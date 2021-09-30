@@ -1,0 +1,130 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  sam-app
+
+  Sample SAM Template for sam-app
+  
+Parameters:
+  UserPoolId:
+    Type: String
+    Description: User pool id for Cognito
+  ClientIdAudience:
+    Type: String
+    Description: Client id for user pool
+
+Globals:
+  Function:
+    Timeout: 3
+    Layers:
+      - !Ref CommonLayer
+
+Resources:
+  CommonLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: common_layer
+      ContentUri: layers/
+      CompatibleRuntimes:
+        - python3.9
+    Metadata:
+      BuildMethod: python3.9
+
+  CommonLayerVersionPermission:
+    Type: AWS::Lambda::LayerVersionPermission
+    Properties:
+      Action: lambda:GetLayerVersion
+      LayerVersionArn: !Ref CommonLayer
+      Principal: !Ref AWS::AccountId
+
+  PinfluencerHttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      Auth:
+        Authorizers:
+          UserAuth:
+            AuthorizationScopes:
+              - email
+              - openid
+              - profile
+            IdentitySource: "$request.header.Authorization"
+            JwtConfiguration:
+              issuer:
+                !Join
+                  - ''
+                  - - 'https://cognito-idp.'
+                    - !Sub ${AWS::Region}
+                    - '.amazonaws.com/'
+                    - !Sub ${UserPoolId}
+              audience: 
+                - !Sub ${ClientIdAudience}
+      CorsConfiguration:
+        AllowMethods:
+          - GET
+          - POST
+          - OPTIONS
+        AllowOrigins:
+          - http://localhost:3000
+          - https://localhost:3000
+          - https://auth.pinfluencer.io
+          - https://app.pinfluencer.io
+  
+  BrandsGetFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: functions/brands-get
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Events:
+        BrandsGet:
+          Type: HttpApi 
+          Properties:
+            Path: /brands
+            Method: get
+            ApiId: !Ref PinfluencerHttpApi
+
+  BrandsPostFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: functions/brands-post
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Events:
+        BrandsPost:
+          Type: HttpApi 
+          Properties:
+            Auth:
+                Authorizer: UserAuth
+            Path: /brands
+            Method: post
+            ApiId: !Ref PinfluencerHttpApi
+
+  ProductsGetFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: functions/products-get
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Events:
+        ProductsGet:
+          Type: HttpApi 
+          Properties:
+            Path: /products
+            Method: get
+            ApiId: !Ref PinfluencerHttpApi
+
+  ProductsPostFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: functions/products-post
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Events:
+        ProductsPost:
+          Type: HttpApi 
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /products
+            Method: post
+            ApiId: !Ref PinfluencerHttpApi
