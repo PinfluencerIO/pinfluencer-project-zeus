@@ -41,10 +41,10 @@ Resources:
       Auth:
         Authorizers:
           UserAuth:
-            AuthorizationScopes:
-              - email
-              - openid
-              - profile
+            # AuthorizationScopes:
+            #   - email
+            #   - openid
+            #   - profile
             IdentitySource: "$request.header.Authorization"
             JwtConfiguration:
               issuer:
@@ -70,8 +70,8 @@ Resources:
   BrandsGetFunction:
     Type: AWS::Serverless::Function 
     Properties:
-      CodeUri: functions/brands-get
-      Handler: app.lambda_handler
+      CodeUri: functions/brands
+      Handler: get_brands.lambda_handler
       Runtime: python3.9
       Events:
         BrandsGet:
@@ -84,8 +84,8 @@ Resources:
   BrandsPostFunction:
     Type: AWS::Serverless::Function 
     Properties:
-      CodeUri: functions/brands-post
-      Handler: app.lambda_handler
+      CodeUri: functions/brands
+      Handler: post_brands.lambda_handler
       Runtime: python3.9
       Events:
         BrandsPost:
@@ -100,8 +100,8 @@ Resources:
   ProductsGetFunction:
     Type: AWS::Serverless::Function 
     Properties:
-      CodeUri: functions/products-get
-      Handler: app.lambda_handler
+      CodeUri: functions/products
+      Handler: get_products.lambda_handler
       Runtime: python3.9
       Events:
         ProductsGet:
@@ -114,8 +114,8 @@ Resources:
   ProductsPostFunction:
     Type: AWS::Serverless::Function 
     Properties:
-      CodeUri: functions/products-post
-      Handler: app.lambda_handler
+      CodeUri: functions/products
+      Handler: post_products.lambda_handler
       Runtime: python3.9
       Events:
         ProductsPost:
@@ -126,3 +126,18 @@ Resources:
             Path: /products
             Method: post
             ApiId: !Ref PinfluencerHttpApi
+
+Outputs:
+  ApiGetBrands:
+    Description: "API Gateway endpoint URL Get Brands function"
+    Value: !Sub "https://${PinfluencerHttpApi}.execute-api.${AWS::Region}.amazonaws.com/brands"
+  ApiPostBrands:
+    Description: "API Gateway endpoint URL Post Brands function"
+    Value: !Sub "https://${PinfluencerHttpApi}.execute-api.${AWS::Region}.amazonaws.com/brands"
+  ApiGetProducts:
+    Description: "API Gateway endpoint URL Get Products function"
+    Value: !Sub "https://${PinfluencerHttpApi}.execute-api.${AWS::Region}.amazonaws.com/products"
+  ApiPostProducts:
+    Description: "API Gateway endpoint URL Get Products function"
+    Value: !Sub "https://${PinfluencerHttpApi}.execute-api.${AWS::Region}.amazonaws.com/products"
+    

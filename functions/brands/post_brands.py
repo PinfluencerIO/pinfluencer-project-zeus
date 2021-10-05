@@ -1,6 +1,4 @@
 import json
-import utils
-import db_common
 
 def lambda_handler(event, context):
     return {
