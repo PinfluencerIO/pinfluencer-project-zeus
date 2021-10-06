@@ -10,12 +10,29 @@ Parameters:
   ClientIdAudience:
     Type: String
     Description: Client id for user pool
+  DatabaseName:
+    Type: String
+    Description: DATABASE_NAME
+  DbClusterARN:
+    Type: String
+    Description: DB_CLUSTER_ARN
+  DatabaseSecretARN:
+    Type: String
+    Description: DB_SECRET_ARN
+  LambdaRole:
+    Type: String
+    Description: The role which the lambda executes
 
 Globals:
   Function:
     Timeout: 3
     Layers:
       - !Ref CommonLayer
+    Environment:
+      Variables:
+        DATABASE_NAME: !Ref DatabaseName
+        DB_CLUSTER_ARN: !Ref DbClusterARN
+        DB_SECRET_ARN: !Ref DatabaseSecretARN
 
 Resources:
   CommonLayer:
@@ -70,13 +87,16 @@ Resources:
   BrandsGetFunction:
     Type: AWS::Serverless::Function 
     Properties:
-      CodeUri: functions/brands
+      Role: !Ref LambdaRole
+      CodeUri: functions/brands/get
       Handler: get_brands.lambda_handler
       Runtime: python3.9
       Events:
         BrandsGet:
           Type: HttpApi 
           Properties:
+            Auth:
+              Authorizer: UserAuth
             Path: /brands
             Method: get
             ApiId: !Ref PinfluencerHttpApi
@@ -84,7 +104,8 @@ Resources:
   BrandsPostFunction:
     Type: AWS::Serverless::Function 
     Properties:
-      CodeUri: functions/brands
+      Role: !Ref LambdaRole
+      CodeUri: functions/brands/post
       Handler: post_brands.lambda_handler
       Runtime: python3.9
       Events:
@@ -100,13 +121,16 @@ Resources:
   ProductsGetFunction:
     Type: AWS::Serverless::Function 
     Properties:
-      CodeUri: functions/products
+      Role: !Ref LambdaRole
+      CodeUri: functions/products/get
       Handler: get_products.lambda_handler
       Runtime: python3.9
       Events:
         ProductsGet:
           Type: HttpApi 
           Properties:
+            Auth:
+                Authorizer: UserAuth
             Path: /products
             Method: get
             ApiId: !Ref PinfluencerHttpApi
@@ -114,7 +138,8 @@ Resources:
   ProductsPostFunction:
     Type: AWS::Serverless::Function 
     Properties:
-      CodeUri: functions/products
+      Role: !Ref LambdaRole
+      CodeUri: functions/products/post
       Handler: post_products.lambda_handler
       Runtime: python3.9
       Events:
