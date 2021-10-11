@@ -1,17 +1,16 @@
 import json
-import uuid
-import boto3
 import os
 
 try:
     import db_common as db
 except:
-    from layers.python import db_common as db
+    pass
 
 try:
     import utils
 except:
-    from layers.python import utils
+    from layers.python.common import utils
+    from layers.python.data_access import db_common as db
 
 import base64
 

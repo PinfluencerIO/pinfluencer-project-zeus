@@ -5,8 +5,7 @@ import os
 try:
     import db_common as db
 except:
-    from layers.python import db_common as db
-
+    from layers.python.data_access import db_common as db
 
 DB_PARAMS = {
     'DATABASE_NAME': os.environ['DATABASE_NAME'],

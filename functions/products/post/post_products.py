@@ -7,7 +7,7 @@ import base64
 try:
     import db_common as db
 except:
-    from layers.python import db_common as db
+    from layers.python.data_access import db_common as db
 
 try:
     import utils
