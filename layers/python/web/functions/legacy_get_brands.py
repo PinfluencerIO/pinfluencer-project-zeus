@@ -72,7 +72,7 @@ def get_brands(event, context):
     except Exception as e:
         return {
             'statusCode': 400,
-            'body': str(DB_PARAMS)
+            'body': str(e)
         }
 
 
