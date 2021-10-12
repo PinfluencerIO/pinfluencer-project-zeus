@@ -2,12 +2,12 @@ import json
 import os
 
 try:
-    import db_common as db
+    import data_access.db_common as db
 except:
     pass
 
 try:
-    import utils
+    import common.utils
 except:
     from layers.python.common import utils
     from layers.python.data_access import db_common as db
@@ -20,16 +20,17 @@ DB_PARAMS = {
 
 COLUMNS = ['id', 'name', 'description', 'image_s3_key', 'brand_id']
 
-def lambda_handler(event, context):
+
+def get_products(event, context):
     tokenPayload = event['requestContext']['authorizer']['jwt']['claims']
     try:
-        sql, parameters = buildSelectStatement(event,tokenPayload)
+        sql, parameters = buildSelectStatement(event, tokenPayload)
         result = db.executeQuery(sql, parameters, DB_PARAMS)
 
         body = db.formatRecords(result['records'])
-        
+
         result = buildJsonResponse(body)
-        
+
         return {
             "headers": {
                 "Content-Type": "application/json"
@@ -49,33 +50,37 @@ def lambda_handler(event, context):
             'statusCode': 500,
             'body': str(e)
         }
-        
+
+
 def buildJsonResponse(body):
     result = list()
-        
+
     for rowIndex, row in enumerate(body):
         result.append({})
         for index, columnValue in enumerate(row):
             result[rowIndex][COLUMNS[index]] = columnValue
-    
+
     return result
+
 
 # Builds a statement based on query string.
 # id for individual product
 # token 'cognito:username' for all products related to brand
-def buildSelectStatement(event,tokenPayload):
+def buildSelectStatement(event, tokenPayload):
     if validProductId(event):
         utils.validId(event['queryStringParameters']['id'])
         id = event['queryStringParameters']['id']
-        return "SELECT * FROM product WHERE id=:id", [{'name':'id', 'value':{'stringValue': id}}]
+        return "SELECT * FROM product WHERE id=:id", [{'name': 'id', 'value': {'stringValue': id}}]
     else:
         auth_user_id = tokenPayload['cognito:username']
-        
-        records = db.executeQuery("SELECT * FROM brand WHERE auth_user_id=:id", [{'name':'id', 'value':{'stringValue': auth_user_id}}], DB_PARAMS)
-        
+
+        records = db.executeQuery("SELECT * FROM brand WHERE auth_user_id=:id",
+                                  [{'name': 'id', 'value': {'stringValue': auth_user_id}}], DB_PARAMS)
+
         id = db.formatRecords(records['records'])[0][0]
-        
-        return "SELECT * FROM product WHERE brand_id=:id", [{'name':'id', 'value':{'stringValue': id}}]
+
+        return "SELECT * FROM product WHERE brand_id=:id", [{'name': 'id', 'value': {'stringValue': id}}]
+
 
 # Validates if event query string parameter has an id key
 def validProductId(event):
