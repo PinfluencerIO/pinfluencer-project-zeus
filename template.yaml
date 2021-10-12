@@ -89,7 +89,7 @@ Resources:
     Properties:
       Role: !Ref LambdaRole
       CodeUri: functions
-      Handler: get_brands.lambda_handler
+      Handler: lambda_handlers.get_brands_handler
       Runtime: python3.9
       Events:
         BrandsGet:
@@ -106,7 +106,7 @@ Resources:
     Properties:
       Role: !Ref LambdaRole
       CodeUri: functions
-      Handler: post_brands.lambda_handler
+      Handler: lambda_handlers.post_brands_handler
       Runtime: python3.9
       Events:
         BrandsPost:
@@ -123,7 +123,7 @@ Resources:
     Properties:
       Role: !Ref LambdaRole
       CodeUri: functions
-      Handler: get_products.lambda_handler
+      Handler: lambda_handlers.get_products_handler
       Runtime: python3.9
       Events:
         ProductsGet:
@@ -140,7 +140,7 @@ Resources:
     Properties:
       Role: !Ref LambdaRole
       CodeUri: functions
-      Handler: post_products.lambda_handler
+      Handler: lambda_handlers.post_products_handler
       Runtime: python3.9
       Events:
         ProductsPost:
