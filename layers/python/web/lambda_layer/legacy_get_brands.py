@@ -1,7 +1,11 @@
 import json
 import os
-from layers.python.common import utils
-from layers.python.data_access import db_common as db
+try:
+    from layers.python.common import utils
+    from layers.python.data_access import db_common as db
+except:
+    from common import utils
+    from data_access import db_common as db
 import base64
 
 DB_PARAMS = {
