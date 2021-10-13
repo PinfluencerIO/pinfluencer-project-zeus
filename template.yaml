@@ -88,8 +88,8 @@ Resources:
     Type: AWS::Serverless::Function 
     Properties:
       Role: !Ref LambdaRole
-      CodeUri: functions
-      Handler: lambda_handlers.get_brands_handler
+      CodeUri: functions/get_brands
+      Handler: lambda.handler
       Runtime: python3.9
       Events:
         BrandsGet:
@@ -105,8 +105,8 @@ Resources:
     Type: AWS::Serverless::Function 
     Properties:
       Role: !Ref LambdaRole
-      CodeUri: functions
-      Handler: lambda_handlers.post_brands_handler
+      CodeUri: functions/post_brands
+      Handler: lambda.handler
       Runtime: python3.9
       Events:
         BrandsPost:
@@ -122,8 +122,8 @@ Resources:
     Type: AWS::Serverless::Function 
     Properties:
       Role: !Ref LambdaRole
-      CodeUri: functions
-      Handler: lambda_handlers.get_products_handler
+      CodeUri: functions/get_products
+      Handler: lambda.handler
       Runtime: python3.9
       Events:
         ProductsGet:
@@ -139,8 +139,8 @@ Resources:
     Type: AWS::Serverless::Function 
     Properties:
       Role: !Ref LambdaRole
-      CodeUri: functions
-      Handler: lambda_handlers.post_products_handler
+      CodeUri: functions/post_products
+      Handler: lambda.handler
       Runtime: python3.9
       Events:
         ProductsPost:

@@ -4,12 +4,8 @@ import os
 import uuid
 
 try:
-    import data_access.db_common as db
-except:
-    pass
-
-try:
-    import common.utils
+    from common import utils
+    from data_access import db_common as db
 except:
     from layers.python.common import utils
     from layers.python.data_access import db_common as db

@@ -1,9 +1,14 @@
 import json
-import os
 import uuid
-from layers.python.common import utils
-from layers.python.data_access import db_common as db
+import boto3
+import os
 import base64
+try:
+    from common import utils
+    from data_access import db_common as db
+except:
+    from layers.python.common import utils
+    from layers.python.data_access import db_common as db
 
 DB_PARAMS = {
     'DATABASE_NAME': os.environ['DATABASE_NAME'],
@@ -11,8 +16,8 @@ DB_PARAMS = {
     'DB_SECRET_ARN': os.environ['DB_SECRET_ARN']
 }
 
-COLUMNS = ['id', 'name', 'bio', 'website', 'email', 'auth_user_id']
 REQUIRED_PAYLOAD_KEYS = ['name', 'bio', 'website', 'email']
+COLUMNS = ['id', 'name', 'description', 'image_s3_key', 'brand_id']
 
 
 def get_brands(event, context):
