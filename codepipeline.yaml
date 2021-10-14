@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion : '2010-09-09'
 Description: >
   This template deploys a CodePipeline with its required resources.
 
@@ -90,9 +90,9 @@ Parameters:
     Default: ""
 
 Conditions:
-  IsMainBranchPipeline: !Equals [ !Ref FeatureGitBranch, "" ]
-  IsFeatureBranchPipeline: !Not [ Condition: IsMainBranchPipeline ]
-  CreateConnection: !Equals [ !Ref CodeStarConnectionArn, "" ]
+  IsMainBranchPipeline: !Equals [!Ref FeatureGitBranch, ""]
+  IsFeatureBranchPipeline: !Not [Condition: IsMainBranchPipeline]
+  CreateConnection: !Equals [!Ref CodeStarConnectionArn, ""]
 
 Resources:
   #   ____
@@ -131,9 +131,9 @@ Resources:
                 Provider: CodeStarSourceConnection
                 Version: "1"
               Configuration:
-                ConnectionArn: !If [ CreateConnection, !Ref CodeStarConnection, !Ref CodeStarConnectionArn ]
+                ConnectionArn: !If [CreateConnection, !Ref CodeStarConnection, !Ref CodeStarConnectionArn]
                 FullRepositoryId: !Ref FullRepositoryId
-                BranchName: !If [ IsFeatureBranchPipeline, !Ref FeatureGitBranch, !Ref MainGitBranch ]
+                BranchName: !If [IsFeatureBranchPipeline, !Ref FeatureGitBranch, !Ref MainGitBranch]
               OutputArtifacts:
                 - Name: SourceCodeAsZip
               RunOrder: 1
@@ -176,18 +176,18 @@ Resources:
               RunOrder: 2
 
         # Uncomment and modify the following step for running the unit-tests
-        - Name: UnitTest
-          Actions:
-            - Name: UnitTest
-              ActionTypeId:
-                Category: Build
-                Owner: AWS
-                Provider: CodeBuild
-                Version: "1"
-              Configuration:
-                ProjectName: !Ref CodeBuildProjectUnitTest
-              InputArtifacts:
-                - Name: SourceCodeAsZip
+        # - Name: UnitTest
+        #   Actions:
+        #     - Name: UnitTest
+        #       ActionTypeId:
+        #         Category: Build
+        #         Owner: AWS
+        #         Provider: CodeBuild
+        #         Version: "1"
+        #       Configuration:
+        #         ProjectName: !Ref CodeBuildProjectUnitTest
+        #       InputArtifacts:
+        #         - Name: SourceCodeAsZip
 
         - !If
           - IsFeatureBranchPipeline
@@ -249,17 +249,17 @@ Resources:
                   - Name: BuildArtifactAsZip
                 RunOrder: 1
               # Uncomment the following step for running the integration tests
-              - Name: IntegrationTest
-                ActionTypeId:
-                  Category: Build
-                  Owner: AWS
-                  Provider: CodeBuild
-                  Version: "1"
-                Configuration:
-                  ProjectName: !Ref CodeBuildProjectIntegrationTest
-                InputArtifacts:
-                  - Name: SourceCodeAsZip
-                RunOrder: 2
+              # - Name: IntegrationTest
+              #   ActionTypeId:
+              #     Category: Build
+              #     Owner: AWS
+              #     Provider: CodeBuild
+              #     Version: "1"
+              #   Configuration:
+              #     ProjectName: !Ref CodeBuildProjectIntegrationTest
+              #   InputArtifacts:
+              #     - Name: SourceCodeAsZip
+              #   RunOrder: 2
           - !Ref AWS::NoValue
 
         - !If
@@ -267,13 +267,13 @@ Resources:
           - Name: DeployProd
             Actions:
               # uncomment this to have a manual approval step before deployment to production
-              - Name: ManualApproval
-                ActionTypeId:
-                  Category: Approval
-                  Owner: AWS
-                  Provider: Manual
-                  Version: "1"
-                RunOrder: 1
+              # - Name: ManualApproval
+              #   ActionTypeId:
+              #    Category: Approval
+              #    Owner: AWS
+              #    Provider: Manual
+              #    Version: "1"
+              #   RunOrder: 1
               - Name: DeployProd
                 ActionTypeId:
                   Category: Build
@@ -395,7 +395,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - "codestar-connections:UseConnection"
-                Resource: !If [ CreateConnection, !Ref CodeStarConnection, !Ref CodeStarConnectionArn ]
+                Resource: !If [CreateConnection, !Ref CodeStarConnection, !Ref CodeStarConnectionArn]
         - PolicyName: CodePipelineCodeAndS3Bucket
           PolicyDocument:
             Version: "2012-10-17"
@@ -426,7 +426,7 @@ Resources:
                   - "codebuild:BatchGetBuilds"
                 Resource:
                   # Uncomment the line below to enable the unit-tests
-                  - !GetAtt CodeBuildProjectUnitTest.Arn
+                  # - !GetAtt CodeBuildProjectUnitTest.Arn
                   - !If
                     - IsFeatureBranchPipeline
                     - !GetAtt CodeBuildProjectBuildAndDeployFeature.Arn
@@ -435,11 +435,11 @@ Resources:
                     - IsMainBranchPipeline
                     - !GetAtt CodeBuildProjectBuildAndPackage.Arn
                     - !Ref AWS::NoValue
-                    # Uncomment the following step for running the integration tests
-                    - !If
-                      - IsMainBranchPipeline
-                      - !GetAtt CodeBuildProjectIntegrationTest.Arn
-                      - !Ref AWS::NoValue
+                  # Uncomment the following step for running the integration tests
+                  # - !If
+                  #   - IsMainBranchPipeline
+                  #   - !GetAtt CodeBuildProjectIntegrationTest.Arn
+                  #   - !Ref AWS::NoValue
                   - !If
                     - IsMainBranchPipeline
                     - !GetAtt CodeBuildProjectDeploy.Arn
@@ -535,21 +535,20 @@ Resources:
                   StringEquals:
                     aws:ResourceTag/Role: pipeline-execution-role
 
-    # Uncomment and modify the following step for running the unit-tests
-
-  CodeBuildProjectUnitTest:
-    Type: AWS::CodeBuild::Project
-    Properties:
-      Artifacts:
-        Type: CODEPIPELINE
-      Environment:
-        Type: LINUX_CONTAINER
-        ComputeType: BUILD_GENERAL1_SMALL
-        Image: aws/codebuild/amazonlinux2-x86_64-standard:3.0
-      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
-      Source:
-        Type: CODEPIPELINE
-        BuildSpec: pipeline/buildspec_unit_test.yml
+  # Uncomment and modify the following step for running the unit-tests
+  # CodeBuildProjectUnitTest:
+  #   Type: AWS::CodeBuild::Project
+  #   Properties:
+  #     Artifacts:
+  #       Type: CODEPIPELINE
+  #     Environment:
+  #       Type: LINUX_CONTAINER
+  #       ComputeType: BUILD_GENERAL1_SMALL
+  #       Image: aws/codebuild/amazonlinux2-x86_64-standard:3.0
+  #     ServiceRole: !GetAtt CodeBuildServiceRole.Arn
+  #     Source:
+  #       Type: CODEPIPELINE
+  #       BuildSpec: pipeline/buildspec_unit_test.yml
 
   CodeBuildProjectBuildAndDeployFeature:
     Condition: IsFeatureBranchPipeline
@@ -617,21 +616,21 @@ Resources:
         Type: CODEPIPELINE
         BuildSpec: pipeline/buildspec_build_package.yml
 
-    # Uncomment and modify the following step for running the integration tests
-    CodeBuildProjectIntegrationTest:
-      Condition: IsMainBranchPipeline
-      Type: AWS::CodeBuild::Project
-      Properties:
-        Artifacts:
-          Type: CODEPIPELINE
-        Environment:
-          Type: LINUX_CONTAINER
-          ComputeType: BUILD_GENERAL1_SMALL
-          Image: aws/codebuild/amazonlinux2-x86_64-standard:3.0
-        ServiceRole: !GetAtt CodeBuildServiceRole.Arn
-        Source:
-          Type: CODEPIPELINE
-          BuildSpec: pipeline/buildspec_integration_test.yml
+  # Uncomment and modify the following step for running the integration tests
+  # CodeBuildProjectIntegrationTest:
+  #   Condition: IsMainBranchPipeline
+  #   Type: AWS::CodeBuild::Project
+  #   Properties:
+  #     Artifacts:
+  #       Type: CODEPIPELINE
+  #     Environment:
+  #       Type: LINUX_CONTAINER
+  #       ComputeType: BUILD_GENERAL1_SMALL
+  #       Image: aws/codebuild/amazonlinux2-x86_64-standard:3.0
+  #     ServiceRole: !GetAtt CodeBuildServiceRole.Arn
+  #     Source:
+  #       Type: CODEPIPELINE
+  #       BuildSpec: pipeline/buildspec_integration_test.yml
 
   CodeBuildProjectDeploy:
     Condition: IsMainBranchPipeline
@@ -647,7 +646,6 @@ Resources:
       Source:
         Type: CODEPIPELINE
         BuildSpec: pipeline/buildspec_deploy.yml
-
 Outputs:
   CodeStarConnectionArn:
     Condition: CreateConnection
