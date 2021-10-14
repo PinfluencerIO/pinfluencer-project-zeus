@@ -1,168 +1,41 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  Pinfluencer backend stack
-  
-Parameters:
-  UserPoolId:
-    Type: String
-    Description: User pool id for Cognito
-  ClientIdAudience:
-    Type: String
-    Description: Client id for user pool
-  DatabaseName:
-    Type: String
-    Description: DATABASE_NAME
-  DbClusterARN:
-    Type: String
-    Description: DB_CLUSTER_ARN
-  DatabaseSecretARN:
-    Type: String
-    Description: DB_SECRET_ARN
-  LambdaRole:
-    Type: String
-    Description: The role which the lambda executes
+  sam-app
 
+  Sample SAM Template for sam-app
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
     Timeout: 3
-    Layers:
-      - !Ref CommonLayer
-    Environment:
-      Variables:
-        DATABASE_NAME: !Ref DatabaseName
-        DB_CLUSTER_ARN: !Ref DbClusterARN
-        DB_SECRET_ARN: !Ref DatabaseSecretARN
 
 Resources:
-  CommonLayer:
-    Type: AWS::Serverless::LayerVersion
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      LayerName: common_layer
-      ContentUri: layers/
-      CompatibleRuntimes:
-        - python3.9
-    Metadata:
-      BuildMethod: python3.9
-
-  CommonLayerVersionPermission:
-    Type: AWS::Lambda::LayerVersionPermission
-    Properties:
-      Action: lambda:GetLayerVersion
-      LayerVersionArn: !Ref CommonLayer
-      Principal: !Ref AWS::AccountId
-
-  PinfluencerHttpApi:
-    Type: AWS::Serverless::HttpApi
-    Properties:
-      Auth:
-        Authorizers:
-          UserAuth:
-            # AuthorizationScopes:
-            #   - email
-            #   - openid
-            #   - profile
-            IdentitySource: "$request.header.Authorization"
-            JwtConfiguration:
-              issuer:
-                !Join
-                  - ''
-                  - - 'https://cognito-idp.'
-                    - !Sub ${AWS::Region}
-                    - '.amazonaws.com/'
-                    - !Sub ${UserPoolId}
-              audience: 
-                - !Sub ${ClientIdAudience}
-      CorsConfiguration:
-        AllowMethods:
-          - GET
-          - POST
-          - OPTIONS
-        AllowOrigins:
-          - http://localhost:3000
-          - https://localhost:3000
-          - https://auth.pinfluencer.io
-          - https://app.pinfluencer.io
-  
-  BrandsGetFunction:
-    Type: AWS::Serverless::Function 
-    Properties:
-      Role: !Ref LambdaRole
-      CodeUri: functions/get_brands
-      Handler: lambda.handler
+      CodeUri: hello_world/
+      Handler: app.lambda_handler
       Runtime: python3.9
+      Architectures:
+        - x86_64
       Events:
-        BrandsGet:
-          Type: HttpApi 
+        HelloWorld:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
-            Auth:
-              Authorizer: UserAuth
-            Path: /brands
+            Path: /hello
             Method: get
-            ApiId: !Ref PinfluencerHttpApi
-
-  BrandsPostFunction:
-    Type: AWS::Serverless::Function 
-    Properties:
-      Role: !Ref LambdaRole
-      CodeUri: functions/post_brands
-      Handler: lambda.handler
-      Runtime: python3.9
-      Events:
-        BrandsPost:
-          Type: HttpApi 
-          Properties:
-            Auth:
-                Authorizer: UserAuth
-            Path: /brands
-            Method: post
-            ApiId: !Ref PinfluencerHttpApi
-
-  ProductsGetFunction:
-    Type: AWS::Serverless::Function 
-    Properties:
-      Role: !Ref LambdaRole
-      CodeUri: functions/get_products
-      Handler: lambda.handler
-      Runtime: python3.9
-      Events:
-        ProductsGet:
-          Type: HttpApi 
-          Properties:
-            Auth:
-                Authorizer: UserAuth
-            Path: /products
-            Method: get
-            ApiId: !Ref PinfluencerHttpApi
-
-  ProductsPostFunction:
-    Type: AWS::Serverless::Function 
-    Properties:
-      Role: !Ref LambdaRole
-      CodeUri: functions/post_products
-      Handler: lambda.handler
-      Runtime: python3.9
-      Events:
-        ProductsPost:
-          Type: HttpApi 
-          Properties:
-            Auth:
-              Authorizer: UserAuth
-            Path: /products
-            Method: post
-            ApiId: !Ref PinfluencerHttpApi
 
 Outputs:
-  ApiGetBrands:
-    Description: "API Gateway endpoint URL Get Brands function"
-    Value: !Sub "https://${PinfluencerHttpApi}.execute-api.${AWS::Region}.amazonaws.com/brands"
-  ApiPostBrands:
-    Description: "API Gateway endpoint URL Post Brands function"
-    Value: !Sub "https://${PinfluencerHttpApi}.execute-api.${AWS::Region}.amazonaws.com/brands"
-  ApiGetProducts:
-    Description: "API Gateway endpoint URL Get Products function"
-    Value: !Sub "https://${PinfluencerHttpApi}.execute-api.${AWS::Region}.amazonaws.com/products"
-  ApiPostProducts:
-    Description: "API Gateway endpoint URL Get Products function"
-    Value: !Sub "https://${PinfluencerHttpApi}.execute-api.${AWS::Region}.amazonaws.com/products"
-    
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  HelloWorldApi:
+    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+  HelloWorldFunction:
+    Description: "Hello World Lambda Function ARN"
+    Value: !GetAtt HelloWorldFunction.Arn
+  HelloWorldFunctionIamRole:
+    Description: "Implicit IAM Role created for Hello World function"
+    Value: !GetAtt HelloWorldFunctionRole.Arn
