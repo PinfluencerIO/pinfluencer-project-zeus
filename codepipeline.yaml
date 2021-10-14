@@ -44,16 +44,16 @@ Parameters:
     Default: "eu-west-2"
   TestingStackName:
     Type: String
-    Default: "pinfluencer-be-test"
+    Default: "pinfluencer.sam.test"
   TestingPipelineExecutionRole:
     Type: String
-    Default: "arn:aws:iam::324303852622:role/aws-sam-cli-managed-test-pip-PipelineExecutionRole-67IHKWRXM6A7"
+    Default: "arn:aws:iam::324303852622:role/aws-sam-cli-managed-test-pip-PipelineExecutionRole-1URH5UQDXES24"
   TestingCloudFormationExecutionRole:
     Type: String
-    Default: "arn:aws:iam::324303852622:role/aws-sam-cli-managed-test-CloudFormationExecutionR-N79GIMO6UWU0"
+    Default: "arn:aws:iam::324303852622:role/aws-sam-cli-managed-test-CloudFormationExecutionR-1H8W0EOKLL7WW"
   TestingArtifactBucket:
     Type: String
-    Default: "aws-sam-cli-managed-test-pipeline-artifactsbucket-1spi1gjarcbf"
+    Default: "aws-sam-cli-managed-test-pipeline-artifactsbucket-eibh1328r6wj"
   TestingImageRepository:
     Type: String
     # If there are functions with "Image" PackageType in your template,
@@ -65,16 +65,16 @@ Parameters:
     Default: "eu-west-2"
   ProdStackName:
     Type: String
-    Default: "pinfluencer-be-prod"
+    Default: "pinfluencer.sam.prod"
   ProdPipelineExecutionRole:
     Type: String
-    Default: "arn:aws:iam::324303852622:role/aws-sam-cli-managed-prod-pip-PipelineExecutionRole-1PWFDQPIQS7AR"
+    Default: "arn:aws:iam::324303852622:role/aws-sam-cli-managed-prod-pip-PipelineExecutionRole-1UIQU32V94VRF"
   ProdCloudFormationExecutionExeRole:
     Type: String
-    Default: "arn:aws:iam::324303852622:role/aws-sam-cli-managed-prod-CloudFormationExecutionR-13KLLDTV7GWB9"
+    Default: "arn:aws:iam::324303852622:role/aws-sam-cli-managed-prod-CloudFormationExecutionR-HATIJXL1SYEB"
   ProdArtifactBucket:
     Type: String
-    Default: "aws-sam-cli-managed-prod-pipeline-artifactsbucket-1ojg6z73klel9"
+    Default: "aws-sam-cli-managed-prod-pipeline-artifactsbucket-1jd9f54esta6x"
   ProdImageRepository:
     Type: String
     # If there are functions with "Image" PackageType in your template,
