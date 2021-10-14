@@ -1,16 +1,6 @@
 AWSTemplateFormatVersion : '2010-09-09'
 Description: >
-  This template deploys a CodePipeline with its required resources.
-
-  The following stages are predefined in this template:
-  - Source
-  - UpdatePipeline
-  - BuildAndDeployFeatureStack (FeatureGitBranch only)
-  - BuildAndPackage (MainGitBranch only)
-  - DeployTest (MainGitBranch only)
-  - DeployProd (MainGitBranch only)
-
-  **WARNING** You will be billed for the AWS resources used if you create a stack from this template.
+  Learning Pipeline
 
 
 # To deploy this template and connect to the main git branch, run this against the leading account:
@@ -44,7 +34,7 @@ Parameters:
     Default: "eu-west-2"
   TestingStackName:
     Type: String
-    Default: "pinfluencer.sam.test"
+    Default: "pinfluencer-sam-test"
   TestingPipelineExecutionRole:
     Type: String
     Default: "arn:aws:iam::324303852622:role/aws-sam-cli-managed-test-pip-PipelineExecutionRole-1URH5UQDXES24"
@@ -65,7 +55,7 @@ Parameters:
     Default: "eu-west-2"
   ProdStackName:
     Type: String
-    Default: "pinfluencer.sam.prod"
+    Default: "pinfluencer-sam-prod"
   ProdPipelineExecutionRole:
     Type: String
     Default: "arn:aws:iam::324303852622:role/aws-sam-cli-managed-prod-pip-PipelineExecutionRole-1UIQU32V94VRF"
