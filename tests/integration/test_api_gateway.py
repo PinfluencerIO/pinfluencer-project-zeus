@@ -52,4 +52,4 @@ class TestApiGateway(TestCase):
         Call the API Gateway endpoint and check the response
         """
         response = requests.get(self.api_endpoint)
-        self.assertDictEqual(response.json(), {"message": "hello world"})
+        self.assertDictEqual(response.json(), {"message": "hello world!"})
