@@ -3,24 +3,8 @@ Transform: AWS::Serverless-2016-10-31
 Description: Pinfluencer Backend SAM Stack
 
 Parameters:
-  UserPoolId:
+  Example:
     Type: String
-    Description: User pool id for Cognito
-  ClientIdAudience:
-    Type: String
-    Description: Client id for user pool
-  DatabaseName:
-    Type: String
-    Description: DATABASE_NAME
-  DbClusterARN:
-    Type: String
-    Description: DB_CLUSTER_ARN
-  DatabaseSecretARN:
-    Type: String
-    Description: DB_SECRET_ARN
-  LambdaRole:
-    Type: String
-    Description: The role which the lambda executes
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
@@ -28,38 +12,6 @@ Globals:
     Timeout: 3
 
 Resources:
-  PinfluencerHttpApi:
-    Type: AWS::Serverless::HttpApi
-    Properties:
-      Auth:
-        Authorizers:
-          UserAuth:
-            # AuthorizationScopes:
-            #   - email
-            #   - openid
-            #   - profile
-            IdentitySource: "$request.header.Authorization"
-            JwtConfiguration:
-              issuer:
-                !Join
-                - ''
-                - - 'https://cognito-idp.'
-                  - !Sub ${AWS::Region}
-                  - '.amazonaws.com/'
-                  - !Sub ${UserPoolId}
-              audience:
-                - !Sub ${ClientIdAudience}
-      CorsConfiguration:
-        AllowMethods:
-          - GET
-          - POST
-          - OPTIONS
-        AllowOrigins:
-          - http://localhost:3000
-          - https://localhost:3000
-          - https://auth.pinfluencer.io
-          - https://app.pinfluencer.io
-
   HelloWorldFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -88,3 +40,6 @@ Outputs:
   HelloWorldFunctionIamRole:
     Description: "Implicit IAM Role created for Hello World function"
     Value: !GetAtt HelloWorldFunctionRole.Arn
+  Example:
+    Description: "Example Output"
+    Value: !Ref Example
