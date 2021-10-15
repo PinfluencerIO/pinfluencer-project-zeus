@@ -12,6 +12,7 @@ phases:
   build:
     commands:
       - sam build --use-container
+      - echo ${ARTIFACT_BUCKET}
 artifacts:
   files:
     - packaged-test.yaml
