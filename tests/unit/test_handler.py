@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from hello_world import app
+from functions.hello_world import app
 
 
 @pytest.fixture()
