@@ -1,29 +1,6 @@
 AWSTemplateFormatVersion : '2010-09-09'
 Description: >
-  This template deploys a CodePipeline with its required resources.
-
-  The following stages are predefined in this template:
-  - Source
-  - UpdatePipeline
-  - BuildAndDeployFeatureStack (FeatureGitBranch only)
-  - BuildAndPackage (MainGitBranch only)
-  - DeployTest (MainGitBranch only)
-  - DeployProd (MainGitBranch only)
-
-  **WARNING** You will be billed for the AWS resources used if you create a stack from this template.
-
-
-# To deploy this template and connect to the main git branch, run this against the leading account:
-# `sam deploy -t codepipeline.yaml --stack-name <stack-name> --capabilities=CAPABILITY_IAM`.
-# After creating the stack, the CodeStar Connection is in PENDING status by default. You must complete
-# the OAuth handshake with the third-party provider using the installation associated with your connection.
-# See https://docs.aws.amazon.com/dtconsole/latest/userguide/connections-update.html for instructions.
-
-# If later you need to deploy a new CodePipeline to connect to a non-main git branch, run
-# ```
-# sam deploy -t codepipeline.yaml --stack-name <stack-name> --capabilities=CAPABILITY_IAM \
-#   --parameter-overrides="FeatureGitBranch=<branch-name> CodeStarConnectionArn=<codestar-connection-arn>"
-# ```
+  Pinfluencer Pipeline Stack
 
 
 Parameters:

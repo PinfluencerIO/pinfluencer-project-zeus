@@ -7,3 +7,5 @@ phases:
     commands:
       # trigger the unit tests here
       - echo 'Running unit tests'
+      - pip install -r tests/requirements.txt --user
+      - python -m pytest tests/unit -v
