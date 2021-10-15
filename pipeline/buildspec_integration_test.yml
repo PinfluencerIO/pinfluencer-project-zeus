@@ -7,5 +7,7 @@ phases:
     commands:
       # trigger the integration tests here
       - echo 'Running integration tests'
+      - echo ${ENV_STACK_NAME}
+      - echo '!!'
       - pip install -r tests/requirements.txt --user
       - AWS_SAM_STACK_NAME=${ENV_STACK_NAME} python -m pytest tests/integration -v
