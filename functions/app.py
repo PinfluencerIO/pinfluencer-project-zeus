@@ -14,13 +14,11 @@ DB_PARAMS = {
 
 rds_client = boto3.client('rds-data')
 
-
 def lambda_handler(event, context):
     print(DB_PARAMS['DATABASE_NAME'])
     response = Controller.process(event)
     logger.info("response: %s" % response)
     return response
-
 
 class Controller():
     def __init__(self):
@@ -29,7 +27,7 @@ class Controller():
     @staticmethod
     def process(event):
         try:
-            http_method = event['requestContext']['http']['method'].lower()
+            http_method = extract_http_method(event)
             resource = event['rawPath'][1:-1]
             # Handle CRUD 
             if http_method == 'post':
@@ -81,6 +79,9 @@ class Respository:
 
     def delete(resource):
         pass
+
+def extract_http_method(event):
+    return event['requestContext']['http']['method'].lower()
 
 def executeQuery(sql, sql_parameters=[], db_parameters={}):
     response = rds_client.execute_statement(
