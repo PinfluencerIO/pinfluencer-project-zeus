@@ -4,7 +4,7 @@ import pytest
 from mock import patch
 
 with patch.dict(os.environ, {'DATABASE_NAME': 'mock-value', 'DB_CLUSTER_ARN':'mock-value', 'DB_SECRET_ARN':'mock-value'}):
-    from functions.util_web import Controller
+    from functions.utils.util_web import Controller
 
 @pytest.fixture()
 def goodEvent():
