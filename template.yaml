@@ -25,7 +25,7 @@ Parameters:
 
 Globals:
   Function:
-    Timeout: 3
+    Timeout: 10
     # Layers:
     #   - !Ref CommonLayer
     Environment:
@@ -88,8 +88,8 @@ Resources:
     Type: AWS::Serverless::Function 
     Properties:
       Role: !Ref LambdaRole
-      CodeUri: functions/
-      Handler: app.lambda_handler
+      CodeUri: .
+      Handler: functions/app.lambda_handler
       Runtime: python3.9
       Events:
         BrandsCreate:
@@ -152,8 +152,6 @@ Resources:
             Path: /products
             Method: delete
             ApiId: !Ref PinfluencerHttpApi
-    Metadata:
-      BuildMethod: makeFile
 Outputs:
   PinfluencerGetAllBrands:
     Description: "API Gateway endpoint URL Get All Brands function"

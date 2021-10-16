@@ -1,11 +1,10 @@
-try:
-    import util_db
-except:
-    import functions.util_db
-    
+
 import json
 
-class Controller():
+from functions import util_db
+
+
+class Controller:
     def __init__(self):
         pass
 
@@ -18,7 +17,7 @@ class Controller():
             if http_method == 'post':
                 return HttpUtils.respond(res=f"Create {resource}")
             elif http_method == 'get':
-                formatted = util_db.Respository.get_all(resource)
+                formatted = util_db.Repository.get_all(resource)
                 return HttpUtils.respond(res=f"Read {resource} Results:\n {formatted}")
             elif http_method == 'put':
                 return HttpUtils.respond(res=f"Update {resource}")
@@ -34,6 +33,7 @@ class Controller():
     @staticmethod
     def extract_http_method(event):
         return event['requestContext']['http']['method'].lower()
+
 
 class HttpUtils:
     def __init__(self):
