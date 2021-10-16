@@ -20,7 +20,7 @@ class Respository:
         pass
 
     def get_all(resource):
-        pass
+        return formatRecords(executeQuery(f'SELECT * FROM {resource}')['records'])
     
     def update(resource, data):
         pass

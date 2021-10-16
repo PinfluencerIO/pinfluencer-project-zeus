@@ -1,8 +1,6 @@
-import utils.util_web as web
-import utils.util_log as log
-
+import util_web
 
 def lambda_handler(event, context):
-    response = web.Controller.process(event)
-    log.logger.info("response: %s" % response)
+    response = util_web.Controller.process(event)
+    print("response: %s" % response)
     return response
