@@ -1,14 +1,22 @@
 import json
 import logging
 import boto3
-
-rds_client = boto3.client('rds-data')
+import os
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+DB_PARAMS = {
+    'DATABASE_NAME': os.environ['DATABASE_NAME'],
+    'DB_CLUSTER_ARN': os.environ['DB_CLUSTER_ARN'],
+    'DB_SECRET_ARN': os.environ['DB_SECRET_ARN']
+}
+
+rds_client = boto3.client('rds-data')
+
+
 def lambda_handler(event, context):
-    print(event)
+    print(DB_PARAMS['DATABASE_NAME'])
     response = Controller.process(event)
     logger.info("response: %s" % response)
     return response
@@ -22,12 +30,13 @@ class Controller():
     def process(event):
         try:
             http_method = event['requestContext']['http']['method'].lower()
-            resource = event['rawPath'][1:]
+            resource = event['rawPath'][1:-1]
             # Handle CRUD 
             if http_method == 'post':
                 return HttpUtils.respond(res=f"Create {resource}")
             elif http_method == 'get':
-                return HttpUtils.respond(res=f"Read {resource}")
+                formatted = formatRecords(executeQuery(f'SELECT * FROM {resource}', db_parameters=DB_PARAMS)['records'])
+                return HttpUtils.respond(res=f"Read {resource} Results:\n {formatted}")
             elif http_method == 'put':
                 return HttpUtils.respond(res=f"Update {resource}")
             elif http_method == 'delete':
@@ -73,7 +82,6 @@ class Respository:
     def delete(resource):
         pass
 
-
 def executeQuery(sql, sql_parameters=[], db_parameters={}):
     response = rds_client.execute_statement(
         secretArn= db_parameters['DB_SECRET_ARN'],
@@ -82,19 +90,20 @@ def executeQuery(sql, sql_parameters=[], db_parameters={}):
         sql=sql,
         parameters=sql_parameters
     )
+
     return response
 
 def formatField(field):
-  if list(field.keys())[0] != 'isNull':
-    return list(field.values())[0]
-  else:
-    return ""
+    if list(field.keys())[0] != 'isNull':
+        return list(field.values())[0]
+    else:
+        return ""
    
 def formatRecord(record):
-   return [formatField(field) for field in record]
+    return [formatField(field) for field in record]
    
 def formatRecords(records):
-   return [formatRecord(record) for record in records]
+    return [formatRecord(record) for record in records]
 
 def print_exception(e):
     logger.error(''.join(['Exception ', str(type(e))]))
