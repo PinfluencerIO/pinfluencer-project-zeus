@@ -152,7 +152,8 @@ Resources:
             Path: /products
             Method: delete
             ApiId: !Ref PinfluencerHttpApi
-
+    Metadata:
+      BuildMethod: makeFile
 Outputs:
   PinfluencerGetAllBrands:
     Description: "API Gateway endpoint URL Get All Brands function"
