@@ -51,6 +51,25 @@ class HttpUtils:
             },
         }
 
+class Respository:
+    def __init__(self) -> None:
+        pass
+
+    def create(resource, data):
+        pass
+
+    def get_by_id(resource, id):
+        pass
+
+    def get_all(resource):
+        pass
+    
+    def update(resource, data):
+        pass
+
+    def delete(resource):
+        pass
+
 def print_exception(e):
     logger.error(''.join(['Exception ', str(type(e))]))
     logger.error(''.join(['Exception ', str(e)]))
