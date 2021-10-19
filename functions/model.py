@@ -5,6 +5,7 @@ import uuid
 from attr import dataclass
 
 
+@dataclass()
 class Brand:
     id_: uuid
     created: datetime

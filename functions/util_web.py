@@ -1,4 +1,7 @@
 import json
+import uuid
+
+from schema import Schema, Optional
 
 from functions import util_db
 
@@ -16,6 +19,7 @@ class Controller:
 
             # Handle CRUD 
             if http_method == 'post':
+                payload_validators[resource].is_valid(event['body'])
                 resource_id = util_db.Repository.create(resource, event['body'])
                 return HttpUtils.respond(status_code=201,
                                          res=f"Create {resource} successfully. /{resource}s?id={resource_id}")
@@ -49,6 +53,33 @@ class HttpUtils:
             'body': body,
             'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
         }
+
+
+brand_create_schema = Schema({
+    'name': str,
+    'description': str,
+    'website': str,
+    'email': str,
+    Optional('logo'): {
+        'name': str,
+        'bytes': str
+    }
+})
+
+product_create_schema = Schema({
+    'name': str,
+    'description': str,
+    Optional('image'): {
+        'name': str,
+        'bytes': str
+    },
+    'requirements': str
+})
+
+payload_validators = {
+    'brand': brand_create_schema,
+    'product': product_create_schema
+}
 
 
 def print_exception(e):
