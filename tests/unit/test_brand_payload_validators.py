@@ -13,7 +13,7 @@ with patch.dict(os.environ, {'DATABASE_NAME': 'mock-value',
 
 
 @fixture
-def good_brand():
+def good_product():
     x = '{ "name":"brand name", ' \
         '"description":"description", ' \
         '"website":"www.name-of-brand.com", ' \
@@ -22,8 +22,8 @@ def good_brand():
 
 
 @fixture
-def bad_brand():
-    x = '{ "named":"brand name", ' \
+def bad_product():
+    x = '{ "NAMED_WRONG":"brand name", ' \
         '"description":"description", ' \
         '"website":"www.name-of-brand.com", ' \
         '"email":"email@name-of-brand.com"}'
@@ -31,7 +31,7 @@ def bad_brand():
 
 
 @fixture
-def good_brand_with_logo():
+def good_product_with_logo():
     x = '{ "name":"brand name", ' \
         '"description":"description", ' \
         '"website":"www.name-of-brand.com", ' \
@@ -46,7 +46,7 @@ def good_brand_with_logo():
 
 
 @fixture
-def bad_brand_with_partial_logo():
+def bad_product_with_partial_logo():
     x = '{ "name":"brand name", ' \
         '"description":"description", ' \
         '"website":"www.name-of-brand.com", ' \
@@ -55,19 +55,19 @@ def bad_brand_with_partial_logo():
     return json.loads(x)
 
 
-def test_valid_create_brand_payload(good_brand):
-    payload_validators['brand'].validate(good_brand)
+def test_valid_create_brand_payload(good_product):
+    payload_validators['brand'].validate(good_product)
 
 
-def test_valid_create_brand_with_logo_payload(good_brand_with_logo):
-    payload_validators['brand'].validate(good_brand_with_logo)
+def test_valid_create_brand_with_logo_payload(good_product_with_logo):
+    payload_validators['brand'].validate(good_product_with_logo)
 
 
-def test_invalid_create_brand_with_partial_logo_payload(bad_brand_with_partial_logo):
+def test_invalid_create_brand_with_partial_logo_payload(bad_product_with_partial_logo):
     with pytest.raises(SchemaError):
-        payload_validators['brand'].validate(bad_brand_with_partial_logo)
+        payload_validators['brand'].validate(bad_product_with_partial_logo)
 
 
-def test_invalid_create_brand_payload(bad_brand):
+def test_invalid_create_brand_payload(bad_product):
     with pytest.raises(SchemaError):
-        payload_validators['brand'].validate(bad_brand)
+        payload_validators['brand'].validate(bad_product)
