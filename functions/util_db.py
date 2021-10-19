@@ -11,26 +11,30 @@ rds_client = boto3.client('rds-data')
 
 
 class Repository:
-    def __init__(self) -> None:
-        pass
-
+    @staticmethod
     def create(resource, data):
         pass
 
+    @staticmethod
     def get_by_id(resource, id):
         pass
 
+    @staticmethod
     def get_all(resource):
-        return formatRecords(executeQuery(f'SELECT * FROM {resource}')['records'])
-    
+        return format_records(execute_query(f'SELECT * FROM {resource}')['records'])
+
+    @staticmethod
     def update(resource, data):
         pass
 
+    @staticmethod
     def delete(resource):
         pass
 
 
-def executeQuery(sql, sql_parameters=[]):
+def execute_query(sql, sql_parameters=None):
+    if sql_parameters is None:
+        sql_parameters = []
     response = rds_client.execute_statement(
         secretArn=DB_PARAMS['DB_SECRET_ARN'],
         database=DB_PARAMS['DATABASE_NAME'],
@@ -42,16 +46,16 @@ def executeQuery(sql, sql_parameters=[]):
     return response
 
 
-def formatField(field):
+def format_field(field):
     if list(field.keys())[0] != 'isNull':
         return list(field.values())[0]
     else:
         return ""
 
 
-def formatRecord(record):
-    return [formatField(field) for field in record]
+def format_record(record):
+    return [format_field(field) for field in record]
 
 
-def formatRecords(records):
-    return [formatRecord(record) for record in records]
+def format_records(records):
+    return [format_record(record) for record in records]

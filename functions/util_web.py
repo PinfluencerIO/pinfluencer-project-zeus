@@ -1,21 +1,24 @@
-
 import json
 
 from functions import util_db
 
 
 class Controller:
-    def __init__(self):
-        pass
 
     @staticmethod
     def process(event):
         try:
             http_method = Controller.extract_http_method(event)
-            resource = event['rawPath'][1:-1]
+            resource = event['rawPath'][1:]
+
+            if resource != 'feed':
+                resource = resource[:-1]
+
             # Handle CRUD 
             if http_method == 'post':
-                return HttpUtils.respond(res=f"Create {resource}")
+                resource_id = util_db.Repository.create(resource, event['body'])
+                return HttpUtils.respond(status_code=201,
+                                         res=f"Create {resource} successfully. /{resource}s?id={resource_id}")
             elif http_method == 'get':
                 formatted = util_db.Repository.get_all(resource)
                 return HttpUtils.respond(res=f"Read {resource} Results:\n {formatted}")
@@ -24,11 +27,11 @@ class Controller:
             elif http_method == 'delete':
                 return HttpUtils.respond(res=f"Delete {resource}")
 
-            return HttpUtils.respond(err="Unsupported action", err_code=400, res=f"Unsupported action {http_method}")
+            return HttpUtils.respond(err="Unsupported action", status_code=400, res=f"Unsupported action {http_method}")
 
         except Exception as e:
             print_exception(e)
-            return HttpUtils.respond(err=e, err_code=404)
+            return HttpUtils.respond(err=e, status_code=404)
 
     @staticmethod
     def extract_http_method(event):
@@ -36,18 +39,15 @@ class Controller:
 
 
 class HttpUtils:
-    def __init__(self):
-        pass
 
     @staticmethod
-    def respond(err=None, err_code=400, res=None):
+    def respond(err=None, status_code=400, res=None):
+        print(err)
+        body = 'error' if status_code == 400 else json.dumps(res)
         return {
-            'statusCode': str(err_code) if err else '200',
-            'body': '{"message":%s}' % json.dumps(str(err)) if err else res,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
+            'statusCode': status_code,
+            'body': body,
+            'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
         }
 
 
