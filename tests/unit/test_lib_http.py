@@ -26,6 +26,6 @@ def test_http_util_response_for_success_non_200():
 def test_http_util_response_for_error():
     response = util_web.HttpUtils.respond('ERROR', 400, {'k': 'v'})
     assert response['statusCode'] == 400
-    assert response['body'] == 'error'
+    assert response['body'] == 'ERROR'
     assert response['headers']['Content-Type'] == 'application/json'
     assert response['headers']['Access-Control-Allow-Origin'] == '*'

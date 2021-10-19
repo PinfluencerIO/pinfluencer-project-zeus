@@ -56,18 +56,18 @@ def bad_product_with_partial_logo():
 
 
 def test_valid_create_brand_payload(good_product):
-    payload_validators['brand'].validate(good_product)
+    payload_validators['post']['brand'].validate(good_product)
 
 
 def test_valid_create_brand_with_logo_payload(good_product_with_logo):
-    payload_validators['brand'].validate(good_product_with_logo)
+    payload_validators['post']['brand'].validate(good_product_with_logo)
 
 
 def test_invalid_create_brand_with_partial_logo_payload(bad_product_with_partial_logo):
     with pytest.raises(SchemaError):
-        payload_validators['brand'].validate(bad_product_with_partial_logo)
+        payload_validators['post']['brand'].validate(bad_product_with_partial_logo)
 
 
 def test_invalid_create_brand_payload(bad_product):
     with pytest.raises(SchemaError):
-        payload_validators['brand'].validate(bad_product)
+        payload_validators['post']['brand'].validate(bad_product)

@@ -37,18 +37,18 @@ def bad_product_with_partial_product_image():
 
 
 def test_valid_create_product_payload(good_product):
-    payload_validators['product'].validate(good_product)
+    payload_validators['post']['product'].validate(good_product)
 
 
 def test_valid_create_product_with_product_image_payload(good_product_with_product_image):
-    payload_validators['product'].validate(good_product_with_product_image)
+    payload_validators['post']['product'].validate(good_product_with_product_image)
 
 
 def test_invalid_create_product_with_partial_product_image_payload(bad_product_with_partial_product_image):
     with pytest.raises(SchemaError):
-        payload_validators['product'].validate(bad_product_with_partial_product_image)
+        payload_validators['post']['product'].validate(bad_product_with_partial_product_image)
 
 
 def test_invalid_create_product_payload(bad_product):
     with pytest.raises(SchemaError):
-        payload_validators['product'].validate(bad_product)
+        payload_validators['post']['product'].validate(bad_product)
