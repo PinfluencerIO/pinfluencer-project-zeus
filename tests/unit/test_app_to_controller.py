@@ -15,17 +15,17 @@ my_data_path = os.path.join(THIS_DIR, os.pardir, '../events/')
 
 
 @fixture
-def good_product_with_logo():
+def create_brand_http_payload():
     with open(my_data_path + 'create_brand.json') as f:
         data = json.load(f)
     return data
 
 
-def test_app_to_controller(good_product_with_logo):
+def test_app_to_controller(create_brand_http_payload):
     mock_repository = Mock()
     mock_repository.create = Mock(return_value="id-123")
     app.util_web.util_db.Repository = mock_repository
-    response = app.lambda_handler(good_product_with_logo, context=None)
+    response = app.lambda_handler(create_brand_http_payload, context=None)
     print(response)
     mock_repository.create.assert_called_once()
     assert response['statusCode'] == 201
