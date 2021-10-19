@@ -2,3 +2,5 @@ pytest
 pytest-mock
 boto3
 mock
+faker
+schema

@@ -10,11 +10,12 @@ Make sure env variable AWS_SAM_STACK_NAME exists with the name of the stack we a
 
 
 class TestApiGateway(TestCase):
-    api_endpoint: str
+    brands_endpoint: str
 
     @classmethod
     def get_stack_name(cls) -> str:
         stack_name = os.environ.get("AWS_SAM_STACK_NAME")
+        print(f"!!!!!!!{stack_name}")
         if not stack_name:
             raise Exception(
                 "Cannot find env var AWS_SAM_STACK_NAME. \n"
@@ -42,14 +43,15 @@ class TestApiGateway(TestCase):
         stacks = response["Stacks"]
 
         stack_outputs = stacks[0]["Outputs"]
-        api_outputs = [output for output in stack_outputs if output["OutputKey"] == "PinfluencerGetAllBrands"]
-        self.assertTrue(api_outputs, f"Cannot find output HelloWorldApi in stack {stack_name}")
+        get_all_brands_output = [output for output in stack_outputs if output["OutputKey"] == "PinfluencerGetAllBrands"]
+        self.assertTrue(get_all_brands_output, f"Cannot find output PinfluencerGetAllBrands in stack {stack_name}")
 
-        self.api_endpoint = api_outputs[0]["OutputValue"]
+        self.brands_endpoint = get_all_brands_output[0]["OutputValue"]
 
-    def test_api_gateway(self):
-        """
-        Call the API Gateway endpoint and check the response
-        """
-        response = requests.get(self.api_endpoint)
+    def test_get_brands(self):
+        response = requests.get(self.brands_endpoint)
         self.assertEquals(response.status_code, 200)
+
+    def test_post_requires_auth(self):
+        response = requests.post(self.brands_endpoint,  json={})
+        self.assertEquals(response.status_code, 401)

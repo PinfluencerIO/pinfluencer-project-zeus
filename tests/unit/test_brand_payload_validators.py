@@ -1,5 +1,6 @@
 import json
 import os
+from faker import Faker
 
 import pytest
 from mock import patch

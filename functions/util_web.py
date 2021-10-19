@@ -11,7 +11,7 @@ class Controller:
     @staticmethod
     def process(event):
         try:
-            http_method = Controller.extract_http_method(event)
+            http_method = Controller._extract_http_method(event)
             resource = event['rawPath'][1:]
 
             if resource != 'feed':
@@ -35,13 +35,14 @@ class Controller:
             return HttpUtils.respond(status_code=400, res=f"Unsupported action {http_method}")
 
         except SchemaError as validation_error:
+            Controller.print_exception(validation_error)
             return HttpUtils.respond(error_msg='The payload was invalid', status_code=400)
         except Exception as e:
             Controller.print_exception(e)
             return HttpUtils.respond(error_msg='The server had a problem dealing with this request', status_code=500)
 
     @staticmethod
-    def extract_http_method(event):
+    def _extract_http_method(event):
         return event['requestContext']['http']['method'].lower()
 
     @staticmethod
