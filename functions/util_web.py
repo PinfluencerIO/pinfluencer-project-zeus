@@ -73,6 +73,18 @@ brand_create_schema = Schema({
     }
 })
 
+brand_update_schema = Schema({
+    'id': str,
+    'name': str,
+    'description': str,
+    'website': str,
+    'email': str,
+    Optional('logo'): {
+        'name': str,
+        'bytes': str
+    }
+})
+
 product_create_schema = Schema({
     'name': str,
     'description': str,
@@ -83,13 +95,28 @@ product_create_schema = Schema({
     'requirements': str
 })
 
+product_update_schema = Schema({
+    'id': str,
+    'name': str,
+    'description': str,
+    Optional('image'): {
+        'name': str,
+        'bytes': str
+    },
+    'requirements': str,
+    'brand': {
+        "id": str,
+        "name": str
+    }
+})
+
 payload_validators = {
     'post': {
         'brand': brand_create_schema,
         'product': product_create_schema
     },
     'put': {
-        'brand': brand_create_schema,
-        'product': product_create_schema
+        'brand': brand_update_schema,
+        'product': product_update_schema
     }
 }
