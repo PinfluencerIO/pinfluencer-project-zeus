@@ -30,3 +30,4 @@ def test_app_to_controller(create_brand_http_payload):
     mock_repository.create.assert_called_once()
     assert response['statusCode'] == 201
     assert "/brands?id=id-123" in response['body']
+
