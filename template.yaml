@@ -92,6 +92,12 @@ Resources:
       Handler: functions/app.lambda_handler
       Runtime: python3.9
       Events:
+        Feed:
+          Type: HttpApi
+          Properties:
+            Path: /feed
+            Method: get
+            ApiId: !Ref PinfluencerHttpApi
         BrandsCreate:
           Type: HttpApi 
           Properties:
