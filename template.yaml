@@ -85,7 +85,9 @@ Resources:
           - https://app.pinfluencer.io
   
   PinfluencerFunction:
-    Type: AWS::Serverless::Function 
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
     Properties:
       Role: !Ref LambdaRole
       CodeUri: .

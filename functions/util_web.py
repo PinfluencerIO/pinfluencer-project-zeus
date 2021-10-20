@@ -10,6 +10,7 @@ class Controller:
 
     @staticmethod
     def process(event):
+        print(event)
         try:
             http_method = Controller._extract_http_method(event)
             resource = event['rawPath'][1:]
@@ -18,16 +19,19 @@ class Controller:
                 resource = resource[:-1]
 
             # Handle CRUD 
+            payload_ = json.loads(event['body'])
             if http_method == 'post':
-                payload_validators['post'][resource].is_valid(event['body'])
-                resource_id = util_db.Repository.create(resource, event['body'])
+                payload_validators['post'][resource].is_valid(payload_)
+                payload_['email'] = event['requestContext']['authorizer']['jwt']['claims']['email']
+                payload_['auth_user'] = event['requestContext']['authorizer']['jwt']['claims']['cognito:username']
+                resource_id = util_db.Repository.create(resource, payload_)
                 return HttpUtils.respond(status_code=201,
                                          res=f"Create {resource} successfully. /{resource}s?id={resource_id}")
             elif http_method == 'get':
                 formatted = util_db.Repository.get_all(resource)
                 return HttpUtils.respond(res=f"Read {resource} Results:\n {formatted}")
             elif http_method == 'put':
-                payload_validators['put'][resource].is_valid(event['body'])
+                payload_validators['put'][resource].is_valid(payload_)
                 return HttpUtils.respond(res=f"Update {resource}")
             elif http_method == 'delete':
                 return HttpUtils.respond(res=f"Delete {resource}")
