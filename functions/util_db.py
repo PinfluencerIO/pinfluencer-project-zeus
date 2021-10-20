@@ -1,4 +1,5 @@
 import datetime
+import json
 import uuid
 
 import boto3
@@ -30,7 +31,10 @@ class Repository:
 
     @staticmethod
     def get_by_id(resource, id_):
-        pass
+        sql = f'SELECT {", ".join(types["brand"])} FROM {resource} WHERE id = :id'
+        sql_parameters = [{'name': 'id', 'value': {'stringValue': id_}}]
+        records = Repository._format_records(Repository._execute_query(sql, sql_parameters)['records'])
+        return Repository.build_json(records)
 
     @staticmethod
     def get_all(resource):
@@ -89,3 +93,16 @@ class Repository:
     def _format_records(records):
         return [Repository._format_record(record) for record in records]
 
+    @staticmethod
+    def build_json(body):
+        result = list()
+        for rowIndex, row in enumerate(body):
+            result.append({})
+            for index, columnValue in enumerate(row):
+                result[rowIndex][types['brand'][index]] = columnValue
+
+        return json.dumps(result)
+
+
+types = {'brand': ['id', 'name', 'description', 'website', 'email', 'logo', 'version'],
+         'product': ['id', 'name', 'bio', 'website', 'email', 'auth_user_id']}
