@@ -34,6 +34,8 @@ routes = OrderedDict(
 
         # authenticated product endpoints
         'GET /products/me': ProcessAuthenticatedGetProduct(FilterChainImp([(AuthFilter())])),
+        'GET /products/me/{product_id}': ProcessAuthenticatedGetProductById(
+            FilterChainImp([AuthFilter(), ValidId('product_id')])),
         'POST /products/me': ProcessAuthenticatedPostProduct(FilterChainImp([AuthFilter(), PayloadFilter(None)])),
         'PUT /products/me/{product_id}': ProcessAuthenticatedPutProduct(
             FilterChainImp([AuthFilter(), ValidId('product_id'), PayloadFilter(None)])),

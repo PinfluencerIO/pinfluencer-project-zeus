@@ -42,12 +42,25 @@ def hack_get_products(event):
     return build_json_from_db_records(format_records(result['records']), COLUMNS_FOR_PRODUCT)
 
 
-def hack_get_product_by_id(event):
-    sql = "SELECT " + ', '.join(COLUMNS_FOR_PRODUCT) + " FROM product where id = :id"
+def hack_get_product_by_id(event, with_version=False):
+    if with_version:
+        cols = ', '.join(COLUMNS_FOR_PRODUCT) + ', version'
+    else:
+        cols = ', '.join(COLUMNS_FOR_PRODUCT)
+    sql = "SELECT " + cols + " FROM product where id = :id"
     id_ = event['pathParameters']['product_id']
     sql_parameters = [{'name': 'id', 'value': {'stringValue': id_}}]
     result = execute_query(sql, sql_parameters)
-    return build_json_from_db_records(format_records(result['records']), COLUMNS_FOR_PRODUCT)[0]
+
+    c = COLUMNS_FOR_PRODUCT.copy()
+    if with_version:
+        c.append('version')
+
+    records = format_records(result['records'])
+    if len(records) == 0:
+        return {}
+    else:
+        return build_json_from_db_records(records, c)[0]
 
 
 def hack_brand_me(event, with_version=False):
@@ -61,6 +74,15 @@ def hack_brand_me(event, with_version=False):
     result = execute_query(sql, parameter)
     body = format_records(result['records'])
     return build_json_from_db_records(body, cols)[0]
+
+
+def hack_product_me_by_id(event):
+    brand = hack_brand_me(event)
+    product = hack_get_product_by_id(event, True)
+    if brand['id'] != product['brand_id']:
+        return {"message": "Unauthorised get"}
+    else:
+        return product
 
 
 def hack_product_me(event):
@@ -111,6 +133,39 @@ def hack_brand_me_update(event):
 
     if query_results['numberOfRecordsUpdated'] == 1:
         return hack_brand_me(event)
+    else:
+        return {'message': 'failed to update brand'}
+
+
+def hack_product_me_update(event):
+    brand = hack_brand_me(event)
+    product = hack_get_product_by_id(event, True)
+    if brand['id'] != product['brand_id']:
+        return {"message": "Update not allowed."}
+
+    version = product['version']
+    body = json.loads(event['body'])
+    sql = "\
+    UPDATE product \
+        SET name = :name,\
+            description = :description,\
+            image = :image,\
+            requirements = :requirements,\
+            version = :version\
+        WHERE id = :id\
+    "
+    sql_parameters = [
+        {'name': 'id', 'value': {'stringValue': product['id']}},
+        {'name': 'name', 'value': {'stringValue': body['name']}},
+        {'name': 'description', 'value': {'stringValue': body['description']}},
+        {'name': 'requirements', 'value': {'stringValue': body['requirements']}},
+        {'name': 'image', 'value': {'stringValue': body['image']['filename']}},
+        {'name': 'version', 'value': {'longValue': version+1}}
+    ]
+    query_results = execute_query(sql, sql_parameters)
+
+    if query_results['numberOfRecordsUpdated'] == 1:
+        return hack_get_product_by_id(event)
     else:
         return {'message': 'failed to update brand'}
 
@@ -187,10 +242,7 @@ def hack_product_me_create(event):
     if has_image(body):
         sql_parameters.append({'name': 'image', 'value': {'stringValue': body['image']['filename']}})
 
-    print(f'sql{sql}\nparams {sql_parameters}')
-
     results = execute_query(sql, sql_parameters)
-    print(f'results from product post {results}')
     if results['numberOfRecordsUpdated'] == 1:
         return {'id': f'{id_}'}
     else:
@@ -215,3 +267,21 @@ def get_email(body, event):
     else:
         email = body['email']
     return email
+
+
+def hack_product_me_delete(event):
+    brand = hack_brand_me(event)
+    product = hack_get_product_by_id(event, True)
+
+    if len(product) == 0:
+        return {}
+
+    if brand['id'] != product['brand_id']:
+        return {"message": "Update not allowed."}
+
+    results = execute_query("DELETE FROM product where id=:id", [{'name': 'id', 'value': {'stringValue': product['id']}}])
+
+    if results['numberOfRecordsUpdated'] == 1:
+        return {'message': 'product deleted'}
+    else:
+        return {'message': 'failed to delete product'}

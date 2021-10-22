@@ -40,6 +40,19 @@ class ProcessPublicGetProductBy(ProcessInterface):
         return PinfluencerResponse(status_code=200, body=old_manual_functions.hack_get_product_by_id(event))
 
 
+class ProcessAuthenticatedGetProductById(ProcessInterface):
+    def __init__(self, filter_chain: FilterChain):
+        self.filter = filter_chain
+
+    def do_process(self, event: dict) -> PinfluencerResponse:
+        print(self)
+        self.filter.do_filter(event)
+        # return PinfluencerResponse(status_code=200, body={"message": "ProcessAuthenticatedGetProduct"})
+        # Todo: Replace the old functions hack with full implementation
+        return PinfluencerResponse(status_code=200, body=old_manual_functions.hack_product_me_by_id(event))
+
+
+
 class ProcessAuthenticatedGetProduct(ProcessInterface):
     def __init__(self, filter_chain: FilterChain):
         self.filter = filter_chain
@@ -69,7 +82,7 @@ class ProcessAuthenticatedPutProduct(ProcessInterface):
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
         self.filter.do_filter(event)
-        return PinfluencerResponse(status_code=200, body={"message": "ProcessAuthenticatedPutProduct"})
+        return PinfluencerResponse(status_code=200, body=old_manual_functions.hack_product_me_update(event))
 
 
 class ProcessAuthenticatedDeleteProduct(ProcessInterface):
@@ -79,4 +92,4 @@ class ProcessAuthenticatedDeleteProduct(ProcessInterface):
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
         self.filter.do_filter(event)
-        return PinfluencerResponse(status_code=200, body={"message": "ProcessAuthenticatedDeleteProduct"})
+        return PinfluencerResponse(status_code=200, body=old_manual_functions.hack_product_me_delete(event))

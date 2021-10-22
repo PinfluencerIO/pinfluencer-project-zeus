@@ -156,6 +156,8 @@ Resources:
         ReadProductById:
           Type: HttpApi
           Properties:
+            Auth:
+              Authorizer: UserAuth
             Path: /products/me/{product_id}
             Method: get
             ApiId: !Ref PinfluencerHttpApi
