@@ -20,7 +20,7 @@ def hack_get_brands(event):
     print(result)
     records = format_records(result['records'])
     print(records)
-    return buildJsonResponse(records, COLUMNS_FOR_BRAND)
+    return build_json_from_db_records(records, COLUMNS_FOR_BRAND)
 
 
 def hack_get_brand_by_id(event):
@@ -29,7 +29,7 @@ def hack_get_brand_by_id(event):
     print(f'sql {sql} for id {id_}')
     sql_parameters = [{'name': 'id', 'value': {'stringValue': id_}}]
     result = execute_query(sql, sql_parameters)
-    return buildJsonResponse(format_records(result['records']), COLUMNS_FOR_BRAND)
+    return build_json_from_db_records(format_records(result['records']), COLUMNS_FOR_BRAND)
 
 
 def hack_get_all_products_for_brand_by_id(event):
@@ -37,13 +37,13 @@ def hack_get_all_products_for_brand_by_id(event):
     id_ = event['pathParameters']['brand_id']
     sql_parameters = [{'name': 'id', 'value': {'stringValue': id_}}]
     result = execute_query(sql, sql_parameters)
-    return buildJsonResponse(format_records(result['records']),COLUMNS_FOR_PRODUCT)
+    return build_json_from_db_records(format_records(result['records']), COLUMNS_FOR_PRODUCT)
 
 
 def hack_get_products(event):
     sql = "SELECT " + ', '.join(COLUMNS_FOR_PRODUCT) + " FROM product"
     result = execute_query(sql, None)
-    return buildJsonResponse(format_records(result['records']), COLUMNS_FOR_PRODUCT)
+    return build_json_from_db_records(format_records(result['records']), COLUMNS_FOR_PRODUCT)
 
 
 def hack_get_product_by_id(event):
@@ -51,7 +51,7 @@ def hack_get_product_by_id(event):
     id_ = event['pathParameters']['product_id']
     sql_parameters = [{'name': 'id', 'value': {'stringValue': id_}}]
     result = execute_query(sql, sql_parameters)
-    return buildJsonResponse(format_records(result['records']), COLUMNS_FOR_PRODUCT)
+    return build_json_from_db_records(format_records(result['records']), COLUMNS_FOR_PRODUCT)
 
 
 def hack_brand_me(event):
@@ -60,7 +60,7 @@ def hack_brand_me(event):
     parameter = [{'name': 'id', 'value': {'stringValue': user}}]
     result = execute_query(sql, parameter)
     body = format_records(result['records'])
-    return buildJsonResponse(body,COLUMNS_FOR_BRAND)
+    return build_json_from_db_records(body, COLUMNS_FOR_BRAND)
 
 
 def hack_product_me(event):
@@ -85,10 +85,22 @@ def hack_product_me(event):
     second_p = [{'name': 'id', 'value': {'stringValue': id}}]
     result = execute_query(second_sql, second_p)
     body = format_records(result['records'])
-    return buildJsonResponse(body, COLUMNS_FOR_PRODUCT)
+    return build_json_from_db_records(body, COLUMNS_FOR_PRODUCT)
 
 
-def buildJsonResponse(body, cols):
+def hack_brand_me_create(event):
+    user = event['requestContext']['authorizer']['jwt']['claims']['cognito:username']
+    sql = "SELECT id FROM brand WHERE auth_user_id=:auth_user_id"
+    sql_parameters = [{'name': 'auth_user_id', 'value': {'stringValue': user}}]
+    result = execute_query(sql, sql_parameters)
+    print(result)
+    if len(result['records']) >= 1:
+        return {'message': 'this user is already associated with a brand', 'id': format_records(result['records'])[0][0]}
+    else:
+        return {'body': 'create'}
+
+
+def build_json_from_db_records(body, cols):
     result = list()
 
     for rowIndex, row in enumerate(body):

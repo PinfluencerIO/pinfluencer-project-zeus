@@ -37,7 +37,7 @@ class ProcessAuthenticatedGetBrand(ProcessInterface):
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
         self.filter.do_filter(event)
-        return PinfluencerResponse(status_code=200, body={"message": "ProcessPublicAllProductsForBrand"})
+        return PinfluencerResponse(status_code=200, body=old_manual_functions.hack_brand_me(event))
 
 
 class ProcessAuthenticatedPutBrand(ProcessInterface):
@@ -57,4 +57,4 @@ class ProcessAuthenticatedPostBrand(ProcessInterface):
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
         self.filter.do_filter(event)
-        return PinfluencerResponse(status_code=200, body={"message": "ProcessAuthenticatedPostBrand"})
+        return PinfluencerResponse(status_code=200, body=old_manual_functions.hack_brand_me_create(event))
