@@ -7,8 +7,8 @@ from functions.processors.hacks.old_manual_db import execute_query, format_recor
 
 COLUMNS_FOR_PRODUCT = ['id', 'name', 'description', 'image', 'requirements', 'brand_id', 'brand_name']
 COLUMNS_FOR_PRODUCT_WITHOUT_IMAGE = ['id', 'name', 'description', 'requirements', 'brand_id', 'brand_name']
-COLUMNS_FOR_BRAND = ['id', 'name', 'bio', 'description', 'website', 'email', 'image', 'auth_user_id']
-COLUMNS_FOR_BRAND_WITHOUT_IMAGE = ['id', 'name', 'bio', 'description', 'website', 'email', 'auth_user_id']
+COLUMNS_FOR_BRAND = ['id', 'name', 'description', 'website', 'email', 'image', 'auth_user_id']
+COLUMNS_FOR_BRAND_WITHOUT_IMAGE = ['id', 'name', 'description', 'website', 'email', 'auth_user_id']
 COLUMNS_FOR_BRAND_WITH_VERSION = \
     ['id', 'name', 'bio', 'description', 'website', 'email', 'image', 'auth_user_id', 'version']
 
@@ -111,7 +111,6 @@ def hack_brand_me_update(event):
     sql = "\
     UPDATE brand \
         SET name = :name,\
-            bio = :bio,\
             description = :description,\
             website = :website,\
             email = :email,\
@@ -122,7 +121,6 @@ def hack_brand_me_update(event):
     sql_parameters = [
         {'name': 'id', 'value': {'stringValue': brand['id']}},
         {'name': 'name', 'value': {'stringValue': body['name']}},
-        {'name': 'bio', 'value': {'stringValue': body['bio']}},
         {'name': 'description', 'value': {'stringValue': body['description']}},
         {'name': 'website', 'value': {'stringValue': body['website']}},
         {'name': 'email', 'value': {'stringValue': email}},
