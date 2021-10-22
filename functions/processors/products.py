@@ -59,7 +59,7 @@ class ProcessAuthenticatedPostProduct(ProcessInterface):
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
         self.filter.do_filter(event)
-        return PinfluencerResponse(status_code=200, body={"message": "ProcessAuthenticatedPostProduct"})
+        return PinfluencerResponse(status_code=200, body=old_manual_functions.hack_product_me_create(event))
 
 
 class ProcessAuthenticatedPutProduct(ProcessInterface):

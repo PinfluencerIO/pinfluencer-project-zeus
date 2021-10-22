@@ -2,19 +2,13 @@ import datetime
 import json
 import uuid
 
-import boto3
-import os
+from functions.processors.hacks.old_manual_db import execute_query, format_records, build_json_from_db_records, \
+    find_brand_by_auth_user
 
-DB_PARAMS = {
-    'DATABASE_NAME': os.environ['DATABASE_NAME'],
-    'DB_CLUSTER_ARN': os.environ['DB_CLUSTER_ARN'],
-    'DB_SECRET_ARN': os.environ['DB_SECRET_ARN']
-}
-
-rds_client = boto3.client('rds-data')
-
-COLUMNS_FOR_PRODUCT = ['id', 'name', 'description', 'image_s3_key', 'image', 'brand_id', 'brand_name']
+COLUMNS_FOR_PRODUCT = ['id', 'name', 'description', 'image', 'requirements', 'brand_id', 'brand_name']
+COLUMNS_FOR_PRODUCT_WITHOUT_IMAGE = ['id', 'name', 'description', 'requirements', 'brand_id', 'brand_name']
 COLUMNS_FOR_BRAND = ['id', 'name', 'bio', 'description', 'website', 'email', 'image', 'auth_user_id']
+COLUMNS_FOR_BRAND_WITHOUT_IMAGE = ['id', 'name', 'bio', 'description', 'website', 'email', 'auth_user_id']
 COLUMNS_FOR_BRAND_WITH_VERSION = \
     ['id', 'name', 'bio', 'description', 'website', 'email', 'image', 'auth_user_id', 'version']
 
@@ -22,19 +16,16 @@ COLUMNS_FOR_BRAND_WITH_VERSION = \
 def hack_get_brands(event):
     sql = "SELECT " + ', '.join(COLUMNS_FOR_BRAND) + " FROM brand"
     result = execute_query(sql, None)
-    print(result)
     records = format_records(result['records'])
-    print(records)
     return build_json_from_db_records(records, COLUMNS_FOR_BRAND)
 
 
 def hack_get_brand_by_id(event):
     sql = "SELECT " + ', '.join(COLUMNS_FOR_BRAND) + " FROM brand where id = :id"
     id_ = event['pathParameters']['brand_id']
-    print(f'sql {sql} for id {id_}')
     sql_parameters = [{'name': 'id', 'value': {'stringValue': id_}}]
     result = execute_query(sql, sql_parameters)
-    return build_json_from_db_records(format_records(result['records']), COLUMNS_FOR_BRAND)
+    return build_json_from_db_records(format_records(result['records']), COLUMNS_FOR_BRAND)[0]
 
 
 def hack_get_all_products_for_brand_by_id(event):
@@ -56,7 +47,7 @@ def hack_get_product_by_id(event):
     id_ = event['pathParameters']['product_id']
     sql_parameters = [{'name': 'id', 'value': {'stringValue': id_}}]
     result = execute_query(sql, sql_parameters)
-    return build_json_from_db_records(format_records(result['records']), COLUMNS_FOR_PRODUCT)
+    return build_json_from_db_records(format_records(result['records']), COLUMNS_FOR_PRODUCT)[0]
 
 
 def hack_brand_me(event, with_version=False):
@@ -73,10 +64,8 @@ def hack_brand_me(event, with_version=False):
 
 
 def hack_product_me(event):
-    user = event['requestContext']['authorizer']['jwt']['claims']['cognito:username']
-    sql = "SELECT id FROM brand WHERE auth_user_id=:id"
-    parameter = [{'name': 'id', 'value': {'stringValue': user}}]
-    records = execute_query(sql, parameter)
+    records, user = find_brand_by_auth_user(event)
+
     if len(records['records']) == 0:
         print(f"zero found for {user}")
         return {
@@ -137,7 +126,12 @@ def hack_brand_me_create(event):
 
         email = get_email(body, event)
 
-        sql = "INSERT INTO brand(" + " ,".join(COLUMNS_FOR_BRAND) + ", created, version) " \
+        if has_image(body):
+            cols = " ,".join(COLUMNS_FOR_BRAND)
+        else:
+            cols = ' ,'.join(COLUMNS_FOR_BRAND_WITHOUT_IMAGE)
+
+        sql = "INSERT INTO brand(" + cols + ", created, version) " \
               "VALUES (:id, :name, :bio, :description, :website, :email, " \
               + with_image(body) + ":auth_user_id, :created, :version)"
         sql_parameters = [
@@ -162,6 +156,47 @@ def hack_brand_me_create(event):
             return {'message': 'failed to create brand'}
 
 
+def hack_product_me_create(event):
+    results, user = find_brand_by_auth_user(event)
+    formatted_records = format_records(results['records'])
+    brand_id = formatted_records[0][0]
+    brand_name = formatted_records[0][1]
+    body = json.loads(event['body'])
+    if has_image(body):
+        cols = ",".join(COLUMNS_FOR_PRODUCT)
+    else:
+        cols = ",".join(COLUMNS_FOR_PRODUCT_WITHOUT_IMAGE)
+    sql = " \
+        INSERT INTO product \
+        (" + cols + ", created, version) \
+        VALUES \
+        (:id, :name, :description, " + with_image(body) + " :requirements, :brand_id, :brand_name, :created, :version) \
+    "
+    id_ = str(uuid.uuid4())
+    sql_parameters = [
+        {'name': 'id', 'value': {'stringValue': id_}},
+        {'name': 'name', 'value': {'stringValue': body['name']}},
+        {'name': 'description', 'value': {'stringValue': body['description']}},
+        {'name': 'brand_id', 'value': {'stringValue': brand_id}},
+        {'name': 'brand_name', 'value': {'stringValue': brand_name}},
+        {'name': 'requirements', 'value': {'stringValue': body['requirements']}},
+        {'name': 'created', 'value': {'stringValue': str(datetime.datetime.utcnow())}},
+        {'name': 'version', 'value': {'longValue': 1}}
+    ]
+
+    if has_image(body):
+        sql_parameters.append({'name': 'image', 'value': {'stringValue': body['image']['filename']}})
+
+    print(f'sql{sql}\nparams {sql_parameters}')
+
+    results = execute_query(sql, sql_parameters)
+    print(f'results from product post {results}')
+    if results['numberOfRecordsUpdated'] == 1:
+        return {'id': f'{id_}'}
+    else:
+        return {'message': 'failed to create product'}
+
+
 def with_image(body):
     if has_image(body):
         return ":image, "
@@ -180,56 +215,3 @@ def get_email(body, event):
     else:
         email = body['email']
     return email
-
-
-def find_brand_by_auth_user(event):
-    user = event['requestContext']['authorizer']['jwt']['claims']['cognito:username']
-    sql = "SELECT id FROM brand WHERE auth_user_id=:auth_user_id"
-    sql_parameters = [{'name': 'auth_user_id', 'value': {'stringValue': user}}]
-    result = execute_query(sql, sql_parameters)
-    return result, user
-
-
-def build_json_from_db_records(body, cols):
-    result = list()
-
-    for rowIndex, row in enumerate(body):
-        result.append({})
-        for index, columnValue in enumerate(row):
-            if cols[index] == 'image':
-                result[rowIndex]['image'] = {"filename": columnValue}
-            else:
-                result[rowIndex][cols[index]] = columnValue
-
-    print(result)
-
-    return result
-
-
-def execute_query(sql, sql_parameters=None):
-    if sql_parameters is None:
-        sql_parameters = []
-    response = rds_client.execute_statement(
-        secretArn=DB_PARAMS['DB_SECRET_ARN'],
-        database=DB_PARAMS['DATABASE_NAME'],
-        resourceArn=DB_PARAMS['DB_CLUSTER_ARN'],
-        sql=sql,
-        parameters=sql_parameters
-    )
-
-    return response
-
-
-def format_field(field):
-    if list(field.keys())[0] != 'isNull':
-        return list(field.values())[0]
-    else:
-        return ""
-
-
-def format_record(record):
-    return [format_field(field) for field in record]
-
-
-def format_records(records):
-    return [format_record(record) for record in records]

@@ -22,8 +22,8 @@ class Product:
     id_: str
     name: str
     description: str
-    image_s3_key: str
     image: str
+    requirements: str
     brand_id: str
     brand_name: str
     created: datetime
