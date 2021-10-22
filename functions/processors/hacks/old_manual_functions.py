@@ -1,4 +1,7 @@
+import datetime
 import json
+import uuid
+
 import boto3
 import os
 
@@ -89,15 +92,66 @@ def hack_product_me(event):
 
 
 def hack_brand_me_create(event):
+    result, user = find_brand_by_auth_user(event)
+    if len(result['records']) >= 1:
+        return {'message': 'this user is already associated with a brand',
+                'id': format_records(result['records'])[0][0]}
+    else:
+        id_ = str(uuid.uuid4())
+        body = json.loads(event['body'])
+
+        email = get_email(body, event)
+
+        sql = "INSERT INTO brand(" + " ,".join(COLUMNS_FOR_BRAND) + ", created, version) " \
+              "VALUES (:id, :name, :bio, :description, :website, :email, " + with_logo(body) + ":auth_user_id, :created, :version)"
+        sql_parameters = [
+            {'name': 'id', 'value': {'stringValue': id_}},
+            {'name': 'name', 'value': {'stringValue': body['name']}},
+            {'name': 'bio', 'value': {'stringValue': body['description']}},
+            {'name': 'description', 'value': {'stringValue': body['description']}},
+            {'name': 'website', 'value': {'stringValue': body['website']}},
+            {'name': 'email', 'value': {'stringValue': email}},
+            {'name': 'auth_user_id', 'value': {'stringValue': user}},
+            {'name': 'created', 'value': {'stringValue': str(datetime.datetime.utcnow())}},
+            {'name': 'version', 'value': {'longValue': 1}}
+        ]
+
+        if has_logo(body):
+            sql_parameters.append({'name': 'logo', 'value': {'stringValue': body['logo']['filename']}})
+
+        query_results = execute_query(sql, sql_parameters)
+        if query_results['numberOfRecordsUpdated'] == 1:
+            return {'id': f'{id_}'}
+        else:
+            return {'message': 'failed to create brand'}
+
+
+def with_logo(body):
+    if has_logo(body):
+        return ":logo, "
+    else:
+        return ""
+
+
+def has_logo(body):
+    return 'logo' in body and 'filename' in body['logo']
+
+
+def get_email(body, event):
+    if ('email' in event['requestContext']['authorizer']['jwt']['claims'] and
+            event['requestContext']['authorizer']['jwt']['claims']['email'] is not None):
+        email = event['requestContext']['authorizer']['jwt']['claims']['email']
+    else:
+        email = body['email']
+    return email
+
+
+def find_brand_by_auth_user(event):
     user = event['requestContext']['authorizer']['jwt']['claims']['cognito:username']
     sql = "SELECT id FROM brand WHERE auth_user_id=:auth_user_id"
     sql_parameters = [{'name': 'auth_user_id', 'value': {'stringValue': user}}]
     result = execute_query(sql, sql_parameters)
-    print(result)
-    if len(result['records']) >= 1:
-        return {'message': 'this user is already associated with a brand', 'id': format_records(result['records'])[0][0]}
-    else:
-        return {'body': 'create'}
+    return result, user
 
 
 def build_json_from_db_records(body, cols):
