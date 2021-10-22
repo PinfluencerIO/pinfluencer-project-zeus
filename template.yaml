@@ -26,8 +26,6 @@ Parameters:
 Globals:
   Function:
     Timeout: 10
-    # Layers:
-    #   - !Ref CommonLayer
     Environment:
       Variables:
         DATABASE_NAME: !Ref DatabaseName
@@ -35,23 +33,6 @@ Globals:
         DB_SECRET_ARN: !Ref DatabaseSecretARN
 
 Resources:
-  # CommonLayer:
-  #   Type: AWS::Serverless::LayerVersion
-  #   Properties:
-  #     LayerName: common_layer
-  #     ContentUri: layers/
-  #     CompatibleRuntimes:
-  #       - python3.9
-  #   Metadata:
-  #     BuildMethod: python3.9
-
-  # CommonLayerVersionPermission:
-  #   Type: AWS::Lambda::LayerVersionPermission
-  #   Properties:
-  #     Action: lambda:GetLayerVersion
-  #     LayerVersionArn: !Ref CommonLayer
-  #     Principal: !Ref AWS::AccountId
-
   PinfluencerHttpApi:
     Type: AWS::Serverless::HttpApi
     Properties:
@@ -83,7 +64,7 @@ Resources:
           - https://localhost:3000
           - https://auth.pinfluencer.io
           - https://app.pinfluencer.io
-  
+
   PinfluencerFunction:
     Type: AWS::Serverless::Function
     Metadata:
@@ -94,70 +75,104 @@ Resources:
       Handler: functions/app.lambda_handler
       Runtime: python3.9
       Events:
+#        PUBLIC Endpoints
         Feed:
           Type: HttpApi
           Properties:
             Path: /feed
             Method: get
             ApiId: !Ref PinfluencerHttpApi
-        BrandsCreate:
-          Type: HttpApi 
-          Properties:
-            Auth:
-              Authorizer: UserAuth
-            Path: /brands
-            Method: post
-            ApiId: !Ref PinfluencerHttpApi
-        BrandsRead:
-          Type: HttpApi 
+        GetAllBrands:
+          Type: HttpApi
           Properties:
             Path: /brands
             Method: get
             ApiId: !Ref PinfluencerHttpApi
-        BrandsUpdate:
-          Type: HttpApi 
+        GetBrandById:
+          Type: HttpApi
           Properties:
-            Auth:
-              Authorizer: UserAuth
-            Path: /brands
-            Method: put
+            Path: /brands/{brand_id}
+            Method: get
             ApiId: !Ref PinfluencerHttpApi
-        BrandsDelete:
-          Type: HttpApi 
+        GetAllProductsForBrandById:
+          Type: HttpApi
           Properties:
-            Auth:
-              Authorizer: UserAuth
-            Path: /brands
-            Method: delete
+            Path: /brands/{brand_id}/products
+            Method: get
             ApiId: !Ref PinfluencerHttpApi
-        ProductsCreate:
-          Type: HttpApi 
-          Properties:
-            Auth:
-              Authorizer: UserAuth
-            Path: /products
-            Method: post
-            ApiId: !Ref PinfluencerHttpApi
-        ProductsRead:
-          Type: HttpApi 
+        GetAllProducts:
+          Type: HttpApi
           Properties:
             Path: /products
             Method: get
             ApiId: !Ref PinfluencerHttpApi
-        ProductsUpdate:
+        GetProductById:
+          Type: HttpApi
+          Properties:
+            Path: /products/{product_id}
+            Method: get
+            ApiId: !Ref PinfluencerHttpApi
+#        AUTHENTICATED Endpoints
+        CreateBrand:
           Type: HttpApi 
           Properties:
             Auth:
               Authorizer: UserAuth
-            Path: /products
+            Path: /brands/me
+            Method: post
+            ApiId: !Ref PinfluencerHttpApi
+        GetBrand:
+          Type: HttpApi 
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /brands/me
+            Method: get
+            ApiId: !Ref PinfluencerHttpApi
+        UpdateBrand:
+          Type: HttpApi 
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /brands/me
             Method: put
             ApiId: !Ref PinfluencerHttpApi
-        ProductsDelete:
+        CreateProduct:
           Type: HttpApi 
           Properties:
             Auth:
               Authorizer: UserAuth
-            Path: /products
+            Path: /products/me
+            Method: post
+            ApiId: !Ref PinfluencerHttpApi
+        ReadAllProduct:
+          Type: HttpApi 
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /products/me
+            Method: get
+            ApiId: !Ref PinfluencerHttpApi
+        ReadProductById:
+          Type: HttpApi
+          Properties:
+            Path: /products/me/{product_id}
+            Method: get
+            ApiId: !Ref PinfluencerHttpApi
+        UpdateProductById:
+          Type: HttpApi 
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /products/me/{product_id}
+            Method: put
+            ApiId: !Ref PinfluencerHttpApi
+        DeleteProductById:
+          Type: HttpApi 
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /products/me/{product_id}
             Method: delete
             ApiId: !Ref PinfluencerHttpApi
 Outputs:
