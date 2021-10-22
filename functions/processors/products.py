@@ -1,6 +1,8 @@
 from functions.processors import ProcessInterface
+from functions.processors.hacks import old_manual_functions
 from functions.web.filters import FilterChain
 from functions.web.http_util import PinfluencerResponse
+
 
 # Todo: Implement these processors
 
@@ -12,7 +14,9 @@ class ProcessPublicAllProductsForBrand(ProcessInterface):
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
         self.filter.do_filter(event)
-        return PinfluencerResponse(status_code=200, body={"message": "ProcessPublicAllProductsForBrand"})
+        # return PinfluencerResponse(status_code=200, body={"message": "ProcessPublicAllProductsForBrand"})
+        return PinfluencerResponse(status_code=200,
+                                   body=old_manual_functions.hack_get_all_products_for_brand_by_id(event))
 
 
 class ProcessPublicProducts(ProcessInterface):
@@ -21,7 +25,8 @@ class ProcessPublicProducts(ProcessInterface):
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
-        return PinfluencerResponse(status_code=200, body={"message": "ProcessPublicProducts"})
+        # return PinfluencerResponse(status_code=200, body={"message": "ProcessPublicProducts"})
+        return PinfluencerResponse(status_code=200, body=old_manual_functions.hack_get_products(event))
 
 
 class ProcessPublicGetProductBy(ProcessInterface):
@@ -31,7 +36,8 @@ class ProcessPublicGetProductBy(ProcessInterface):
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
         self.filter.do_filter(event)
-        return PinfluencerResponse(status_code=200, body={"message": "ProcessPublicGetProductBy"})
+        # return PinfluencerResponse(status_code=200, body={"message": "ProcessPublicGetProductBy"})
+        return PinfluencerResponse(status_code=200, body=old_manual_functions.hack_get_product_by_id(event))
 
 
 class ProcessAuthenticatedGetProduct(ProcessInterface):
@@ -41,7 +47,9 @@ class ProcessAuthenticatedGetProduct(ProcessInterface):
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
         self.filter.do_filter(event)
-        return PinfluencerResponse(status_code=200, body={"message": "ProcessAuthenticatedGetProduct"})
+        # return PinfluencerResponse(status_code=200, body={"message": "ProcessAuthenticatedGetProduct"})
+        # Todo: Replace the old functions hack with full implementation
+        return PinfluencerResponse(status_code=200, body=old_manual_functions.hack_product_me(event))
 
 
 class ProcessAuthenticatedPostProduct(ProcessInterface):

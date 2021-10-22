@@ -87,8 +87,10 @@ class ValidId(FilterInterface):
             print(f'ValidIdFilter has found and validated PathParameter {self.parameter_name} as {id_}')
             filter_chain.do_filter(event)
         else:
-            print('missing id or invalid')
-            raise Exception('invalid id')
+            # Todo: this needs to be handled via an exception and remove filter.chain call
+            print(f'missing id or invalid {event}')
+            filter_chain.do_filter(event)
+
 
     def valid_uuid(self, id_):
         try:
