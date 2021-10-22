@@ -13,7 +13,6 @@ class ProcessPublicBrands(ProcessInterface):
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
-        # return PinfluencerResponse(status_code=200, body={'message': 'ProcessPublicBrands'})
         # Todo: Replace the old functions hack with full implementation
         return PinfluencerResponse(status_code=200, body=old_manual_functions.hack_get_brands(event))
 
@@ -25,7 +24,6 @@ class ProcessPublicGetBrandBy(ProcessInterface):
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
         self.filter.do_filter(event)
-        # return PinfluencerResponse(status_code=200, body={"message": "ProcessPublicAllProductsForBrand"})
         # Todo: Replace the old functions hack with full implementation
         return PinfluencerResponse(status_code=200, body=old_manual_functions.hack_get_brand_by_id(event))
 
@@ -37,6 +35,7 @@ class ProcessAuthenticatedGetBrand(ProcessInterface):
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
         self.filter.do_filter(event)
+        # Todo: Replace the old functions hack with full implementation
         return PinfluencerResponse(status_code=200, body=old_manual_functions.hack_brand_me(event))
 
 
@@ -47,7 +46,8 @@ class ProcessAuthenticatedPutBrand(ProcessInterface):
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
         self.filter.do_filter(event)
-        return PinfluencerResponse(status_code=200, body={"message": "ProcessAuthenticatedPutBrand"})
+        # Todo: Replace the old functions hack with full implementation
+        return PinfluencerResponse(status_code=204, body=old_manual_functions.hack_brand_me_update(event))
 
 
 class ProcessAuthenticatedPostBrand(ProcessInterface):
@@ -57,4 +57,5 @@ class ProcessAuthenticatedPostBrand(ProcessInterface):
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
         self.filter.do_filter(event)
-        return PinfluencerResponse(status_code=200, body=old_manual_functions.hack_brand_me_create(event))
+        # Todo: Replace the old functions hack with full implementation
+        return PinfluencerResponse(status_code=201, body=old_manual_functions.hack_brand_me_create(event))

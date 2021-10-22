@@ -14,7 +14,9 @@ DB_PARAMS = {
 rds_client = boto3.client('rds-data')
 
 COLUMNS_FOR_PRODUCT = ['id', 'name', 'description', 'image_s3_key', 'image', 'brand_id', 'brand_name']
-COLUMNS_FOR_BRAND = ['id', 'name', 'bio', 'description', 'website', 'email', 'logo', 'auth_user_id']
+COLUMNS_FOR_BRAND = ['id', 'name', 'bio', 'description', 'website', 'email', 'image', 'auth_user_id']
+COLUMNS_FOR_BRAND_WITH_VERSION = \
+    ['id', 'name', 'bio', 'description', 'website', 'email', 'image', 'auth_user_id', 'version']
 
 
 def hack_get_brands(event):
@@ -57,24 +59,24 @@ def hack_get_product_by_id(event):
     return build_json_from_db_records(format_records(result['records']), COLUMNS_FOR_PRODUCT)
 
 
-def hack_brand_me(event):
+def hack_brand_me(event, with_version=False):
+    if with_version:
+        cols = COLUMNS_FOR_BRAND_WITH_VERSION
+    else:
+        cols = COLUMNS_FOR_BRAND
     user = event['requestContext']['authorizer']['jwt']['claims']['cognito:username']
-    sql = "SELECT " + ', '.join(COLUMNS_FOR_BRAND) + " FROM brand where auth_user_id = :id"
+    sql = "SELECT " + ', '.join(cols) + " FROM brand where auth_user_id = :id"
     parameter = [{'name': 'id', 'value': {'stringValue': user}}]
     result = execute_query(sql, parameter)
     body = format_records(result['records'])
-    return build_json_from_db_records(body, COLUMNS_FOR_BRAND)
+    return build_json_from_db_records(body, cols)[0]
 
 
 def hack_product_me(event):
     user = event['requestContext']['authorizer']['jwt']['claims']['cognito:username']
-    print(user)
     sql = "SELECT id FROM brand WHERE auth_user_id=:id"
     parameter = [{'name': 'id', 'value': {'stringValue': user}}]
     records = execute_query(sql, parameter)
-    print("!!!")
-    print(records['records'])
-    print("!!!")
     if len(records['records']) == 0:
         print(f"zero found for {user}")
         return {
@@ -83,12 +85,45 @@ def hack_product_me(event):
         }
 
     id = format_records(records['records'])[0][0]
-    print(f"the id is {id}")
     second_sql = "SELECT " + ', '.join(COLUMNS_FOR_PRODUCT) + " FROM product WHERE brand_id=:id"
     second_p = [{'name': 'id', 'value': {'stringValue': id}}]
     result = execute_query(second_sql, second_p)
     body = format_records(result['records'])
     return build_json_from_db_records(body, COLUMNS_FOR_PRODUCT)
+
+
+def hack_brand_me_update(event):
+    brand = hack_brand_me(event, True)
+    version = brand['version'] + 1
+    body = json.loads(event['body'])
+    email = get_email(body, event)
+    sql = "\
+    UPDATE brand \
+        SET name = :name,\
+            bio = :bio,\
+            description = :description,\
+            website = :website,\
+            email = :email,\
+            image = :image,\
+            version = :version\
+        WHERE id = :id\
+    "
+    sql_parameters = [
+        {'name': 'id', 'value': {'stringValue': brand['id']}},
+        {'name': 'name', 'value': {'stringValue': body['name']}},
+        {'name': 'bio', 'value': {'stringValue': body['bio']}},
+        {'name': 'description', 'value': {'stringValue': body['description']}},
+        {'name': 'website', 'value': {'stringValue': body['website']}},
+        {'name': 'email', 'value': {'stringValue': email}},
+        {'name': 'image', 'value': {'stringValue': body['image']['filename']}},
+        {'name': 'version', 'value': {'longValue': version}}
+    ]
+    query_results = execute_query(sql, sql_parameters)
+
+    if query_results['numberOfRecordsUpdated'] == 1:
+        return hack_brand_me(event)
+    else:
+        return {'message': 'failed to update brand'}
 
 
 def hack_brand_me_create(event):
@@ -103,7 +138,8 @@ def hack_brand_me_create(event):
         email = get_email(body, event)
 
         sql = "INSERT INTO brand(" + " ,".join(COLUMNS_FOR_BRAND) + ", created, version) " \
-              "VALUES (:id, :name, :bio, :description, :website, :email, " + with_logo(body) + ":auth_user_id, :created, :version)"
+              "VALUES (:id, :name, :bio, :description, :website, :email, " \
+              + with_image(body) + ":auth_user_id, :created, :version)"
         sql_parameters = [
             {'name': 'id', 'value': {'stringValue': id_}},
             {'name': 'name', 'value': {'stringValue': body['name']}},
@@ -116,8 +152,8 @@ def hack_brand_me_create(event):
             {'name': 'version', 'value': {'longValue': 1}}
         ]
 
-        if has_logo(body):
-            sql_parameters.append({'name': 'logo', 'value': {'stringValue': body['logo']['filename']}})
+        if has_image(body):
+            sql_parameters.append({'name': 'image', 'value': {'stringValue': body['image']['filename']}})
 
         query_results = execute_query(sql, sql_parameters)
         if query_results['numberOfRecordsUpdated'] == 1:
@@ -126,15 +162,15 @@ def hack_brand_me_create(event):
             return {'message': 'failed to create brand'}
 
 
-def with_logo(body):
-    if has_logo(body):
-        return ":logo, "
+def with_image(body):
+    if has_image(body):
+        return ":image, "
     else:
         return ""
 
 
-def has_logo(body):
-    return 'logo' in body and 'filename' in body['logo']
+def has_image(body):
+    return 'image' in body and 'filename' in body['image']
 
 
 def get_email(body, event):
@@ -160,7 +196,10 @@ def build_json_from_db_records(body, cols):
     for rowIndex, row in enumerate(body):
         result.append({})
         for index, columnValue in enumerate(row):
-            result[rowIndex][cols[index]] = columnValue
+            if cols[index] == 'image':
+                result[rowIndex]['image'] = {"filename": columnValue}
+            else:
+                result[rowIndex][cols[index]] = columnValue
 
     print(result)
 

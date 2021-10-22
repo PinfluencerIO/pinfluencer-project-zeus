@@ -9,7 +9,7 @@ class Brand:
     name: str
     bio: str
     description: str
-    logo: str
+    image: str
     website: str
     email: str
     auth_user_id: str
