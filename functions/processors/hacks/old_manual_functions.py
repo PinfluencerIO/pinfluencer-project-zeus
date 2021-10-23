@@ -9,8 +9,6 @@ COLUMNS_FOR_PRODUCT = ['id', 'name', 'description', 'image', 'requirements', 'br
 COLUMNS_FOR_PRODUCT_WITHOUT_IMAGE = ['id', 'name', 'description', 'requirements', 'brand_id', 'brand_name']
 COLUMNS_FOR_BRAND = ['id', 'name', 'description', 'website', 'email', 'image', 'auth_user_id']
 COLUMNS_FOR_BRAND_WITHOUT_IMAGE = ['id', 'name', 'description', 'website', 'email', 'auth_user_id']
-COLUMNS_FOR_BRAND_WITH_VERSION = \
-    ['id', 'name', 'bio', 'description', 'website', 'email', 'image', 'auth_user_id', 'version']
 
 
 def hack_get_brands(event):
@@ -42,19 +40,14 @@ def hack_get_products(event):
     return build_json_from_db_records(format_records(result['records']), COLUMNS_FOR_PRODUCT)
 
 
-def hack_get_product_by_id(event, with_version=False):
-    if with_version:
-        cols = ', '.join(COLUMNS_FOR_PRODUCT) + ', version'
-    else:
-        cols = ', '.join(COLUMNS_FOR_PRODUCT)
+def hack_get_product_by_id(event):
+    cols = ', '.join(COLUMNS_FOR_PRODUCT)
     sql = "SELECT " + cols + " FROM product where id = :id"
     id_ = event['pathParameters']['product_id']
     sql_parameters = [{'name': 'id', 'value': {'stringValue': id_}}]
     result = execute_query(sql, sql_parameters)
 
     c = COLUMNS_FOR_PRODUCT.copy()
-    if with_version:
-        c.append('version')
 
     records = format_records(result['records'])
     if len(records) == 0:
@@ -63,11 +56,8 @@ def hack_get_product_by_id(event, with_version=False):
         return build_json_from_db_records(records, c)[0]
 
 
-def hack_brand_me(event, with_version=False):
-    if with_version:
-        cols = COLUMNS_FOR_BRAND_WITH_VERSION
-    else:
-        cols = COLUMNS_FOR_BRAND
+def hack_brand_me(event):
+    cols = COLUMNS_FOR_BRAND
     user = event['requestContext']['authorizer']['jwt']['claims']['cognito:username']
     sql = "SELECT " + ', '.join(cols) + " FROM brand where auth_user_id = :id"
     parameter = [{'name': 'id', 'value': {'stringValue': user}}]
@@ -78,7 +68,7 @@ def hack_brand_me(event, with_version=False):
 
 def hack_product_me_by_id(event):
     brand = hack_brand_me(event)
-    product = hack_get_product_by_id(event, True)
+    product = hack_get_product_by_id(event)
     if brand['id'] != product['brand_id']:
         return {"message": "Unauthorised get"}
     else:
@@ -104,8 +94,7 @@ def hack_product_me(event):
 
 
 def hack_brand_me_update(event):
-    brand = hack_brand_me(event, True)
-    version = brand['version'] + 1
+    brand = hack_brand_me(event)
     body = json.loads(event['body'])
     email = get_email(body, event)
     sql = "\
@@ -114,8 +103,7 @@ def hack_brand_me_update(event):
             description = :description,\
             website = :website,\
             email = :email,\
-            image = :image,\
-            version = :version\
+            image = :image\
         WHERE id = :id\
     "
     sql_parameters = [
@@ -125,7 +113,6 @@ def hack_brand_me_update(event):
         {'name': 'website', 'value': {'stringValue': body['website']}},
         {'name': 'email', 'value': {'stringValue': email}},
         {'name': 'image', 'value': {'stringValue': body['image']['filename']}},
-        {'name': 'version', 'value': {'longValue': version}}
     ]
     query_results = execute_query(sql, sql_parameters)
 
@@ -137,19 +124,17 @@ def hack_brand_me_update(event):
 
 def hack_product_me_update(event):
     brand = hack_brand_me(event)
-    product = hack_get_product_by_id(event, True)
+    product = hack_get_product_by_id(event)
     if brand['id'] != product['brand_id']:
         return {"message": "Update not allowed."}
 
-    version = product['version']
     body = json.loads(event['body'])
     sql = "\
     UPDATE product \
         SET name = :name,\
             description = :description,\
             image = :image,\
-            requirements = :requirements,\
-            version = :version\
+            requirements = :requirements\
         WHERE id = :id\
     "
     sql_parameters = [
@@ -158,7 +143,6 @@ def hack_product_me_update(event):
         {'name': 'description', 'value': {'stringValue': body['description']}},
         {'name': 'requirements', 'value': {'stringValue': body['requirements']}},
         {'name': 'image', 'value': {'stringValue': body['image']['filename']}},
-        {'name': 'version', 'value': {'longValue': version+1}}
     ]
     query_results = execute_query(sql, sql_parameters)
 
@@ -184,9 +168,9 @@ def hack_brand_me_create(event):
         else:
             cols = ' ,'.join(COLUMNS_FOR_BRAND_WITHOUT_IMAGE)
 
-        sql = "INSERT INTO brand(" + cols + ", created, version) " \
+        sql = "INSERT INTO brand(" + cols + ", created) " \
               "VALUES (:id, :name, :bio, :description, :website, :email, " \
-              + with_image(body) + ":auth_user_id, :created, :version)"
+              + with_image(body) + ":auth_user_id, :created)"
         sql_parameters = [
             {'name': 'id', 'value': {'stringValue': id_}},
             {'name': 'name', 'value': {'stringValue': body['name']}},
@@ -196,7 +180,6 @@ def hack_brand_me_create(event):
             {'name': 'email', 'value': {'stringValue': email}},
             {'name': 'auth_user_id', 'value': {'stringValue': user}},
             {'name': 'created', 'value': {'stringValue': str(datetime.datetime.utcnow())}},
-            {'name': 'version', 'value': {'longValue': 1}}
         ]
 
         if has_image(body):
@@ -221,9 +204,9 @@ def hack_product_me_create(event):
         cols = ",".join(COLUMNS_FOR_PRODUCT_WITHOUT_IMAGE)
     sql = " \
         INSERT INTO product \
-        (" + cols + ", created, version) \
+        (" + cols + ", created) \
         VALUES \
-        (:id, :name, :description, " + with_image(body) + " :requirements, :brand_id, :brand_name, :created, :version) \
+        (:id, :name, :description, " + with_image(body) + " :requirements, :brand_id, :brand_name, :created) \
     "
     id_ = str(uuid.uuid4())
     sql_parameters = [
@@ -234,7 +217,6 @@ def hack_product_me_create(event):
         {'name': 'brand_name', 'value': {'stringValue': brand_name}},
         {'name': 'requirements', 'value': {'stringValue': body['requirements']}},
         {'name': 'created', 'value': {'stringValue': str(datetime.datetime.utcnow())}},
-        {'name': 'version', 'value': {'longValue': 1}}
     ]
 
     if has_image(body):
@@ -269,7 +251,7 @@ def get_email(body, event):
 
 def hack_product_me_delete(event):
     brand = hack_brand_me(event)
-    product = hack_get_product_by_id(event, True)
+    product = hack_get_product_by_id(event)
 
     if len(product) == 0:
         return {}

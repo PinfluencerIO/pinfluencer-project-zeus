@@ -7,14 +7,12 @@ from attr import dataclass
 class Brand:
     id_: str
     name: str
-    bio: str
     description: str
     image: str
     website: str
     email: str
     auth_user_id: str
     created: datetime
-    version: int
 
 
 @dataclass()
@@ -27,4 +25,3 @@ class Product:
     brand_id: str
     brand_name: str
     created: datetime
-    version: int

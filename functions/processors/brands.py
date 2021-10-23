@@ -47,7 +47,7 @@ class ProcessAuthenticatedPutBrand(ProcessInterface):
         print(self)
         self.filter.do_filter(event)
         # Todo: Replace the old functions hack with full implementation
-        return PinfluencerResponse(status_code=204, body=old_manual_functions.hack_brand_me_update(event))
+        return PinfluencerResponse(status_code=200, body=old_manual_functions.hack_brand_me_update(event))
 
 
 class ProcessAuthenticatedPostBrand(ProcessInterface):

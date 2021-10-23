@@ -50,12 +50,11 @@ class Repository:
 
     @staticmethod
     def _create_brand_query_builders(data, resource):
-        sql = f'INSERT INTO {resource}(id, created, name, description, website, email, version, auth_user_id) ' \
-              f'VALUES(:id, :created, :name, :description, :website, :email, :version, :auth_user_id)'
+        sql = f'INSERT INTO {resource}(id, created, name, description, website, email, auth_user_id) ' \
+              f'VALUES(:id, :created, :name, :description, :website, :email, :auth_user_id)'
         sql_parameters = [
             {'name': 'id', 'value': {'stringValue': data['id']}},
             {'name': 'created', 'value': {'stringValue': data['created']}},
-            {'name': 'version', 'value': {'longValue': data['version']}},
             {'name': 'name', 'value': {'stringValue': data['name']}},
             {'name': 'description', 'value': {'stringValue': data['description']}},
             {'name': 'website', 'value': {'stringValue': data['website']}},
