@@ -1,10 +1,10 @@
 from sqlalchemy import Column, String, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 
-from functions.data_access_layer.data_models.data_model_base import Base
+from functions.data_access_layer.models.model_base import ModelBase
 
 
-class Product(Base):
+class ProductModel(ModelBase):
 
     __tablename__ = 'product'
 
