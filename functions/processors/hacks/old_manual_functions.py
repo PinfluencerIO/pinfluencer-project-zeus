@@ -23,6 +23,8 @@ def hack_get_brand_by_id(event):
     id_ = event['pathParameters']['brand_id']
     sql_parameters = [{'name': 'id', 'value': {'stringValue': id_}}]
     result = execute_query(sql, sql_parameters)
+    if len(result) == 0:
+        return {}
     return build_json_from_db_records(format_records(result['records']), COLUMNS_FOR_BRAND)[0]
 
 
@@ -169,7 +171,7 @@ def hack_brand_me_create(event):
             cols = ' ,'.join(COLUMNS_FOR_BRAND_WITHOUT_IMAGE)
 
         sql = "INSERT INTO brand(" + cols + ", created) " \
-              "VALUES (:id, :name, :bio, :description, :website, :email, " \
+                                            "VALUES (:id, :name, :bio, :description, :website, :email, " \
               + with_image(body) + ":auth_user_id, :created)"
         sql_parameters = [
             {'name': 'id', 'value': {'stringValue': id_}},
@@ -259,9 +261,43 @@ def hack_product_me_delete(event):
     if brand['id'] != product['brand_id']:
         return {"message": "Update not allowed."}
 
-    results = execute_query("DELETE FROM product where id=:id", [{'name': 'id', 'value': {'stringValue': product['id']}}])
+    results = execute_query("DELETE FROM product where id=:id",
+                            [{'name': 'id', 'value': {'stringValue': product['id']}}])
 
     if results['numberOfRecordsUpdated'] == 1:
         return {'message': 'product deleted'}
     else:
         return {'message': 'failed to delete product'}
+
+
+def hack_feed(event):
+    single = {"id": "4f9cf273-f37f-44db-be0c-a081fd200a01",
+              "created": "2021-10-18 17:24:22.644158",
+              "name": "Product Name 1",
+              "description": "Lorem ipsum dolor sit amet, Product 1",
+              "image": "product_image_1.png",
+              "brand": {"id": "4f9cf273-f37f-44db-be0c-a081fd209991",
+                        "name": "Brand name 1"}
+              }
+
+    product_number = 1
+    brand_number = 1
+    result = []
+    for i in range(20):
+        item = single.copy()
+        item_b = single['brand'].copy()
+        item['id'] = f'{product_number}_{brand_number}'
+        item['name'] = f'Product {product_number}_{brand_number}'
+        item['description'] = f'This is the description for product {product_number}_{brand_number}'
+        item["image_s3_key"] = f'product_image_{product_number}_{brand_number}.png'
+        item["image"] = f'product_image_{product_number}_{brand_number}.png'
+        item_b['id'] = f'{brand_number}'
+        item_b['name'] = f'Brand {brand_number}'
+        item['brand'] = item_b
+        result.append(item)
+        product_number = product_number + 1
+        if product_number > 3:
+            product_number = 1
+            brand_number = brand_number + 1
+
+    return result
