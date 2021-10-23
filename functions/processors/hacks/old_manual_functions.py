@@ -289,7 +289,6 @@ def hack_feed(event):
         item['id'] = f'{product_number}_{brand_number}'
         item['name'] = f'Product {product_number}_{brand_number}'
         item['description'] = f'This is the description for product {product_number}_{brand_number}'
-        item["image_s3_key"] = f'product_image_{product_number}_{brand_number}.png'
         item["image"] = f'product_image_{product_number}_{brand_number}.png'
         item_b['id'] = f'{brand_number}'
         item_b['name'] = f'Brand {brand_number}'
