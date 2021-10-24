@@ -59,11 +59,7 @@ Resources:
           - GET
           - POST
           - OPTIONS
-        AllowOrigins:
-          - http://localhost:3000
-          - https://localhost:3000
-          - https://auth.pinfluencer.io
-          - https://app.pinfluencer.io
+        AllowOrigins: '*'
 
   PinfluencerFunction:
     Type: AWS::Serverless::Function
