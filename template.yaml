@@ -55,11 +55,9 @@ Resources:
               audience: 
                 - !Sub ${ClientIdAudience}
       CorsConfiguration:
-        AllowMethods:
-          - GET
-          - POST
-          - OPTIONS
+        AllowMethods: '*'
         AllowOrigins: '*'
+        AllowHeaders: '*'
 
   PinfluencerFunction:
     Type: AWS::Serverless::Function
