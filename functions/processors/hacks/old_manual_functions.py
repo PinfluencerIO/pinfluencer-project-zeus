@@ -124,6 +124,8 @@ def hack_brand_me_update(event):
     query_results = execute_query(sql, sql_parameters)
 
     if query_results['numberOfRecordsUpdated'] == 1:
+        upload_image_to_s3(brand['id'], None, body['image']['filename'], body['image']['bytes'])
+
         return hack_brand_me(event)
     else:
         return {'message': 'failed to update brand'}
@@ -195,6 +197,8 @@ def hack_brand_me_create(event):
 
         query_results = execute_query(sql, sql_parameters)
         if query_results['numberOfRecordsUpdated'] == 1:
+            if has_image(body):
+                upload_image_to_s3(id_, None, body['image']['filename'],body['image']['bytes'])
             return {'id': f'{id_}'}
         else:
             return {'message': 'failed to create brand'}
@@ -245,7 +249,10 @@ def hack_product_me_create(event):
 def upload_image_to_s3(brand_id, product_id_, filename_, bytes_):
     print(f'brand{brand_id}, product{product_id_}, fn{filename_}')
     image = base64.b64decode(bytes_)
-    key = f'{brand_id}/{product_id_}/{filename_}'
+    if product_id_ is None:
+        key = f'{brand_id}/{filename_}'
+    else:
+        key = f'{brand_id}/{product_id_}/{filename_}'
     s3.put_object(Bucket='pinfluencer-product-images',
                   Key=key, Body=image,
                   ContentType=f'image/{filename_[-3:]}',
