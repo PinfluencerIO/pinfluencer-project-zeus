@@ -36,6 +36,18 @@ Resources:
   PinfluencerHttpApi:
     Type: AWS::Serverless::HttpApi
     Properties:
+      CorsConfiguration:
+        AllowOrigins:
+          - "https://localhost:3000"
+          - "https://app.pinfluencer.io"
+        AllowHeaders:
+          - "*"
+        AllowMethods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS
       Auth:
         Authorizers:
           UserAuth:
@@ -54,10 +66,6 @@ Resources:
                     - !Sub ${UserPoolId}
               audience: 
                 - !Sub ${ClientIdAudience}
-      CorsConfiguration:
-        AllowMethods: '*'
-        AllowOrigins: '*'
-        AllowHeaders: '*'
 
   PinfluencerFunction:
     Type: AWS::Serverless::Function
