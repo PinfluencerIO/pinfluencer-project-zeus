@@ -1,6 +1,10 @@
+import base64
 import datetime
 import json
 import uuid
+
+import boto3
+s3 = boto3.client('s3')
 
 from functions.processors.hacks.old_manual_db import execute_query, format_records, build_json_from_db_records, \
     find_brand_by_auth_user
@@ -226,9 +230,22 @@ def hack_product_me_create(event):
 
     results = execute_query(sql, sql_parameters)
     if results['numberOfRecordsUpdated'] == 1:
+        filename_ = body["image"]["filename"]
+        bytes_ = body['image']['bytes']
+        upload_image_to_s3(brand_id, id_, filename_, bytes_)
+
         return {'id': f'{id_}'}
     else:
         return {'message': 'failed to create product'}
+
+# Todo: When implementing this again in OO, use SQS so failures can be mitigated
+def upload_image_to_s3(brand_id, product_id_, filename_, bytes_):
+    image = base64.b64decode(bytes_)
+    key = f'{brand_id}/{product_id_}/{filename_}'
+    s3.put_object(Bucket='pinfluencer-product-images',
+                  Key=key, Body=image,
+                  ContentType=f'image/{filename_[-3:]}',
+                  Tagging='public=yes')
 
 
 def with_image(body):
