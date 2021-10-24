@@ -64,6 +64,8 @@ Resources:
           - https://localhost:3000
           - https://auth.pinfluencer.io
           - https://app.pinfluencer.io
+        AllowHeaders:
+          - *
 
   PinfluencerFunction:
     Type: AWS::Serverless::Function
