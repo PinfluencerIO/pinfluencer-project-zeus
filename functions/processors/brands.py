@@ -36,7 +36,11 @@ class ProcessAuthenticatedGetBrand(ProcessInterface):
         print(self)
         self.filter.do_filter(event)
         # Todo: Replace the old functions hack with full implementation
-        return PinfluencerResponse(status_code=200, body=old_manual_functions.hack_brand_me(event))
+        me = old_manual_functions.hack_brand_me(event)
+        if len(me) == 0:
+            return PinfluencerResponse(status_code=404, body={})
+        else:
+            return PinfluencerResponse(status_code=200, body=me)
 
 
 class ProcessAuthenticatedPutBrand(ProcessInterface):

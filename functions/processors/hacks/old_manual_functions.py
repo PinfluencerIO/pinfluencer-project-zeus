@@ -70,7 +70,10 @@ def hack_brand_me(event):
     parameter = [{'name': 'id', 'value': {'stringValue': user}}]
     result = execute_query(sql, parameter)
     body = format_records(result['records'])
-    return build_json_from_db_records(body, cols)[0]
+    records = build_json_from_db_records(body, cols)
+    if len(records) == 0:
+        return {}
+    return records[0]
 
 
 def hack_product_me_by_id(event):
