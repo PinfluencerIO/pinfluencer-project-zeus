@@ -179,12 +179,11 @@ def hack_brand_me_create(event):
             cols = ' ,'.join(COLUMNS_FOR_BRAND_WITHOUT_IMAGE)
 
         sql = "INSERT INTO brand(" + cols + ", created) " \
-                                            "VALUES (:id, :name, :bio, :description, :website, :email, " \
+                                            "VALUES (:id, :name, :description, :website, :email, " \
               + with_image(body) + ":auth_user_id, :created)"
         sql_parameters = [
             {'name': 'id', 'value': {'stringValue': id_}},
             {'name': 'name', 'value': {'stringValue': body['name']}},
-            {'name': 'bio', 'value': {'stringValue': body['description']}},
             {'name': 'description', 'value': {'stringValue': body['description']}},
             {'name': 'website', 'value': {'stringValue': body['website']}},
             {'name': 'email', 'value': {'stringValue': email}},
@@ -194,6 +193,8 @@ def hack_brand_me_create(event):
 
         if has_image(body):
             sql_parameters.append({'name': 'image', 'value': {'stringValue': body['image']['filename']}})
+
+        print(f'sql: {sql} params:{sql_parameters}')
 
         query_results = execute_query(sql, sql_parameters)
         if query_results['numberOfRecordsUpdated'] == 1:

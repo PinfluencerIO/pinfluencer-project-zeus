@@ -19,9 +19,7 @@ CREATE TABLE `brand`
  `auth_user_id` varchar(64) DEFAULT NULL,
  `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, 
  PRIMARY KEY (`id`), 
- KEY `brand_id_index` (`id`) USING BTREE) 
-ENGINE=InnoDB DEFAULT
-CHARSET=utf-8
+ KEY `brand_id_index` (`id`) USING BTREE)
 ```
 
 ```sql
@@ -38,5 +36,4 @@ PRIMARY KEY (`id`),
 KEY `fk_brand_id` (`brand_id`), 
 KEY `product_id_index` (`id`) 
 USING BTREE, CONSTRAINT `fk_brand_id` FOREIGN KEY (`brand_id`) REFERENCES `brand` (`id`) ) 
-ENGINE=InnoDB DEFAULT CHARSET=utf-8
 ```
