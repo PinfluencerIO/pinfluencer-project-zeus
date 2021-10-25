@@ -2,7 +2,7 @@ from functions.data_access_layer.data_manager import DataManager
 from functions.data_access_layer.models.product_model import ProductModel
 
 
-class ProductRepository:
+class BrandRepository:
 
     __session_maker: DataManager
 
@@ -19,7 +19,4 @@ class ProductRepository:
         return self.__session_maker.session.add(data)
 
     def update(self, id: str, data: ProductModel) -> bool:
-        raise NotImplemented
-
-    def delete(self, id: str) -> bool:
         raise NotImplemented

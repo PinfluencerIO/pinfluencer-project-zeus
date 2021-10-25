@@ -1,26 +1,29 @@
 from sqlalchemy import create_engine
+from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 import os
-import boto3
+
 
 class DataManager:
     __session: Session
+    __engine: Engine
+
     def __init__(self):
-        rds_host = os.environ.get("RDS_HOST")
-        rds_port = os.environ.get("RDS_PORT")
-        rds_username = os.environ.get("RDS_USER")
-        temp_passwd = boto3.client('rds').generate_db_auth_token(
-            DBHostname=rds_host,
-            Port=rds_port,
-            DBUsername=rds_username
+        engine = create_engine(
+            'postgresql+pydataapi://',
+            connect_args={
+                'resource_arn': os.environ['DB_CLUSTER_ARN'],
+                'secret_arn': os.environ['DB_SECRET_ARN'],
+                'database': os.environ['DATABASE_NAME']
+            }
         )
-        rds_credentials = {'user': rds_username, 'passwd': temp_passwd}
-        conn_str = f"postgres://pinfluencer-2.cluster-czqff0jhbhz3.eu-west-2.rds.amazonaws.com:5432/pinfluencer-1"
-        kw = dict()
-        kw.update(rds_credentials)
-        engine = create_engine(conn_str, connect_args=kw)
-        Session = sessionmaker(bind=engine)
-        self.__session = Session()
+        self.__engine = engine
+        session = sessionmaker(bind=self.__engine)
+        self.__session = session()
+
+    @property
+    def engine(self):
+        return self.__engine
 
     @property
     def session(self):
