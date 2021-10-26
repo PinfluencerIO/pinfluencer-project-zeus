@@ -3,7 +3,8 @@ from functions.processors.brands import *
 from functions.processors.feed import ProcessPublicFeed
 from functions.processors.products import *
 
-from functions.web.filters import FilterChainImp, ValidBrandId, ValidProductId, AuthFilter
+from functions.web.filters import FilterChainImp, ValidBrandId, ValidProductId, AuthFilter, BrandPostPayload, \
+    BrandPayloadValidationError
 from functions.web.http_util import PinfluencerResponse
 from collections import OrderedDict
 
@@ -22,6 +23,9 @@ def lambda_handler(event, context):
     except InvalidId:
         print(f'InvalidId')
         return PinfluencerResponse.as_400_error().as_json()
+    except BrandPayloadValidationError:
+        print(f'BrandPayloadValidationError')
+        return PinfluencerResponse.as_400_error().as_json()
     except Exception as e:
         print_exception(e)
         return PinfluencerResponse.as_500_error().as_json()
@@ -39,7 +43,7 @@ routes = OrderedDict(
 
         # # authenticated brand endpoints
         'GET /brands/me': ProcessAuthenticatedGetBrand(FilterChainImp([(AuthFilter())])),
-        # 'POST /brands/me': ProcessAuthenticatedPostBrand(FilterChainImp([AuthFilter(), PayloadFilter(None)])),
+        'POST /brands/me': ProcessAuthenticatedPostBrand(FilterChainImp([AuthFilter(), BrandPostPayload()])),
         # 'PUT /brands/me': ProcessAuthenticatedPutBrand(FilterChainImp([AuthFilter(), PayloadFilter(None)])),
         #
         # # authenticated product endpoints

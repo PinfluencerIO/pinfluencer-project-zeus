@@ -1,7 +1,8 @@
 import abc
+import json
 import uuid
 
-import schema as schema
+from jsonschema import validate
 
 from functions import log_util
 from functions.processors.hacks.brand_helps import select_brand_by_id, select_brand_by_auth_user_id
@@ -17,6 +18,10 @@ class NotFoundById(Exception):
 
 
 class InvalidId(Exception):
+    pass
+
+
+class BrandPayloadValidationError(Exception):
     pass
 
 
@@ -141,3 +146,63 @@ class AuthFilter(FilterInterface):
         else:
             # Todo: this needs to be handled via an exception and remove filter.chain call
             print(f'event was missing the required keys to extract cognito:username')
+
+
+def get_brand_payload_schema():
+    schema = {
+        "type": "object",
+        "properties":
+            {
+                "name": {
+                    "type": "string",
+                    "pattern": "^.{1,120}$"
+                },
+                "description": {
+                    "type": "string",
+                    "pattern": "^.{1,500}$"
+                },
+                "website": {
+                    "type": "string",
+                    "pattern": "^(https?\:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})(\/[\w]*)*$"
+                },
+                "email": {
+                    "type": "string",
+                    "pattern": "^[a-zA-Z\._-]+[@]{1}[a-zA-Z\._-]+[\.]+[a-zA-Z]+$"
+                },
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "filename": {
+                            "type": "string",
+                            "pattern": "^.{1,120}$"
+                        },
+                        "bytes": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+        "required": ["name", "description", "website", "email", "image"]
+    }
+    return schema
+
+
+class BrandPostPayload(FilterInterface):
+    def do_filter(self, event: dict):
+        body_ = event["body"]
+        payload = json.loads(body_)
+        print(f'payload {payload}')
+        try:
+            validate(instance=payload, schema=(get_brand_payload_schema()))
+            if len(payload['email']) > 120:
+                print(f'email is longer than column size, clipping ')
+                payload['email'] = payload['email'][:120]
+            if len(payload['website']) > 120:
+                print(f'website is longer than column size, clipping ')
+                payload['website'] = payload['website'][:120]
+        except Exception as e:
+            print(f'Validating brand payload failed {e}')
+            raise BrandPayloadValidationError()
+
+        print(f'Validate brand create payload {body_}')
+        pass

@@ -44,23 +44,21 @@ class ProcessAuthenticatedGetBrand(ProcessInterface):
         return PinfluencerResponse(body=event["auth_brand"])
 
 
-# class ProcessAuthenticatedPutBrand(ProcessInterface):
-#     def __init__(self, filter_chain: FilterChain):
-#         self.filter = filter_chain
-#
-#     def do_process(self, event: dict) -> PinfluencerResponse:
-#         print(self)
-#         self.filter.do_filter(event)
-#         # Todo: Replace the old functions hack with full implementation
-#         return old_manual_functions.hack_brand_me_update(event)
-#
-#
-# class ProcessAuthenticatedPostBrand(ProcessInterface):
-#     def __init__(self, filter_chain: FilterChain):
-#         self.filter = filter_chain
-#
-#     def do_process(self, event: dict) -> PinfluencerResponse:
-#         print(self)
-#         self.filter.do_filter(event)
-#         # Todo: Replace the old functions hack with full implementation
-#         return old_manual_functions.hack_brand_me_create(event)
+class ProcessAuthenticatedPutBrand(ProcessInterface):
+    def __init__(self, filter_chain: FilterChain):
+        self.filter = filter_chain
+
+    def do_process(self, event: dict) -> PinfluencerResponse:
+        self.filter.do_chain(event)
+        print(f'found auth brand {event["auth_brand"]}')
+        return PinfluencerResponse.as_500_error()
+
+
+class ProcessAuthenticatedPostBrand(ProcessInterface):
+    def __init__(self, filter_chain: FilterChain):
+        self.filter = filter_chain
+
+    def do_process(self, event: dict) -> PinfluencerResponse:
+        self.filter.do_chain(event)
+        print(f'found auth brand {event["auth_brand"]}')
+        return PinfluencerResponse(body={"M": "GOOD"})
