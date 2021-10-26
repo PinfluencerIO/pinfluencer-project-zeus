@@ -66,7 +66,7 @@ def get_user(event):
     return event['requestContext']['authorizer']['jwt']['claims']['cognito:username']
 
 
-def hack_brand_me_update(event):
+def update_authenticated_brand(event):
     body = json.loads(event['body'])
     email = get_email(body, event)
     brand = event['auth_brand']
@@ -96,7 +96,7 @@ def hack_brand_me_update(event):
         return PinfluencerResponse.as_500_error('Failed update brand')
 
 
-def hack_brand_me_create(event):
+def create_authenticated_brand(event):
     body = json.loads(event['body'])
     id_ = str(uuid.uuid4())
     email = get_email(body, event)
@@ -123,7 +123,7 @@ def hack_brand_me_create(event):
         return PinfluencerResponse.as_500_error('Failed to create brand')
 
 
-def hack_product_me(event):
+def get_authenticated_products(event):
     brand = event['auth_brand']
     sql = "SELECT " + ', '.join(COLUMNS_FOR_PRODUCT) + " FROM product WHERE brand_id=:id"
     parameters = [{'name': 'id', 'value': {'stringValue': brand['id']}}]
@@ -132,7 +132,7 @@ def hack_product_me(event):
     return PinfluencerResponse(body=build_json_for_product(records))
 
 
-def hack_product_me_create(event):
+def create_authenticated_product(event):
     body = json.loads(event['body'])
     brand = event['auth_brand']
     sql = " \
@@ -163,7 +163,7 @@ def hack_product_me_create(event):
         return PinfluencerResponse.as_500_error('Failed to create product')
 
 
-def hack_product_me_update(event):
+def update_authenticated_product(event):
     body = json.loads(event['body'])
     brand = event['auth_brand']
     product = event['product']
@@ -216,7 +216,7 @@ def get_email(body, event):
     return email
 
 
-def delete_product(event):
+def delete_authenticated_product(event):
     results = execute_query("DELETE FROM product WHERE id=:id",
                             [{'name': 'id', 'value': {'stringValue': event['product']['id']}}])
     if results['numberOfRecordsUpdated'] == 1:

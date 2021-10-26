@@ -40,7 +40,7 @@ class ProcessAuthenticatedGetProduct(ProcessInterface):
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         self.filter.do_chain(event)
-        return old_manual_functions.hack_product_me(event)
+        return old_manual_functions.get_authenticated_products(event)
 
 
 class ProcessAuthenticatedPostProduct(ProcessInterface):
@@ -50,7 +50,7 @@ class ProcessAuthenticatedPostProduct(ProcessInterface):
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
         self.filter.do_chain(event)
-        return old_manual_functions.hack_product_me_create(event)
+        return old_manual_functions.create_authenticated_product(event)
 
 
 class ProcessAuthenticatedPutProduct(ProcessInterface):
@@ -60,7 +60,7 @@ class ProcessAuthenticatedPutProduct(ProcessInterface):
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
         self.filter.do_chain(event)
-        return old_manual_functions.hack_product_me_update(event)
+        return old_manual_functions.update_authenticated_product(event)
 
 
 class ProcessAuthenticatedDeleteProduct(ProcessInterface):
@@ -70,4 +70,4 @@ class ProcessAuthenticatedDeleteProduct(ProcessInterface):
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
         self.filter.do_chain(event)
-        return old_manual_functions.delete_product(event)
+        return old_manual_functions.delete_authenticated_product(event)

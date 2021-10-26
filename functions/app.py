@@ -5,7 +5,7 @@ from functions.processors.products import *
 
 from functions.web.filters import FilterChainImp, ValidBrandId, ValidProductId, AuthFilter, \
     BrandPostPayloadValidation, PayloadValidationError, NotFoundByAuthUser, OneTimeCreateBrandFilter, \
-    BrandAlreadyCreatedForAuthUser, ProductPostPayloadValidation, OwnerOnly, OwnershipError
+    BrandAlreadyCreatedForAuthUser, ProductPostPayloadValidation, OwnerOnly, OwnershipError, NotFoundById, InvalidId
 from functions.web.http_util import PinfluencerResponse
 from collections import OrderedDict
 

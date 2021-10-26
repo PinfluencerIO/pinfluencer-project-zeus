@@ -50,7 +50,7 @@ class ProcessAuthenticatedPutBrand(ProcessInterface):
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         self.filter.do_chain(event)
-        return old_manual_functions.hack_brand_me_update(event)
+        return old_manual_functions.update_authenticated_brand(event)
 
 
 class ProcessAuthenticatedPostBrand(ProcessInterface):
@@ -59,4 +59,4 @@ class ProcessAuthenticatedPostBrand(ProcessInterface):
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         self.filter.do_chain(event)
-        return old_manual_functions.hack_brand_me_create(event)
+        return old_manual_functions.create_authenticated_brand(event)
