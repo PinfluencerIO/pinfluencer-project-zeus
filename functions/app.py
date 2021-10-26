@@ -5,7 +5,7 @@ from functions.processors.products import *
 
 from functions.web.filters import FilterChainImp, ValidBrandId, ValidProductId, AuthFilter, BrandPostPayloadValidation, \
     PayloadValidationError, NotFoundByAuthUser, OneTimeCreateBrandFilter, BrandAlreadyCreatedForAuthUser, \
-    ProductPostPayloadValidation
+    ProductPostPayloadValidation, OwnerOnly, OwnershipError
 from functions.web.http_util import PinfluencerResponse
 from collections import OrderedDict
 
@@ -24,6 +24,8 @@ def lambda_handler(event, context):
     except NotFoundByAuthUser:
         print(f'NotFoundByAuthUser')
         return PinfluencerResponse.as_401_error().as_json()
+    except OwnershipError as ownership:
+        return PinfluencerResponse.as_401_error(str(ownership)).as_json()
     except InvalidId:
         print(f'InvalidId')
         return PinfluencerResponse.as_400_error().as_json()
@@ -56,9 +58,10 @@ routes = OrderedDict(
         #
         # # authenticated product endpoints
         'GET /products/me': ProcessAuthenticatedGetProduct(FilterChainImp([AuthFilter()])),
-        # 'GET /products/me/{product_id}': ProcessAuthenticatedGetProductById(
-        #     FilterChainImp([AuthFilter(), ValidId('product_id')])),
-        'POST /products/me': ProcessAuthenticatedPostProduct(FilterChainImp([AuthFilter(), ProductPostPayloadValidation()])),
+        'GET /products/me/{product_id}': ProcessAuthenticatedGetProductById(
+            FilterChainImp([AuthFilter(),ValidProductId(), OwnerOnly('product')])),
+        'POST /products/me': ProcessAuthenticatedPostProduct(
+            FilterChainImp([AuthFilter(), ValidProductId(), ProductPostPayloadValidation()])),
         # 'PUT /products/me/{product_id}': ProcessAuthenticatedPutProduct(
         #     FilterChainImp([AuthFilter(), ValidId('product_id'), PayloadFilter(None)])),
         # 'DELETE /products/me/{product_id}': ProcessAuthenticatedDeleteProduct(

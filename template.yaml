@@ -151,14 +151,14 @@ Resources:
             Path: /products/me
             Method: get
             ApiId: !Ref PinfluencerHttpApi
-#        ReadProductById:
-#          Type: HttpApi
-#          Properties:
-#            Auth:
-#              Authorizer: UserAuth
-#            Path: /products/me/{product_id}
-#            Method: get
-#            ApiId: !Ref PinfluencerHttpApi
+        ReadProductById:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /products/me/{product_id}
+            Method: get
+            ApiId: !Ref PinfluencerHttpApi
 #        UpdateProductById:
 #          Type: HttpApi
 #          Properties:

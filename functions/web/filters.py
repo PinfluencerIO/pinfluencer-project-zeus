@@ -33,6 +33,10 @@ class BrandAlreadyCreatedForAuthUser(Exception):
     pass
 
 
+class OwnershipError(Exception):
+    pass
+
+
 class FilterChain:
     @abc.abstractmethod
     def do_chain(self, event):
@@ -272,3 +276,16 @@ class BrandPostPayloadValidation(FilterInterface):
 
         print(f'Validate brand create payload {body_}')
         pass
+
+
+class OwnerOnly(FilterInterface):
+    def __init__(self, resource):
+        self.resource = resource
+
+    def do_filter(self, event: dict):
+        print(f'product{event[self.resource]}')
+        print(f'auth brand{event["auth_brand"]}')
+        if event["product"]['brand']['id'] == event["auth_brand"]['id']:
+            pass
+        else:
+            raise OwnershipError(f'product {event["product"]["id"]} is not owned by brand {event["auth_brand"]["id"]}')

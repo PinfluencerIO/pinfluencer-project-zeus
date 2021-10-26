@@ -27,8 +27,8 @@ class PinfluencerResponse:
         return PinfluencerResponse(500, {"message": message})
 
     @staticmethod
-    def as_401_error():
-        return PinfluencerResponse(401, {"message": 'Not authorised'})
+    def as_401_error(message: str = 'Not authorised'):
+        return PinfluencerResponse(401, {"message": message})
 
     @staticmethod
     def as_404_error():
