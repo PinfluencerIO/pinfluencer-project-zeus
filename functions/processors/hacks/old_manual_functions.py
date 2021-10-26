@@ -7,7 +7,9 @@ import boto3
 from functions.processors.hacks import brand_helps, product_helps
 from functions.processors.hacks.brand_helps import select_brand_by_auth_user_id
 from functions.processors.hacks.old_manual_db import execute_query, \
-    COLUMNS_FOR_BRAND, COLUMNS_FOR_PRODUCT, PRODUCT_TEMPLATE, build_json_for_brand, build_json_for_product
+    COLUMNS_FOR_BRAND, COLUMNS_FOR_PRODUCT, PRODUCT_TEMPLATE, build_json_for_brand, build_json_for_product, \
+    format_records
+from functions.processors.hacks.product_helps import select_product_by_id
 from functions.web.http_util import PinfluencerResponse
 
 s3 = boto3.client('s3')
@@ -215,7 +217,7 @@ def hack_brand_me_create(event):
     email = get_email(body, event)
     user = get_user(event)
     sql = "INSERT INTO brand(" + " ,".join(COLUMNS_FOR_BRAND) + ") " \
-        "VALUES (:id, :name, :description, :website, :email, :image, :auth_user_id, :created)"
+                                                                "VALUES (:id, :name, :description, :website, :email, :image, :auth_user_id, :created)"
 
     sql_parameters = [
         {'name': 'id', 'value': {'stringValue': id_}},
@@ -234,6 +236,46 @@ def hack_brand_me_create(event):
         return PinfluencerResponse(body=new_brand)
     else:
         return PinfluencerResponse.as_500_error('Failed to create brand')
+
+
+def hack_product_me(event):
+    brand = event['auth_brand']
+    sql = "SELECT " + ', '.join(COLUMNS_FOR_PRODUCT) + " FROM product WHERE brand_id=:id"
+    parameters = [{'name': 'id', 'value': {'stringValue': brand['id']}}]
+    query_results = execute_query(sql, parameters)
+    records = format_records(query_results['records'])
+    return PinfluencerResponse(body=build_json_for_product(records))
+
+
+def hack_product_me_create(event):
+    body = json.loads(event['body'])
+    brand = event['auth_brand']
+    sql = " \
+        INSERT INTO product \
+        (" + ",".join(COLUMNS_FOR_PRODUCT)+") \
+        VALUES \
+        (:id, :name, :description, :requirements, :image, :brand_id, :brand_name, :created)"
+
+    id_ = str(uuid.uuid4())
+
+    sql_parameters = [
+        {'name': 'id', 'value': {'stringValue': id_}},
+        {'name': 'name', 'value': {'stringValue': body['name']}},
+        {'name': 'description', 'value': {'stringValue': body['description']}},
+        {'name': 'brand_id', 'value': {'stringValue': brand['id']}},
+        {'name': 'brand_name', 'value': {'stringValue': brand['name']}},
+        {'name': 'requirements', 'value': {'stringValue': body['requirements']}},
+        {'name': 'image', 'value': {'stringValue': body['image']['filename']}},
+        {'name': 'created', 'value': {'stringValue': str(datetime.datetime.utcnow())}},
+    ]
+
+    query_results = execute_query(sql, sql_parameters)
+    if query_results['numberOfRecordsUpdated'] == 1:
+        upload_image_to_s3(brand['id'], id_, body['image']['filename'], body['image']['bytes'])
+        new_product = select_product_by_id(id_)
+        return PinfluencerResponse(body=new_product)
+    else:
+        return PinfluencerResponse.as_500_error('Failed to create product')
 
 
 #

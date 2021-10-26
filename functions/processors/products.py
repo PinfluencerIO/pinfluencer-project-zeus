@@ -24,6 +24,7 @@ class ProcessPublicGetProductBy(ProcessInterface):
         self.filter.do_chain(event)
         return old_manual_functions.get_product_by_id(event)
 
+
 #
 # class ProcessAuthenticatedGetProductById(ProcessInterface):
 #     def __init__(self, filter_chain: FilterChain):
@@ -36,29 +37,25 @@ class ProcessPublicGetProductBy(ProcessInterface):
 #         # Todo: Replace the old functions hack with full implementation
 #         return old_manual_functions.hack_product_me_by_id(event)
 #
-#
-# class ProcessAuthenticatedGetProduct(ProcessInterface):
-#     def __init__(self, filter_chain: FilterChain):
-#         self.filter = filter_chain
-#
-#     def do_process(self, event: dict) -> PinfluencerResponse:
-#         print(self)
-#         self.filter.do_filter(event)
-#         # return PinfluencerResponse(status_code=200, body={"message": "ProcessAuthenticatedGetProduct"})
-#         # Todo: Replace the old functions hack with full implementation
-#         return old_manual_functions.hack_product_me(event)
-#
-#
-# class ProcessAuthenticatedPostProduct(ProcessInterface):
-#     def __init__(self, filter_chain: FilterChain):
-#         self.filter = filter_chain
-#
-#     def do_process(self, event: dict) -> PinfluencerResponse:
-#         print(self)
-#         self.filter.do_filter(event)
-#         return old_manual_functions.hack_product_me_create(event)
-#
-#
+
+class ProcessAuthenticatedGetProduct(ProcessInterface):
+    def __init__(self, filter_chain: FilterChain):
+        self.filter = filter_chain
+
+    def do_process(self, event: dict) -> PinfluencerResponse:
+        self.filter.do_chain(event)
+        return old_manual_functions.hack_product_me(event)
+
+class ProcessAuthenticatedPostProduct(ProcessInterface):
+    def __init__(self, filter_chain: FilterChain):
+        self.filter = filter_chain
+
+    def do_process(self, event: dict) -> PinfluencerResponse:
+        print(self)
+        self.filter.do_chain(event)
+        return old_manual_functions.hack_product_me_create(event)
+
+
 # class ProcessAuthenticatedPutProduct(ProcessInterface):
 #     def __init__(self, filter_chain: FilterChain):
 #         self.filter = filter_chain

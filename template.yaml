@@ -135,22 +135,22 @@ Resources:
             Path: /brands/me
             Method: put
             ApiId: !Ref PinfluencerHttpApi
-#        CreateProduct:
-#          Type: HttpApi
-#          Properties:
-#            Auth:
-#              Authorizer: UserAuth
-#            Path: /products/me
-#            Method: post
-#            ApiId: !Ref PinfluencerHttpApi
-#        ReadAllProduct:
-#          Type: HttpApi
-#          Properties:
-#            Auth:
-#              Authorizer: UserAuth
-#            Path: /products/me
-#            Method: get
-#            ApiId: !Ref PinfluencerHttpApi
+        CreateProduct:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /products/me
+            Method: post
+            ApiId: !Ref PinfluencerHttpApi
+        ReadAllProduct:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /products/me
+            Method: get
+            ApiId: !Ref PinfluencerHttpApi
 #        ReadProductById:
 #          Type: HttpApi
 #          Properties:

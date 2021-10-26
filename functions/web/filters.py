@@ -25,7 +25,7 @@ class InvalidId(Exception):
     pass
 
 
-class BrandPayloadValidationError(Exception):
+class PayloadValidationError(Exception):
     pass
 
 
@@ -164,6 +164,41 @@ class AuthFilter(FilterInterface):
             print(f'event was missing the required keys to extract cognito:username')
 
 
+def get_product_payload_schema():
+    schema = {
+        "type": "object",
+        "properties":
+            {
+                "name": {
+                    "type": "string",
+                    "pattern": "^.{1,120}$"
+                },
+                "description": {
+                    "type": "string",
+                    "pattern": "^.{1,500}$"
+                },
+                "requirements": {
+                    "type": "string",
+                    "pattern": "^.{1,500}$"
+                },
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "filename": {
+                            "type": "string",
+                            "pattern": "^.{1,120}$"
+                        },
+                        "bytes": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+        "required": ["name", "description", "requirements", "image"]
+    }
+    return schema
+
+
 def get_brand_payload_schema():
     schema = {
         "type": "object",
@@ -203,6 +238,21 @@ def get_brand_payload_schema():
     return schema
 
 
+class ProductPostPayloadValidation(FilterInterface):
+    def do_filter(self, event: dict):
+        body_ = event["body"]
+        payload = json.loads(body_)
+        print(f'payload {payload}')
+        try:
+            validate(instance=payload, schema=(get_product_payload_schema()))
+        except Exception as e:
+            print(f'Validating product payload failed {e}')
+            raise PayloadValidationError(f'Validating product payload failed {e}')
+
+        print(f'Validate brand create payload {body_}')
+        pass
+
+
 class BrandPostPayloadValidation(FilterInterface):
     def do_filter(self, event: dict):
         body_ = event["body"]
@@ -218,7 +268,7 @@ class BrandPostPayloadValidation(FilterInterface):
                 payload['website'] = payload['website'][:120]
         except Exception as e:
             print(f'Validating brand payload failed {e}')
-            raise BrandPayloadValidationError()
+            raise PayloadValidationError()
 
         print(f'Validate brand create payload {body_}')
         pass
