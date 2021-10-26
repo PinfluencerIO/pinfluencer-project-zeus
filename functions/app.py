@@ -3,7 +3,7 @@ from functions.processors.brands import *
 from functions.processors.feed import ProcessPublicFeed
 from functions.processors.products import *
 
-from functions.web.filters import FilterChainImp, ValidBrandId, ValidProductId
+from functions.web.filters import FilterChainImp, ValidBrandId, ValidProductId, AuthFilter
 from functions.web.http_util import PinfluencerResponse
 from collections import OrderedDict
 
@@ -36,9 +36,9 @@ routes = OrderedDict(
         'GET /brands/{brand_id}/products': ProcessPublicAllProductsForBrand(FilterChainImp([ValidBrandId()])),
         'GET /products': ProcessPublicProducts(),
         'GET /products/{product_id}': ProcessPublicGetProductBy(FilterChainImp([ValidProductId()])),
-        #
+
         # # authenticated brand endpoints
-        # 'GET /brands/me': ProcessAuthenticatedGetBrand(FilterChainImp([(AuthFilter())])),
+        'GET /brands/me': ProcessAuthenticatedGetBrand(FilterChainImp([(AuthFilter())])),
         # 'POST /brands/me': ProcessAuthenticatedPostBrand(FilterChainImp([AuthFilter(), PayloadFilter(None)])),
         # 'PUT /brands/me': ProcessAuthenticatedPutBrand(FilterChainImp([AuthFilter(), PayloadFilter(None)])),
         #

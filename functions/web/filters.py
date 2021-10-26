@@ -4,7 +4,7 @@ import uuid
 import schema as schema
 
 from functions import log_util
-from functions.processors.hacks.brand_helps import select_brand_by_id
+from functions.processors.hacks.brand_helps import select_brand_by_id, select_brand_by_auth_user_id
 from functions.processors.hacks.product_helps import select_product_by_id
 
 
@@ -113,23 +113,31 @@ def valid_uuid(id_):
 
     return False
 
-# class AuthFilter(FilterInterface):
-#     """
-#     Todo: Implement this filter
-#     Get cognito:username from authorizer and puts it in top level event dictionary.
-#     """
-#
-#     def do_filter(self, event: dict, filter_chain: FilterChain):
-#         print('AuthFilter')
-#         if 'authorizer' in event['requestContext'] \
-#                 and 'authorizer' in event['requestContext'] \
-#                 and 'jwt' in event['requestContext']['authorizer'] \
-#                 and 'claims' in event['requestContext']['authorizer']['jwt'] \
-#                 and 'cognito:username' in event['requestContext']['authorizer']['jwt']['claims']:
-#             id_ = event['requestContext']['authorizer']['jwt']['claims']['cognito:username']
-#             print(f'AuthFilter has found the require cognito:username key with {id_}')
-#             filter_chain.do_filter(event)
-#         else:
-#             # Todo: this needs to be handled via an exception and remove filter.chain call
-#             print(f'event was missing the required keys to extract cognito:username')
-#             filter_chain.do_filter(event)
+
+class AuthFilter(FilterInterface):
+    """
+    Todo: Implement this filter
+    Get cognito:username from authorizer and puts it in top level event dictionary.
+    """
+
+    def do_filter(self, event: dict):
+        print('AuthFilter')
+        if 'authorizer' in event['requestContext'] \
+                and 'authorizer' in event['requestContext'] \
+                and 'jwt' in event['requestContext']['authorizer'] \
+                and 'claims' in event['requestContext']['authorizer']['jwt'] \
+                and 'cognito:username' in event['requestContext']['authorizer']['jwt']['claims']:
+            auth_user_id = event['requestContext']['authorizer']['jwt']['claims']['cognito:username']
+            print(f'AuthFilter has found the require cognito:username key with {auth_user_id}')
+            try:
+                list_of_brands = select_brand_by_auth_user_id(auth_user_id)
+                if len(list_of_brands) == 0:
+                    raise NotFoundById(f'Failed to find brand by auth_user_id {auth_user_id}')
+                else:
+                    event['auth_brand'] = list_of_brands[0]
+            except Exception as e:
+                print(f'Failed db call get brand by auth_user_id {auth_user_id}')
+                raise e
+        else:
+            # Todo: this needs to be handled via an exception and remove filter.chain call
+            print(f'event was missing the required keys to extract cognito:username')

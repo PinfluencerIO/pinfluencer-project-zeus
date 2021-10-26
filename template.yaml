@@ -111,23 +111,22 @@ Resources:
             Path: /products/{product_id}
             Method: get
             ApiId: !Ref PinfluencerHttpApi
-##        AUTHENTICATED Endpoints
-#        CreateBrand:
-#          Type: HttpApi
-#          Properties:
-#            Auth:
-#              Authorizer: UserAuth
-#            Path: /brands/me
-#            Method: post
-#            ApiId: !Ref PinfluencerHttpApi
-#        GetBrand:
-#          Type: HttpApi
-#          Properties:
-#            Auth:
-#              Authorizer: UserAuth
-#            Path: /brands/me
-#            Method: get
-#            ApiId: !Ref PinfluencerHttpApi
+        CreateBrand:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /brands/me
+            Method: post
+            ApiId: !Ref PinfluencerHttpApi
+        GetBrand:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /brands/me
+            Method: get
+            ApiId: !Ref PinfluencerHttpApi
 #        UpdateBrand:
 #          Type: HttpApi
 #          Properties:
