@@ -23,8 +23,8 @@ class PinfluencerResponse:
         }
 
     @staticmethod
-    def as_500_error():
-        return PinfluencerResponse(500, {"message": "Unexpected server error. Please try later."})
+    def as_500_error(message="Unexpected server error. Please try later."):
+        return PinfluencerResponse(500, {"message": message})
 
     @staticmethod
     def as_401_error():
@@ -35,5 +35,5 @@ class PinfluencerResponse:
         return PinfluencerResponse(404, {"message": 'Not found'})
 
     @staticmethod
-    def as_400_error():
-        return PinfluencerResponse(400, {"message": 'Client error, please check request.'})
+    def as_400_error(message: str = 'Client error, please check request.'):
+        return PinfluencerResponse(400, {"message": message})

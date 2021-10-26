@@ -5,7 +5,8 @@ import uuid
 import boto3
 
 from functions.processors.hacks import brand_helps, product_helps
-from functions.processors.hacks.old_manual_db import execute_query, format_records, find_brand_by_auth_user, \
+from functions.processors.hacks.brand_helps import select_brand_by_auth_user_id
+from functions.processors.hacks.old_manual_db import execute_query, \
     COLUMNS_FOR_BRAND, COLUMNS_FOR_PRODUCT, PRODUCT_TEMPLATE, build_json_for_brand, build_json_for_product
 from functions.web.http_util import PinfluencerResponse
 
@@ -57,6 +58,7 @@ def get_all_products(event):
 
 def get_product_by_id(event) -> PinfluencerResponse:
     return PinfluencerResponse(body=event['product'])
+
 
 #
 # def hack_brand_me(event):
@@ -171,42 +173,39 @@ def get_product_by_id(event) -> PinfluencerResponse:
 #         return hack_get_product_by_id(event)
 #     else:
 #         return PinfluencerResponse(status_code=400, body={'message': 'failed to update product'})
-#
-#
-# def hack_brand_me_create(event):
-#     result, user = find_brand_by_auth_user(event)
-#     if len(result['records']) >= 1:
-#         return PinfluencerResponse(status_code=400, body={'message': 'this user is already associated with a brand',
-#                                                           'id': format_records(result['records'])[0][0]})
-#     else:
-#         id_ = str(uuid.uuid4())
-#         body = json.loads(event['body'])
-#
-#         email = get_email(body, event)
-#
-#         sql = "INSERT INTO brand(" + " ,".join(COLUMNS_FOR_BRAND) + ", created) " \
-#                                                                     "VALUES (:id, :name, :description, :website, :email, :image, :auth_user_id, :created)"
-#
-#         sql_parameters = [
-#             {'name': 'id', 'value': {'stringValue': id_}},
-#             {'name': 'name', 'value': {'stringValue': body['name']}},
-#             {'name': 'description', 'value': {'stringValue': body['description']}},
-#             {'name': 'website', 'value': {'stringValue': body['website']}},
-#             {'name': 'email', 'value': {'stringValue': email}},
-#             {'name': 'image', 'value': {'stringValue': body['image']['filename']}},
-#             {'name': 'auth_user_id', 'value': {'stringValue': user}},
-#             {'name': 'created', 'value': {'stringValue': str(datetime.datetime.utcnow())}},
-#         ]
-#         print(f'sql: {sql} params:{sql_parameters}')
-#
-#         query_results = execute_query(sql, sql_parameters)
-#         if query_results['numberOfRecordsUpdated'] == 1:
-#             if has_image(body):
-#                 upload_image_to_s3(id_, None, body['image']['filename'], body['image']['bytes'])
-#             return hack_brand_me(event)
-#         else:
-#             return PinfluencerResponse(status_code=400, body={'message': 'failed to create brand'})
-#
+
+
+def get_user(event):
+    return event['requestContext']['authorizer']['jwt']['claims']['cognito:username']
+
+
+def hack_brand_me_create(event):
+    body = json.loads(event['body'])
+    id_ = str(uuid.uuid4())
+    email = get_email(body, event)
+    user = get_user(event)
+    sql = "INSERT INTO brand(" + " ,".join(COLUMNS_FOR_BRAND) + ") " \
+        "VALUES (:id, :name, :description, :website, :email, :image, :auth_user_id, :created)"
+
+    sql_parameters = [
+        {'name': 'id', 'value': {'stringValue': id_}},
+        {'name': 'name', 'value': {'stringValue': body['name']}},
+        {'name': 'description', 'value': {'stringValue': body['description']}},
+        {'name': 'website', 'value': {'stringValue': body['website']}},
+        {'name': 'email', 'value': {'stringValue': email}},
+        {'name': 'image', 'value': {'stringValue': body['image']['filename']}},
+        {'name': 'auth_user_id', 'value': {'stringValue': user}},
+        {'name': 'created', 'value': {'stringValue': str(datetime.datetime.utcnow())}},
+    ]
+    query_results = execute_query(sql, sql_parameters)
+    if query_results['numberOfRecordsUpdated'] == 1:
+        upload_image_to_s3(id_, None, body['image']['filename'], body['image']['bytes'])
+        new_brand = select_brand_by_auth_user_id(user)
+        return PinfluencerResponse(body=new_brand)
+    else:
+        return PinfluencerResponse.as_500_error('Failed to create brand')
+
+
 #
 # def hack_product_me_create(event):
 #     brand = hack_brand_me(event)
@@ -246,22 +245,22 @@ def get_product_by_id(event) -> PinfluencerResponse:
 #         return PinfluencerResponse(status_code=201, body={"id": f"{id_}"})
 #     else:
 #         return PinfluencerResponse(status_code=400, body={'message': 'failed to create product'})
-#
-#
-# # Todo: When implementing this again in OO, use SQS so failures can be mitigated
-# def upload_image_to_s3(brand_id, product_id_, filename_, bytes_):
-#     print(f'brand{brand_id}, product{product_id_}, fn{filename_}')
-#     image = base64.b64decode(bytes_)
-#     if product_id_ is None:
-#         key = f'{brand_id}/{filename_}'
-#     else:
-#         key = f'{brand_id}/{product_id_}/{filename_}'
-#     s3.put_object(Bucket='pinfluencer-product-images',
-#                   Key=key, Body=image,
-#                   ContentType=f'image/{filename_[-3:]}',
-#                   Tagging='public=yes')
-#
-#
+
+
+# Todo: When implementing this again in OO, use SQS so failures can be mitigated
+def upload_image_to_s3(brand_id, product_id_, filename_, bytes_):
+    print(f'brand{brand_id}, product{product_id_}, fn{filename_}')
+    image = base64.b64decode(bytes_)
+    if product_id_ is None:
+        key = f'{brand_id}/{filename_}'
+    else:
+        key = f'{brand_id}/{product_id_}/{filename_}'
+    s3.put_object(Bucket='pinfluencer-product-images',
+                  Key=key, Body=image,
+                  ContentType=f'image/{filename_[-3:]}',
+                  Tagging='public=yes')
+
+
 # def with_image(body):
 #     if has_image(body):
 #         return ":image, "
@@ -271,17 +270,16 @@ def get_product_by_id(event) -> PinfluencerResponse:
 #
 # def has_image(body):
 #     return 'image' in body and 'filename' in body['image']
-#
-#
-# def get_email(body, event):
-#     if ('email' in event['requestContext']['authorizer']['jwt']['claims'] and
-#             event['requestContext']['authorizer']['jwt']['claims']['email'] is not None):
-#         email = event['requestContext']['authorizer']['jwt']['claims']['email']
-#     else:
-#         email = body['email']
-#     return email
-#
-#
+
+
+def get_email(body, event):
+    if ('email' in event['requestContext']['authorizer']['jwt']['claims'] and
+            event['requestContext']['authorizer']['jwt']['claims']['email'] is not None):
+        email = event['requestContext']['authorizer']['jwt']['claims']['email']
+    else:
+        email = body['email']
+    return email
+
 # def hack_product_me_delete(event):
 #     brand = hack_brand_me(event)
 #     if brand.status_code == 400:

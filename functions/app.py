@@ -3,8 +3,8 @@ from functions.processors.brands import *
 from functions.processors.feed import ProcessPublicFeed
 from functions.processors.products import *
 
-from functions.web.filters import FilterChainImp, ValidBrandId, ValidProductId, AuthFilter, BrandPostPayload, \
-    BrandPayloadValidationError
+from functions.web.filters import FilterChainImp, ValidBrandId, ValidProductId, AuthFilter, BrandPostPayloadValidation, \
+    BrandPayloadValidationError, NotFoundByAuthUser, OneTimeCreateBrandFilter, BrandAlreadyCreatedForAuthUser
 from functions.web.http_util import PinfluencerResponse
 from collections import OrderedDict
 
@@ -20,12 +20,18 @@ def lambda_handler(event, context):
     except NotFoundById:
         print(f'NotFoundById')
         return PinfluencerResponse.as_404_error().as_json()
+    except NotFoundByAuthUser:
+        print(f'NotFoundByAuthUser')
+        return PinfluencerResponse.as_401_error().as_json()
     except InvalidId:
         print(f'InvalidId')
         return PinfluencerResponse.as_400_error().as_json()
     except BrandPayloadValidationError:
         print(f'BrandPayloadValidationError')
         return PinfluencerResponse.as_400_error().as_json()
+    except BrandAlreadyCreatedForAuthUser:
+        print(f'BrandAlreadyCreatedForAuthUser')
+        return PinfluencerResponse.as_400_error('There is already a brand associated with this auth user').as_json()
     except Exception as e:
         print_exception(e)
         return PinfluencerResponse.as_500_error().as_json()
@@ -43,7 +49,8 @@ routes = OrderedDict(
 
         # # authenticated brand endpoints
         'GET /brands/me': ProcessAuthenticatedGetBrand(FilterChainImp([(AuthFilter())])),
-        'POST /brands/me': ProcessAuthenticatedPostBrand(FilterChainImp([AuthFilter(), BrandPostPayload()])),
+        'POST /brands/me': ProcessAuthenticatedPostBrand(
+            FilterChainImp([OneTimeCreateBrandFilter(), BrandPostPayloadValidation()])),
         # 'PUT /brands/me': ProcessAuthenticatedPutBrand(FilterChainImp([AuthFilter(), PayloadFilter(None)])),
         #
         # # authenticated product endpoints

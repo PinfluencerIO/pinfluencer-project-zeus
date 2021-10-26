@@ -17,11 +17,19 @@ class NotFoundById(Exception):
     pass
 
 
+class NotFoundByAuthUser(Exception):
+    pass
+
+
 class InvalidId(Exception):
     pass
 
 
 class BrandPayloadValidationError(Exception):
+    pass
+
+
+class BrandAlreadyCreatedForAuthUser(Exception):
     pass
 
 
@@ -119,6 +127,17 @@ def valid_uuid(id_):
     return False
 
 
+class OneTimeCreateBrandFilter(FilterInterface):
+    def do_filter(self, event: dict):
+        try:
+            AuthFilter().do_filter(event)
+        except NotFoundByAuthUser:
+            print(f'No brand associated auth user id; continue')
+            return
+
+        raise BrandAlreadyCreatedForAuthUser(f'brand already associated with auth user')
+
+
 class AuthFilter(FilterInterface):
     """
     Todo: Implement this filter
@@ -133,16 +152,13 @@ class AuthFilter(FilterInterface):
                 and 'claims' in event['requestContext']['authorizer']['jwt'] \
                 and 'cognito:username' in event['requestContext']['authorizer']['jwt']['claims']:
             auth_user_id = event['requestContext']['authorizer']['jwt']['claims']['cognito:username']
+
             print(f'AuthFilter has found the require cognito:username key with {auth_user_id}')
-            try:
-                list_of_brands = select_brand_by_auth_user_id(auth_user_id)
-                if len(list_of_brands) == 0:
-                    raise NotFoundById(f'Failed to find brand by auth_user_id {auth_user_id}')
-                else:
-                    event['auth_brand'] = list_of_brands[0]
-            except Exception as e:
-                print(f'Failed db call get brand by auth_user_id {auth_user_id}')
-                raise e
+            list_of_brands = select_brand_by_auth_user_id(auth_user_id)
+            if len(list_of_brands) == 0:
+                raise NotFoundByAuthUser(f'Failed to find brand by auth_user_id {auth_user_id}')
+            else:
+                event['auth_brand'] = list_of_brands[0]
         else:
             # Todo: this needs to be handled via an exception and remove filter.chain call
             print(f'event was missing the required keys to extract cognito:username')
@@ -187,7 +203,7 @@ def get_brand_payload_schema():
     return schema
 
 
-class BrandPostPayload(FilterInterface):
+class BrandPostPayloadValidation(FilterInterface):
     def do_filter(self, event: dict):
         body_ = event["body"]
         payload = json.loads(body_)

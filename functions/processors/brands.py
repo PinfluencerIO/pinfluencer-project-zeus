@@ -60,5 +60,5 @@ class ProcessAuthenticatedPostBrand(ProcessInterface):
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         self.filter.do_chain(event)
-        print(f'found auth brand {event["auth_brand"]}')
-        return PinfluencerResponse(body={"M": "GOOD"})
+        return old_manual_functions.hack_brand_me_create(event)
+
