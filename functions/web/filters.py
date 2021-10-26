@@ -179,11 +179,11 @@ def get_brand_payload_schema():
                 },
                 "website": {
                     "type": "string",
-                    "pattern": "^(https?\:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})(\/[\w]*)*$"
+                    "pattern": "^(https?\:\/\/)?([\da-zA-Z\.-]+)\.([a-z\.]{2,6})(\/[\w]*)*$"
                 },
                 "email": {
                     "type": "string",
-                    "pattern": "^[a-zA-Z\._-]+[@]{1}[a-zA-Z\._-]+[\.]+[a-zA-Z]+$"
+                    "pattern": "^[a-zA-Z0-9\._-]+[@]{1}[a-zA-Z0-9\._-]+[\.]+[a-zA-Z0-9]+$"
                 },
                 "image": {
                     "type": "object",

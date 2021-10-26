@@ -31,7 +31,7 @@ def execute_query(sql, sql_parameters=None):
         sql=sql,
         parameters=sql_parameters
     )
-
+    print(f'query response {response}')
     return response
 
 

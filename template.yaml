@@ -127,14 +127,14 @@ Resources:
             Path: /brands/me
             Method: get
             ApiId: !Ref PinfluencerHttpApi
-#        UpdateBrand:
-#          Type: HttpApi
-#          Properties:
-#            Auth:
-#              Authorizer: UserAuth
-#            Path: /brands/me
-#            Method: put
-#            ApiId: !Ref PinfluencerHttpApi
+        UpdateBrand:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /brands/me
+            Method: put
+            ApiId: !Ref PinfluencerHttpApi
 #        CreateProduct:
 #          Type: HttpApi
 #          Properties:

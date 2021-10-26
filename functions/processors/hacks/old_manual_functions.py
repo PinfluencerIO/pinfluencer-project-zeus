@@ -179,6 +179,36 @@ def get_user(event):
     return event['requestContext']['authorizer']['jwt']['claims']['cognito:username']
 
 
+def hack_brand_me_update(event):
+    body = json.loads(event['body'])
+    email = get_email(body, event)
+    brand = event['auth_brand']
+    sql = "\
+        UPDATE brand \
+            SET name = :name,\
+                description = :description,\
+                website = :website,\
+                email = :email,\
+                image = :image\
+            WHERE id = :id\
+        "
+    sql_parameters = [
+        {'name': 'id', 'value': {'stringValue': brand['id']}},
+        {'name': 'name', 'value': {'stringValue': body['name']}},
+        {'name': 'description', 'value': {'stringValue': body['description']}},
+        {'name': 'website', 'value': {'stringValue': body['website']}},
+        {'name': 'email', 'value': {'stringValue': email}},
+        {'name': 'image', 'value': {'stringValue': body['image']['filename']}},
+    ]
+    query_results = execute_query(sql, sql_parameters)
+    if query_results['numberOfRecordsUpdated'] == 1:
+        upload_image_to_s3(brand['id'], None, body['image']['filename'], body['image']['bytes'])
+        updated_brand = select_brand_by_auth_user_id(get_user(event))
+        return PinfluencerResponse(body=updated_brand)
+    else:
+        return PinfluencerResponse.as_500_error('Failed update brand')
+
+
 def hack_brand_me_create(event):
     body = json.loads(event['body'])
     id_ = str(uuid.uuid4())
