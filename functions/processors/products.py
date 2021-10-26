@@ -52,16 +52,16 @@ class ProcessAuthenticatedPostProduct(ProcessInterface):
         self.filter.do_chain(event)
         return old_manual_functions.hack_product_me_create(event)
 
-# class ProcessAuthenticatedPutProduct(ProcessInterface):
-#     def __init__(self, filter_chain: FilterChain):
-#         self.filter = filter_chain
-#
-#     def do_process(self, event: dict) -> PinfluencerResponse:
-#         print(self)
-#         self.filter.do_filter(event)
-#         return old_manual_functions.hack_product_me_update(event)
-#
-#
+
+class ProcessAuthenticatedPutProduct(ProcessInterface):
+    def __init__(self, filter_chain: FilterChain):
+        self.filter = filter_chain
+
+    def do_process(self, event: dict) -> PinfluencerResponse:
+        print(self)
+        self.filter.do_chain(event)
+        return old_manual_functions.hack_product_me_update(event)
+
 # class ProcessAuthenticatedDeleteProduct(ProcessInterface):
 #     def __init__(self, filter_chain: FilterChain):
 #         self.filter = filter_chain

@@ -252,7 +252,7 @@ def hack_product_me_create(event):
     brand = event['auth_brand']
     sql = " \
         INSERT INTO product \
-        (" + ",".join(COLUMNS_FOR_PRODUCT)+") \
+        (" + ",".join(COLUMNS_FOR_PRODUCT) + ") \
         VALUES \
         (:id, :name, :description, :requirements, :image, :brand_id, :brand_name, :created)"
 
@@ -274,6 +274,36 @@ def hack_product_me_create(event):
         upload_image_to_s3(brand['id'], id_, body['image']['filename'], body['image']['bytes'])
         new_product = select_product_by_id(id_)
         return PinfluencerResponse(body=new_product)
+    else:
+        return PinfluencerResponse.as_500_error('Failed to create product')
+
+
+def hack_product_me_update(event):
+    body = json.loads(event['body'])
+    brand = event['auth_brand']
+    product = event['product']
+    sql = "\
+            UPDATE product \
+                SET name = :name,\
+                    description = :description,\
+                    requirements = :requirements,\
+                    image = :image\
+                WHERE id = :id\
+            "
+
+    sql_parameters = [
+        {'name': 'id', 'value': {'stringValue': product['id']}},
+        {'name': 'name', 'value': {'stringValue': body['name']}},
+        {'name': 'description', 'value': {'stringValue': body['description']}},
+        {'name': 'requirements', 'value': {'stringValue': body['requirements']}},
+        {'name': 'image', 'value': {'stringValue': body['image']['filename']}},
+    ]
+
+    query_results = execute_query(sql, sql_parameters)
+    if query_results['numberOfRecordsUpdated'] == 1:
+        upload_image_to_s3(brand['id'], product['id'], body['image']['filename'], body['image']['bytes'])
+        updated_product = select_product_by_id(product['id'])
+        return PinfluencerResponse(body=updated_product)
     else:
         return PinfluencerResponse.as_500_error('Failed to create product')
 

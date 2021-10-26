@@ -159,22 +159,22 @@ Resources:
             Path: /products/me/{product_id}
             Method: get
             ApiId: !Ref PinfluencerHttpApi
-#        UpdateProductById:
-#          Type: HttpApi
-#          Properties:
-#            Auth:
-#              Authorizer: UserAuth
-#            Path: /products/me/{product_id}
-#            Method: put
-#            ApiId: !Ref PinfluencerHttpApi
-#        DeleteProductById:
-#          Type: HttpApi
-#          Properties:
-#            Auth:
-#              Authorizer: UserAuth
-#            Path: /products/me/{product_id}
-#            Method: delete
-#            ApiId: !Ref PinfluencerHttpApi
+        UpdateProductById:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /products/me/{product_id}
+            Method: put
+            ApiId: !Ref PinfluencerHttpApi
+        DeleteProductById:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /products/me/{product_id}
+            Method: delete
+            ApiId: !Ref PinfluencerHttpApi
 Outputs:
   PinfluencerGetAllBrands:
     Description: "API Gateway endpoint URL Get All Brands function"
