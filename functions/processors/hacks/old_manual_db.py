@@ -11,14 +11,6 @@ DB_PARAMS = {
 }
 
 
-# def find_brand_by_auth_user(event):
-#     user = event['requestContext']['authorizer']['jwt']['claims']['cognito:username']
-#     sql = "SELECT id, name FROM brand WHERE auth_user_id=:auth_user_id"
-#     sql_parameters = [{'name': 'auth_user_id', 'value': {'stringValue': user}}]
-#     result = execute_query(sql, sql_parameters)
-#     return result, user
-
-
 def execute_query(sql, sql_parameters=None):
     print(f'sql {sql}')
     print(f'sql parameters {sql_parameters}')

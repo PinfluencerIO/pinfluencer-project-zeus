@@ -1,5 +1,5 @@
 from functions.processors import ProcessInterface
-from functions.web.filters import FilterChain, MissingPathParameter, NotFoundById, InvalidId
+from functions.web.filters import FilterChain
 from functions.web.http_util import PinfluencerResponse
 from functions.processors.hacks import old_manual_functions
 
@@ -13,7 +13,7 @@ class ProcessPublicBrands(ProcessInterface):
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
-        return old_manual_functions.get_all_brands(event)
+        return old_manual_functions.get_all_brands()
 
 
 class ProcessPublicGetBrandBy(ProcessInterface):
@@ -60,4 +60,3 @@ class ProcessAuthenticatedPostBrand(ProcessInterface):
     def do_process(self, event: dict) -> PinfluencerResponse:
         self.filter.do_chain(event)
         return old_manual_functions.hack_brand_me_create(event)
-

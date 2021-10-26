@@ -3,9 +3,9 @@ from functions.processors.brands import *
 from functions.processors.feed import ProcessPublicFeed
 from functions.processors.products import *
 
-from functions.web.filters import FilterChainImp, ValidBrandId, ValidProductId, AuthFilter, BrandPostPayloadValidation, \
-    PayloadValidationError, NotFoundByAuthUser, OneTimeCreateBrandFilter, BrandAlreadyCreatedForAuthUser, \
-    ProductPostPayloadValidation, OwnerOnly, OwnershipError
+from functions.web.filters import FilterChainImp, ValidBrandId, ValidProductId, AuthFilter, \
+    BrandPostPayloadValidation, PayloadValidationError, NotFoundByAuthUser, OneTimeCreateBrandFilter, \
+    BrandAlreadyCreatedForAuthUser, ProductPostPayloadValidation, OwnerOnly, OwnershipError
 from functions.web.http_util import PinfluencerResponse
 from collections import OrderedDict
 
@@ -50,16 +50,16 @@ routes = OrderedDict(
         'GET /products': ProcessPublicProducts(),
         'GET /products/{product_id}': ProcessPublicGetProductBy(FilterChainImp([ValidProductId()])),
 
-        # # authenticated brand endpoints
+        # authenticated brand endpoints
         'GET /brands/me': ProcessAuthenticatedGetBrand(FilterChainImp([(AuthFilter())])),
         'POST /brands/me': ProcessAuthenticatedPostBrand(
             FilterChainImp([OneTimeCreateBrandFilter(), BrandPostPayloadValidation()])),
         'PUT /brands/me': ProcessAuthenticatedPutBrand(FilterChainImp([AuthFilter(), BrandPostPayloadValidation()])),
-        #
-        # # authenticated product endpoints
+
+        # authenticated product endpoints
         'GET /products/me': ProcessAuthenticatedGetProduct(FilterChainImp([AuthFilter()])),
         'GET /products/me/{product_id}': ProcessAuthenticatedGetProductById(
-            FilterChainImp([AuthFilter(),ValidProductId(), OwnerOnly('product')])),
+            FilterChainImp([AuthFilter(), ValidProductId(), OwnerOnly('product')])),
         'POST /products/me': ProcessAuthenticatedPostProduct(
             FilterChainImp([AuthFilter(), ProductPostPayloadValidation()])),
         'PUT /products/me/{product_id}': ProcessAuthenticatedPutProduct(

@@ -1,6 +1,6 @@
 from functions.processors import ProcessInterface
 from functions.processors.hacks import old_manual_functions
-from functions.web.filters import FilterChain, MissingPathParameter, NotFoundById, InvalidId
+from functions.web.filters import FilterChain
 from functions.web.http_util import PinfluencerResponse
 
 
@@ -13,7 +13,7 @@ class ProcessPublicProducts(ProcessInterface):
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
-        return old_manual_functions.get_all_products(event)
+        return old_manual_functions.get_all_products()
 
 
 class ProcessPublicGetProductBy(ProcessInterface):
