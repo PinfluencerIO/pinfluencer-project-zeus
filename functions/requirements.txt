@@ -1,3 +1,4 @@
 attrs
 schema
+jsonschema
 SQLAlchemy==1.4.26

@@ -9,4 +9,4 @@ class ProcessPublicFeed(ProcessInterface):
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
-        return PinfluencerResponse(status_code=200, body=old_manual_functions.hack_feed(event))
+        return old_manual_functions.get_feed()

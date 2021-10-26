@@ -51,10 +51,6 @@ Resources:
       Auth:
         Authorizers:
           UserAuth:
-            # AuthorizationScopes:
-            #   - email
-            #   - openid
-            #   - profile
             IdentitySource: "$request.header.Authorization"
             JwtConfiguration:
               issuer:
@@ -96,6 +92,7 @@ Resources:
             Path: /brands/{brand_id}
             Method: get
             ApiId: !Ref PinfluencerHttpApi
+
         GetAllProductsForBrandById:
           Type: HttpApi
           Properties:
@@ -114,9 +111,8 @@ Resources:
             Path: /products/{product_id}
             Method: get
             ApiId: !Ref PinfluencerHttpApi
-#        AUTHENTICATED Endpoints
         CreateBrand:
-          Type: HttpApi 
+          Type: HttpApi
           Properties:
             Auth:
               Authorizer: UserAuth
@@ -124,7 +120,7 @@ Resources:
             Method: post
             ApiId: !Ref PinfluencerHttpApi
         GetBrand:
-          Type: HttpApi 
+          Type: HttpApi
           Properties:
             Auth:
               Authorizer: UserAuth
@@ -132,7 +128,7 @@ Resources:
             Method: get
             ApiId: !Ref PinfluencerHttpApi
         UpdateBrand:
-          Type: HttpApi 
+          Type: HttpApi
           Properties:
             Auth:
               Authorizer: UserAuth
@@ -140,7 +136,7 @@ Resources:
             Method: put
             ApiId: !Ref PinfluencerHttpApi
         CreateProduct:
-          Type: HttpApi 
+          Type: HttpApi
           Properties:
             Auth:
               Authorizer: UserAuth
@@ -148,7 +144,7 @@ Resources:
             Method: post
             ApiId: !Ref PinfluencerHttpApi
         ReadAllProduct:
-          Type: HttpApi 
+          Type: HttpApi
           Properties:
             Auth:
               Authorizer: UserAuth
@@ -164,7 +160,7 @@ Resources:
             Method: get
             ApiId: !Ref PinfluencerHttpApi
         UpdateProductById:
-          Type: HttpApi 
+          Type: HttpApi
           Properties:
             Auth:
               Authorizer: UserAuth
@@ -172,7 +168,7 @@ Resources:
             Method: put
             ApiId: !Ref PinfluencerHttpApi
         DeleteProductById:
-          Type: HttpApi 
+          Type: HttpApi
           Properties:
             Auth:
               Authorizer: UserAuth
