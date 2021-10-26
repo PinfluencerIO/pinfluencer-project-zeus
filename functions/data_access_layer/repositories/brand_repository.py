@@ -10,13 +10,20 @@ class BrandRepository:
         self.__session_maker = session_manager
 
     def get(self, id: str) -> BrandModel:
-        return self.__session_maker.session.query(BrandModel).filter(BrandModel.id == id)
+        result = self.__session_maker.session.query(BrandModel).filter(BrandModel.id == id)
+        self.__session_maker.session.commit()
+        return result
 
     def get_all(self) -> list[BrandModel]:
-        return self.__session_maker.session.query(BrandModel)
+        result = self.__session_maker.session.query(BrandModel)
+        self.__session_maker.session.commit()
+        return result
 
-    def create(self, data: BrandModel) -> BrandModel:
-        return self.__session_maker.session.add(data)
+    def create(self, data: BrandModel) -> bool:
+        self.__session_maker.session.add(data)
+        self.__session_maker.session.commit()
+        # TODO: implement logic
+        return True
 
     def update(self, id: str, data: BrandModel) -> bool:
         raise NotImplemented

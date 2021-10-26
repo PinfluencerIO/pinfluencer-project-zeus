@@ -1,14 +1,16 @@
 import uuid
 from datetime import datetime
+
 from sqlalchemy import Column, String, DateTime
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
+from functions.data_access_layer import Base
 from functions.data_access_layer.db_constants import BRAND_TBL_NAME
-from functions.data_access_layer.models.model_base import ModelBase
 from functions.data_access_layer.models.product_model import ProductModel
 
 
-class BrandModel(ModelBase):
+class BrandModel(Base):
 
     __tablename__ = BRAND_TBL_NAME
 
