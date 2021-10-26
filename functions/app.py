@@ -61,10 +61,10 @@ routes = OrderedDict(
         'GET /products/me/{product_id}': ProcessAuthenticatedGetProductById(
             FilterChainImp([AuthFilter(),ValidProductId(), OwnerOnly('product')])),
         'POST /products/me': ProcessAuthenticatedPostProduct(
-            FilterChainImp([AuthFilter(), ValidProductId(), ProductPostPayloadValidation()])),
+            FilterChainImp([AuthFilter(), ProductPostPayloadValidation()])),
         'PUT /products/me/{product_id}': ProcessAuthenticatedPutProduct(
-            FilterChainImp([AuthFilter(),ValidProductId(), OwnerOnly('product'), ProductPostPayloadValidation()])),
-        # 'DELETE /products/me/{product_id}': ProcessAuthenticatedDeleteProduct(
-        #     FilterChainImp([AuthFilter(), ValidId('product_id')])),
+            FilterChainImp([AuthFilter(), ValidProductId(), OwnerOnly('product'), ProductPostPayloadValidation()])),
+        'DELETE /products/me/{product_id}': ProcessAuthenticatedDeleteProduct(
+            FilterChainImp([AuthFilter(), ValidProductId(), OwnerOnly('product')])),
     }
 )

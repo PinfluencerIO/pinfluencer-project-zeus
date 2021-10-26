@@ -382,6 +382,16 @@ def get_email(body, event):
         email = body['email']
     return email
 
+
+def delete_product(event):
+    results = execute_query("DELETE FROM product WHERE id=:id",
+                            [{'name': 'id', 'value': {'stringValue': event['product']['id']}}])
+    if results['numberOfRecordsUpdated'] == 1:
+        return PinfluencerResponse(status_code=200, body={"message": f"Product {event['product']['id']} deleted"})
+    else:
+        return PinfluencerResponse(status_code=500, body={"message": f"Failed to delete product {event['product']['id']}"})
+
+
 # def hack_product_me_delete(event):
 #     brand = hack_brand_me(event)
 #     if brand.status_code == 400:
