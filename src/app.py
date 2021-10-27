@@ -1,4 +1,4 @@
-from src.crosscutting.log_util import print_exception
+from src.common.diagnostics.log_util import print_exception
 from src.processors.brands import *
 from src.processors.feed import ProcessPublicFeed
 from src.processors.products import *
