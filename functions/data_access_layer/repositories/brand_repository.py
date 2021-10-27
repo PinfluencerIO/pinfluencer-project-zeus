@@ -4,24 +4,22 @@ from functions.data_access_layer.models.brand_model import BrandModel
 
 class BrandRepository:
 
-    __session_maker: DataManager
+    __data_manager: DataManager
 
-    def __init__(self, session_manager: DataManager):
-        self.__session_maker = session_manager
+    def __init__(self, data_manager: DataManager):
+        self.__data_manager = data_manager
 
     def get(self, id: str) -> BrandModel:
-        result = self.__session_maker.session.query(BrandModel).filter(BrandModel.id == id)
-        self.__session_maker.session.commit()
+        result = self.__data_manager.session.query(BrandModel).filter(BrandModel.id == id).first()
         return result
 
     def get_all(self) -> list[BrandModel]:
-        result = self.__session_maker.session.query(BrandModel)
-        self.__session_maker.session.commit()
+        result = self.__data_manager.session.query(BrandModel).all()
         return result
 
     def create(self, data: BrandModel) -> bool:
-        self.__session_maker.session.add(data)
-        self.__session_maker.session.commit()
+        self.__data_manager.session.add(data)
+        self.__data_manager.session.commit()
         # TODO: implement logic
         return True
 

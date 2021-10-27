@@ -3,9 +3,10 @@ from datetime import datetime
 
 from sqlalchemy import Column, String, DateTime, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 
-from functions.data_access_layer import Base
 from functions.data_access_layer.db_constants import PRODUCT_TBL_NAME, BRAND_TBL_NAME
+from functions.data_access_layer.models.model_base import Base
 
 
 class ProductModel(Base):
