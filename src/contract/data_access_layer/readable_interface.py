@@ -8,8 +8,16 @@ class ReadableInterface(Generic[T], metaclass=ABC):
 
     @abstractmethod
     def read(self, id: str) -> T:
+        """
+        reads single resource
+        returns ( resource )
+        """
         pass
 
     @abstractmethod
-    def readall(self, id: str) -> T:
+    def readall(self) -> list[T]:
+        """
+        reads all resources
+        returns ( list of resources )
+        """
         pass

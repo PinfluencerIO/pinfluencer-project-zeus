@@ -6,30 +6,31 @@ from src.contract.data_access_layer.createable_interface import CreatableInterfa
 from src.contract.data_access_layer.deleteable_interface import DeletableInterface
 from src.contract.data_access_layer.readable_interface import ReadableInterface
 from src.contract.data_access_layer.updatable_interface import UpdatableInterface
-from src.domain.models.product_model import ProductModel
+from src.domain.models.brand_model import BrandModel
 
 
-class ProductRepositoryInterface(CreatableInterface[ProductModel],
-                                 ReadableInterface[ProductModel],
-                                 UpdatableInterface[ProductModel],
-                                 DeletableInterface[ProductModel],
-                                 metaclass=ABC):
+class BrandRepositoryInterface(CreatableInterface[BrandModel],
+                               ReadableInterface[BrandModel],
+                               UpdatableInterface[BrandModel],
+                               DeletableInterface[BrandModel],
+                               metaclass=ABC):
+
     @abstractmethod
-    def read(self, id: str) -> ProductModel:
+    def create(self, data: BrandModel) -> ObjectResult[str]:
         pass
 
     @abstractmethod
-    def readall(self) -> list[ProductModel]:
+    def read(self, id: str) -> BrandModel:
         pass
 
     @abstractmethod
-    def update(self, data: ProductModel) -> Result:
+    def readall(self) -> list[BrandModel]:
+        pass
+
+    @abstractmethod
+    def update(self, data: BrandModel) -> Result:
         pass
 
     @abstractmethod
     def delete(self, id: str) -> Result:
-        pass
-
-    @abstractmethod
-    def create(self, data: ProductModel) -> ObjectResult[str]:
         pass
