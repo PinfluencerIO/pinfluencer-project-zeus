@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 
 from src.contract.data_access_layer.createable_interface import CreatableInterface
 from src.contract.data_access_layer.deleteable_interface import DeletableInterface
@@ -12,17 +12,23 @@ class ProductRepositoryInterface(CreatableInterface[ProductModel],
                                  UpdatableInterface[ProductModel],
                                  DeletableInterface[ProductModel],
                                  metaclass=ABC):
+
+    @abstractmethod
     def create(self, data: ProductModel) -> bool:
         pass
 
+    @abstractmethod
     def read(self, id: str) -> ProductModel:
         pass
 
+    @abstractmethod
     def readall(self, id: str) -> ProductModel:
         pass
 
+    @abstractmethod
     def update(self, data: T) -> bool:
         pass
 
+    @abstractmethod
     def delete(self, data: T) -> bool:
         pass
