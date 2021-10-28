@@ -1,7 +1,8 @@
+from src.domain.models.model_base import ModelBase
 from src.domain.models.product_model import ProductModel
 
 
-class BrandModel:
+class BrandModel(ModelBase):
     name: str
     description: str
     website: str

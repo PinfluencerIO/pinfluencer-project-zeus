@@ -4,7 +4,7 @@ from typing import TypeVar, Generic
 T = TypeVar("T")
 
 
-class CreateableInterface(Generic[T], metaclass=ABC):
+class CreatableInterface(Generic[T], metaclass=ABC):
 
     @abstractmethod
     def create(self, data: T) -> bool:
