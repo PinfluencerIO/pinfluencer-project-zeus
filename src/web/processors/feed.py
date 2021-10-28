@@ -1,5 +1,5 @@
-from src.processors import ProcessInterface
-from src.processors.hacks import old_manual_functions
+from src.web.processors import ProcessInterface
+from src.web.processors.hacks import old_manual_functions
 from src.common.web.http_util import PinfluencerResponse
 
 

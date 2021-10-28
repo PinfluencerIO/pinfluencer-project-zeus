@@ -1,4 +1,4 @@
-from src.processors.hacks.old_manual_db import COLUMNS_FOR_PRODUCT, execute_query, format_records, \
+from src.web.processors.hacks.old_manual_db import COLUMNS_FOR_PRODUCT, execute_query, format_records, \
     build_json_for_product
 
 
