@@ -4,8 +4,8 @@ from typing import TypeVar, Generic
 T = TypeVar("T")
 
 
-class DeletableInterface(Generic[T], metaclass=ABC):
+class UpdatableInterface(Generic[T], metaclass=ABC):
 
     @abstractmethod
-    def delete(self, data: T) -> bool:
+    def update(self, data: T) -> bool:
         pass

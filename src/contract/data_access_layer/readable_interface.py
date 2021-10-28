@@ -9,3 +9,7 @@ class ReadableInterface(Generic[T], metaclass=ABC):
     @abstractmethod
     def read(self, id: str) -> T:
         pass
+
+    @abstractmethod
+    def readall(self, id: str) -> T:
+        pass
