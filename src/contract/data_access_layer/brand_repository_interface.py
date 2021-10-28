@@ -12,7 +12,6 @@ from src.domain.models.brand_model import BrandModel
 class BrandRepositoryInterface(CreatableInterface[BrandModel],
                                ReadableInterface[BrandModel],
                                UpdatableInterface[BrandModel],
-                               DeletableInterface[BrandModel],
                                metaclass=ABC):
 
     @abstractmethod
@@ -29,8 +28,4 @@ class BrandRepositoryInterface(CreatableInterface[BrandModel],
 
     @abstractmethod
     def update(self, data: BrandModel) -> Result:
-        pass
-
-    @abstractmethod
-    def delete(self, id: str) -> Result:
         pass
