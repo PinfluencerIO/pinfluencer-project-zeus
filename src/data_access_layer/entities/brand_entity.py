@@ -2,11 +2,11 @@ from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
 
 from src.data_access_layer.db_constants import BRAND_TBL_NAME
-from src.data_access_layer.entities.base_entity import BaseEntity
-from src.data_access_layer.entities.product_entity import Product
+from src.data_access_layer.entities.base_entity import BaseEntity, BaseMeta
+from src.data_access_layer.entities.product_entity import ProductEntity
 
 
-class BrandEntity(BaseEntity):
+class BrandEntity(BaseEntity, BaseMeta):
 
     __tablename__ = BRAND_TBL_NAME
 
@@ -16,4 +16,4 @@ class BrandEntity(BaseEntity):
     email: str = Column(type_=String(length=120), nullable=False)
     image: str = Column(type_=String(length=120), nullable=False)
     auth_user_id: str = Column(type_=String(length=64), nullable=False, unique=True)
-    products: list[Product] = relationship('ProductModel', backref='brand')
+    products: list[ProductEntity] = relationship('ProductEntity', back_populates='brand')
