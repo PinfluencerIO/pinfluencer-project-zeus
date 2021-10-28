@@ -10,7 +10,7 @@ from src.web.processors.hacks.old_manual_db import execute_query, \
     COLUMNS_FOR_BRAND, COLUMNS_FOR_PRODUCT, PRODUCT_TEMPLATE, build_json_for_product, \
     format_records
 from src.web.processors.hacks.product_helps import select_product_by_id
-from src.common.web.http_util import PinfluencerResponse
+from src.web.http_util import PinfluencerResponse
 
 s3 = boto3.client('s3')
 

@@ -1,6 +1,6 @@
 import abc
 
-from src.common.web.http_util import PinfluencerResponse
+from src.web.http_util import PinfluencerResponse
 
 # Todo: Not sure this is the right place for an interface...read up about it.
 

@@ -1,6 +1,6 @@
 from src.web.processors import ProcessInterface
-from src.common.web.filters import FilterChain
-from src.common.web.http_util import PinfluencerResponse
+from src.web.filters import FilterChain
+from src.web.http_util import PinfluencerResponse
 from src.web.processors.hacks import old_manual_functions
 
 

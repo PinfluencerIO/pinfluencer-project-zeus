@@ -1,10 +1,10 @@
-from src.common.diagnostics.log_util import print_exception
+from src.common.log_util import print_exception
 from src.web.processors.feed import ProcessPublicFeed
 
-from src.common.web.filters import FilterChainImp, ValidBrandId, ValidProductId, AuthFilter, \
+from src.web.filters import FilterChainImp, ValidBrandId, ValidProductId, AuthFilter, \
     BrandPostPayloadValidation, PayloadValidationError, NotFoundByAuthUser, OneTimeCreateBrandFilter, \
     BrandAlreadyCreatedForAuthUser, ProductPostPayloadValidation, OwnerOnly, OwnershipError, NotFoundById, InvalidId
-from src.common.web.http_util import PinfluencerResponse
+from src.web.http_util import PinfluencerResponse
 from collections import OrderedDict
 
 

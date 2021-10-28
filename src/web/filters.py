@@ -4,7 +4,7 @@ import uuid
 
 from jsonschema import validate
 
-from src.common.diagnostics import log_util
+from src.common import log_util
 from src.web.processors.hacks.brand_helps import select_brand_by_id, select_brand_by_auth_user_id
 from src.web.processors.hacks.product_helps import select_product_by_id
 
