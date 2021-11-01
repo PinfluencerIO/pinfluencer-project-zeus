@@ -167,6 +167,14 @@ Resources:
             Path: /products/me/{product_id}
             Method: put
             ApiId: !Ref PinfluencerHttpApi
+        UpdateProductImgeById:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /products/me/{product_id}/image
+            Method: patch
+            ApiId: !Ref PinfluencerHttpApi
         DeleteProductById:
           Type: HttpApi
           Properties:
