@@ -24,15 +24,12 @@ def get_feed():
     for i in range(20):
         item = PRODUCT_TEMPLATE.copy()
         item_b = PRODUCT_TEMPLATE['brand'].copy()
-        item_i = PRODUCT_TEMPLATE['image'].copy()
         item['id'] = f'{product_number}_{brand_number}'
         item['name'] = f'Product {product_number}_{brand_number}'
         item['description'] = f'This is the description for product {product_number}_{brand_number}'
-        item_i['filename'] = f'product_image_{product_number}_{brand_number}.png'
         item_b['id'] = f'{brand_number}'
         item_b['name'] = f'Brand {brand_number}'
         item['brand'] = item_b
-        item['image'] = item_i
         result.append(item)
         product_number = product_number + 1
         if product_number > 3:
@@ -77,7 +74,8 @@ def update_authenticated_brand(event):
             SET name = :name,\
                 description = :description,\
                 website = :website,\
-                email = :email\
+                email = :email, \
+                instahandle = :instahandle\
             WHERE id = :id\
         "
     sql_parameters = [
@@ -85,7 +83,8 @@ def update_authenticated_brand(event):
         {'name': 'name', 'value': {'stringValue': body['name']}},
         {'name': 'description', 'value': {'stringValue': body['description']}},
         {'name': 'website', 'value': {'stringValue': body['website']}},
-        {'name': 'email', 'value': {'stringValue': email}}
+        {'name': 'email', 'value': {'stringValue': email}},
+        {'name': 'instahandle', 'value': {'stringValue': body['instahandle']}}
     ]
     query_results = execute_query(sql, sql_parameters)
     if query_results['numberOfRecordsUpdated'] == 1:
@@ -101,7 +100,7 @@ def create_authenticated_brand(event):
     email = get_email(body, event)
     user = get_user(event)
     sql = "INSERT INTO brand(" + " ,".join(COLUMNS_FOR_BRAND) + ") " \
-        "VALUES (:id, :name, :description, :website, :email, :auth_user_id, :created)"
+        "VALUES (:id, :name, :description, :website, :email, :instahandle, :auth_user_id, :created)"
 
     sql_parameters = [
         {'name': 'id', 'value': {'stringValue': id_}},
@@ -109,6 +108,7 @@ def create_authenticated_brand(event):
         {'name': 'description', 'value': {'stringValue': body['description']}},
         {'name': 'website', 'value': {'stringValue': body['website']}},
         {'name': 'email', 'value': {'stringValue': email}},
+        {'name': 'instahandle', 'value': {'stringValue': body['instahandle']}},
         {'name': 'auth_user_id', 'value': {'stringValue': user}},
         {'name': 'created', 'value': {'stringValue': str(datetime.datetime.utcnow())}},
     ]
@@ -186,12 +186,17 @@ def update_authenticated_product(event):
 
 
 def patch_product_image(event):
-    etag = upload_image_to_s3(event['auth_brand'], event['product'], json.loads(event['body'])['image'])
+    etag = upload_image_to_s3(event['auth_brand']['id'], event['product']['id'], json.loads(event['body'])['image'])
+    return PinfluencerResponse(status_code=200, body=etag)
+
+
+def patch_brand_image(event):
+    etag = upload_image_to_s3(event['auth_brand']['id'],  None, image_base64_encoded=json.loads(event['body'])['image'])
     return PinfluencerResponse(status_code=200, body=etag)
 
 
 # Todo: When implementing this again in OO, use SQS so failures can be mitigated
-def upload_image_to_s3(brand_id: str, product_id_:str, image_base64_encoded:str):
+def upload_image_to_s3(brand_id: str, product_id_, image_base64_encoded:str):
     print(f'brand {brand_id}, product{product_id_}')
     image = base64.b64decode(image_base64_encoded)
     f = io.BytesIO(image)

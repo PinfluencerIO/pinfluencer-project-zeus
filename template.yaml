@@ -48,6 +48,7 @@ Resources:
           - PUT
           - DELETE
           - OPTIONS
+          - PATCH
       Auth:
         Authorizers:
           UserAuth:
@@ -133,7 +134,7 @@ Resources:
             Auth:
               Authorizer: UserAuth
             Path: /brands/me/image
-            Method: get
+            Method: patch
             ApiId: !Ref PinfluencerHttpApi
         UpdateBrand:
           Type: HttpApi

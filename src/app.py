@@ -53,7 +53,7 @@ routes = OrderedDict(
         'POST /brands/me': ProcessAuthenticatedPostBrand(
             FilterChainImp([OneTimeCreateBrandFilter(), BrandPostPayloadValidation()])),
         'PUT /brands/me': ProcessAuthenticatedPutBrand(FilterChainImp([AuthFilter(), BrandPutPayloadValidation()])),
-        'PUT /brands/me/image': ProcessAuthenticatedPutBrand(
+        'PATCH /brands/me/image': ProcessAuthenticatedPatchBrandImage(
             FilterChainImp([AuthFilter(), BrandImagePatchPayloadValidation()])),
 
         # authenticated product endpoints

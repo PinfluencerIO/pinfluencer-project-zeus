@@ -83,3 +83,11 @@ class ProcessAuthenticatedPatchProductImage(ProcessInterface):
         self.filters.do_chain(event)
         return old_manual_functions.patch_product_image(event)
 
+
+class ProcessAuthenticatedPatchBrandImage(ProcessInterface):
+    def __init__(self, filter_chain: FilterChain) -> None:
+        self.filters = filter_chain
+
+    def do_process(self, event: dict) -> PinfluencerResponse:
+        self.filters.do_chain(event)
+        return old_manual_functions.patch_brand_image(event)

@@ -252,6 +252,10 @@ def get_brand_payload_schema():
                     "type": "string",
                     "pattern": "^[a-zA-Z0-9\._-]+[@]{1}[a-zA-Z0-9\._-]+[\.]+[a-zA-Z0-9]+$"
                 },
+                "instahandle": {
+                    "type": "string",
+                    "pattern": "^.{1,30}$"
+                },
                 "image": {
                     "type": "string"
                 }
@@ -281,9 +285,13 @@ def update_brand_payload_schema():
                 "email": {
                     "type": "string",
                     "pattern": "^[a-zA-Z0-9\._-]+[@]{1}[a-zA-Z0-9\._-]+[\.]+[a-zA-Z0-9]+$"
+                },
+                "instahandle": {
+                    "type": "string",
+                    "pattern": "^.{1,30}$"
                 }
             },
-        "required": ["name", "description", "website", "email"]
+        "required": ["name", "description", "website", "instahandle", "email"]
     }
     return schema
 

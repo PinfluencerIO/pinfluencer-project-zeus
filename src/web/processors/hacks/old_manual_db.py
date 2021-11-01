@@ -53,7 +53,8 @@ def build_json_for_brand(records) -> list[dict]:
         copy_brand['description'] = record[2]
         copy_brand['website'] = record[3]
         copy_brand['email'] = record[4]
-        copy_brand['created'] = record[5]
+        copy_brand['instahandle'] = record[5]
+        copy_brand['created'] = record[6]
         results.append(copy_brand)
 
     return results
@@ -95,11 +96,12 @@ PRODUCT_TEMPLATE = {
 }
 
 # the order is important, index number is used in boto3 records lookup for json template creation
-COLUMNS_FOR_BRAND = ['id', 'name', 'description', 'website', 'email', 'auth_user_id', 'created']
+COLUMNS_FOR_BRAND = ['id', 'name', 'description', 'website', 'email', 'instahandle', 'auth_user_id', 'created']
 
 BRAND_TEMPLATE = {
     "id": "",
     "name": "",
     "description": "",
+    "instahandle": "",
     "created": ""
 }
