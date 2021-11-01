@@ -77,7 +77,7 @@ def update_authenticated_brand(event):
             SET name = :name,\
                 description = :description,\
                 website = :website,\
-                email = :email,\
+                email = :email\
             WHERE id = :id\
         "
     sql_parameters = [
