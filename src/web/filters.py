@@ -168,6 +168,20 @@ class AuthFilter(FilterInterface):
             print(f'event was missing the required keys to extract cognito:username')
 
 
+def get_product_image_update_payload_schema():
+    schema = {
+        "type": "object",
+        "properties":
+            {
+                "image": {
+                    "type": "string"
+                }
+            },
+        "required": ["image"]
+    }
+    return schema
+
+
 def get_product_payload_schema():
     schema = {
         "type": "object",
@@ -186,19 +200,33 @@ def get_product_payload_schema():
                     "pattern": "^.{1,500}$"
                 },
                 "image": {
-                    "type": "object",
-                    "properties": {
-                        "filename": {
-                            "type": "string",
-                            "pattern": "^.{1,120}$"
-                        },
-                        "bytes": {
-                            "type": "string"
-                        }
-                    }
+                    "type": "string"
                 }
             },
         "required": ["name", "description", "requirements", "image"]
+    }
+    return schema
+
+
+def get_product_update_payload_schema():
+    schema = {
+        "type": "object",
+        "properties":
+            {
+                "name": {
+                    "type": "string",
+                    "pattern": "^.{1,120}$"
+                },
+                "description": {
+                    "type": "string",
+                    "pattern": "^.{1,500}$"
+                },
+                "requirements": {
+                    "type": "string",
+                    "pattern": "^.{1,500}$"
+                }
+            },
+        "required": ["name", "description", "requirements"]
     }
     return schema
 
@@ -253,7 +281,37 @@ class ProductPostPayloadValidation(FilterInterface):
             print(f'Validating product payload failed {e}')
             raise PayloadValidationError(f'Validating product payload failed {e}')
 
-        print(f'Validate brand create payload {body_}')
+        print(f'Validate product create payload {body_}')
+        pass
+
+
+class ProductPutPayloadValidation(FilterInterface):
+    def do_filter(self, event: dict):
+        body_ = event["body"]
+        payload = json.loads(body_)
+        print(f'payload {payload}')
+        try:
+            validate(instance=payload, schema=(get_product_update_payload_schema()))
+        except Exception as e:
+            print(f'Validating product update payload failed {e}')
+            raise PayloadValidationError(f'Validating product update payload failed {e}')
+
+        print(f'Validate product update payload {body_}')
+        pass
+
+
+class ProductImagePatchPayloadValidation(FilterInterface):
+    def do_filter(self, event: dict):
+        body_ = event["body"]
+        payload = json.loads(body_)
+        print(f'payload {payload}')
+        try:
+            validate(instance=payload, schema=(get_product_image_update_payload_schema()))
+        except Exception as e:
+            print(f'Validating product update payload failed {e}')
+            raise PayloadValidationError(f'Validating product update payload failed {e}')
+
+        print(f'Validate product update payload {body_}')
         pass
 
 

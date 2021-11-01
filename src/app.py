@@ -61,7 +61,9 @@ routes = OrderedDict(
         'POST /products/me': ProcessAuthenticatedPostProduct(
             FilterChainImp([AuthFilter(), ProductPostPayloadValidation()])),
         'PUT /products/me/{product_id}': ProcessAuthenticatedPutProduct(
-            FilterChainImp([AuthFilter(), ValidProductId(), OwnerOnly('product'), ProductPostPayloadValidation()])),
+            FilterChainImp([AuthFilter(), ValidProductId(), OwnerOnly('product'), ProductPutPayloadValidation()])),
+        'PATCH /product/me/{product_id}/image': ProcessPatchProductImage(FilterChainImp(
+            [AuthFilter(), ValidProductId(), OwnerOnly('product'), ProductImagePatchPayloadValidation()])),
         'DELETE /products/me/{product_id}': ProcessAuthenticatedDeleteProduct(
             FilterChainImp([AuthFilter(), ValidProductId(), OwnerOnly('product')])),
     }
