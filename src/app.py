@@ -19,9 +19,9 @@ def lambda_handler(event, context):
     except NotFoundById:
         print(f'NotFoundById')
         return PinfluencerResponse.as_404_error().as_json()
-    except NotFoundByAuthUser:
+    except NotFoundByAuthUser as e:
         print(f'NotFoundByAuthUser')
-        return PinfluencerResponse.as_401_error().as_json()
+        return PinfluencerResponse.as_401_error(e).as_json()
     except OwnershipError as ownership:
         return PinfluencerResponse.as_401_error(str(ownership)).as_json()
     except InvalidId:
@@ -52,7 +52,9 @@ routes = OrderedDict(
         'GET /brands/me': ProcessAuthenticatedGetBrand(FilterChainImp([(AuthFilter())])),
         'POST /brands/me': ProcessAuthenticatedPostBrand(
             FilterChainImp([OneTimeCreateBrandFilter(), BrandPostPayloadValidation()])),
-        'PUT /brands/me': ProcessAuthenticatedPutBrand(FilterChainImp([AuthFilter(), BrandPostPayloadValidation()])),
+        'PUT /brands/me': ProcessAuthenticatedPutBrand(FilterChainImp([AuthFilter(), BrandPutPayloadValidation()])),
+        'PUT /brands/me/image': ProcessAuthenticatedPutBrand(
+            FilterChainImp([AuthFilter(), BrandImagePatchPayloadValidation()])),
 
         # authenticated product endpoints
         'GET /products/me': ProcessAuthenticatedGetProduct(FilterChainImp([AuthFilter()])),
@@ -62,7 +64,7 @@ routes = OrderedDict(
             FilterChainImp([AuthFilter(), ProductPostPayloadValidation()])),
         'PUT /products/me/{product_id}': ProcessAuthenticatedPutProduct(
             FilterChainImp([AuthFilter(), ValidProductId(), OwnerOnly('product'), ProductPutPayloadValidation()])),
-        'PATCH /product/me/{product_id}/image': ProcessPatchProductImage(FilterChainImp(
+        'PATCH /products/me/{product_id}/image': ProcessAuthenticatedPatchProductImage(FilterChainImp(
             [AuthFilter(), ValidProductId(), OwnerOnly('product'), ProductImagePatchPayloadValidation()])),
         'DELETE /products/me/{product_id}': ProcessAuthenticatedDeleteProduct(
             FilterChainImp([AuthFilter(), ValidProductId(), OwnerOnly('product')])),

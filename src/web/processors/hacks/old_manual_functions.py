@@ -3,6 +3,8 @@ import datetime
 import json
 import uuid
 import boto3
+import filetype as filetype
+import io
 
 from src.web.processors.hacks import brand_helps, product_helps
 from src.web.processors.hacks.brand_helps import select_brand_by_auth_user_id
@@ -76,7 +78,6 @@ def update_authenticated_brand(event):
                 description = :description,\
                 website = :website,\
                 email = :email,\
-                image = :image\
             WHERE id = :id\
         "
     sql_parameters = [
@@ -84,12 +85,10 @@ def update_authenticated_brand(event):
         {'name': 'name', 'value': {'stringValue': body['name']}},
         {'name': 'description', 'value': {'stringValue': body['description']}},
         {'name': 'website', 'value': {'stringValue': body['website']}},
-        {'name': 'email', 'value': {'stringValue': email}},
-        {'name': 'image', 'value': {'stringValue': body['image']['filename']}},
+        {'name': 'email', 'value': {'stringValue': email}}
     ]
     query_results = execute_query(sql, sql_parameters)
     if query_results['numberOfRecordsUpdated'] == 1:
-        upload_image_to_s3(brand['id'], None, body['image']['filename'], body['image']['bytes'])
         updated_brand = select_brand_by_auth_user_id(get_user(event))
         return PinfluencerResponse(body=updated_brand)
     else:
@@ -102,7 +101,7 @@ def create_authenticated_brand(event):
     email = get_email(body, event)
     user = get_user(event)
     sql = "INSERT INTO brand(" + " ,".join(COLUMNS_FOR_BRAND) + ") " \
-        "VALUES (:id, :name, :description, :website, :email, :image, :auth_user_id, :created)"
+        "VALUES (:id, :name, :description, :website, :email, :auth_user_id, :created)"
 
     sql_parameters = [
         {'name': 'id', 'value': {'stringValue': id_}},
@@ -110,13 +109,12 @@ def create_authenticated_brand(event):
         {'name': 'description', 'value': {'stringValue': body['description']}},
         {'name': 'website', 'value': {'stringValue': body['website']}},
         {'name': 'email', 'value': {'stringValue': email}},
-        {'name': 'image', 'value': {'stringValue': body['image']['filename']}},
         {'name': 'auth_user_id', 'value': {'stringValue': user}},
         {'name': 'created', 'value': {'stringValue': str(datetime.datetime.utcnow())}},
     ]
     query_results = execute_query(sql, sql_parameters)
     if query_results['numberOfRecordsUpdated'] == 1:
-        upload_image_to_s3(id_, None, body['image']['filename'], body['image']['bytes'])
+        upload_image_to_s3(id_, None, body['image'])
         new_brand = select_brand_by_auth_user_id(user)
         return PinfluencerResponse(body=new_brand)
     else:
@@ -139,24 +137,22 @@ def create_authenticated_product(event):
         INSERT INTO product \
         (" + ",".join(COLUMNS_FOR_PRODUCT) + ") \
         VALUES \
-        (:id, :name, :description, :requirements, :image, :brand_id, :brand_name, :created)"
+        (:id, :name, :description, :requirements, :brand_id, :brand_name, :created)"
 
     id_ = str(uuid.uuid4())
-
     sql_parameters = [
         {'name': 'id', 'value': {'stringValue': id_}},
         {'name': 'name', 'value': {'stringValue': body['name']}},
         {'name': 'description', 'value': {'stringValue': body['description']}},
+        {'name': 'requirements', 'value': {'stringValue': body['requirements']}},
         {'name': 'brand_id', 'value': {'stringValue': brand['id']}},
         {'name': 'brand_name', 'value': {'stringValue': brand['name']}},
-        {'name': 'requirements', 'value': {'stringValue': body['requirements']}},
-        {'name': 'image', 'value': {'stringValue': body['image']['filename']}},
         {'name': 'created', 'value': {'stringValue': str(datetime.datetime.utcnow())}},
     ]
 
     query_results = execute_query(sql, sql_parameters)
     if query_results['numberOfRecordsUpdated'] == 1:
-        upload_image_to_s3(brand['id'], id_, body['image']['filename'], body['image']['bytes'])
+        upload_image_to_s3(brand['id'], id_, body['image'])
         new_product = select_product_by_id(id_)
         return PinfluencerResponse(body=new_product)
     else:
@@ -165,14 +161,12 @@ def create_authenticated_product(event):
 
 def update_authenticated_product(event):
     body = json.loads(event['body'])
-    brand = event['auth_brand']
     product = event['product']
     sql = "\
             UPDATE product \
                 SET name = :name,\
                     description = :description,\
-                    requirements = :requirements,\
-                    image = :image\
+                    requirements = :requirements\
                 WHERE id = :id\
             "
 
@@ -181,30 +175,44 @@ def update_authenticated_product(event):
         {'name': 'name', 'value': {'stringValue': body['name']}},
         {'name': 'description', 'value': {'stringValue': body['description']}},
         {'name': 'requirements', 'value': {'stringValue': body['requirements']}},
-        {'name': 'image', 'value': {'stringValue': body['image']['filename']}},
     ]
 
     query_results = execute_query(sql, sql_parameters)
     if query_results['numberOfRecordsUpdated'] == 1:
-        upload_image_to_s3(brand['id'], product['id'], body['image']['filename'], body['image']['bytes'])
         updated_product = select_product_by_id(product['id'])
         return PinfluencerResponse(body=updated_product)
     else:
         return PinfluencerResponse.as_500_error('Failed to create product')
 
 
+def patch_product_image(event):
+    etag = upload_image_to_s3(event['auth_brand'], event['product'], json.loads(event['body'])['image'])
+    return PinfluencerResponse(status_code=200, body=etag)
+
+
 # Todo: When implementing this again in OO, use SQS so failures can be mitigated
-def upload_image_to_s3(brand_id, product_id_, filename_, bytes_):
-    print(f'brand{brand_id}, product{product_id_}, fn{filename_}')
-    image = base64.b64decode(bytes_)
-    if product_id_ is None:
-        key = f'{brand_id}/{filename_}'
+def upload_image_to_s3(brand_id: str, product_id_:str, image_base64_encoded:str):
+    print(f'brand {brand_id}, product{product_id_}')
+    image = base64.b64decode(image_base64_encoded)
+    f = io.BytesIO(image)
+    file_type = filetype.guess(f)
+    if file_type is not None:
+        mime = file_type.MIME
+        print(f'the interrupted mime for image bytes are ${mime}')
     else:
-        key = f'{brand_id}/{product_id_}/{filename_}'
-    s3.put_object(Bucket='pinfluencer-product-images',
-                  Key=key, Body=image,
-                  ContentType=f'image/{filename_[-3:]}',
-                  Tagging='public=yes')
+        mime = 'image/jpg'
+        print(f'the interrupted mime failed for image bytes setting to ${mime}')
+
+    if product_id_ is None:
+        key = f'{brand_id}/image'
+    else:
+        key = f'{brand_id}/{product_id_}/image'
+    s3_object = s3.put_object(Bucket='pinfluencer-product-images',
+                              Key=key, Body=image,
+                              ContentType=mime,
+                              Tagging='public=yes')
+
+    return {"etag": s3_object['ETag']}
 
 
 def get_email(body, event):

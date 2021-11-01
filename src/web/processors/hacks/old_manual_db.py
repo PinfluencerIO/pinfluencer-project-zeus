@@ -46,16 +46,14 @@ def format_records(records):
 def build_json_for_brand(records) -> list[dict]:
     results = []
     for record in records:
+        print(f'${record}')
         copy_brand = BRAND_TEMPLATE.copy()
-        copy_image = BRAND_TEMPLATE['image'].copy()
         copy_brand['id'] = record[0]
         copy_brand['name'] = record[1]
         copy_brand['description'] = record[2]
         copy_brand['website'] = record[3]
         copy_brand['email'] = record[4]
-        copy_image['filename'] = record[5]
-        copy_brand['image'] = copy_image
-        copy_brand['created'] = record[6]
+        copy_brand['created'] = record[5]
         results.append(copy_brand)
 
     return results
@@ -66,34 +64,29 @@ def build_json_for_product(records) -> list[dict]:
     results = []
     for record in records:
         copy_product = PRODUCT_TEMPLATE.copy()
-        copy_image = PRODUCT_TEMPLATE['image'].copy()
+
         copy_brand = PRODUCT_TEMPLATE['brand'].copy()
         copy_product['id'] = record[0]
         copy_product['name'] = record[1]
         copy_product['description'] = record[2]
         copy_product['requirements'] = record[3]
-        copy_image['filename'] = record[4]
-        copy_product['image'] = copy_image
-        copy_brand['id'] = record[5]
-        copy_brand['name'] = record[6]
+        copy_brand['id'] = record[4]
+        copy_brand['name'] = record[5]
         copy_product['brand'] = copy_brand
-        copy_product['created'] = record[7]
+        copy_product['created'] = record[6]
         results.append(copy_product)
 
     return results
 
 
 # the order is important, index number is used in boto3 records lookup for json template creation
-COLUMNS_FOR_PRODUCT = ['id', 'name', 'description', 'requirements', 'image', 'brand_id', 'brand_name', 'created']
+COLUMNS_FOR_PRODUCT = ['id', 'name', 'description', 'requirements', 'brand_id', 'brand_name', 'created']
 
 PRODUCT_TEMPLATE = {
     "id": "",
     "name": "",
     "description": "",
     "requirements": "",
-    "image": {
-        "filename": ""
-    },
     "brand": {
         "id": "",
         "name": ""
@@ -102,14 +95,11 @@ PRODUCT_TEMPLATE = {
 }
 
 # the order is important, index number is used in boto3 records lookup for json template creation
-COLUMNS_FOR_BRAND = ['id', 'name', 'description', 'website', 'email', 'image', 'auth_user_id', 'created']
+COLUMNS_FOR_BRAND = ['id', 'name', 'description', 'website', 'email', 'auth_user_id', 'created']
 
 BRAND_TEMPLATE = {
     "id": "",
     "name": "",
     "description": "",
-    "image": {
-        "filename": ""
-    },
     "created": ""
 }

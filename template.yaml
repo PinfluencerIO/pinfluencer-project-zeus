@@ -127,6 +127,14 @@ Resources:
             Path: /brands/me
             Method: get
             ApiId: !Ref PinfluencerHttpApi
+        UpdateBrandImage:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /brands/me/image
+            Method: get
+            ApiId: !Ref PinfluencerHttpApi
         UpdateBrand:
           Type: HttpApi
           Properties:

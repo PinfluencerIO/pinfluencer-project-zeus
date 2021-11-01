@@ -18,7 +18,7 @@ def select_brand_by_auth_user_id(auth_user_id) -> list[dict]:
     sql_parameters = [{'name': 'auth_user_id', 'value': {'stringValue': auth_user_id}}]
     result = execute_query(sql, sql_parameters)
     print(f'select brand by auth records len = {len(result["records"])}')
-    if result is None or len(result['records']) == 0:
+    if len(result['records']) == 0:
         print('return empty records')
         return []
     else:
