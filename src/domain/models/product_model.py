@@ -1,11 +1,12 @@
 from dataclasses import dataclass
 
-from src.domain.models.model_base import ModelBase
+from src.domain.models import brand_model
+from src.domain.models.base_model import BaseModel
 
 
 @dataclass
-class ProductModel(ModelBase):
+class ProductModel(BaseModel):
     name: str
     description: str
     requirements: str
-    image: str
+    brand: brand_model.BrandModel

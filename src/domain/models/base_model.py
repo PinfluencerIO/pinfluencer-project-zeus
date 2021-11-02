@@ -4,7 +4,6 @@ from datetime import datetime
 
 
 @dataclass
-class ModelBase(ABC):
+class BaseModel(ABC):
     id: str
     created: datetime
-    last_updated: datetime

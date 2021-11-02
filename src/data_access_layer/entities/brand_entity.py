@@ -14,6 +14,6 @@ class BrandEntity(BaseEntity, BaseMeta):
     description: str = Column(type_=String(length=500), nullable=False)
     website: str = Column(type_=String(length=120), nullable=False)
     email: str = Column(type_=String(length=120), nullable=False)
-    image: str = Column(type_=String(length=120), nullable=False)
+    instahandle: str = Column(type_=String(length=30), nullable=True)
     auth_user_id: str = Column(type_=String(length=64), nullable=False, unique=True)
     products: list[ProductEntity] = relationship('ProductEntity', back_populates='brand')
