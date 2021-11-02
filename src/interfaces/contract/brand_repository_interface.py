@@ -5,5 +5,5 @@ from src.common.result import Result
 from src.domain.models.brand_model import BrandModel
 
 
-class BrandRepositoryInterface(metaclass=ABC):
+class BrandRepositoryInterface(ABC):
     pass

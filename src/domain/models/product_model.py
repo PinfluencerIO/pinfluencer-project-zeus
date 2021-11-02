@@ -9,4 +9,4 @@ class ProductModel(BaseModel):
     name: str
     description: str
     requirements: str
-    brand: brand_model.BrandModel
+

@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import Column, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 
-from src.data_access_layer import entities
+import src.data_access_layer.entities
 from src.data_access_layer.db_constants import PRODUCT_TBL_NAME, BRAND_TBL_NAME
 from src.data_access_layer.entities import brand_entity
 from src.data_access_layer.entities.base_entity import BaseEntity, BaseMeta
@@ -17,4 +17,4 @@ class ProductEntity(BaseEntity, BaseMeta):
     description: str = Column(type_=String(length=500), nullable=False)
     requirements: str = Column(type_=String(length=500), nullable=False)
     brand_id: str = Column(String(length=36), ForeignKey(f"{BRAND_TBL_NAME}.id"))
-    brand: brand_entity.BrandEntity = relationship('BrandEntity', back_populates='products')
+    brand = relationship('BrandEntity', back_populates='products')

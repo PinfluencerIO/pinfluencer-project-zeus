@@ -5,7 +5,7 @@ from src.common.result import Result
 from src.domain.models.product_model import ProductModel
 
 
-class ProductRepositoryInterface(metaclass=ABC):
+class ProductRepositoryInterface(ABC):
 
     @abstractmethod
     def feed(self) -> list[ProductModel]:
