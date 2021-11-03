@@ -1,0 +1,12 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "df-postgres-pinfluencer"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-1mycbpdtzxnbk"
+s3_prefix = "df-postgres-pinfluencer"
+region = "eu-west-2"
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "UserPoolId=\"eu-west-2_gpEf5qhko\" ClientIdAudience=\"432hfe79sd50o7l2fj788aioef\" DatabaseName=\"pinfluencer\" DbClusterARN=\"arn:aws:rds:eu-west-2:324303852622:cluster:pinfluencer\" DatabaseSecretARN=\"arn:aws:secretsmanager:eu-west-2:324303852622:secret:rds-db-credentials/cluster-YG6IZQHZ53WZXYDG7FMX3TI7NI/admin-0eUj0L\" LambdaRole=\"arn:aws:iam::324303852622:role/AuroraLambdaRole\""
+image_repositories = []
+confirm_changeset = false

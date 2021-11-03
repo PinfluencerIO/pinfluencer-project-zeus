@@ -10,7 +10,7 @@ from src.web.processors.hacks import brand_helps, product_helps
 from src.web.processors.hacks.brand_helps import select_brand_by_auth_user_id
 from src.web.processors.hacks.old_manual_db import execute_query, \
     COLUMNS_FOR_BRAND, COLUMNS_FOR_PRODUCT, PRODUCT_TEMPLATE, build_json_for_product, \
-    format_records
+    format_records, COLUMNS_FOR_BRAND_FOR_INSERT, COLUMNS_FOR_PRODUCT_FOR_INSERT
 from src.web.processors.hacks.product_helps import select_product_by_id
 from src.web.http_util import PinfluencerResponse
 
@@ -99,8 +99,8 @@ def create_authenticated_brand(event):
     id_ = str(uuid.uuid4())
     email = get_email(body, event)
     user = get_user(event)
-    sql = "INSERT INTO brand(" + " ,".join(COLUMNS_FOR_BRAND) + ") " \
-        "VALUES (:id, :name, :description, :website, :email, :instahandle, :auth_user_id, :created)"
+    sql = "INSERT INTO brand(" + " ,".join(COLUMNS_FOR_BRAND_FOR_INSERT) + ") " \
+        "VALUES (:id, :name, :description, :website, :email, :instahandle, :auth_user_id)"
 
     sql_parameters = [
         {'name': 'id', 'value': {'stringValue': id_}},
@@ -110,7 +110,6 @@ def create_authenticated_brand(event):
         {'name': 'email', 'value': {'stringValue': email}},
         {'name': 'instahandle', 'value': {'stringValue': body['instahandle']}},
         {'name': 'auth_user_id', 'value': {'stringValue': user}},
-        {'name': 'created', 'value': {'stringValue': str(datetime.datetime.utcnow())}},
     ]
     query_results = execute_query(sql, sql_parameters)
     if query_results['numberOfRecordsUpdated'] == 1:
@@ -135,9 +134,9 @@ def create_authenticated_product(event):
     brand = event['auth_brand']
     sql = " \
         INSERT INTO product \
-        (" + ",".join(COLUMNS_FOR_PRODUCT) + ") \
+        (" + ",".join(COLUMNS_FOR_PRODUCT_FOR_INSERT) + ") \
         VALUES \
-        (:id, :name, :description, :requirements, :brand_id, :brand_name, :created)"
+        (:id, :name, :description, :requirements, :brand_id, :brand_name)"
 
     id_ = str(uuid.uuid4())
     sql_parameters = [
@@ -147,7 +146,6 @@ def create_authenticated_product(event):
         {'name': 'requirements', 'value': {'stringValue': body['requirements']}},
         {'name': 'brand_id', 'value': {'stringValue': brand['id']}},
         {'name': 'brand_name', 'value': {'stringValue': brand['name']}},
-        {'name': 'created', 'value': {'stringValue': str(datetime.datetime.utcnow())}},
     ]
 
     query_results = execute_query(sql, sql_parameters)

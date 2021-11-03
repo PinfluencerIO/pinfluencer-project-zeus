@@ -82,6 +82,7 @@ def build_json_for_product(records) -> list[dict]:
 
 # the order is important, index number is used in boto3 records lookup for json template creation
 COLUMNS_FOR_PRODUCT = ['id', 'name', 'description', 'requirements', 'brand_id', 'brand_name', 'created']
+COLUMNS_FOR_PRODUCT_FOR_INSERT = ['id', 'name', 'description', 'requirements', 'brand_id', 'brand_name']
 
 PRODUCT_TEMPLATE = {
     "id": "",
@@ -97,6 +98,7 @@ PRODUCT_TEMPLATE = {
 
 # the order is important, index number is used in boto3 records lookup for json template creation
 COLUMNS_FOR_BRAND = ['id', 'name', 'description', 'website', 'email', 'instahandle', 'auth_user_id', 'created']
+COLUMNS_FOR_BRAND_FOR_INSERT = ['id', 'name', 'description', 'website', 'email', 'instahandle', 'auth_user_id']
 
 BRAND_TEMPLATE = {
     "id": "",
