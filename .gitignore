@@ -247,6 +247,7 @@ $RECYCLE.BIN/
 packaged.yaml
 .aws-sam/
 samconfig.toml
+samconfig.toml.olddb
 events/*.json
 env.json
 
