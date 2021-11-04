@@ -6,13 +6,15 @@ import src.domain.models.brand_model as brand_module
 
 
 @dataclass
+class Owner:
+    id: str
+    name: str
+
+
+@dataclass
 class ProductModel(BaseModel):
     name: str
     description: str
     requirements: str
-    brand: BaseModel
+    brand: Owner
 
-    @property
-    def brand(self):
-        return_brand: brand_module.BrandModel = self.brand
-        return return_brand

@@ -22,9 +22,9 @@ class DataManager:
         self.__session = session()
 
     @property
-    def engine(self):
+    def engine(self) -> Engine:
         return self.__engine
 
     @property
-    def session(self):
+    def session(self) -> Session:
         return self.__session
