@@ -1,12 +1,10 @@
-import uuid
-from datetime import datetime
-from sqlalchemy import Column, String, DateTime, ForeignKey
+from sqlalchemy import Column, String, ForeignKey
 from sqlalchemy.orm import relationship
 
-import src.data_access_layer.entities
+import src
 from src.data_access_layer.db_constants import PRODUCT_TBL_NAME, BRAND_TBL_NAME
-from src.data_access_layer.entities import brand_entity
 from src.data_access_layer.entities.base_entity import BaseEntity, BaseMeta
+import src.data_access_layer.entities.brand_entity as brand_module
 
 
 class ProductEntity(BaseEntity, BaseMeta):
@@ -18,3 +16,8 @@ class ProductEntity(BaseEntity, BaseMeta):
     requirements: str = Column(type_=String(length=500), nullable=False)
     brand_id: str = Column(String(length=36), ForeignKey(f"{BRAND_TBL_NAME}.id"))
     brand = relationship('BrandEntity', back_populates='products')
+
+    @property
+    def owner(self):
+        brand_to_return: brand_module.BrandEntity = self.brand
+        return brand_to_return
