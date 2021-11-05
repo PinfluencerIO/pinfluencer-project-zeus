@@ -41,7 +41,7 @@ def lambda_handler(event, context):
 routes = OrderedDict(
     {
         # public endpoints
-        'GET /feed': ProcessPublicFeed(),
+        'GET /feed': container.process_public_feed,
         'GET /brands': ProcessPublicBrands(),
         'GET /brands/{brand_id}': ProcessPublicGetBrandBy(FilterChainImp([ValidBrandId()])),
         'GET /brands/{brand_id}/products': ProcessPublicAllProductsForBrand(FilterChainImp([ValidBrandId()])),
