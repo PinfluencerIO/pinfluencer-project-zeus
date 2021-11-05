@@ -1,4 +1,5 @@
 from src.common.log_util import print_exception
+from src.data_access_layer.data_manager import DataManager
 from src.web.processors.brands import *
 from src.web.processors.feed import *
 from src.web.processors.products import *
@@ -41,7 +42,7 @@ def lambda_handler(event, context):
 routes = OrderedDict(
     {
         # public endpoints
-        'GET /feed': ProcessPublicFeed(),
+        'GET /feed': ProcessPublicFeed(DataManager()),
         'GET /brands': ProcessPublicBrands(),
         'GET /brands/{brand_id}': ProcessPublicGetBrandBy(FilterChainImp([ValidBrandId()])),
         'GET /brands/{brand_id}/products': ProcessPublicAllProductsForBrand(FilterChainImp([ValidBrandId()])),

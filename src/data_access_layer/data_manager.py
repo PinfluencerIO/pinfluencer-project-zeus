@@ -3,8 +3,10 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 import os
 
+from src.interfaces.data_manager_interface import DataManagerInterface
 
-class DataManager:
+
+class DataManager(DataManagerInterface):
     __session: Session
     __engine: Engine
 
