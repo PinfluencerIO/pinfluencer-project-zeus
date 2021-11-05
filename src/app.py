@@ -1,5 +1,6 @@
 from src.common.log_util import print_exception
 from src.data_access_layer.data_manager import DataManager
+from src.services import Container
 from src.web.processors.brands import *
 from src.web.processors.feed import *
 from src.web.processors.products import *
@@ -8,8 +9,12 @@ from src.web.filters import *
 from src.web.http_util import PinfluencerResponse
 from collections import OrderedDict
 
+container: Container = Container()
+
 
 def lambda_handler(event, context):
+    global container
+    container = Container()
     try:
         print(f'route: {event["routeKey"]}')
         print(f'event: {event}')
@@ -22,7 +27,7 @@ def lambda_handler(event, context):
         return PinfluencerResponse.as_404_error().as_json()
     except NotFoundByAuthUser as e:
         print(f'NotFoundByAuthUser')
-        return PinfluencerResponse.as_401_error(e).as_json()
+        return PinfluencerResponse.as_401_error(str(e)).as_json()
     except OwnershipError as ownership:
         return PinfluencerResponse.as_401_error(str(ownership)).as_json()
     except InvalidId:
@@ -42,32 +47,33 @@ def lambda_handler(event, context):
 routes = OrderedDict(
     {
         # public endpoints
-        'GET /feed': ProcessPublicFeed(DataManager()),
-        'GET /brands': ProcessPublicBrands(DataManager()),
-        'GET /brands/{brand_id}': ProcessPublicGetBrandBy(FilterChainImp([ValidBrandId()])),
-        'GET /brands/{brand_id}/products': ProcessPublicAllProductsForBrand(FilterChainImp([ValidBrandId()])),
+        'GET /feed': ProcessPublicFeed(container.data_manager),
+        'GET /brands': ProcessPublicBrands(container.data_manager),
+        'GET /brands/{brand_id}': ProcessPublicGetBrandBy(FilterChainImp([ValidBrandId()]), container.data_manager),
+        'GET /brands/{brand_id}/products': ProcessPublicAllProductsForBrand(FilterChainImp([ValidBrandId()]),
+                                                                            container.data_manager),
         'GET /products': ProcessPublicProducts(),
         'GET /products/{product_id}': ProcessPublicGetProductBy(FilterChainImp([ValidProductId()])),
 
         # authenticated brand endpoints
-        'GET /brands/me': ProcessAuthenticatedGetBrand(FilterChainImp([(LegacyAuthFilter())])),
+        'GET /brands/me': ProcessAuthenticatedGetBrand(FilterChainImp([container.auth_filter]), container.data_manager),
         'POST /brands/me': ProcessAuthenticatedPostBrand(
-            FilterChainImp([OneTimeCreateBrandFilter(), BrandPostPayloadValidation()])),
-        'PUT /brands/me': ProcessAuthenticatedPutBrand(FilterChainImp([LegacyAuthFilter(), BrandPutPayloadValidation()])),
+            FilterChainImp([OneTimeCreateBrandFilter(container.data_manager), BrandPostPayloadValidation()])),
+        'PUT /brands/me': ProcessAuthenticatedPutBrand(FilterChainImp([container.auth_filter, BrandPutPayloadValidation()])),
         'PATCH /brands/me/image': ProcessAuthenticatedPatchBrandImage(
-            FilterChainImp([LegacyAuthFilter(), BrandImagePatchPayloadValidation()])),
+            FilterChainImp([container.auth_filter, BrandImagePatchPayloadValidation()])),
 
         # authenticated product endpoints
-        'GET /products/me': ProcessAuthenticatedGetProduct(FilterChainImp([LegacyAuthFilter()])),
+        'GET /products/me': ProcessAuthenticatedGetProduct(FilterChainImp([container.auth_filter])),
         'GET /products/me/{product_id}': ProcessAuthenticatedGetProductById(
-            FilterChainImp([LegacyAuthFilter(), ValidProductId(), OwnerOnly('product')])),
+            FilterChainImp([container.auth_filter, ValidProductId(), OwnerOnly('product')])),
         'POST /products/me': ProcessAuthenticatedPostProduct(
-            FilterChainImp([LegacyAuthFilter(), ProductPostPayloadValidation()])),
+            FilterChainImp([container.auth_filter, ProductPostPayloadValidation()])),
         'PUT /products/me/{product_id}': ProcessAuthenticatedPutProduct(
-            FilterChainImp([LegacyAuthFilter(), ValidProductId(), OwnerOnly('product'), ProductPutPayloadValidation()])),
+            FilterChainImp([container.auth_filter, ValidProductId(), OwnerOnly('product'), ProductPutPayloadValidation()])),
         'PATCH /products/me/{product_id}/image': ProcessAuthenticatedPatchProductImage(FilterChainImp(
-            [LegacyAuthFilter(), ValidProductId(), OwnerOnly('product'), ProductImagePatchPayloadValidation()])),
+            [container.auth_filter, ValidProductId(), OwnerOnly('product'), ProductImagePatchPayloadValidation()])),
         'DELETE /products/me/{product_id}': ProcessAuthenticatedDeleteProduct(
-            FilterChainImp([LegacyAuthFilter(), ValidProductId(), OwnerOnly('product')])),
+            FilterChainImp([container.auth_filter, ValidProductId(), OwnerOnly('product')])),
     }
 )

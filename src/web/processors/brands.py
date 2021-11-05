@@ -1,5 +1,6 @@
 from src.data_access_layer import to_list
 from src.data_access_layer.brand import Brand
+from src.data_access_layer.product import Product
 from src.interfaces.data_manager_interface import DataManagerInterface
 from src.web.processors import ProcessInterface
 from src.web.filters import FilterChain
@@ -15,29 +16,40 @@ class ProcessPublicBrands(ProcessInterface):
         super().__init__(data_manager)
 
     def do_process(self, event: dict) -> PinfluencerResponse:
-        return PinfluencerResponse(body=to_list(self._data_manager.session.query(Brand).all()))
+        return PinfluencerResponse(body=to_list(self._data_manager.session
+                                                .query(Brand)
+                                                .all()))
 
 
 class ProcessPublicGetBrandBy(ProcessInterface):
-    def __init__(self, filter_chain: FilterChain):
+    def __init__(self, filter_chain: FilterChain, data_manager: DataManagerInterface):
+        super().__init__(data_manager)
         self.filters = filter_chain
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         self.filters.do_chain(event)
-        return old_manual_functions.get_brand_by_id(event)
+        return PinfluencerResponse(body=to_list(self._data_manager.session
+                                                .query(Brand)
+                                                .filter(Brand.id == event['brand']['id'])
+                                                .first()))
 
 
 class ProcessPublicAllProductsForBrand(ProcessInterface):
-    def __init__(self, filter_chain: FilterChain):
+    def __init__(self, filter_chain: FilterChain, data_manager: DataManagerInterface):
+        super().__init__(data_manager)
         self.filter = filter_chain
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         self.filter.do_chain(event)
-        return old_manual_functions.get_all_products_for_brand_with_id(event)
+        return PinfluencerResponse(body=to_list(self._data_manager.session
+                                                .query(Product)
+                                                .filter(Product.brand_id == event['brand']['id'])
+                                                .first()))
 
 
 class ProcessAuthenticatedGetBrand(ProcessInterface):
-    def __init__(self, filter_chain: FilterChain):
+    def __init__(self, filter_chain: FilterChain, data_manager: DataManagerInterface):
+        super().__init__(data_manager)
         self.filter = filter_chain
 
     def do_process(self, event: dict) -> PinfluencerResponse:

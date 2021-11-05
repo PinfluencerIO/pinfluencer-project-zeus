@@ -5,6 +5,8 @@ import uuid
 from jsonschema import validate
 
 from src.common import log_util
+from src.data_access_layer.brand import Brand
+from src.interfaces.data_manager_interface import DataManagerInterface
 from src.web.processors.hacks.brand_helps import select_brand_by_id, select_brand_by_auth_user_id
 from src.web.processors.hacks.product_helps import select_product_by_id
 
@@ -132,9 +134,12 @@ def valid_uuid(id_):
 
 
 class OneTimeCreateBrandFilter(FilterInterface):
+    def __init__(self, data_manager: DataManagerInterface):
+        self.__data_manager = data_manager
+
     def do_filter(self, event: dict):
         try:
-            LegacyAuthFilter().do_filter(event)
+            AuthFilter(self.__data_manager).do_filter(event)
         except NotFoundByAuthUser:
             print(f'No brand associated auth user id; continue')
             return
@@ -142,11 +147,13 @@ class OneTimeCreateBrandFilter(FilterInterface):
         raise BrandAlreadyCreatedForAuthUser(f'brand already associated with auth user')
 
 
-class LegacyAuthFilter(FilterInterface):
+class AuthFilter(FilterInterface):
     """
     Todo: Implement this filter
     Get cognito:username from authorizer and puts it in top level event dictionary.
     """
+    def __init__(self, data_manager: DataManagerInterface):
+        self.__data_manager = data_manager
 
     def do_filter(self, event: dict):
         print('LegacyAuthFilter')
@@ -158,7 +165,10 @@ class LegacyAuthFilter(FilterInterface):
             auth_user_id = event['requestContext']['authorizer']['jwt']['claims']['cognito:username']
 
             print(f'AuthFilter has found the require cognito:username key with {auth_user_id}')
-            list_of_brands = select_brand_by_auth_user_id(auth_user_id)
+            list_of_brands = self.__data_manager.session\
+                .query(Brand)\
+                .filter(Brand.auth_user_id == auth_user_id)\
+                .first()
             if len(list_of_brands) == 0:
                 raise NotFoundByAuthUser(f'Failed to find brand by auth_user_id {auth_user_id}')
             else:
@@ -166,24 +176,6 @@ class LegacyAuthFilter(FilterInterface):
         else:
             # Todo: this needs to be handled via an exception and remove filter.chain call
             print(f'event was missing the required keys to extract cognito:username')
-
-
-class AuthFilter(FilterInterface):
-    """
-    Get cognito:username from authorizer and puts it in top level event dictionary.
-    """
-
-    def do_filter(self, event: dict):
-        print('AuthFilter')
-        if 'authorizer' in event['requestContext'] \
-                and 'authorizer' in event['requestContext'] \
-                and 'jwt' in event['requestContext']['authorizer'] \
-                and 'claims' in event['requestContext']['authorizer']['jwt'] \
-                and 'cognito:username' in event['requestContext']['authorizer']['jwt']['claims']:
-            auth_user_id = event['requestContext']['authorizer']['jwt']['claims']['cognito:username']
-            event['auth_brand'] = auth_user_id
-        else:
-            raise Exception(f'event was missing the required keys to extract cognito:username')
 
 
 def get_image_update_payload_schema():
