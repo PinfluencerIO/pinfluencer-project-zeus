@@ -1,6 +1,4 @@
-from src.interfaces.contract.product_repository_interface import ProductRepositoryInterface
 from src.web.processors import ProcessInterface
-from src.web.processors.base_processor import BaseProcessor
 from src.web.processors.hacks import old_manual_functions
 from src.web.http_util import PinfluencerResponse
 
