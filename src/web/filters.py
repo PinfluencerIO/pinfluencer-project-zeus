@@ -134,7 +134,7 @@ def valid_uuid(id_):
 class OneTimeCreateBrandFilter(FilterInterface):
     def do_filter(self, event: dict):
         try:
-            AuthFilter().do_filter(event)
+            LegacyAuthFilter().do_filter(event)
         except NotFoundByAuthUser:
             print(f'No brand associated auth user id; continue')
             return
@@ -142,14 +142,14 @@ class OneTimeCreateBrandFilter(FilterInterface):
         raise BrandAlreadyCreatedForAuthUser(f'brand already associated with auth user')
 
 
-class AuthFilter(FilterInterface):
+class LegacyAuthFilter(FilterInterface):
     """
     Todo: Implement this filter
     Get cognito:username from authorizer and puts it in top level event dictionary.
     """
 
     def do_filter(self, event: dict):
-        print('AuthFilter')
+        print('LegacyAuthFilter')
         if 'authorizer' in event['requestContext'] \
                 and 'authorizer' in event['requestContext'] \
                 and 'jwt' in event['requestContext']['authorizer'] \
@@ -166,6 +166,24 @@ class AuthFilter(FilterInterface):
         else:
             # Todo: this needs to be handled via an exception and remove filter.chain call
             print(f'event was missing the required keys to extract cognito:username')
+
+
+class AuthFilter(FilterInterface):
+    """
+    Get cognito:username from authorizer and puts it in top level event dictionary.
+    """
+
+    def do_filter(self, event: dict):
+        print('AuthFilter')
+        if 'authorizer' in event['requestContext'] \
+                and 'authorizer' in event['requestContext'] \
+                and 'jwt' in event['requestContext']['authorizer'] \
+                and 'claims' in event['requestContext']['authorizer']['jwt'] \
+                and 'cognito:username' in event['requestContext']['authorizer']['jwt']['claims']:
+            auth_user_id = event['requestContext']['authorizer']['jwt']['claims']['cognito:username']
+            event['auth_brand'] = auth_user_id
+        else:
+            raise Exception(f'event was missing the required keys to extract cognito:username')
 
 
 def get_image_update_payload_schema():
