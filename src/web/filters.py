@@ -5,6 +5,7 @@ import uuid
 from jsonschema import validate
 
 from src.common import log_util
+from src.data_access_layer import to_list
 from src.data_access_layer.brand import Brand
 from src.interfaces.data_manager_interface import DataManagerInterface
 from src.web.processors.hacks.brand_helps import select_brand_by_id, select_brand_by_auth_user_id
@@ -152,11 +153,12 @@ class AuthFilter(FilterInterface):
     Todo: Implement this filter
     Get cognito:username from authorizer and puts it in top level event dictionary.
     """
+
     def __init__(self, data_manager: DataManagerInterface):
         self.__data_manager = data_manager
 
     def do_filter(self, event: dict):
-        print('LegacyAuthFilter')
+        print('AuthFilter')
         if 'authorizer' in event['requestContext'] \
                 and 'authorizer' in event['requestContext'] \
                 and 'jwt' in event['requestContext']['authorizer'] \
@@ -165,10 +167,10 @@ class AuthFilter(FilterInterface):
             auth_user_id = event['requestContext']['authorizer']['jwt']['claims']['cognito:username']
 
             print(f'AuthFilter has found the require cognito:username key with {auth_user_id}')
-            list_of_brands = self.__data_manager.session\
-                .query(Brand)\
-                .filter(Brand.auth_user_id == auth_user_id)\
-                .first()
+            list_of_brands = to_list(self.__data_manager.session
+                                     .query(Brand)
+                                     .filter(Brand.auth_user_id == auth_user_id)
+                                     .first())
             if len(list_of_brands) == 0:
                 raise NotFoundByAuthUser(f'Failed to find brand by auth_user_id {auth_user_id}')
             else:
