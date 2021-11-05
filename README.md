@@ -28,7 +28,6 @@ CREATE TABLE `product`
 `description` varchar(500) NOT NULL, 
 `requirements` varchar(500) DEFAULT NULL, 
 `brand_id` varchar(36) NOT NULL, 
-`brand_name` varchar(500) DEFAULT NULL, 
 `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, 
 PRIMARY KEY (`id`), KEY `fk_brand_id` (`brand_id`), 
 KEY `product_id_index` (`id`) USING BTREE, CONSTRAINT `fk_brand_id` FOREIGN KEY (`brand_id`) REFERENCES `brand` (`id`) ) 

@@ -122,11 +122,33 @@ def create_authenticated_brand(event):
 
 def get_authenticated_products(event):
     brand = event['auth_brand']
-    sql = "SELECT " + ', '.join(COLUMNS_FOR_PRODUCT) + " FROM product WHERE brand_id=:id"
+    sql = "SELECT product.id, " \
+          "product.name, " \
+          "product.description, " \
+          "product.requirements, " \
+          "product.created, " \
+          "brand.id as \"brand_id\", " \
+          "brand.name as \"brand_name\" " \
+          "FROM product " \
+          "INNER JOIN brand on brand.id = brand_id and brand.id = :id"
     parameters = [{'name': 'id', 'value': {'stringValue': brand['id']}}]
     query_results = execute_query(sql, parameters)
     records = format_records(query_results['records'])
-    return PinfluencerResponse(body=build_json_for_product(records))
+    results = []
+    for record in records:
+        copy_product = PRODUCT_TEMPLATE.copy()
+        copy_brand = PRODUCT_TEMPLATE['brand'].copy()
+        copy_product['id'] = record[0]
+        copy_product['name'] = record[1]
+        copy_product['description'] = record[2]
+        copy_product['requirements'] = record[3]
+        copy_brand['id'] = record[4]
+        copy_brand['name'] = record[5]
+        copy_product['brand'] = copy_brand
+        copy_product['created'] = record[6]
+        results.append(copy_product)
+
+    return PinfluencerResponse(body=results)
 
 
 def create_authenticated_product(event):
@@ -136,7 +158,7 @@ def create_authenticated_product(event):
         INSERT INTO product \
         (" + ",".join(COLUMNS_FOR_PRODUCT_FOR_INSERT) + ") \
         VALUES \
-        (:id, :name, :description, :requirements, :brand_id, :brand_name)"
+        (:id, :name, :description, :requirements, :brand_id)"
 
     id_ = str(uuid.uuid4())
     sql_parameters = [
@@ -145,7 +167,6 @@ def create_authenticated_product(event):
         {'name': 'description', 'value': {'stringValue': body['description']}},
         {'name': 'requirements', 'value': {'stringValue': body['requirements']}},
         {'name': 'brand_id', 'value': {'stringValue': brand['id']}},
-        {'name': 'brand_name', 'value': {'stringValue': brand['name']}},
     ]
 
     query_results = execute_query(sql, sql_parameters)
