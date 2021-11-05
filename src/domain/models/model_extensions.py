@@ -18,3 +18,10 @@ class ModelExtensions:
         @type model: base.BaseModel
         """
         return dataclasses.asdict(model)
+
+    @staticmethod
+    def list_to_dict(models) -> list[dict]:
+        """
+        @type models: list[base.BaseModel]
+        """
+        return list(map(ModelExtensions.as_dict, models))
