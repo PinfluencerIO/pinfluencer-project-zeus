@@ -5,9 +5,9 @@ from src.web.processors.hacks import old_manual_functions
 from src.web.http_util import PinfluencerResponse
 
 
-class ProcessPublicFeed(ProcessInterface, BaseProcessor):
+class ProcessPublicFeed(ProcessInterface):
     def __init__(self):
-        super().__init__()
+        pass
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
