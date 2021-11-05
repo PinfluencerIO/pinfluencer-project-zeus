@@ -3,6 +3,7 @@ import json
 import uuid
 
 from jsonschema import validate
+from sqlalchemy.orm import Query
 
 from src.common import log_util
 from src.data_access_layer import to_list
@@ -167,14 +168,14 @@ class AuthFilter(FilterInterface):
             auth_user_id = event['requestContext']['authorizer']['jwt']['claims']['cognito:username']
 
             print(f'AuthFilter has found the require cognito:username key with {auth_user_id}')
-            list_of_brands = to_list(self.__data_manager.session
-                                     .query(Brand)
-                                     .filter(Brand.auth_user_id == auth_user_id)
-                                     .first())
-            if len(list_of_brands) == 0:
+            brandQuery: Query = self.__data_manager.session\
+                .query(Brand)\
+                .filter(Brand.auth_user_id == auth_user_id)
+            brand: Brand = brandQuery.first()
+            if brand is None:
                 raise NotFoundByAuthUser(f'Failed to find brand by auth_user_id {auth_user_id}')
             else:
-                event['auth_brand'] = list_of_brands[0]
+                event['auth_brand'] = brand.as_dict()
         else:
             # Todo: this needs to be handled via an exception and remove filter.chain call
             print(f'event was missing the required keys to extract cognito:username')
