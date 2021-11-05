@@ -1,5 +1,4 @@
 from src.common.log_util import print_exception
-from src.domain.services import Container
 from src.web.processors.brands import *
 from src.web.processors.feed import *
 from src.web.processors.products import *
@@ -8,12 +7,8 @@ from src.web.filters import *
 from src.web.http_util import PinfluencerResponse
 from collections import OrderedDict
 
-container: Container
-
 
 def lambda_handler(event, context):
-    global container
-    container = Container()
     try:
         print(f'route: {event["routeKey"]}')
         print(f'event: {event}')

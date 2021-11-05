@@ -12,4 +12,3 @@ class Container:
     def __init__(self):
         self.data_manager = DataManager()
         self.product_repo = AlchemyProductRepository(data_manager=self.data_manager)
-        self.process_public_feed = ProcessPublicFeed(product_repo=self.product_repo)
