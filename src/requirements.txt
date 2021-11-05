@@ -1,5 +1,6 @@
 attrs
 schema
 jsonschema
-SQLAlchemy==1.4.26
+pydataapi
+SQLAlchemy
 filetype

@@ -1,7 +1,6 @@
 from src.data_access_layer.data_manager import DataManager
-from src.data_access_layer.repositories.alchemy_product_repository import AlchemyProductRepository
-from src.interfaces.contract.product_repository_interface import ProductRepositoryInterface
-from src.web.processors.feed import ProcessPublicFeed
+from src.data_access_layer.repositories import AlchemyProductRepository
+from src.interfaces.contract.repositories import ProductRepositoryInterface
 
 
 class Container:
