@@ -59,7 +59,9 @@ routes = OrderedDict(
         'GET /brands/me': ProcessAuthenticatedGetBrand(FilterChainImp([container.auth_filter]), container.data_manager),
         'POST /brands/me': ProcessAuthenticatedPostBrand(
             FilterChainImp([OneTimeCreateBrandFilter(container.data_manager), BrandPostPayloadValidation()])),
-        'PUT /brands/me': ProcessAuthenticatedPutBrand(FilterChainImp([container.auth_filter, BrandPutPayloadValidation()])),
+        'PUT /brands/me': ProcessAuthenticatedPutBrand(FilterChainImp([container.auth_filter,
+                                                       BrandPutPayloadValidation()]),
+                                                       container.data_manager),
         'PATCH /brands/me/image': ProcessAuthenticatedPatchBrandImage(
             FilterChainImp([container.auth_filter, BrandImagePatchPayloadValidation()])),
 
@@ -70,7 +72,8 @@ routes = OrderedDict(
         'POST /products/me': ProcessAuthenticatedPostProduct(
             FilterChainImp([container.auth_filter, ProductPostPayloadValidation()])),
         'PUT /products/me/{product_id}': ProcessAuthenticatedPutProduct(
-            FilterChainImp([container.auth_filter, ValidProductId(), OwnerOnly('product'), ProductPutPayloadValidation()])),
+            FilterChainImp(
+                [container.auth_filter, ValidProductId(), OwnerOnly('product'), ProductPutPayloadValidation()])),
         'PATCH /products/me/{product_id}/image': ProcessAuthenticatedPatchProductImage(FilterChainImp(
             [container.auth_filter, ValidProductId(), OwnerOnly('product'), ProductImagePatchPayloadValidation()])),
         'DELETE /products/me/{product_id}': ProcessAuthenticatedDeleteProduct(
