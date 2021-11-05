@@ -5,12 +5,13 @@ from sqlalchemy import Column, String, DateTime, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-from src.data_access_layer.db_constants import PRODUCT_TBL_NAME, BRAND_TBL_NAME
 BaseMeta = declarative_base()
+
+PRODUCT_TBL_NAME = 'product'
+BRAND_TBL_NAME = 'brand'
 
 
 class BaseEntity:
-
     __tablename__: str
 
     id: str = Column(type_=String(length=36), primary_key=True, default=uuid.uuid4, nullable=False)
@@ -18,7 +19,6 @@ class BaseEntity:
 
 
 class ProductEntity(BaseEntity, BaseMeta):
-
     __tablename__ = PRODUCT_TBL_NAME
 
     name: str = Column(type_=String(length=120), nullable=False)
@@ -34,7 +34,6 @@ class ProductEntity(BaseEntity, BaseMeta):
 
 
 class BrandEntity(BaseEntity, BaseMeta):
-
     __tablename__ = BRAND_TBL_NAME
 
     name: str = Column(type_=String(length=120), nullable=False)

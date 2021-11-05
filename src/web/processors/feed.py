@@ -1,5 +1,5 @@
 from src.domain.models import ModelExtensions
-from src.domain.services import Container
+from src.services import Container
 from src.web.processors import ProcessInterface
 from src.web.http_util import PinfluencerResponse
 
