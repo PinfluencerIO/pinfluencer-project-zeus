@@ -8,8 +8,7 @@ import io
 
 from src.web.processors.hacks import brand_helps, product_helps
 from src.web.processors.hacks.brand_helps import select_brand_by_auth_user_id
-from src.web.processors.hacks.old_manual_db import execute_query, \
-    COLUMNS_FOR_BRAND, COLUMNS_FOR_PRODUCT, PRODUCT_TEMPLATE, build_json_for_product, \
+from src.web.processors.hacks.old_manual_db import execute_query, PRODUCT_TEMPLATE, \
     format_records, COLUMNS_FOR_BRAND_FOR_INSERT, COLUMNS_FOR_PRODUCT_FOR_INSERT
 from src.web.processors.hacks.product_helps import select_product_by_id
 from src.web.http_util import PinfluencerResponse

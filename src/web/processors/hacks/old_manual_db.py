@@ -60,28 +60,6 @@ def build_json_for_brand(records) -> list[dict]:
     return results
 
 
-# the order is important, index number is used in boto3 records lookup for json template creation
-def build_json_for_product(records) -> list[dict]:
-    results = []
-    for record in records:
-        copy_product = PRODUCT_TEMPLATE.copy()
-
-        copy_brand = PRODUCT_TEMPLATE['brand'].copy()
-        copy_product['id'] = record[0]
-        copy_product['name'] = record[1]
-        copy_product['description'] = record[2]
-        copy_product['requirements'] = record[3]
-        copy_brand['id'] = record[4]
-        copy_brand['name'] = record[5]
-        copy_product['brand'] = copy_brand
-        copy_product['created'] = record[6]
-        results.append(copy_product)
-
-    return results
-
-
-# the order is important, index number is used in boto3 records lookup for json template creation
-COLUMNS_FOR_PRODUCT = ['id', 'name', 'description', 'requirements', 'brand_id',  'created']
 COLUMNS_FOR_PRODUCT_FOR_INSERT = ['id', 'name', 'description', 'requirements', 'brand_id']
 
 PRODUCT_TEMPLATE = {

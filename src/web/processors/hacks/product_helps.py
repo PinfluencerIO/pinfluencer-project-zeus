@@ -1,5 +1,4 @@
-from src.web.processors.hacks.old_manual_db import COLUMNS_FOR_PRODUCT, execute_query, format_records, \
-    build_json_for_product, PRODUCT_TEMPLATE
+from src.web.processors.hacks.old_manual_db import execute_query, format_records, PRODUCT_TEMPLATE
 
 
 def select_all_products() -> list[dict]:
