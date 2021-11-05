@@ -1,6 +1,5 @@
 from src.common.log_util import print_exception
-from src.data_access_layer.data_manager import DataManager
-from src.data_access_layer.repositories.alchemy_product_repository import AlchemyProductRepository
+from src.domain.services import Container
 from src.web.processors.brands import *
 from src.web.processors.feed import *
 from src.web.processors.products import *
@@ -9,11 +8,12 @@ from src.web.filters import *
 from src.web.http_util import PinfluencerResponse
 from collections import OrderedDict
 
-data_manager = DataManager()
-product_repo = AlchemyProductRepository(data_manager)
+container: Container
 
 
 def lambda_handler(event, context):
+    global container
+    container = Container()
     try:
         print(f'route: {event["routeKey"]}')
         print(f'event: {event}')
@@ -46,7 +46,7 @@ def lambda_handler(event, context):
 routes = OrderedDict(
     {
         # public endpoints
-        'GET /feed': ProcessPublicFeed(),
+        'GET /feed': container.process_public_feed,
         'GET /brands': ProcessPublicBrands(),
         'GET /brands/{brand_id}': ProcessPublicGetBrandBy(FilterChainImp([ValidBrandId()])),
         'GET /brands/{brand_id}/products': ProcessPublicAllProductsForBrand(FilterChainImp([ValidBrandId()])),
