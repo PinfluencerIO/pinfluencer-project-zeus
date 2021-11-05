@@ -7,14 +7,14 @@ from src.web.http_util import PinfluencerResponse
 
 class ProcessPublicFeed(ProcessInterface):
     def __init__(self, data_manager: DataManagerInterface):
-        self.__data_manager = data_manager
+        super().__init__(data_manager)
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
-        brands: list[Brand] = self.__data_manager.session.query(Brand.id).limit(20).all()
+        brands: list[Brand] = self._data_manager.session.query(Brand.id).limit(20).all()
         products = []
         for brand in brands:
-            products.extend(self.__data_manager.session
+            products.extend(self._data_manager.session
                             .query(Product)
                             .filter(Product.brand_id == brand.id)
                             .limit(3)

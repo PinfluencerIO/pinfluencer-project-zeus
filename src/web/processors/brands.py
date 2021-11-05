@@ -1,3 +1,5 @@
+from src.data_access_layer.brand import Brand
+from src.interfaces.data_manager_interface import DataManagerInterface
 from src.web.processors import ProcessInterface
 from src.web.filters import FilterChain
 from src.web.http_util import PinfluencerResponse
@@ -8,12 +10,16 @@ from src.web.processors.hacks import old_manual_functions
 
 
 class ProcessPublicBrands(ProcessInterface):
-    def __init__(self):
-        pass
+    def __init__(self, data_manager: DataManagerInterface):
+        super().__init__(data_manager)
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
-        return old_manual_functions.get_all_brands()
+        brands: list[Brand] = self._data_manager.session.query(Brand).all()
+        brandsDict = []
+        for brand in brands:
+            brandsDict.append(brand.as_dict())
+        return PinfluencerResponse(body=brandsDict)
 
 
 class ProcessPublicGetBrandBy(ProcessInterface):

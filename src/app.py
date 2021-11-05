@@ -43,7 +43,7 @@ routes = OrderedDict(
     {
         # public endpoints
         'GET /feed': ProcessPublicFeed(DataManager()),
-        'GET /brands': ProcessPublicBrands(),
+        'GET /brands': ProcessPublicBrands(DataManager()),
         'GET /brands/{brand_id}': ProcessPublicGetBrandBy(FilterChainImp([ValidBrandId()])),
         'GET /brands/{brand_id}/products': ProcessPublicAllProductsForBrand(FilterChainImp([ValidBrandId()])),
         'GET /products': ProcessPublicProducts(),
