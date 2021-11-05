@@ -1,7 +1,5 @@
 from sqlalchemy import Column, String, ForeignKey
 from sqlalchemy.orm import relationship
-
-import src
 from src.data_access_layer.db_constants import PRODUCT_TBL_NAME, BRAND_TBL_NAME
 from src.data_access_layer.entities.base_entity import BaseEntity, BaseMeta
 import src.data_access_layer.entities.brand_entity as brand_module

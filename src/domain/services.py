@@ -7,7 +7,6 @@ from src.web.processors.feed import ProcessPublicFeed
 class Container:
     data_manager: DataManager
     product_repo: ProductRepositoryInterface
-    process_public_feed: ProcessPublicFeed
 
     def __init__(self):
         self.data_manager = DataManager()
