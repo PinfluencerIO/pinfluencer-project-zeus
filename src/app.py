@@ -50,24 +50,24 @@ routes = OrderedDict(
         'GET /products/{product_id}': ProcessPublicGetProductBy(FilterChainImp([ValidProductId()])),
 
         # authenticated brand endpoints
-        'GET /brands/me': ProcessAuthenticatedGetBrand(FilterChainImp([(AuthFilter())])),
+        'GET /brands/me': ProcessAuthenticatedGetBrand(FilterChainImp([(LegacyAuthFilter())])),
         'POST /brands/me': ProcessAuthenticatedPostBrand(
             FilterChainImp([OneTimeCreateBrandFilter(), BrandPostPayloadValidation()])),
-        'PUT /brands/me': ProcessAuthenticatedPutBrand(FilterChainImp([AuthFilter(), BrandPutPayloadValidation()])),
+        'PUT /brands/me': ProcessAuthenticatedPutBrand(FilterChainImp([LegacyAuthFilter(), BrandPutPayloadValidation()])),
         'PATCH /brands/me/image': ProcessAuthenticatedPatchBrandImage(
-            FilterChainImp([AuthFilter(), BrandImagePatchPayloadValidation()])),
+            FilterChainImp([LegacyAuthFilter(), BrandImagePatchPayloadValidation()])),
 
         # authenticated product endpoints
-        'GET /products/me': ProcessAuthenticatedGetProduct(FilterChainImp([AuthFilter()])),
+        'GET /products/me': ProcessAuthenticatedGetProduct(FilterChainImp([LegacyAuthFilter()])),
         'GET /products/me/{product_id}': ProcessAuthenticatedGetProductById(
-            FilterChainImp([AuthFilter(), ValidProductId(), OwnerOnly('product')])),
+            FilterChainImp([LegacyAuthFilter(), ValidProductId(), OwnerOnly('product')])),
         'POST /products/me': ProcessAuthenticatedPostProduct(
-            FilterChainImp([AuthFilter(), ProductPostPayloadValidation()])),
+            FilterChainImp([LegacyAuthFilter(), ProductPostPayloadValidation()])),
         'PUT /products/me/{product_id}': ProcessAuthenticatedPutProduct(
-            FilterChainImp([AuthFilter(), ValidProductId(), OwnerOnly('product'), ProductPutPayloadValidation()])),
+            FilterChainImp([LegacyAuthFilter(), ValidProductId(), OwnerOnly('product'), ProductPutPayloadValidation()])),
         'PATCH /products/me/{product_id}/image': ProcessAuthenticatedPatchProductImage(FilterChainImp(
-            [AuthFilter(), ValidProductId(), OwnerOnly('product'), ProductImagePatchPayloadValidation()])),
+            [LegacyAuthFilter(), ValidProductId(), OwnerOnly('product'), ProductImagePatchPayloadValidation()])),
         'DELETE /products/me/{product_id}': ProcessAuthenticatedDeleteProduct(
-            FilterChainImp([AuthFilter(), ValidProductId(), OwnerOnly('product')])),
+            FilterChainImp([LegacyAuthFilter(), ValidProductId(), OwnerOnly('product')])),
     }
 )
