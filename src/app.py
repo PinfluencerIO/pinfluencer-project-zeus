@@ -1,5 +1,4 @@
 from src.common.log_util import print_exception
-from src.data_access_layer.data_manager import DataManager
 from src.web.processors.brands import *
 from src.web.processors.feed import *
 from src.web.processors.products import *
@@ -22,7 +21,7 @@ def lambda_handler(event, context):
         return PinfluencerResponse.as_404_error().as_json()
     except NotFoundByAuthUser as e:
         print(f'NotFoundByAuthUser')
-        return PinfluencerResponse.as_401_error(str(e)).as_json()
+        return PinfluencerResponse.as_401_error(e).as_json()
     except OwnershipError as ownership:
         return PinfluencerResponse.as_401_error(str(ownership)).as_json()
     except InvalidId:
@@ -42,7 +41,7 @@ def lambda_handler(event, context):
 routes = OrderedDict(
     {
         # public endpoints
-        'GET /feed': ProcessPublicFeed(AlchemyProductRepository(DataManager())),
+        'GET /feed': ProcessPublicFeed(),
         'GET /brands': ProcessPublicBrands(),
         'GET /brands/{brand_id}': ProcessPublicGetBrandBy(FilterChainImp([ValidBrandId()])),
         'GET /brands/{brand_id}/products': ProcessPublicAllProductsForBrand(FilterChainImp([ValidBrandId()])),
