@@ -16,10 +16,10 @@ class ProcessPublicBrands(ProcessInterface):
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
         brands: list[Brand] = self._data_manager.session.query(Brand).all()
-        brandsDict = []
+        list_of_formatted_brands = []
         for brand in brands:
-            brandsDict.append(brand.as_dict())
-        return PinfluencerResponse(body=brandsDict)
+            list_of_formatted_brands.append(brand.as_dict())
+        return PinfluencerResponse(body=list_of_formatted_brands)
 
 
 class ProcessPublicGetBrandBy(ProcessInterface):
