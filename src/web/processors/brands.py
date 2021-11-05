@@ -1,3 +1,4 @@
+from src.data_access_layer import to_list
 from src.data_access_layer.brand import Brand
 from src.interfaces.data_manager_interface import DataManagerInterface
 from src.web.processors import ProcessInterface
@@ -14,12 +15,7 @@ class ProcessPublicBrands(ProcessInterface):
         super().__init__(data_manager)
 
     def do_process(self, event: dict) -> PinfluencerResponse:
-        print(self)
-        brands: list[Brand] = self._data_manager.session.query(Brand).all()
-        list_of_formatted_brands = []
-        for brand in brands:
-            list_of_formatted_brands.append(brand.as_dict())
-        return PinfluencerResponse(body=list_of_formatted_brands)
+        return PinfluencerResponse(body=to_list(self._data_manager.session.query(Brand).all()))
 
 
 class ProcessPublicGetBrandBy(ProcessInterface):

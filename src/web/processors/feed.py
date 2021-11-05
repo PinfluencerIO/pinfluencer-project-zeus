@@ -1,3 +1,4 @@
+from src.data_access_layer import to_list
 from src.data_access_layer.product import Product
 from src.data_access_layer.brand import Brand
 from src.interfaces.data_manager_interface import DataManagerInterface
@@ -10,7 +11,6 @@ class ProcessPublicFeed(ProcessInterface):
         super().__init__(data_manager)
 
     def do_process(self, event: dict) -> PinfluencerResponse:
-        print(self)
         brands: list[Brand] = self._data_manager.session.query(Brand.id).limit(20).all()
         products = []
         for brand in brands:
@@ -19,8 +19,4 @@ class ProcessPublicFeed(ProcessInterface):
                             .filter(Product.brand_id == brand.id)
                             .limit(3)
                             .all())
-        limitedProducts = products[:20]
-        productsDict = []
-        for product in limitedProducts:
-            productsDict.append(product.as_dict())
-        return PinfluencerResponse(body=productsDict)
+        return PinfluencerResponse(body=to_list(products[:20]))
