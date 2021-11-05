@@ -1,9 +1,11 @@
+from dataclasses import dataclass
+
 from sqlalchemy import String, Column
-from sqlalchemy.orm import relationship
 
 from src.data_access_layer import BaseEntity, BaseMeta, BRAND_TBL_NAME
 
 
+@dataclass
 class Brand(BaseMeta, BaseEntity):
     __tablename__ = BRAND_TBL_NAME
 
@@ -14,7 +16,7 @@ class Brand(BaseMeta, BaseEntity):
     instahandle: str = Column(type_=String(length=30), nullable=True)
     auth_user_id: str = Column(type_=String(length=64), nullable=False, unique=True)
 
-    def as_dict(self):
+    def as_dict(self) -> dict:
         return {
             "id": self.id,
             "created": self.created,
@@ -25,3 +27,12 @@ class Brand(BaseMeta, BaseEntity):
             "instahandle": self.instahandle,
             "auth_user_id": self.auth_user_id
         }
+
+
+def brand_from_dict(brand: dict) -> Brand:
+    return Brand(name=brand["name"],
+                 description=brand["description"],
+                 website=brand["website"],
+                 email=brand["email"],
+                 instahandle=brand["instahandle"],
+                 auth_user_id=brand["auth_user_id"])

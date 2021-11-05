@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from sqlalchemy import Column, String, ForeignKey
 from sqlalchemy.orm import relationship
 
@@ -5,6 +7,7 @@ from src.data_access_layer import BaseEntity, BaseMeta, PRODUCT_TBL_NAME, BRAND_
 from src.data_access_layer.brand import Brand
 
 
+@dataclass
 class Product(BaseMeta, BaseEntity):
     __tablename__ = PRODUCT_TBL_NAME
 
@@ -33,3 +36,10 @@ class Product(BaseMeta, BaseEntity):
                 "name": self.owner.name
             }
         }
+
+
+def product_from_dict(product: dict) -> Product:
+    return Product(name=product["name"],
+                   description=product["description"],
+                   requirements=product["requirements"],
+                   brand_id=product["brand_id"])

@@ -20,3 +20,10 @@ class BaseEntity:
     @abstractmethod
     def as_dict(self):
         pass
+
+
+def to_list(data: list[BaseEntity]) -> list[dict]:
+    data_dict: list[dict] = []
+    for data_item in data:
+        data_dict.append(data_item.as_dict())
+    return data_dict
