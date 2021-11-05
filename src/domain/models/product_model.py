@@ -6,8 +6,7 @@ import src.domain.models.brand_model as brand_module
 
 
 @dataclass
-class Owner:
-    id: str
+class Owner(BaseModel):
     name: str
 
 

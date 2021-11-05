@@ -37,4 +37,5 @@ class AlchemyProductRepository(ProductRepositoryInterface):
                             description=product.description,
                             requirements=product.requirements,
                             brand=Owner(id=product.owner.id,
-                                        name=product.owner.created))
+                                        name=product.owner.name,
+                                        created=product.owner.created))
