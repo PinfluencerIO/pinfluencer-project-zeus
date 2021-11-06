@@ -52,7 +52,7 @@ routes = OrderedDict(
         'GET /brands/{brand_id}/products': ProcessPublicAllProductsForBrand(
             FilterChainImp([container.valid_brand_filter]),
             container.data_manager),
-        'GET /products': ProcessPublicProducts(),
+        'GET /products': ProcessPublicProducts(container.data_manager),
         'GET /products/{product_id}': ProcessPublicGetProductBy(FilterChainImp([ValidProductId()])),
 
         # authenticated brand endpoints
