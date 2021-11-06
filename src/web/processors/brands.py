@@ -42,7 +42,7 @@ class ProcessPublicAllProductsForBrand(ProcessInterface):
         return PinfluencerResponse(body=to_list(self._data_manager.session
                                                 .query(Product)
                                                 .filter(Product.brand_id == event['brand']['id'])
-                                                .first()))
+                                                .all()))
 
 
 class ProcessAuthenticatedGetBrand(ProcessInterface):
