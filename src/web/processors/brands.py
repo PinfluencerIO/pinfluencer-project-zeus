@@ -4,10 +4,9 @@ from src.data_access_layer import to_list
 from src.data_access_layer.brand import Brand, brand_from_dict
 from src.data_access_layer.product import Product
 from src.interfaces.data_manager_interface import DataManagerInterface
-from src.web.processors import ProcessInterface, get_user
 from src.web.filters import FilterChain
 from src.web.http_util import PinfluencerResponse
-from src.web.processors.hacks import old_manual_functions
+from src.web.processors import ProcessInterface, get_user
 
 
 # Todo: Implement these processors
@@ -30,11 +29,7 @@ class ProcessPublicGetBrandBy(ProcessInterface):
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         self.filters.do_chain(event)
-        brand: Brand = (self._data_manager.session
-                        .query(Brand)
-                        .filter(Brand.id == event['brand']['id'])
-                        .first())
-        return PinfluencerResponse(body=brand.as_dict())
+        return PinfluencerResponse(body=event["brand"])
 
 
 class ProcessPublicAllProductsForBrand(ProcessInterface):

@@ -1,13 +1,11 @@
+from collections import OrderedDict
+
 from src.common.log_util import print_exception
-from src.data_access_layer.data_manager import DataManager
 from src.services import Container
+from src.web.filters import *
 from src.web.processors.brands import *
 from src.web.processors.feed import *
 from src.web.processors.products import *
-
-from src.web.filters import *
-from src.web.http_util import PinfluencerResponse
-from collections import OrderedDict
 
 container: Container = Container()
 
@@ -49,9 +47,11 @@ routes = OrderedDict(
         # public endpoints
         'GET /feed': ProcessPublicFeed(container.data_manager),
         'GET /brands': ProcessPublicBrands(container.data_manager),
-        'GET /brands/{brand_id}': ProcessPublicGetBrandBy(FilterChainImp([ValidBrandId()]), container.data_manager),
-        'GET /brands/{brand_id}/products': ProcessPublicAllProductsForBrand(FilterChainImp([ValidBrandId()]),
-                                                                            container.data_manager),
+        'GET /brands/{brand_id}': ProcessPublicGetBrandBy(FilterChainImp([container.valid_brand_filter]),
+                                                          container.data_manager),
+        'GET /brands/{brand_id}/products': ProcessPublicAllProductsForBrand(
+            FilterChainImp([container.valid_brand_filter]),
+            container.data_manager),
         'GET /products': ProcessPublicProducts(),
         'GET /products/{product_id}': ProcessPublicGetProductBy(FilterChainImp([ValidProductId()])),
 

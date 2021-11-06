@@ -6,10 +6,8 @@ from jsonschema import validate
 from sqlalchemy.orm import Query
 
 from src.common import log_util
-from src.data_access_layer import to_list
 from src.data_access_layer.brand import Brand
 from src.interfaces.data_manager_interface import DataManagerInterface
-from src.web.processors.hacks.brand_helps import select_brand_by_id, select_brand_by_auth_user_id
 from src.web.processors.hacks.product_helps import select_product_by_id
 
 
@@ -67,8 +65,8 @@ class FilterChainImp(FilterChain):
 
 
 class ValidBrandId(FilterInterface):
-    def __init__(self):
-        pass
+    def __init__(self, data_manager: DataManagerInterface):
+        self.__data_manager = data_manager
 
     def do_filter(self, event: dict):
         try:
@@ -78,15 +76,18 @@ class ValidBrandId(FilterInterface):
 
         if valid_uuid(id_):
             try:
-                list_of_brands = select_brand_by_id(id_)
+                brand: Brand = (self.__data_manager.session
+                                .query(Brand)
+                                .filter(Brand.id == event['pathParameters']['brand_id'])
+                                .first())
             except Exception as e:
                 print(f'Failed db call get brand by id {id_}')
                 raise e
 
-            if len(list_of_brands) == 0:
+            if brand is None:
                 raise NotFoundById(f'Failed to find brand by id {id_}')
             else:
-                event['brand'] = list_of_brands[0]
+                event['brand'] = brand.as_dict()
         else:
             raise InvalidId(f'Invalid id {id_} in path for brand')
 
@@ -168,8 +169,8 @@ class AuthFilter(FilterInterface):
             auth_user_id = event['requestContext']['authorizer']['jwt']['claims']['cognito:username']
 
             print(f'AuthFilter has found the require cognito:username key with {auth_user_id}')
-            brandQuery: Query = self.__data_manager.session\
-                .query(Brand)\
+            brandQuery: Query = self.__data_manager.session \
+                .query(Brand) \
                 .filter(Brand.auth_user_id == auth_user_id)
             brand: Brand = brandQuery.first()
             if brand is None:
