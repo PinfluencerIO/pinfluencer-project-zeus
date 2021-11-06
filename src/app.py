@@ -69,7 +69,8 @@ routes = OrderedDict(
             FilterChainImp([container.auth_filter, BrandImagePatchPayloadValidation()])),
 
         # authenticated product endpoints
-        'GET /products/me': ProcessAuthenticatedGetProduct(FilterChainImp([container.auth_filter])),
+        'GET /products/me': ProcessAuthenticatedGetProduct(FilterChainImp([container.auth_filter]),
+                                                           container.data_manager),
         'GET /products/me/{product_id}': ProcessAuthenticatedGetProductById(
             FilterChainImp([container.auth_filter, container.valid_product_filter, OwnerOnly('product')]),
             container.data_manager),
