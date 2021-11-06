@@ -1,8 +1,10 @@
+import json
+
 from src.data_access_layer import to_list
 from src.data_access_layer.brand import Brand, brand_from_dict
 from src.data_access_layer.product import Product
 from src.interfaces.data_manager_interface import DataManagerInterface
-from src.web.processors import ProcessInterface
+from src.web.processors import ProcessInterface, get_user
 from src.web.filters import FilterChain
 from src.web.http_util import PinfluencerResponse
 from src.web.processors.hacks import old_manual_functions
@@ -84,7 +86,9 @@ class ProcessAuthenticatedPostBrand(ProcessInterface):
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         self.filter.do_chain(event)
-        brand = brand_from_dict(event["body"])
+        brand_dict = json.loads(event['body'])
+        brand_dict["auth_user_id"] = get_user(event=event)
+        brand = brand_from_dict(brand_dict)
         self._data_manager.session.add(brand)
         self._data_manager.session.commit()
         return PinfluencerResponse.as_created(brand.id)

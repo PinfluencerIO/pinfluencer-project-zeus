@@ -15,3 +15,7 @@ class ProcessInterface(abc.ABC):
     @abc.abstractmethod
     def do_process(self, event: dict) -> PinfluencerResponse:
         pass
+
+
+def get_user(event):
+    return event['requestContext']['authorizer']['jwt']['claims']['cognito:username']
