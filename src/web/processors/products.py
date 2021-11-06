@@ -40,12 +40,17 @@ class ProcessAuthenticatedGetProductById(ProcessInterface):
 
 
 class ProcessAuthenticatedGetProduct(ProcessInterface):
-    def __init__(self, filter_chain: FilterChain):
+    def __init__(self, filter_chain: FilterChain, data_manager: DataManagerInterface):
+        super().__init__(data_manager)
         self.filter = filter_chain
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         self.filter.do_chain(event)
-        return old_manual_functions.get_authenticated_products(event)
+        products: list[Product] = (self._data_manager.session
+                                   .query(Product)
+                                   .filter(Product.brand_id == event["auth_brand"])
+                                   .all())
+        return PinfluencerResponse(body=to_list(products))
 
 
 class ProcessAuthenticatedPostProduct(ProcessInterface):
