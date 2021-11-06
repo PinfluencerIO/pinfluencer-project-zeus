@@ -1,17 +1,17 @@
 import base64
-import datetime
+import io
 import json
 import uuid
+
 import boto3
 import filetype as filetype
-import io
 
+from src.web.http_util import PinfluencerResponse
 from src.web.processors.hacks import brand_helps, product_helps
 from src.web.processors.hacks.brand_helps import select_brand_by_auth_user_id
 from src.web.processors.hacks.old_manual_db import execute_query, PRODUCT_TEMPLATE, \
     format_records, COLUMNS_FOR_BRAND_FOR_INSERT, COLUMNS_FOR_PRODUCT_FOR_INSERT
 from src.web.processors.hacks.product_helps import select_product_by_id
-from src.web.http_util import PinfluencerResponse
 
 s3 = boto3.client('s3')
 
@@ -99,7 +99,7 @@ def create_authenticated_brand(event):
     email = get_email(body, event)
     user = get_user(event)
     sql = "INSERT INTO brand(" + " ,".join(COLUMNS_FOR_BRAND_FOR_INSERT) + ") " \
-        "VALUES (:id, :name, :description, :website, :email, :instahandle, :auth_user_id)"
+                                                                           "VALUES (:id, :name, :description, :website, :email, :instahandle, :auth_user_id)"
 
     sql_parameters = [
         {'name': 'id', 'value': {'stringValue': id_}},
@@ -209,12 +209,12 @@ def patch_product_image(event):
 
 
 def patch_brand_image(event):
-    etag = upload_image_to_s3(event['auth_brand']['id'],  None, image_base64_encoded=json.loads(event['body'])['image'])
+    etag = upload_image_to_s3(event['auth_brand']['id'], None, image_base64_encoded=json.loads(event['body'])['image'])
     return PinfluencerResponse(status_code=200, body=etag)
 
 
 # Todo: When implementing this again in OO, use SQS so failures can be mitigated
-def upload_image_to_s3(brand_id: str, product_id_, image_base64_encoded:str):
+def upload_image_to_s3(brand_id: str, product_id_, image_base64_encoded: str):
     print(f'brand {brand_id}, product{product_id_}')
     image = base64.b64decode(image_base64_encoded)
     f = io.BytesIO(image)

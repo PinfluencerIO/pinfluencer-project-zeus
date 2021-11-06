@@ -22,7 +22,7 @@ class Brand(BaseMeta, BaseEntity):
             "created": self.created,
             "name": self.name,
             "description": self.description,
-            "website":  self.website,
+            "website": self.website,
             "email": self.email,
             "instahandle": self.instahandle,
             "auth_user_id": self.auth_user_id

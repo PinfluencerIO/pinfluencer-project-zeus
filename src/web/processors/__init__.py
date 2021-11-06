@@ -3,6 +3,7 @@ import abc
 from src.interfaces.data_manager_interface import DataManagerInterface
 from src.web.http_util import PinfluencerResponse
 
+
 # Todo: Not sure this is the right place for an interface...read up about it.
 
 

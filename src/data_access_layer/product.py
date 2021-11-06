@@ -30,7 +30,7 @@ class Product(BaseMeta, BaseEntity):
             "created": self.created,
             "name": self.name,
             "description": self.description,
-            "requirements":  self.requirements,
+            "requirements": self.requirements,
             "brand": {
                 "id": self.owner.id,
                 "name": self.owner.name

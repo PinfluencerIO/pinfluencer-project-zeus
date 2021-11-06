@@ -62,7 +62,7 @@ routes = OrderedDict(
                             BrandPostPayloadValidation()]),
             container.data_manager),
         'PUT /brands/me': ProcessAuthenticatedPutBrand(FilterChainImp([container.auth_filter,
-                                                       BrandPutPayloadValidation()]),
+                                                                       BrandPutPayloadValidation()]),
                                                        container.data_manager),
         'PATCH /brands/me/image': ProcessAuthenticatedPatchBrandImage(
             FilterChainImp([container.auth_filter, BrandImagePatchPayloadValidation()])),
