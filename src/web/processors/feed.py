@@ -1,9 +1,9 @@
 from src.data_access_layer import to_list
-from src.data_access_layer.product import Product
 from src.data_access_layer.brand import Brand
+from src.data_access_layer.product import Product
 from src.interfaces.data_manager_interface import DataManagerInterface
-from src.web.processors import ProcessInterface
 from src.web.http_util import PinfluencerResponse
+from src.web.processors import ProcessInterface
 
 
 class ProcessPublicFeed(ProcessInterface):
