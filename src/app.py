@@ -71,7 +71,8 @@ routes = OrderedDict(
         # authenticated product endpoints
         'GET /products/me': ProcessAuthenticatedGetProduct(FilterChainImp([container.auth_filter])),
         'GET /products/me/{product_id}': ProcessAuthenticatedGetProductById(
-            FilterChainImp([container.auth_filter, container.valid_product_filter, OwnerOnly('product')])),
+            FilterChainImp([container.auth_filter, container.valid_product_filter, OwnerOnly('product')]),
+            container.data_manager),
         'POST /products/me': ProcessAuthenticatedPostProduct(
             FilterChainImp([container.auth_filter, ProductPostPayloadValidation()])),
         'PUT /products/me/{product_id}': ProcessAuthenticatedPutProduct(
