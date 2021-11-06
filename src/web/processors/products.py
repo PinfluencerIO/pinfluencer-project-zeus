@@ -1,3 +1,6 @@
+from src.data_access_layer import to_list
+from src.data_access_layer.product import Product
+from src.interfaces.data_manager_interface import DataManagerInterface
 from src.web.filters import FilterChain
 from src.web.http_util import PinfluencerResponse
 from src.web.processors import ProcessInterface
@@ -8,12 +11,12 @@ from src.web.processors.hacks import old_manual_functions
 
 
 class ProcessPublicProducts(ProcessInterface):
-    def __init__(self):
-        pass
+    def __init__(self, data_manager: DataManagerInterface):
+        super().__init__(data_manager)
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
-        return old_manual_functions.get_all_products()
+        return PinfluencerResponse(body=to_list(self._data_manager.session.query(Product).all()))
 
 
 class ProcessPublicGetProductBy(ProcessInterface):
