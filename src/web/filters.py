@@ -7,8 +7,8 @@ from sqlalchemy.orm import Query
 
 from src.common import log_util
 from src.data_access_layer.brand import Brand
+from src.data_access_layer.product import Product
 from src.interfaces.data_manager_interface import DataManagerInterface
-from src.web.processors.hacks.product_helps import select_product_by_id
 
 
 class MissingPathParameter(Exception):
@@ -78,7 +78,7 @@ class ValidBrandId(FilterInterface):
             try:
                 brand: Brand = (self.__data_manager.session
                                 .query(Brand)
-                                .filter(Brand.id == event['pathParameters']['brand_id'])
+                                .filter(Brand.id == id_)
                                 .first())
             except Exception as e:
                 print(f'Failed db call get brand by id {id_}')
@@ -93,8 +93,8 @@ class ValidBrandId(FilterInterface):
 
 
 class ValidProductId(FilterInterface):
-    def __init__(self):
-        pass
+    def __init__(self, data_manager: DataManagerInterface):
+        self.__data_manager = data_manager
 
     def do_filter(self, event: dict):
         try:
@@ -106,15 +106,18 @@ class ValidProductId(FilterInterface):
         if valid_uuid(id_):
             print('valid product id in path')
             try:
-                list_of_products = select_product_by_id(id_)
+                product: Product = (self.__data_manager.session
+                                    .query(Product)
+                                    .filter(Product.id == id_)
+                                    .first())
             except Exception as e:
                 print(f'Failed db call get product by id {id_}')
                 raise e
 
-            if len(list_of_products) == 0:
+            if product is None:
                 raise NotFoundById(f'Failed to find product by id {id_}')
             else:
-                event['product'] = list_of_products[0]
+                event['product'] = product.as_dict()
         else:
             raise InvalidId(f'Invalid id {id_} in path for product')
 

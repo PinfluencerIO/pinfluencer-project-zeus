@@ -20,12 +20,13 @@ class ProcessPublicProducts(ProcessInterface):
 
 
 class ProcessPublicGetProductBy(ProcessInterface):
-    def __init__(self, filter_chain: FilterChain):
+    def __init__(self, filter_chain: FilterChain, data_manager: DataManagerInterface):
+        super().__init__(data_manager)
         self.filter = filter_chain
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         self.filter.do_chain(event)
-        return old_manual_functions.get_product_by_id(event)
+        return PinfluencerResponse(body=event['product'])
 
 
 class ProcessAuthenticatedGetProductById(ProcessInterface):

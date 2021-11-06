@@ -53,7 +53,8 @@ routes = OrderedDict(
             FilterChainImp([container.valid_brand_filter]),
             container.data_manager),
         'GET /products': ProcessPublicProducts(container.data_manager),
-        'GET /products/{product_id}': ProcessPublicGetProductBy(FilterChainImp([ValidProductId()])),
+        'GET /products/{product_id}': ProcessPublicGetProductBy(FilterChainImp([container.valid_product_filter]),
+                                                                container.data_manager),
 
         # authenticated brand endpoints
         'GET /brands/me': ProcessAuthenticatedGetBrand(FilterChainImp([container.auth_filter]), container.data_manager),
@@ -70,15 +71,17 @@ routes = OrderedDict(
         # authenticated product endpoints
         'GET /products/me': ProcessAuthenticatedGetProduct(FilterChainImp([container.auth_filter])),
         'GET /products/me/{product_id}': ProcessAuthenticatedGetProductById(
-            FilterChainImp([container.auth_filter, ValidProductId(), OwnerOnly('product')])),
+            FilterChainImp([container.auth_filter, container.valid_product_filter, OwnerOnly('product')])),
         'POST /products/me': ProcessAuthenticatedPostProduct(
             FilterChainImp([container.auth_filter, ProductPostPayloadValidation()])),
         'PUT /products/me/{product_id}': ProcessAuthenticatedPutProduct(
             FilterChainImp(
-                [container.auth_filter, ValidProductId(), OwnerOnly('product'), ProductPutPayloadValidation()])),
+                [container.auth_filter, container.valid_product_filter, OwnerOnly('product'),
+                 ProductPutPayloadValidation()])),
         'PATCH /products/me/{product_id}/image': ProcessAuthenticatedPatchProductImage(FilterChainImp(
-            [container.auth_filter, ValidProductId(), OwnerOnly('product'), ProductImagePatchPayloadValidation()])),
+            [container.auth_filter, container.valid_product_filter, OwnerOnly('product'),
+             ProductImagePatchPayloadValidation()])),
         'DELETE /products/me/{product_id}': ProcessAuthenticatedDeleteProduct(
-            FilterChainImp([container.auth_filter, ValidProductId(), OwnerOnly('product')])),
+            FilterChainImp([container.auth_filter, container.valid_product_filter, OwnerOnly('product')])),
     }
 )
