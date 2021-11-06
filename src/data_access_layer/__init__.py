@@ -15,7 +15,7 @@ class BaseEntity:
     __tablename__: str
 
     id: str = Column(type_=String(length=36), primary_key=True, default=uuid.uuid4, nullable=False)
-    created: datetime = Column(DateTime, nullable=False)
+    created: datetime = Column(DateTime, nullable=False, default=datetime.utcnow)
 
     @abstractmethod
     def as_dict(self):
