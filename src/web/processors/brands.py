@@ -67,10 +67,11 @@ class ProcessAuthenticatedPutBrand(ProcessInterface):
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         self.filter.do_chain(event)
+        brand_body = json.loads(event['body'])
         brand: Brand = self._data_manager.session.query(Brand)\
-            .filter(Brand.id == event["brand"]["id"])\
+            .filter(Brand.id == brand_body["id"])\
             .first()
-        brand_from_body = brand_from_dict(json.loads(event['body']))
+        brand_from_body = brand_from_dict(brand_body)
         brand.name = brand_from_body.name
         brand.description = brand_from_body.description
         brand.website = brand_from_body.website
