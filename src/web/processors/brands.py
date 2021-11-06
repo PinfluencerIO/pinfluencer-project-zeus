@@ -70,7 +70,7 @@ class ProcessAuthenticatedPutBrand(ProcessInterface):
         brand: Brand = self._data_manager.session.query(Brand)\
             .filter(Brand.id == event["brand"]["id"])\
             .first()
-        brand_from_body = brand_from_dict(event['body'])
+        brand_from_body = brand_from_dict(json.loads(event['body']))
         brand.name = brand_from_body.name
         brand.description = brand_from_body.description
         brand.website = brand_from_body.website
