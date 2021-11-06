@@ -30,9 +30,12 @@ class Brand(BaseMeta, BaseEntity):
 
 
 def brand_from_dict(brand: dict) -> Brand:
+    auth_user_id = ""
+    if "auth_user_id" in brand:
+        auth_user_id = brand["auth_user_id"]
     return Brand(name=brand["name"],
                  description=brand["description"],
                  website=brand["website"],
                  email=brand["email"],
                  instahandle=brand["instahandle"],
-                 auth_user_id=brand["auth_user_id"])
+                 auth_user_id=auth_user_id)
