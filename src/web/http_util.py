@@ -37,3 +37,11 @@ class PinfluencerResponse:
     @staticmethod
     def as_400_error(message: str = 'Client error, please check request.'):
         return PinfluencerResponse(400, {"message": message})
+
+    @staticmethod
+    def as_updated(id: str):
+        return PinfluencerResponse(body={"message": f'{id} updated successfully'})
+
+    @staticmethod
+    def as_created(id: str):
+        return PinfluencerResponse(body={"id": f'{id} created successfully'})
