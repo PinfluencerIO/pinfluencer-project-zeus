@@ -30,10 +30,11 @@ class ProcessPublicGetBrandBy(ProcessInterface):
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         self.filters.do_chain(event)
-        return PinfluencerResponse(body=to_list(self._data_manager.session
-                                                .query(Brand)
-                                                .filter(Brand.id == event['brand']['id'])
-                                                .first()))
+        brand: Brand = (self._data_manager.session
+                        .query(Brand)
+                        .filter(Brand.id == event['brand']['id'])
+                        .first())
+        return PinfluencerResponse(body=brand.as_dict())
 
 
 class ProcessPublicAllProductsForBrand(ProcessInterface):
