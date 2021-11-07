@@ -92,13 +92,16 @@ class ProcessAuthenticatedPutProduct(ProcessInterface):
 
 
 class ProcessAuthenticatedDeleteProduct(ProcessInterface):
-    def __init__(self, filter_chain: FilterChain):
+    def __init__(self, filter_chain: FilterChain, data_manager: DataManagerInterface):
+        super().__init__(data_manager)
         self.filter = filter_chain
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
         self.filter.do_chain(event)
-        return old_manual_functions.delete_authenticated_product(event)
+        self._data_manager.session.delete(product_from_dict(event['product']))
+        self._data_manager.session.commit()
+        return PinfluencerResponse.as_deleted()
 
 
 class ProcessAuthenticatedPatchProductImage(ProcessInterface):
@@ -108,12 +111,3 @@ class ProcessAuthenticatedPatchProductImage(ProcessInterface):
     def do_process(self, event: dict) -> PinfluencerResponse:
         self.filters.do_chain(event)
         return old_manual_functions.patch_product_image(event)
-
-
-class ProcessAuthenticatedPatchBrandImage(ProcessInterface):
-    def __init__(self, filter_chain: FilterChain) -> None:
-        self.filters = filter_chain
-
-    def do_process(self, event: dict) -> PinfluencerResponse:
-        self.filters.do_chain(event)
-        return old_manual_functions.patch_brand_image(event)

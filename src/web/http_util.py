@@ -44,4 +44,8 @@ class PinfluencerResponse:
 
     @staticmethod
     def as_created(id: str):
-        return PinfluencerResponse(body={"id": f'{id} created successfully'})
+        return PinfluencerResponse(body={"id": f'{id} created successfully'}, status_code=201)
+
+    @staticmethod
+    def as_deleted():
+        return PinfluencerResponse(body={"id": f'resource deleted successfully'})

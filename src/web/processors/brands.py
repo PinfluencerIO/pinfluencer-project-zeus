@@ -7,9 +7,8 @@ from src.interfaces.data_manager_interface import DataManagerInterface
 from src.web.filters import FilterChain
 from src.web.http_util import PinfluencerResponse
 from src.web.processors import ProcessInterface, get_user
-
-
 # Todo: Implement these processors
+from src.web.processors.hacks import old_manual_functions
 
 
 class ProcessPublicBrands(ProcessInterface):
@@ -88,3 +87,12 @@ class ProcessAuthenticatedPostBrand(ProcessInterface):
         self._data_manager.session.add(brand)
         self._data_manager.session.commit()
         return PinfluencerResponse.as_created(brand.id)
+
+
+class ProcessAuthenticatedPatchBrandImage(ProcessInterface):
+    def __init__(self, filter_chain: FilterChain) -> None:
+        self.filters = filter_chain
+
+    def do_process(self, event: dict) -> PinfluencerResponse:
+        self.filters.do_chain(event)
+        return old_manual_functions.patch_brand_image(event)
