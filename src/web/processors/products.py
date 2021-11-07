@@ -63,7 +63,9 @@ class ProcessAuthenticatedPostProduct(ProcessInterface):
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
         self.filter.do_chain(event)
-        self._data_manager.session.add(product_from_dict(json.loads(event['body'])))
+        product_dict: dict = json.loads(event['body'])
+        product_dict.update({'brand_id': event['auth_brand']['id']})
+        self._data_manager.session.add(product_from_dict(product_dict))
         self._data_manager.session.commit()
         return old_manual_functions.create_authenticated_product(event)
 
