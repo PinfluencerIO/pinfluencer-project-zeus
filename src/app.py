@@ -75,7 +75,8 @@ routes = OrderedDict(
             FilterChainImp([container.auth_filter, container.valid_product_filter, OwnerOnly('product')]),
             container.data_manager),
         'POST /products/me': ProcessAuthenticatedPostProduct(
-            FilterChainImp([container.auth_filter, ProductPostPayloadValidation()])),
+            FilterChainImp([container.auth_filter, OwnerOnly('product'), ProductPostPayloadValidation()]),
+            container.data_manager),
         'PUT /products/me/{product_id}': ProcessAuthenticatedPutProduct(
             FilterChainImp(
                 [container.auth_filter, container.valid_product_filter, OwnerOnly('product'),

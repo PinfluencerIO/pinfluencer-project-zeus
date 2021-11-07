@@ -1,5 +1,7 @@
+import json
+
 from src.data_access_layer import to_list
-from src.data_access_layer.product import Product
+from src.data_access_layer.product import Product, product_from_dict
 from src.interfaces.data_manager_interface import DataManagerInterface
 from src.web.filters import FilterChain
 from src.web.http_util import PinfluencerResponse
@@ -54,12 +56,15 @@ class ProcessAuthenticatedGetProduct(ProcessInterface):
 
 
 class ProcessAuthenticatedPostProduct(ProcessInterface):
-    def __init__(self, filter_chain: FilterChain):
+    def __init__(self, filter_chain: FilterChain, data_manager: DataManagerInterface):
+        super().__init__(data_manager)
         self.filter = filter_chain
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
         self.filter.do_chain(event)
+        self._data_manager.session.add(product_from_dict(json.loads(event['body'])))
+        self._data_manager.session.commit()
         return old_manual_functions.create_authenticated_product(event)
 
 
