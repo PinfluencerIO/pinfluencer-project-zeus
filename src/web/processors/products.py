@@ -72,13 +72,23 @@ class ProcessAuthenticatedPostProduct(ProcessInterface):
 
 
 class ProcessAuthenticatedPutProduct(ProcessInterface):
-    def __init__(self, filter_chain: FilterChain):
+    def __init__(self, filter_chain: FilterChain, data_manager: DataManagerInterface):
+        super().__init__(data_manager)
         self.filter = filter_chain
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
         self.filter.do_chain(event)
-        return old_manual_functions.update_authenticated_product(event)
+        product_from_req_body = product_from_dict(json.loads(event['body']))
+        product: Product = (self._data_manager.session
+                            .query(Product)
+                            .filter(Product.id == event['product']['id'])
+                            .first())
+        product.name = product_from_req_body.name
+        product.description = product_from_req_body.description
+        product.requirements = product_from_req_body.requirements
+        self._data_manager.session.commit()
+        return PinfluencerResponse.as_updated(product.id)
 
 
 class ProcessAuthenticatedDeleteProduct(ProcessInterface):

@@ -80,7 +80,7 @@ routes = OrderedDict(
         'PUT /products/me/{product_id}': ProcessAuthenticatedPutProduct(
             FilterChainImp(
                 [container.auth_filter, container.valid_product_filter, OwnerOnly('product'),
-                 ProductPutPayloadValidation()])),
+                 ProductPutPayloadValidation()]), container.data_manager),
         'PATCH /products/me/{product_id}/image': ProcessAuthenticatedPatchProductImage(FilterChainImp(
             [container.auth_filter, container.valid_product_filter, OwnerOnly('product'),
              ProductImagePatchPayloadValidation()])),
