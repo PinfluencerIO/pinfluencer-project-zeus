@@ -79,14 +79,14 @@ class ProcessAuthenticatedPutProduct(ProcessInterface):
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
         self.filter.do_chain(event)
-        product_from_req_body = product_from_dict(json.loads(event['body']))
+        product_from_req_body = json.loads(event['body'])
         product: Product = (self._data_manager.session
                             .query(Product)
                             .filter(Product.id == event['product']['id'])
                             .first())
-        product.name = product_from_req_body.name
-        product.description = product_from_req_body.description
-        product.requirements = product_from_req_body.requirements
+        product.name = product_from_req_body['name']
+        product.description = product_from_req_body['description']
+        product.requirements = product_from_req_body['requirements']
         self._data_manager.session.commit()
         return PinfluencerResponse.as_updated(product.id)
 
