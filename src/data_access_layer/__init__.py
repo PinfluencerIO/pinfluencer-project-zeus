@@ -8,8 +8,6 @@ from sqlalchemy.ext.declarative import declarative_base
 PRODUCT_TBL_NAME = 'product'
 BRAND_TBL_NAME = 'brand'
 
-BaseMeta = declarative_base()
-
 
 class BaseEntity:
     __tablename__: str
@@ -20,6 +18,9 @@ class BaseEntity:
     @abstractmethod
     def as_dict(self):
         pass
+
+
+Base = declarative_base(cls=BaseEntity)
 
 
 def to_list(data: list[BaseEntity]) -> list[dict]:

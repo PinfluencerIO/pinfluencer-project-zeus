@@ -3,12 +3,12 @@ from dataclasses import dataclass
 from sqlalchemy import Column, String, ForeignKey
 from sqlalchemy.orm import relationship
 
-from src.data_access_layer import BaseEntity, BaseMeta, PRODUCT_TBL_NAME, BRAND_TBL_NAME
+from src.data_access_layer import Base, PRODUCT_TBL_NAME, BRAND_TBL_NAME
 from src.data_access_layer.brand import Brand
 
 
 @dataclass
-class Product(BaseMeta, BaseEntity):
+class Product(Base):
     __tablename__ = PRODUCT_TBL_NAME
 
     name: str = Column(type_=String(length=120), nullable=False)

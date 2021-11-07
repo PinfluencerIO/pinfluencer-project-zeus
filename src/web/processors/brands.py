@@ -1,4 +1,10 @@
+import base64
+import io
 import json
+import uuid
+
+import boto3
+from filetype import filetype
 
 from src.data_access_layer import to_list
 from src.data_access_layer.brand import Brand, brand_from_dict
@@ -9,6 +15,8 @@ from src.web.http_util import PinfluencerResponse
 from src.web.processors import ProcessInterface, get_user
 # Todo: Implement these processors
 from src.web.processors.hacks import old_manual_functions
+
+s3 = boto3.client('s3')
 
 
 class ProcessPublicBrands(ProcessInterface):
@@ -82,11 +90,52 @@ class ProcessAuthenticatedPostBrand(ProcessInterface):
     def do_process(self, event: dict) -> PinfluencerResponse:
         self.filter.do_chain(event)
         brand_dict = json.loads(event['body'])
+        update_email(brand_dict, event)
         brand_dict["auth_user_id"] = get_user(event=event)
+        image_bytes = brand_dict['image']
+        brand_dict['image'] = None
         brand = brand_from_dict(brand_dict)
+
         self._data_manager.session.add(brand)
         self._data_manager.session.commit()
-        return PinfluencerResponse.as_created(brand.id)
+
+        image_id = upload_image_to_s3(brand.id, None, image_bytes)
+        brand: Brand = self._data_manager.session.query(Brand) \
+            .filter(Brand.id == brand.id) \
+            .first()
+        brand.image = image_id
+        self._data_manager.session.commit()
+
+        return PinfluencerResponse(body=brand.as_dict(), status_code=201)
+
+
+def update_email(body, event):
+    if ('email' in event['requestContext']['authorizer']['jwt']['claims'] and
+            event['requestContext']['authorizer']['jwt']['claims']['email'] is not None):
+        body['email'] = event['requestContext']['authorizer']['jwt']['claims']['email']
+
+
+def upload_image_to_s3(brand_id: str, product_id_, image_base64_encoded: str):
+    print(f'brand {brand_id}, product{product_id_}')
+    image = base64.b64decode(image_base64_encoded)
+    f = io.BytesIO(image)
+    file_type = filetype.guess(f)
+    if file_type is not None:
+        mime = file_type.MIME
+    else:
+        mime = 'image/jpg'
+
+    image_id = str(uuid.uuid4())
+    if product_id_ is None:
+        key = f'{brand_id}/{image_id}.{file_type.EXTENSION}'
+    else:
+        key = f'{brand_id}/{product_id_}/{image_id}.{file_type.EXTENSION}'
+    s3.put_object(Bucket='pinfluencer-product-images',
+                  Key=key, Body=image,
+                  ContentType=mime,
+                  Tagging='public=yes')
+
+    return image_id
 
 
 class ProcessAuthenticatedPatchBrandImage(ProcessInterface):
