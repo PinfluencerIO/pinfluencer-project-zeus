@@ -50,7 +50,7 @@ class ProcessAuthenticatedGetProduct(ProcessInterface):
         self.filter.do_chain(event)
         products: list[Product] = (self._data_manager.session
                                    .query(Product)
-                                   .filter(Product.brand_id == event["auth_brand"])
+                                   .filter(Product.brand_id == event["auth_brand"]['id'])
                                    .all())
         return PinfluencerResponse(body=to_list(products))
 
