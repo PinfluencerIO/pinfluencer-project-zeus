@@ -99,7 +99,9 @@ class ProcessAuthenticatedDeleteProduct(ProcessInterface):
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
         self.filter.do_chain(event)
-        self._data_manager.session.delete(product_from_dict(event['product']))
+        product_dict = event['product']
+        self._data_manager.session.delete(
+            product_from_dict(product_dict.update({'brand_id': product_dict['brand']['id']})))
         self._data_manager.session.commit()
         return PinfluencerResponse.as_deleted()
 
