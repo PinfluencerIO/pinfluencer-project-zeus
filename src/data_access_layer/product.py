@@ -43,7 +43,7 @@ def product_from_dict(product: dict, nested_brand: bool) -> Product:
                    description=product["description"],
                    requirements=product["requirements"])
     if nested_brand:
-        prod.brand_id = prod['brand']['id']
+        prod.brand_id = product['brand']['id']
     else:
-        prod.brand_id = prod['brand_id']
+        prod.brand_id = product['brand_id']
     return prod
