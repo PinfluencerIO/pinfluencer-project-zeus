@@ -2,11 +2,11 @@ from dataclasses import dataclass
 
 from sqlalchemy import String, Column
 
-from src.data_access_layer import Base, BRAND_TBL_NAME
+from src.data_access_layer import Base, BRAND_TBL_NAME, BaseEntity
 
 
 @dataclass
-class Brand(Base):
+class Brand(Base, BaseEntity):
     __tablename__ = BRAND_TBL_NAME
 
     name: str = Column(type_=String(length=120), nullable=False)

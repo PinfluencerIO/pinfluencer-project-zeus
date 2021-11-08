@@ -12,8 +12,6 @@ BRAND_TBL_NAME = 'brand'
 
 @dataclass
 class BaseEntity:
-    __tablename__: str
-
     id: str = Column(type_=String(length=36), primary_key=True, default=uuid.uuid4, nullable=False)
     created: datetime = Column(DateTime, nullable=False, default=datetime.utcnow)
 
@@ -22,7 +20,7 @@ class BaseEntity:
         pass
 
 
-Base = declarative_base(cls=BaseEntity)
+Base = declarative_base()
 
 
 def to_list(data: list[BaseEntity]) -> list[dict]:

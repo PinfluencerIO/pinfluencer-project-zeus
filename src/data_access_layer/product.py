@@ -3,12 +3,12 @@ from dataclasses import dataclass
 from sqlalchemy import Column, String, ForeignKey
 from sqlalchemy.orm import relationship
 
-from src.data_access_layer import Base, PRODUCT_TBL_NAME, BRAND_TBL_NAME
+from src.data_access_layer import Base, PRODUCT_TBL_NAME, BRAND_TBL_NAME, BaseEntity
 from src.data_access_layer.brand import Brand
 
 
 @dataclass
-class Product(Base):
+class Product(Base, BaseEntity):
     __tablename__ = PRODUCT_TBL_NAME
 
     name: str = Column(type_=String(length=120), nullable=False)
@@ -38,7 +38,7 @@ class Product(Base):
         }
 
 
-def product_from_dict(product: dict, nested_brand: bool) -> Product:
+def product_from_dict(product: dict, nested_brand: bool, id: bool) -> Product:
     prod = Product(name=product["name"],
                    description=product["description"],
                    requirements=product["requirements"])
@@ -46,4 +46,6 @@ def product_from_dict(product: dict, nested_brand: bool) -> Product:
         prod.brand_id = product['brand']['id']
     else:
         prod.brand_id = product['brand_id']
+    if id:
+        prod.id = product['id']
     return prod
