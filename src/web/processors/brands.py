@@ -40,7 +40,7 @@ class ProcessPublicAllProductsForBrand(ProcessInterface):
         self.filter.do_chain(event)
         return PinfluencerResponse(body=to_list(self._data_manager.session
                                                 .query(Product)
-                                                .filter(Product.brand_id == event['brand'].id)
+                                                .filter(Product.brand_id == event['brand']['id'])
                                                 .all()))
 
 
@@ -62,7 +62,7 @@ class ProcessAuthenticatedPutBrand(ProcessInterface):
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         self.filter.do_chain(event)
-        brand: Brand = event['auth_brand']
+        brand: Brand = brand_from_dict(event['auth_brand'])
         brand_from_body = brand_from_dict(json.loads(event['body']))
         brand.name = brand_from_body.name
         brand.description = brand_from_body.description
@@ -112,7 +112,7 @@ class ProcessAuthenticatedPatchBrandImage(ProcessInterface):
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         self.filters.do_chain(event)
-        brand: Brand = event['auth_brand']
+        brand: Brand = brand_from_dict(event['auth_brand'])
         # TODO: delete image
         image_id = upload_image_to_s3(f'{brand}', json.loads(event['body']['image']))
         brand.image = image_id

@@ -28,8 +28,7 @@ class ProcessPublicGetProductBy(ProcessInterface):
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         self.filter.do_chain(event)
-        product: Product = event['product']
-        return PinfluencerResponse(body=product.as_dict())
+        return PinfluencerResponse(body=event['product'])
 
 
 class ProcessAuthenticatedGetProductById(ProcessInterface):
@@ -65,7 +64,7 @@ class ProcessAuthenticatedPostProduct(ProcessInterface):
         print(self)
         self.filter.do_chain(event)
         product_dict: dict = json.loads(event['body'])
-        product_dict.update({'brand_id': event['auth_brand'].id})
+        product_dict.update({'brand_id': event['auth_brand']['id']})
         product: Product = product_from_dict(product_dict)
         self._data_manager.session.add(product)
         self._data_manager.session.commit()
@@ -81,7 +80,7 @@ class ProcessAuthenticatedPutProduct(ProcessInterface):
         print(self)
         self.filter.do_chain(event)
         product_from_req_body = json.loads(event['body'])
-        product: Product = event['product'].id
+        product: Product = event['product']['id']
         product.name = product_from_req_body['name']
         product.description = product_from_req_body['description']
         product.requirements = product_from_req_body['requirements']
@@ -98,7 +97,7 @@ class ProcessAuthenticatedDeleteProduct(ProcessInterface):
         print(self)
         self.filter.do_chain(event)
         # TODO: add dictionary conversion with id
-        self._data_manager.session.delete(event['product'].id)
+        self._data_manager.session.delete(event['product']['id'])
         self._data_manager.session.commit()
         return PinfluencerResponse.as_deleted()
 
