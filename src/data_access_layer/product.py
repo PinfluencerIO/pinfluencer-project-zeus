@@ -38,8 +38,12 @@ class Product(Base):
         }
 
 
-def product_from_dict(product: dict) -> Product:
-    return Product(name=product["name"],
+def product_from_dict(product: dict, nested_brand: bool) -> Product:
+    prod = Product(name=product["name"],
                    description=product["description"],
-                   requirements=product["requirements"],
-                   brand_id=product["brand_id"])
+                   requirements=product["requirements"])
+    if nested_brand:
+        prod.brand_id = prod['brand']['id']
+    else:
+        prod.brand_id = prod['brand_id']
+    return prod

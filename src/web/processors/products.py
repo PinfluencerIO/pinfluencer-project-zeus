@@ -65,7 +65,7 @@ class ProcessAuthenticatedPostProduct(ProcessInterface):
         self.filter.do_chain(event)
         product_dict: dict = json.loads(event['body'])
         product_dict.update({'brand_id': event['auth_brand']['id']})
-        product: Product = product_from_dict(product_dict)
+        product: Product = product_from_dict(product=product_dict, nested_brand=False)
         self._data_manager.session.add(product)
         self._data_manager.session.commit()
         return PinfluencerResponse(body=product.as_dict())
@@ -97,7 +97,7 @@ class ProcessAuthenticatedDeleteProduct(ProcessInterface):
         print(self)
         self.filter.do_chain(event)
         # TODO: add dictionary conversion with id
-        self._data_manager.session.delete(event['product']['id'])
+        self._data_manager.session.delete(product_from_dict(product=event['product'], nested_brand=True))
         self._data_manager.session.commit()
         return PinfluencerResponse.as_deleted()
 
