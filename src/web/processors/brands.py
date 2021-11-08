@@ -1,10 +1,4 @@
-import base64
-import io
 import json
-import uuid
-
-import boto3
-from filetype import filetype
 
 from src.data_access_layer import to_list
 from src.data_access_layer.brand import Brand, brand_from_dict
@@ -12,11 +6,9 @@ from src.data_access_layer.product import Product
 from src.interfaces.data_manager_interface import DataManagerInterface
 from src.web.filters import FilterChain
 from src.web.http_util import PinfluencerResponse
-from src.web.processors import ProcessInterface, get_user
+from src.web.processors import ProcessInterface, get_user, upload_image_to_s3
 # Todo: Implement these processors
 from src.web.processors.hacks import old_manual_functions
-
-s3 = boto3.client('s3')
 
 
 class ProcessPublicBrands(ProcessInterface):
@@ -48,7 +40,7 @@ class ProcessPublicAllProductsForBrand(ProcessInterface):
         self.filter.do_chain(event)
         return PinfluencerResponse(body=to_list(self._data_manager.session
                                                 .query(Product)
-                                                .filter(Product.brand_id == event['brand']['id'])
+                                                .filter(Product.brand_id == event['brand'].id)
                                                 .all()))
 
 
@@ -70,9 +62,7 @@ class ProcessAuthenticatedPutBrand(ProcessInterface):
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         self.filter.do_chain(event)
-        brand: Brand = self._data_manager.session.query(Brand) \
-            .filter(Brand.id == event['auth_brand']["id"]) \
-            .first()
+        brand: Brand = event['auth_brand']
         brand_from_body = brand_from_dict(json.loads(event['body']))
         brand.name = brand_from_body.name
         brand.description = brand_from_body.description
@@ -99,7 +89,7 @@ class ProcessAuthenticatedPostBrand(ProcessInterface):
         self._data_manager.session.add(brand)
         self._data_manager.session.commit()
 
-        image_id = upload_image_to_s3(brand.id, None, image_bytes)
+        image_id = upload_image_to_s3(f'{brand.id}', image_bytes)
         brand: Brand = self._data_manager.session.query(Brand) \
             .filter(Brand.id == brand.id) \
             .first()
@@ -115,33 +105,16 @@ def update_email(body, event):
         body['email'] = event['requestContext']['authorizer']['jwt']['claims']['email']
 
 
-def upload_image_to_s3(brand_id: str, product_id_, image_base64_encoded: str):
-    print(f'brand {brand_id}, product{product_id_}')
-    image = base64.b64decode(image_base64_encoded)
-    f = io.BytesIO(image)
-    file_type = filetype.guess(f)
-    if file_type is not None:
-        mime = file_type.MIME
-    else:
-        mime = 'image/jpg'
-
-    image_id = str(uuid.uuid4())
-    if product_id_ is None:
-        key = f'{brand_id}/{image_id}.{file_type.EXTENSION}'
-    else:
-        key = f'{brand_id}/{product_id_}/{image_id}.{file_type.EXTENSION}'
-    s3.put_object(Bucket='pinfluencer-product-images',
-                  Key=key, Body=image,
-                  ContentType=mime,
-                  Tagging='public=yes')
-
-    return image_id
-
-
 class ProcessAuthenticatedPatchBrandImage(ProcessInterface):
-    def __init__(self, filter_chain: FilterChain) -> None:
+    def __init__(self, filter_chain: FilterChain, data_manager: DataManagerInterface) -> None:
+        super().__init__(data_manager)
         self.filters = filter_chain
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         self.filters.do_chain(event)
+        brand: Brand = event['auth_brand']
+        # TODO: delete image
+        image_id = upload_image_to_s3(f'{brand}', json.loads(event['body']['image']))
+        brand.image = image_id
+        self._data_manager.session.commit()
         return old_manual_functions.patch_brand_image(event)

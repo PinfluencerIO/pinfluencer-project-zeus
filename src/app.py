@@ -66,7 +66,7 @@ routes = OrderedDict(
                                                                        BrandPutPayloadValidation()]),
                                                        container.data_manager),
         'PATCH /brands/me/image': ProcessAuthenticatedPatchBrandImage(
-            FilterChainImp([container.auth_filter, BrandImagePatchPayloadValidation()])),
+            FilterChainImp([container.auth_filter, BrandImagePatchPayloadValidation()]), container.data_manager),
 
         # authenticated product endpoints
         'GET /products/me': ProcessAuthenticatedGetProduct(FilterChainImp([container.auth_filter]),

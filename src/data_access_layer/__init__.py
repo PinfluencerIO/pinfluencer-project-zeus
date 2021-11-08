@@ -1,5 +1,6 @@
 import uuid
 from abc import abstractmethod
+from dataclasses import dataclass
 from datetime import datetime
 
 from sqlalchemy import Column, String, DateTime
@@ -9,6 +10,7 @@ PRODUCT_TBL_NAME = 'product'
 BRAND_TBL_NAME = 'brand'
 
 
+@dataclass
 class BaseEntity:
     __tablename__: str
 

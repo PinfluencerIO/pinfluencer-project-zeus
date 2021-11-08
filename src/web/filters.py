@@ -87,7 +87,7 @@ class ValidBrandId(FilterInterface):
             if brand is None:
                 raise NotFoundById(f'Failed to find brand by id {id_}')
             else:
-                event['brand'] = brand.as_dict()
+                event['brand'] = brand
         else:
             raise InvalidId(f'Invalid id {id_} in path for brand')
 
@@ -117,7 +117,7 @@ class ValidProductId(FilterInterface):
             if product is None:
                 raise NotFoundById(f'Failed to find product by id {id_}')
             else:
-                event['product'] = product.as_dict()
+                event['product'] = product
         else:
             raise InvalidId(f'Invalid id {id_} in path for product')
 
@@ -179,7 +179,7 @@ class AuthFilter(FilterInterface):
             if brand is None:
                 raise NotFoundByAuthUser(f'Failed to find brand by auth_user_id {auth_user_id}')
             else:
-                event['auth_brand'] = brand.as_dict()
+                event['auth_brand'] = brand
         else:
             # Todo: this needs to be handled via an exception and remove filter.chain call
             print(f'event was missing the required keys to extract cognito:username')
