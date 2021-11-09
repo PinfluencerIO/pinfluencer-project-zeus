@@ -9,6 +9,8 @@ from filetype import filetype
 from src.interfaces.data_manager_interface import DataManagerInterface
 from src.web.http_util import PinfluencerResponse
 
+BUCKET = 'pinfluencer-product-images'
+
 s3 = boto3.client('s3')
 
 
@@ -37,9 +39,14 @@ def upload_image_to_s3(path: str, image_base64_encoded: str) -> str:
     else:
         mime = 'image/jpg'
     image_id = str(uuid.uuid4())
-    key = f'{path}/{image_id}.{file_type.EXTENSION}'
-    s3.put_object(Bucket='pinfluencer-product-images',
+    file = f'{image_id}.{file_type.EXTENSION}'
+    key = f'{path}/{file}'
+    s3.put_object(Bucket=BUCKET,
                   Key=key, Body=image,
                   ContentType=mime,
                   Tagging='public=yes')
-    return image_id
+    return file
+
+
+def delete_image_from_s3(path: str) -> None:
+    s3.delete_object(Bucket=BUCKET, Key=path)

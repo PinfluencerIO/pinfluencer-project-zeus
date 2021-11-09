@@ -6,7 +6,7 @@ from src.data_access_layer.product import Product
 from src.interfaces.data_manager_interface import DataManagerInterface
 from src.web.filters import FilterChain
 from src.web.http_util import PinfluencerResponse
-from src.web.processors import ProcessInterface, get_user, upload_image_to_s3
+from src.web.processors import ProcessInterface, get_user, upload_image_to_s3, delete_image_from_s3
 # Todo: Implement these processors
 from src.web.processors.hacks import old_manual_functions
 
@@ -115,6 +115,7 @@ class ProcessAuthenticatedPatchBrandImage(ProcessInterface):
         brand: Brand = brand_from_dict(event['auth_brand'])
         # TODO: delete image
         image_id = upload_image_to_s3(f'{brand}', json.loads(event['body']['image']))
+        delete_image_from_s3(f'{brand}/{brand.image}')
         brand.image = image_id
         self._data_manager.session.commit()
         return old_manual_functions.patch_brand_image(event)
