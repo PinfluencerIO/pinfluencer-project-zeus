@@ -15,6 +15,7 @@ class Product(Base, BaseEntity):
     description: str = Column(type_=String(length=500), nullable=False)
     requirements: str = Column(type_=String(length=500), nullable=False)
     brand_id: str = Column(String(length=36), ForeignKey(f"{BRAND_TBL_NAME}.id"))
+    image: str = Column(type_=String(length=36), nullable=True)
     brand = relationship('Brand')
 
     @property
@@ -38,14 +39,14 @@ class Product(Base, BaseEntity):
         }
 
 
-def product_from_dict(product: dict, nested_brand: bool, id: bool) -> Product:
+def product_from_dict(product: dict) -> Product:
     prod = Product(name=product["name"],
                    description=product["description"],
                    requirements=product["requirements"])
-    if nested_brand:
+    if 'brand' in product:
         prod.brand_id = product['brand']['id']
     else:
         prod.brand_id = product['brand_id']
-    if id:
+    if 'id' in product:
         prod.id = product['id']
     return prod

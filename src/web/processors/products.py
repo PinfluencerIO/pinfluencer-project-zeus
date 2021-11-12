@@ -5,7 +5,7 @@ from src.data_access_layer.product import Product, product_from_dict
 from src.interfaces.data_manager_interface import DataManagerInterface
 from src.web.filters import FilterChain
 from src.web.http_util import PinfluencerResponse
-from src.web.processors import ProcessInterface
+from src.web.processors import ProcessInterface, upload_image_to_s3
 from src.web.processors.hacks import old_manual_functions
 
 
@@ -64,8 +64,9 @@ class ProcessAuthenticatedPostProduct(ProcessInterface):
         print(self)
         self.filter.do_chain(event)
         product_dict: dict = json.loads(event['body'])
-        product_dict.update({'brand_id': event['auth_brand']['id']})
-        product: Product = product_from_dict(product=product_dict, nested_brand=False, id=False)
+        image = product_dict['image']
+        product: Product = product_from_dict(product=product_dict)
+        product.image = upload_image_to_s3(path=f'{product.owner.id}/{product.id}', image_base64_encoded=image)
         self._data_manager.session.add(product)
         self._data_manager.session.commit()
         return PinfluencerResponse(body=product.as_dict())
@@ -79,11 +80,17 @@ class ProcessAuthenticatedPutProduct(ProcessInterface):
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
         self.filter.do_chain(event)
-        product_from_req_body = json.loads(event['body'])
-        product: Product = event['product']['id']
-        product.name = product_from_req_body['name']
-        product.description = product_from_req_body['description']
-        product.requirements = product_from_req_body['requirements']
+        product_from_req_json = json.loads(event['body'])
+        product_from_req = product_from_dict(product_from_req_json)
+        product = (self._data_manager.session
+                   .query(Product)
+                   .filter(Product.id == event['product']['id'])
+                   .first())
+        product.image = upload_image_to_s3(path=f'{product.owner.id}/{product.id}',
+                                           image_base64_encoded=product_from_req.image)
+        product.name = product_from_req.name
+        product.description = product_from_req.description
+        product.requirements = product_from_req.requirements
         self._data_manager.session.commit()
         return PinfluencerResponse.as_updated(product.id)
 
