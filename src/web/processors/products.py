@@ -5,8 +5,7 @@ from src.data_access_layer.product import Product, product_from_dict
 from src.interfaces.data_manager_interface import DataManagerInterface
 from src.web.filters import FilterChain
 from src.web.http_util import PinfluencerResponse
-from src.web.processors import ProcessInterface, upload_image_to_s3
-from src.web.processors.hacks import old_manual_functions
+from src.web.processors import ProcessInterface, upload_image_to_s3, delete_image_from_s3
 
 
 # Todo: Implement all these processors
@@ -86,8 +85,6 @@ class ProcessAuthenticatedPutProduct(ProcessInterface):
                    .query(Product)
                    .filter(Product.id == event['product']['id'])
                    .first())
-        product.image = upload_image_to_s3(path=f'{product.owner.id}/{product.id}',
-                                           image_base64_encoded=product_from_req.image)
         product.name = product_from_req.name
         product.description = product_from_req.description
         product.requirements = product_from_req.requirements
@@ -103,11 +100,12 @@ class ProcessAuthenticatedDeleteProduct(ProcessInterface):
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
         self.filter.do_chain(event)
-        # TODO: add dictionary conversion with id
-        self._data_manager.session.delete(self._data_manager.session
-                                          .query(Product)
-                                          .filter(Product.id == event['product']['id'])
-                                          .first())
+        product: Product = (self._data_manager.session
+                            .query(Product)
+                            .filter(Product.id == event['product']['id'])
+                            .first())
+        delete_image_from_s3(path=product.image)
+        self._data_manager.session.delete(product)
         self._data_manager.session.commit()
         return PinfluencerResponse.as_deleted()
 
@@ -118,4 +116,8 @@ class ProcessAuthenticatedPatchProductImage(ProcessInterface):
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         self.filters.do_chain(event)
-        return old_manual_functions.patch_product_image(event)
+        product: Product = product_from_dict(event['product'])
+        delete_image_from_s3(path=product.image)
+        product.image = upload_image_to_s3(path=f'{product.owner.id}/{product.id}',
+                                           image_base64_encoded=json.loads(event['body'])['image'])
+        return PinfluencerResponse(body={})
