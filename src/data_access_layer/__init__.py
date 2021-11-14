@@ -10,9 +10,13 @@ PRODUCT_TBL_NAME = 'product'
 BRAND_TBL_NAME = 'brand'
 
 
+def uuid4_str() -> str:
+    return str(uuid.uuid4())
+
+
 @dataclass
 class BaseEntity:
-    id: str = Column(type_=String(length=36), primary_key=True, default=uuid.uuid4, nullable=False)
+    id: str = Column(String(length=36), primary_key=True, default=uuid4_str, nullable=False)
     created: datetime = Column(DateTime, nullable=False, default=datetime.utcnow)
 
     @abstractmethod
