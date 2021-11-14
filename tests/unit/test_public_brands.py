@@ -36,7 +36,7 @@ class TestPublicBrands:
         self.__setup(get_public_brands_fixture, self.__setup_test_data)
         assert self.__result.is_ok()
         assert len(self.__result.body) == 3
-        for i in range(2):
+        for i in range(3):
             assert self.__brands[i].as_dict() == self.__result.body[i]
 
     def test_0_brands_are_found_when_db_is_empty(self, get_public_brands_fixture):
