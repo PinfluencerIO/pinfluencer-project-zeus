@@ -42,7 +42,10 @@ def lambda_handler(event, context):
         return PinfluencerResponse.as_500_error().as_json()
     finally:
         container.data_manager.session.flush()
-        container.data_manager.session.commit()
+        if container.status_manager.status:
+            container.data_manager.session.commit()
+        else:
+            container.data_manager.session.rollback()
         container.data_manager.session.close()
 
 
@@ -65,14 +68,14 @@ routes = OrderedDict(
         'POST /brands/me': ProcessAuthenticatedPostBrand(
             FilterChainImp([OneTimeCreateBrandFilter(container.data_manager),
                             BrandPostPayloadValidation()]),
-            container.data_manager, container.image_repository),
+            container.data_manager, container.image_repository, container.status_manager),
         'PUT /brands/me': ProcessAuthenticatedPutBrand(FilterChainImp([container.auth_filter,
                                                                        BrandPutPayloadValidation()]),
-                                                       container.data_manager),
+                                                       container.data_manager, container.status_manager),
         'PATCH /brands/me/image': ProcessAuthenticatedPatchBrandImage(
             FilterChainImp([container.auth_filter, BrandImagePatchPayloadValidation()]),
             container.data_manager,
-            container.image_repository),
+            container.image_repository, container.status_manager),
 
         # authenticated product endpoints
         'GET /products/me': ProcessAuthenticatedGetProduct(FilterChainImp([container.auth_filter]),
@@ -82,16 +85,17 @@ routes = OrderedDict(
             container.data_manager),
         'POST /products/me': ProcessAuthenticatedPostProduct(
             FilterChainImp([container.auth_filter, ProductPostPayloadValidation()]),
-            container.data_manager, container.image_repository),
+            container.data_manager, container.image_repository, container.status_manager),
         'PUT /products/me/{product_id}': ProcessAuthenticatedPutProduct(
             FilterChainImp(
                 [container.auth_filter, container.valid_product_filter, OwnerOnly('product'),
-                 ProductPutPayloadValidation()]), container.data_manager),
+                 ProductPutPayloadValidation()]), container.data_manager, container.status_manager),
         'PATCH /products/me/{product_id}/image': ProcessAuthenticatedPatchProductImage(FilterChainImp(
             [container.auth_filter, container.valid_product_filter, OwnerOnly('product'),
-             ProductImagePatchPayloadValidation()]), container.image_repository, container.data_manager),
+             ProductImagePatchPayloadValidation()]), container.image_repository, container.data_manager,
+            container.status_manager),
         'DELETE /products/me/{product_id}': ProcessAuthenticatedDeleteProduct(
             FilterChainImp([container.auth_filter, container.valid_product_filter, OwnerOnly('product')]),
-            container.data_manager, container.image_repository),
+            container.data_manager, container.image_repository, container.status_manager),
     }
 )

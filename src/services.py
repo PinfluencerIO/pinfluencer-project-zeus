@@ -3,6 +3,7 @@ from src.data_access_layer.image_repository import S3ImageRepository
 from src.interfaces.data_manager_interface import DataManagerInterface
 from src.interfaces.image_repository_interface import ImageRepositoryInterface
 from src.web.filters import AuthFilter, ValidBrandId, ValidProductId
+from src.web.request_status_manager import RequestStatusManager
 
 
 class Container:
@@ -11,6 +12,7 @@ class Container:
     auth_filter: AuthFilter
     valid_brand_filter: ValidBrandId
     valid_product_filter: ValidProductId
+    status_manager: RequestStatusManager
 
     def __init__(self):
         self.data_manager = DataManager()
@@ -18,3 +20,4 @@ class Container:
         self.auth_filter = AuthFilter(self.data_manager)
         self.valid_brand_filter = ValidBrandId(self.data_manager)
         self.valid_product_filter = ValidProductId(self.data_manager)
+        self.status_manager = RequestStatusManager()

@@ -8,6 +8,7 @@ from src.interfaces.image_repository_interface import ImageRepositoryInterface
 from src.web.filters import FilterChain
 from src.web.http_util import PinfluencerResponse
 from src.web.processors import ProcessInterface, get_user
+from src.web.request_status_manager import RequestStatusManager
 
 
 class ProcessPublicBrands(ProcessInterface):
@@ -55,9 +56,13 @@ class ProcessAuthenticatedGetBrand(ProcessInterface):
 
 
 class ProcessAuthenticatedPutBrand(ProcessInterface):
-    def __init__(self, filter_chain: FilterChain, data_manager: DataManagerInterface):
+    def __init__(self,
+                 filter_chain: FilterChain,
+                 data_manager: DataManagerInterface,
+                 status_manager: RequestStatusManager):
         super().__init__(data_manager)
         self.filter = filter_chain
+        self.__status_manager = status_manager
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         self.filter.do_chain(event)
@@ -68,6 +73,7 @@ class ProcessAuthenticatedPutBrand(ProcessInterface):
         brand.website = brand_from_body.website
         brand.instahandle = brand_from_body.instahandle
         self._data_manager.session.flush()
+        self.__status_manager.status = True
         return PinfluencerResponse(body=brand.as_dict())
 
 
@@ -75,10 +81,12 @@ class ProcessAuthenticatedPostBrand(ProcessInterface):
     def __init__(self,
                  filter_chain: FilterChain,
                  data_manager: DataManagerInterface,
-                 image_repository: ImageRepositoryInterface):
+                 image_repository: ImageRepositoryInterface,
+                 status_manager: RequestStatusManager):
         super().__init__(data_manager)
         self.__image_repository = image_repository
         self.filter = filter_chain
+        self.__status_manager = status_manager
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         self.filter.do_chain(event)
@@ -97,6 +105,7 @@ class ProcessAuthenticatedPostBrand(ProcessInterface):
             .first()
         brand.image = image_id
         self._data_manager.session.flush()
+        self.__status_manager.status = True
         return PinfluencerResponse(body=brand.as_dict(), status_code=201)
 
 
@@ -110,10 +119,12 @@ class ProcessAuthenticatedPatchBrandImage(ProcessInterface):
     def __init__(self,
                  filter_chain: FilterChain,
                  data_manager: DataManagerInterface,
-                 image_repository: ImageRepositoryInterface) -> None:
+                 image_repository: ImageRepositoryInterface,
+                 status_manager: RequestStatusManager) -> None:
         super().__init__(data_manager)
         self.filters = filter_chain
         self.__image_repository = image_repository
+        self.__status_manager = status_manager
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         self.filters.do_chain(event)
@@ -122,4 +133,5 @@ class ProcessAuthenticatedPatchBrandImage(ProcessInterface):
         self.__image_repository.delete(f'{brand.id}/{brand.image}')
         brand.image = image_id
         self._data_manager.session.flush()
+        self.__status_manager = True
         return PinfluencerResponse(body=brand.as_dict())
