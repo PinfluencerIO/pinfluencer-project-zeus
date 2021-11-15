@@ -3,6 +3,7 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.pool import NullPool
 
 from src.interfaces.data_manager_interface import DataManagerInterface
 
@@ -18,7 +19,8 @@ class DataManager(DataManagerInterface):
                 'resource_arn': os.environ['DB_CLUSTER_ARN'],
                 'secret_arn': os.environ['DB_SECRET_ARN'],
                 'database': os.environ['DATABASE_NAME']
-            }
+            },
+            poolclass=NullPool
         )
         self.__engine = engine
         session = sessionmaker(bind=self.__engine)

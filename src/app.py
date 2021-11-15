@@ -40,6 +40,10 @@ def lambda_handler(event, context):
     except Exception as e:
         print_exception(e)
         return PinfluencerResponse.as_500_error().as_json()
+    finally:
+        container.data_manager.session.flush()
+        container.data_manager.session.commit()
+        container.data_manager.session.close()
 
 
 routes = OrderedDict(

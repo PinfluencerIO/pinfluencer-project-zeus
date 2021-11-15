@@ -67,7 +67,6 @@ class ProcessAuthenticatedPutBrand(ProcessInterface):
         brand.description = brand_from_body.description
         brand.website = brand_from_body.website
         brand.instahandle = brand_from_body.instahandle
-        self._data_manager.session.commit()
         return PinfluencerResponse(body=brand.as_dict())
 
 
@@ -90,14 +89,12 @@ class ProcessAuthenticatedPostBrand(ProcessInterface):
         brand = brand_from_dict(brand_dict)
 
         self._data_manager.session.add(brand)
-        self._data_manager.session.commit()
 
         image_id = self.__image_repository.upload(f'{brand.id}', image_bytes)
         brand: Brand = self._data_manager.session.query(Brand) \
             .filter(Brand.id == brand.id) \
             .first()
         brand.image = image_id
-        self._data_manager.session.commit()
 
         return PinfluencerResponse(body=brand.as_dict(), status_code=201)
 
@@ -123,5 +120,4 @@ class ProcessAuthenticatedPatchBrandImage(ProcessInterface):
         image_id = self.__image_repository.upload(f'{brand.id}', json.loads(event['body'])['image'])
         self.__image_repository.delete(f'{brand.id}/{brand.image}')
         brand.image = image_id
-        self._data_manager.session.commit()
         return PinfluencerResponse(body=brand.as_dict())
