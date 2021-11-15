@@ -61,7 +61,7 @@ class ProcessAuthenticatedPutBrand(ProcessInterface):
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         self.filter.do_chain(event)
-        brand: Brand = brand_from_dict(event['auth_brand'])
+        brand: Brand = self._data_manager.session.query(Brand).filter(Brand.id == event['auth_brand']['id']).first()
         brand_from_body = brand_from_dict(json.loads(event['body']))
         brand.name = brand_from_body.name
         brand.description = brand_from_body.description
@@ -119,7 +119,7 @@ class ProcessAuthenticatedPatchBrandImage(ProcessInterface):
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         self.filters.do_chain(event)
-        brand: Brand = brand_from_dict(event['auth_brand'])
+        brand: Brand = self._data_manager.session.query(Brand).filter(Brand.id == event['auth_brand']['id']).first()
         # TODO: delete image
         image_id = self.__image_repository.upload(f'{brand}', json.loads(event['body']['image']))
         self.__image_repository.delete(f'{brand}/{brand.image}')

@@ -121,16 +121,19 @@ class ProcessAuthenticatedDeleteProduct(ProcessInterface):
 
 
 class ProcessAuthenticatedPatchProductImage(ProcessInterface):
-    def __init__(self,
-                 filter_chain: FilterChain,
-                 image_repository: ImageRepositoryInterface) -> None:
+    def __init__(self, filter_chain: FilterChain, image_repository: ImageRepositoryInterface,
+                 data_manager: DataManagerInterface) -> None:
+        super().__init__(data_manager)
         self.filters = filter_chain
         self.__image_repository = image_repository
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         self.filters.do_chain(event)
-        product: Product = product_from_dict(event['product'])
+        product: Product = self._data_manager.session.query(Product) \
+            .filter(Product.id == event['product']['id']) \
+            .first()
         self.__image_repository.delete(path=product.image)
         product.image = self.__image_repository.upload(path=f'{product.owner.id}/{product.id}',
                                                        image_base64_encoded=json.loads(event['body'])['image'])
-        return PinfluencerResponse(body={})
+        self._data_manager.session.commit()
+        return PinfluencerResponse(body=product.as_dict())
