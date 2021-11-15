@@ -35,7 +35,8 @@ class Product(Base, BaseEntity):
             "brand": {
                 "id": self.owner.id,
                 "name": self.owner.name
-            }
+            },
+            "image": self.image
         }
 
 
