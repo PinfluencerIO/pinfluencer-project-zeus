@@ -1,4 +1,5 @@
 import json
+import uuid
 
 from src.data_access_layer import to_list
 from src.data_access_layer.product import Product, product_from_dict
@@ -68,9 +69,13 @@ class ProcessAuthenticatedPostProduct(ProcessInterface):
         print(self)
         self.filter.do_chain(event)
         product_dict: dict = json.loads(event['body'])
+        brand_id: str = event['auth_brand']['id']
         image = product_dict['image']
+        product_dict['brand_id'] = brand_id
         product: Product = product_from_dict(product=product_dict)
-        product.image = self.__image_repository.upload(path=f'{product.owner.id}/{product.id}',
+        # hacky
+        product.id = uuid.uuid4()
+        product.image = self.__image_repository.upload(path=f'{brand_id}/{product.id}',
                                                        image_base64_encoded=image)
         self._data_manager.session.add(product)
         self._data_manager.session.commit()
