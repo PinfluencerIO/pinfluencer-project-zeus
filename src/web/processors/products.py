@@ -1,5 +1,4 @@
 import json
-import uuid
 
 from src.data_access_layer import to_list
 from src.data_access_layer.product import Product, product_from_dict
@@ -73,11 +72,12 @@ class ProcessAuthenticatedPostProduct(ProcessInterface):
         image = product_dict['image']
         product_dict['brand_id'] = brand_id
         product: Product = product_from_dict(product=product_dict)
-        # hacky
-        product.id = uuid.uuid4()
+        self._data_manager.session.add(product)
+        self._data_manager.session.flush()
         product.image = self.__image_repository.upload(path=f'{brand_id}/{product.id}',
                                                        image_base64_encoded=image)
         self._data_manager.session.add(product)
+        self._data_manager.session.flush()
         return PinfluencerResponse(body=product.as_dict())
 
 
@@ -98,7 +98,8 @@ class ProcessAuthenticatedPutProduct(ProcessInterface):
         product.name = product_from_req.name
         product.description = product_from_req.description
         product.requirements = product_from_req.requirements
-        return PinfluencerResponse.as_updated(product.id)
+        self._data_manager.session.flush()
+        return PinfluencerResponse(body=product)
 
 
 class ProcessAuthenticatedDeleteProduct(ProcessInterface):
@@ -119,6 +120,7 @@ class ProcessAuthenticatedDeleteProduct(ProcessInterface):
                             .first())
         self.__image_repository.delete(path=f'{product.owner.id}/{product.id}/{product.image}')
         self._data_manager.session.delete(product)
+        self._data_manager.session.flush()
         return PinfluencerResponse(body=product.as_dict())
 
 
@@ -137,4 +139,5 @@ class ProcessAuthenticatedPatchProductImage(ProcessInterface):
         self.__image_repository.delete(path=f'{product.owner.id}/{product.id}/{product.image}')
         product.image = self.__image_repository.upload(path=f'{product.owner.id}/{product.id}',
                                                        image_base64_encoded=json.loads(event['body'])['image'])
+        self._data_manager.session.flush()
         return PinfluencerResponse(body=product.as_dict())
