@@ -121,7 +121,7 @@ class ProcessAuthenticatedPatchBrandImage(ProcessInterface):
         self.filters.do_chain(event)
         brand: Brand = self._data_manager.session.query(Brand).filter(Brand.id == event['auth_brand']['id']).first()
         # TODO: delete image
-        image_id = self.__image_repository.upload(f'{brand.id}', json.loads(event['body']['image']))
+        image_id = self.__image_repository.upload(f'{brand.id}', json.loads(event['body'])['image'])
         self.__image_repository.delete(f'{brand.id}/{brand.image}')
         brand.image = image_id
         self._data_manager.session.commit()
