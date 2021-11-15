@@ -14,7 +14,7 @@ class Brand(Base, BaseEntity):
     website: str = Column(type_=String(length=120), nullable=False)
     email: str = Column(type_=String(length=120), nullable=False)
     instahandle: str = Column(type_=String(length=30), nullable=True)
-    image: str = Column(type_=String(length=36), nullable=True)
+    image: str = Column(type_=String(length=64), nullable=True)
     auth_user_id: str = Column(type_=String(length=64), nullable=False, unique=True)
 
     def as_dict(self) -> dict:

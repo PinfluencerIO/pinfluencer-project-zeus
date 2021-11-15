@@ -15,7 +15,7 @@ class Product(Base, BaseEntity):
     description: str = Column(type_=String(length=500), nullable=False)
     requirements: str = Column(type_=String(length=500), nullable=False)
     brand_id: str = Column(String(length=36), ForeignKey(f"{BRAND_TBL_NAME}.id"))
-    image: str = Column(type_=String(length=36), nullable=True)
+    image: str = Column(type_=String(length=64), nullable=True)
     brand = relationship('Brand')
 
     @property
