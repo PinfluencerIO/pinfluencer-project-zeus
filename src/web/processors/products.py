@@ -122,7 +122,7 @@ class ProcessAuthenticatedDeleteProduct(ProcessInterface):
         self.__image_repository.delete(path=f'{product.owner.id}/{product.id}/{product.image}')
         self._data_manager.session.delete(product)
         self._data_manager.session.commit()
-        return PinfluencerResponse.as_deleted()
+        return PinfluencerResponse(body=product.as_dict())
 
 
 class ProcessAuthenticatedPatchProductImage(ProcessInterface):
