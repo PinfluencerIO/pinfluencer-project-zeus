@@ -85,7 +85,7 @@ routes = OrderedDict(
                  ProductPutPayloadValidation()]), container.data_manager),
         'PATCH /products/me/{product_id}/image': ProcessAuthenticatedPatchProductImage(FilterChainImp(
             [container.auth_filter, container.valid_product_filter, OwnerOnly('product'),
-             ProductImagePatchPayloadValidation()]), container.image_repository),
+             ProductImagePatchPayloadValidation()]), container.image_repository, container.data_manager),
         'DELETE /products/me/{product_id}': ProcessAuthenticatedDeleteProduct(
             FilterChainImp([container.auth_filter, container.valid_product_filter, OwnerOnly('product')]),
             container.data_manager, container.image_repository),
