@@ -61,12 +61,14 @@ routes = OrderedDict(
         'POST /brands/me': ProcessAuthenticatedPostBrand(
             FilterChainImp([OneTimeCreateBrandFilter(container.data_manager),
                             BrandPostPayloadValidation()]),
-            container.data_manager),
+            container.data_manager, container.image_repository),
         'PUT /brands/me': ProcessAuthenticatedPutBrand(FilterChainImp([container.auth_filter,
                                                                        BrandPutPayloadValidation()]),
                                                        container.data_manager),
         'PATCH /brands/me/image': ProcessAuthenticatedPatchBrandImage(
-            FilterChainImp([container.auth_filter, BrandImagePatchPayloadValidation()]), container.data_manager),
+            FilterChainImp([container.auth_filter, BrandImagePatchPayloadValidation()]),
+            container.data_manager,
+            container.image_repository),
 
         # authenticated product endpoints
         'GET /products/me': ProcessAuthenticatedGetProduct(FilterChainImp([container.auth_filter]),
