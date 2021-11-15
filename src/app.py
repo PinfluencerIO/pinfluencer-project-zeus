@@ -78,16 +78,16 @@ routes = OrderedDict(
             container.data_manager),
         'POST /products/me': ProcessAuthenticatedPostProduct(
             FilterChainImp([container.auth_filter, ProductPostPayloadValidation()]),
-            container.data_manager),
+            container.data_manager, container.image_repository),
         'PUT /products/me/{product_id}': ProcessAuthenticatedPutProduct(
             FilterChainImp(
                 [container.auth_filter, container.valid_product_filter, OwnerOnly('product'),
                  ProductPutPayloadValidation()]), container.data_manager),
         'PATCH /products/me/{product_id}/image': ProcessAuthenticatedPatchProductImage(FilterChainImp(
             [container.auth_filter, container.valid_product_filter, OwnerOnly('product'),
-             ProductImagePatchPayloadValidation()])),
+             ProductImagePatchPayloadValidation()]), container.image_repository),
         'DELETE /products/me/{product_id}': ProcessAuthenticatedDeleteProduct(
             FilterChainImp([container.auth_filter, container.valid_product_filter, OwnerOnly('product')]),
-            container.data_manager),
+            container.data_manager, container.image_repository),
     }
 )
