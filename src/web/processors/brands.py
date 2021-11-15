@@ -4,9 +4,10 @@ from src.data_access_layer import to_list
 from src.data_access_layer.brand import Brand, brand_from_dict
 from src.data_access_layer.product import Product
 from src.interfaces.data_manager_interface import DataManagerInterface
+from src.interfaces.image_repository_interface import ImageRepositoryInterface
 from src.web.filters import FilterChain
 from src.web.http_util import PinfluencerResponse
-from src.web.processors import ProcessInterface, get_user, upload_image_to_s3, delete_image_from_s3
+from src.web.processors import ProcessInterface, get_user
 
 
 class ProcessPublicBrands(ProcessInterface):
@@ -67,12 +68,16 @@ class ProcessAuthenticatedPutBrand(ProcessInterface):
         brand.website = brand_from_body.website
         brand.instahandle = brand_from_body.instahandle
         self._data_manager.session.commit()
-        return PinfluencerResponse.as_updated(brand.id)
+        return PinfluencerResponse(body=brand.as_dict())
 
 
 class ProcessAuthenticatedPostBrand(ProcessInterface):
-    def __init__(self, filter_chain: FilterChain, data_manager: DataManagerInterface):
+    def __init__(self,
+                 filter_chain: FilterChain,
+                 data_manager: DataManagerInterface,
+                 image_repository: ImageRepositoryInterface):
         super().__init__(data_manager)
+        self.__image_repository = image_repository
         self.filter = filter_chain
 
     def do_process(self, event: dict) -> PinfluencerResponse:
@@ -87,7 +92,7 @@ class ProcessAuthenticatedPostBrand(ProcessInterface):
         self._data_manager.session.add(brand)
         self._data_manager.session.commit()
 
-        image_id = upload_image_to_s3(f'{brand.id}', image_bytes)
+        image_id = self.__image_repository.upload(f'{brand.id}', image_bytes)
         brand: Brand = self._data_manager.session.query(Brand) \
             .filter(Brand.id == brand.id) \
             .first()
@@ -104,16 +109,20 @@ def update_email(body, event):
 
 
 class ProcessAuthenticatedPatchBrandImage(ProcessInterface):
-    def __init__(self, filter_chain: FilterChain, data_manager: DataManagerInterface) -> None:
+    def __init__(self,
+                 filter_chain: FilterChain,
+                 data_manager: DataManagerInterface,
+                 image_repository: ImageRepositoryInterface) -> None:
         super().__init__(data_manager)
         self.filters = filter_chain
+        self.__image_repository = image_repository
 
     def do_process(self, event: dict) -> PinfluencerResponse:
         self.filters.do_chain(event)
         brand: Brand = brand_from_dict(event['auth_brand'])
         # TODO: delete image
-        image_id = upload_image_to_s3(f'{brand}', json.loads(event['body']['image']))
-        delete_image_from_s3(f'{brand}/{brand.image}')
+        image_id = self.__image_repository.upload(f'{brand}', json.loads(event['body']['image']))
+        self.__image_repository.delete(f'{brand}/{brand.image}')
         brand.image = image_id
         self._data_manager.session.commit()
         return PinfluencerResponse(body={})
