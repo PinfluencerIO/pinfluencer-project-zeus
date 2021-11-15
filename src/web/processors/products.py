@@ -119,7 +119,7 @@ class ProcessAuthenticatedDeleteProduct(ProcessInterface):
                             .query(Product)
                             .filter(Product.id == event['product']['id'])
                             .first())
-        self.__image_repository.delete(path=product.image)
+        self.__image_repository.delete(path=f'{product.owner.id}/{product.id}/{product.image}')
         self._data_manager.session.delete(product)
         self._data_manager.session.commit()
         return PinfluencerResponse.as_deleted()
@@ -137,7 +137,7 @@ class ProcessAuthenticatedPatchProductImage(ProcessInterface):
         product: Product = self._data_manager.session.query(Product) \
             .filter(Product.id == event['product']['id']) \
             .first()
-        self.__image_repository.delete(path=product.image)
+        self.__image_repository.delete(path=f'{product.owner.id}/{product.id}/{product.image}')
         product.image = self.__image_repository.upload(path=f'{product.owner.id}/{product.id}',
                                                        image_base64_encoded=json.loads(event['body'])['image'])
         self._data_manager.session.commit()
