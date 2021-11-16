@@ -105,7 +105,7 @@ class ProcessAuthenticatedPutProduct(ProcessInterface):
         product.requirements = product_from_req['requirements']
         self._data_manager.session.flush()
         self.__status_manager.status = True
-        return PinfluencerResponse(body=product)
+        return PinfluencerResponse(body=product.as_dict())
 
 
 class ProcessAuthenticatedDeleteProduct(ProcessInterface):
