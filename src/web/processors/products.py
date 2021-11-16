@@ -95,15 +95,14 @@ class ProcessAuthenticatedPutProduct(ProcessInterface):
     def do_process(self, event: dict) -> PinfluencerResponse:
         print(self)
         self.filter.do_chain(event)
-        product_from_req_json = json.loads(event['body'])
-        product_from_req = product_from_dict(product_from_req_json)
-        product = (self._data_manager.session
-                   .query(Product)
-                   .filter(Product.id == event['product']['id'])
-                   .first())
-        product.name = product_from_req.name
-        product.description = product_from_req.description
-        product.requirements = product_from_req.requirements
+        product_from_req = json.loads(event['body'])
+        product: Product = (self._data_manager.session
+                            .query(Product)
+                            .filter(Product.id == event['product']['id'])
+                            .first())
+        product.name = product_from_req['name']
+        product.description = product_from_req['description']
+        product.requirements = product_from_req['requirements']
         self._data_manager.session.flush()
         self.__status_manager.status = True
         return PinfluencerResponse(body=product)
