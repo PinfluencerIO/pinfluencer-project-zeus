@@ -4,3 +4,4 @@ jsonschema
 pydataapi
 SQLAlchemy
 filetype
+sqlalchemy-aurora-data-api

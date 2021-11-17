@@ -15,9 +15,10 @@ class Container:
     status_manager: RequestStatusManager
 
     def __init__(self):
-        self.data_manager = DataManager()
+        print("new container constructed")
+        self.status_manager = RequestStatusManager()
+        self.data_manager = DataManager(self.status_manager)
         self.image_repository = S3ImageRepository()
         self.auth_filter = AuthFilter(self.data_manager)
         self.valid_brand_filter = ValidBrandId(self.data_manager)
         self.valid_product_filter = ValidProductId(self.data_manager)
-        self.status_manager = RequestStatusManager()

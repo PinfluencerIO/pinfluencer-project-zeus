@@ -1,5 +1,9 @@
 class RequestStatusManager:
-    __status: bool = False
+    __status: bool
+
+    def __init__(self):
+        print("status manager constructed")
+        self.__status = False
 
     @property
     def status(self) -> bool:

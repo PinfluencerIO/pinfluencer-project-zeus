@@ -35,6 +35,10 @@ def product_generator(num: int, brand: str) -> Product:
 
 class FakeDataManager(DataManagerInterface):
 
+    # TODO: implement
+    def cleanup(self) -> None:
+        pass
+
     def __init__(self):
         self.__engine: Engine = create_engine('sqlite:///:memory:')
         session = sessionmaker(bind=self.__engine)

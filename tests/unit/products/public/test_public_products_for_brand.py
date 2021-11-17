@@ -30,6 +30,7 @@ class TestPublicBrands:
     def __setup(self, get_public_products_fixture, callback=lambda *args: None):
         (self.__product_processor, self.__data_manager) = get_public_products_fixture
         callback()
+        self.__product_processor.run_filters(event=self.__event)
         self.__result = self.__product_processor.do_process(self.__event)
 
     def __setup_test_data(self):
