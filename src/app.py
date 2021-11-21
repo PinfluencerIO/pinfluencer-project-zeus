@@ -80,7 +80,7 @@ def lambda_handler(event, context):
         return PinfluencerResponse.as_404_error().as_json()
     except NotFoundByAuthUser as e:
         print(f'NotFoundByAuthUser')
-        return PinfluencerResponse.as_401_error(str(e)).as_json()
+        return PinfluencerResponse.as_404_error().as_json()
     except OwnershipError as ownership:
         return PinfluencerResponse.as_401_error(str(ownership)).as_json()
     except InvalidId:
