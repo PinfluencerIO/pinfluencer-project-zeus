@@ -1,4 +1,3 @@
-import abc
 import json
 import uuid
 
@@ -9,6 +8,7 @@ from src.common import log_util
 from src.data_access_layer.brand import Brand
 from src.data_access_layer.product import Product
 from src.interfaces.data_manager_interface import DataManagerInterface
+from src.web.filters import FilterInterface
 
 
 class MissingPathParameter(Exception):
@@ -37,31 +37,6 @@ class BrandAlreadyCreatedForAuthUser(Exception):
 
 class OwnershipError(Exception):
     pass
-
-
-class FilterChain:
-    @abc.abstractmethod
-    def do_chain(self, event):
-        pass
-
-
-class FilterInterface:
-    @abc.abstractmethod
-    def do_filter(self, event: dict):
-        pass
-
-
-class FilterChainImp(FilterChain):
-    """
-    Handles the chaining of calls through the FilterChain
-    """
-
-    def __init__(self, filters: list[FilterInterface]):
-        self.filters = filters
-
-    def do_chain(self, event: dict):
-        for filter_ in self.filters:
-            filter_.do_filter(event)
 
 
 class ValidBrandId(FilterInterface):
