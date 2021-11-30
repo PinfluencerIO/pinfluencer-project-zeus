@@ -1,7 +1,7 @@
 from collections import OrderedDict
 
 from src.common.log_util import print_exception
-from src.services import Container
+from src.container import Container
 from src.web.filters import *
 from src.web.processors.brands import *
 from src.web.processors.feed import *
