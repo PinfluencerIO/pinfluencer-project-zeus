@@ -11,7 +11,7 @@ class ProcessPublicFeed(ProcessInterface):
         super().__init__(data_manager)
 
     def do_process(self, event: dict) -> PinfluencerResponse:
-        brands: list[Brand] = self._data_manager.session.query(Brand.id).limit(20).all()
+        brands: list[Brand] = self._data_manager.session.query(Brand.id).all()
         products = []
         for brand in brands:
             products.extend(self._data_manager.session
