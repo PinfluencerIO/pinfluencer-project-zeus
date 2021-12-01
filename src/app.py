@@ -3,6 +3,8 @@ from collections import OrderedDict
 from src.common.log_util import print_exception
 from src.services import Container
 from src.web.filters import *
+from src.web.filters.authorised_filter import *
+from src.web.filters.payload_validation import *
 from src.web.processors.brands import *
 from src.web.processors.feed import *
 from src.web.processors.products import *
@@ -65,33 +67,26 @@ def lambda_handler(event, context):
         print(f'event: {event}')
         processor: ProcessInterface = routes[event['routeKey']]
         print("start run filters")
-        processor.run_filters(event)
-        print("finished run filters")
-        print("start run processor")
-        response = processor.do_process(event).as_json()
-        print("finished run processor")
-        container.status_manager.status = True
-        return response
+        filter_response: FilterResponse = processor.run_filters(event)
+
+        if filter_response.is_success():
+            print("finished run filters successfully")
+            print("start run processor")
+            response: PinfluencerResponse = processor.do_process(event)
+            if response.is_ok():
+                print("finished run processor successfully")
+                container.status_manager.status = True
+            else:
+                print("finished run processor unsuccessfully")
+            return response.as_json()
+        else:
+            print("finished run filters unsuccessfully")
+            container.status_manager.status = True
+            return PinfluencerResponse(filter_response.get_code(), filter_response.get_message())
+
     except KeyError as ke:
         print(f'Missing required key {ke}')
         return PinfluencerResponse.as_400_error().as_json()
-    except NotFoundById:
-        print(f'NotFoundById')
-        return PinfluencerResponse.as_404_error().as_json()
-    except NotFoundByAuthUser as e:
-        print(f'NotFoundByAuthUser')
-        return PinfluencerResponse.as_404_error().as_json()
-    except OwnershipError as ownership:
-        return PinfluencerResponse.as_401_error(str(ownership)).as_json()
-    except InvalidId:
-        print(f'InvalidId')
-        return PinfluencerResponse.as_400_error().as_json()
-    except PayloadValidationError:
-        print(f'BrandPayloadValidationError')
-        return PinfluencerResponse.as_400_error().as_json()
-    except BrandAlreadyCreatedForAuthUser:
-        print(f'BrandAlreadyCreatedForAuthUser')
-        return PinfluencerResponse.as_400_error('There is already a brand associated with this auth user').as_json()
     except Exception as e:
         print_exception(e)
         return PinfluencerResponse.as_500_error().as_json()
