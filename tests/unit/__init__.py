@@ -56,3 +56,16 @@ class FakeDataManager(DataManagerInterface):
     def create_fake_data(self, objects: list[BaseEntity]):
         self.__session.bulk_save_objects(objects=objects)
         self.__session.commit()
+
+
+class StubDataManager(DataManagerInterface):
+    @property
+    def engine(self) -> Engine:
+        pass
+
+    @property
+    def session(self) -> Session:
+        pass
+
+    def cleanup(self) -> None:
+        pass

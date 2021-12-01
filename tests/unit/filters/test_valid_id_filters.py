@@ -4,14 +4,14 @@ from unittest.mock import patch
 from src.data_access_layer.brand import Brand
 from src.data_access_layer.product import Product
 from src.web.filters.valid_id_filters import LoadResourceById
-from tests.unit import FakeDataManager
+from tests.unit import StubDataManager
 
 
 @patch('src.web.filters.valid_id_filters.load_by_id')
 def test_load_resources_id_succeeds_for_known_brand_resource_id(mock_load):
     mock_load.return_value = Brand()
 
-    manager = FakeDataManager()
+    manager = StubDataManager()
     _filter = LoadResourceById(manager, 'brand')
 
     uuid_ = uuid.uuid4()
@@ -24,9 +24,11 @@ def test_load_resources_id_succeeds_for_known_brand_resource_id(mock_load):
 
 @patch('src.web.filters.valid_id_filters.load_by_id')
 def test_load_resources_id_succeeds_for_known_product_resource_id(mock_load):
-    mock_load.return_value = Product()
+    product = Product()
+    product.brand = Brand()
+    mock_load.return_value = product
 
-    manager = FakeDataManager()
+    manager = StubDataManager()
     _filter = LoadResourceById(manager, 'product')
 
     uuid_ = uuid.uuid4()
@@ -41,7 +43,7 @@ def test_load_resources_id_succeeds_for_known_product_resource_id(mock_load):
 def test_load_resources_id_fails_for_unknown_resource_id(mock_load):
     mock_load.return_value = None
 
-    _filter = LoadResourceById(FakeDataManager(), 'brand')
+    _filter = LoadResourceById(StubDataManager(), 'brand')
 
     response = _filter.do_filter({'pathParameters': {'brand_id': str(uuid.uuid4())}})
 
@@ -50,21 +52,21 @@ def test_load_resources_id_fails_for_unknown_resource_id(mock_load):
 
 
 def test_load_resources_id_fails_when_event_missing_key():
-    _filter = LoadResourceById(FakeDataManager(), 'brand')
+    _filter = LoadResourceById(StubDataManager(), 'brand')
     response = _filter.do_filter({'pathParameters': {}})
     assert response.is_success() is False
     assert response.get_code() == 400
 
 
 def test_load_resources_id_fails_when_event_root_missing_key():
-    _filter = LoadResourceById(FakeDataManager(), 'brand')
+    _filter = LoadResourceById(StubDataManager(), 'brand')
     response = _filter.do_filter({'sadf': {}})
     assert response.is_success() is False
     assert response.get_code() == 400
 
 
 def test_load_resources_id_fails_when_event_contains_invalid_uuid():
-    _filter = LoadResourceById(FakeDataManager(), 'brand')
+    _filter = LoadResourceById(StubDataManager(), 'brand')
     response = _filter.do_filter({'pathParameters': {'brand_id': '123-123-123-123-123'}})
     assert response.is_success() is False
     assert response.get_code() == 400
