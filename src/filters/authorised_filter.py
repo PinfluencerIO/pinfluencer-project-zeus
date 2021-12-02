@@ -1,5 +1,5 @@
 from src.interfaces.data_manager_interface import DataManagerInterface
-from src.service_layer import load_brand_by_auth_id
+from src.data_access_layer.read_data_access import load_brand_by_auth_id
 from src.filters import FilterInterface, FilterResponse
 
 
