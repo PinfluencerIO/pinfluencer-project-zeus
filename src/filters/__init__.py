@@ -44,31 +44,3 @@ class FilterChainImp(FilterChain):
                 return response
 
         return response
-
-
-class MissingPathParameter(Exception):
-    pass
-
-
-class NotFoundById(Exception):
-    pass
-
-
-class NotFoundByAuthUser(Exception):
-    pass
-
-
-class InvalidId(Exception):
-    pass
-
-
-class PayloadValidationError(Exception):
-    pass
-
-
-class BrandAlreadyCreatedForAuthUser(Exception):
-    pass
-
-
-class OwnershipError(Exception):
-    pass

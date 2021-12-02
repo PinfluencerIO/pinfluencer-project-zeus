@@ -3,7 +3,7 @@ import uuid
 import pytest
 
 from src.data_access_layer.product import Product
-from src.filters import FilterChainImp, NotFoundById
+from src.filters import FilterChainImp
 from src.filters.valid_id_filters import LoadResourceById
 from src.pinfluencer_response import PinfluencerResponse
 from src.web.processors.products import ProcessPublicGetProductBy
@@ -59,6 +59,7 @@ class TestPublicProductById:
         assert self.__result.body == self.__products[0].as_dict()
 
     def off_test_no_product_is_found_when_product_is_not_in_db(self, get_public_product_by_id_fixture):
-        with pytest.raises(NotFoundById):
-            self.__setup(get_public_product_by_id_fixture=get_public_product_by_id_fixture,
-                         callback=self.__setup_empty_data)
+        # with pytest.raises(NotFoundById):
+        #     self.__setup(get_public_product_by_id_fixture=get_public_product_by_id_fixture,
+        #                  callback=self.__setup_empty_data)
+        pass
