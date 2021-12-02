@@ -2,8 +2,8 @@ import pytest
 
 from src.data_access_layer.brand import Brand
 from src.data_access_layer.product import Product
-from src.web.filters import FilterChainImp
-from src.web.filters.valid_id_filters import LoadResourceById
+from src.filters import FilterChainImp
+from src.filters.valid_id_filters import LoadResourceById
 from src.web.http_util import PinfluencerResponse
 from src.web.processors.brands import ProcessPublicAllProductsForBrand
 from src.web.processors.products import ProcessPublicProducts

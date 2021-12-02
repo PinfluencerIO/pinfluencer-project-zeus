@@ -3,11 +3,11 @@ from unittest.mock import patch
 
 from src.data_access_layer.brand import Brand
 from src.data_access_layer.product import Product
-from src.web.filters.valid_id_filters import LoadResourceById
+from src.filters.valid_id_filters import LoadResourceById
 from tests.unit import StubDataManager
 
 
-@patch('src.web.filters.valid_id_filters.load_by_id')
+@patch('src.filters.valid_id_filters.load_by_id')
 def test_load_resources_id_succeeds_for_known_brand_resource_id(mock_load):
     mock_load.return_value = Brand()
 
@@ -22,7 +22,7 @@ def test_load_resources_id_succeeds_for_known_brand_resource_id(mock_load):
     mock_load.assert_called_with(str(uuid_), Brand, manager)
 
 
-@patch('src.web.filters.valid_id_filters.load_by_id')
+@patch('src.filters.valid_id_filters.load_by_id')
 def test_load_resources_id_succeeds_for_known_product_resource_id(mock_load):
     product = Product()
     product.brand = Brand()
@@ -39,7 +39,7 @@ def test_load_resources_id_succeeds_for_known_product_resource_id(mock_load):
     mock_load.assert_called_with(str(uuid_), Product, manager)
 
 
-@patch('src.web.filters.valid_id_filters.load_by_id')
+@patch('src.filters.valid_id_filters.load_by_id')
 def test_load_resources_id_fails_for_unknown_resource_id(mock_load):
     mock_load.return_value = None
 

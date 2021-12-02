@@ -2,9 +2,9 @@ from collections import OrderedDict
 
 from src.common.log_util import print_exception
 from src.container import Container
-from src.web.filters import *
-from src.web.filters.authorised_filter import *
-from src.web.filters.payload_validation import *
+from src.filters import *
+from src.filters.authorised_filter import *
+from src.filters.payload_validation import *
 from src.web.processors.brands import *
 from src.web.processors.feed import *
 from src.web.processors.products import *

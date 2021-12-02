@@ -1,6 +1,6 @@
 from src.interfaces.data_manager_interface import DataManagerInterface
 from src.service_layer import load_brand_by_auth_id
-from src.web.filters import FilterInterface, FilterResponse
+from src.filters import FilterInterface, FilterResponse
 
 
 class AuthFilter(FilterInterface):

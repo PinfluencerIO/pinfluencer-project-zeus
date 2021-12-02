@@ -2,7 +2,7 @@ import json
 
 from jsonschema import validate
 
-from src.web.filters import FilterInterface, FilterResponse
+from src.filters import FilterInterface, FilterResponse
 
 
 class BrandPutPayloadValidation(FilterInterface):

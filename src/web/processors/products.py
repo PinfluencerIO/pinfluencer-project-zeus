@@ -4,7 +4,7 @@ from src.data_access_layer import to_list
 from src.data_access_layer.product import Product, product_from_dict
 from src.interfaces.data_manager_interface import DataManagerInterface
 from src.interfaces.image_repository_interface import ImageRepositoryInterface
-from src.web.filters import FilterChain
+from src.filters import FilterChain
 from src.web.http_util import PinfluencerResponse
 from src.web.processors import ProcessInterface
 # Todo: Implement all these processors

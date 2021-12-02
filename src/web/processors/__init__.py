@@ -3,7 +3,7 @@ import abc
 import boto3
 
 from src.interfaces.data_manager_interface import DataManagerInterface
-from src.web.filters import FilterChain, FilterChainImp, FilterResponse
+from src.filters import FilterChain, FilterChainImp, FilterResponse
 from src.web.http_util import PinfluencerResponse
 
 BUCKET = 'pinfluencer-product-images'

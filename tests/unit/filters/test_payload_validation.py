@@ -1,8 +1,4 @@
-import json
-
-from src.web.filters.payload_validation import BrandPutPayloadValidation, BrandImagePatchPayloadValidation, \
-    BrandPostPayloadValidation, ProductPostPayloadValidation, ProductPutPayloadValidation, \
-    ProductImagePatchPayloadValidation
+from src.filters.payload_validation import *
 
 
 def test_valid_put_brand_payload_response_200():

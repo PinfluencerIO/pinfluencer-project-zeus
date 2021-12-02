@@ -3,8 +3,8 @@ from unittest.mock import patch
 import pytest
 
 from src.data_access_layer.brand import Brand
-from src.web.filters.authorised_filter import AuthFilter, OwnerOnly, OneTimeCreateBrandFilter
-from tests.unit import FakeDataManager, StubDataManager
+from src.filters.authorised_filter import AuthFilter, OwnerOnly, OneTimeCreateBrandFilter
+from tests.unit import StubDataManager
 
 user_id = 'user_id'
 event_cognito_user = {
@@ -20,7 +20,7 @@ event_cognito_user = {
 }
 
 
-@patch('src.web.filters.authorised_filter.load_brand_by_auth_id')
+@patch('src.filters.authorised_filter.load_brand_by_auth_id')
 def test_brand_found_for_cognito_user_and_added_to_event(mock_load):
     mock_load.return_value = Brand()
 
@@ -35,7 +35,7 @@ def test_brand_found_for_cognito_user_and_added_to_event(mock_load):
     mock_load.assert_called_with(user_id, data_manager)
 
 
-@patch('src.web.filters.authorised_filter.load_brand_by_auth_id')
+@patch('src.filters.authorised_filter.load_brand_by_auth_id')
 def test_brand_not_found_for_cognito_user_response_with_401(mock_load):
     mock_load.return_value = None
 
@@ -49,7 +49,7 @@ def test_brand_not_found_for_cognito_user_response_with_401(mock_load):
     mock_load.assert_called_with(user_id, data_manager)
 
 
-@patch('src.web.filters.authorised_filter.load_brand_by_auth_id')
+@patch('src.filters.authorised_filter.load_brand_by_auth_id')
 def test_missing_cognito_user_response_with_401(mock_load):
     mock_load.return_value = None
 
@@ -112,7 +112,7 @@ def test_when_owner_is_not_authorised_for_resource_response_with_401():
     assert response.get_code() == 401
 
 
-@patch('src.web.filters.authorised_filter.load_brand_by_auth_id')
+@patch('src.filters.authorised_filter.load_brand_by_auth_id')
 def test_brand_already_associated_with__user_response_with_400(mock_load):
     mock_load.return_value = Brand()
 
@@ -126,7 +126,7 @@ def test_brand_already_associated_with__user_response_with_400(mock_load):
     mock_load.assert_called_with(user_id, data_manager)
 
 
-@patch('src.web.filters.authorised_filter.load_brand_by_auth_id')
+@patch('src.filters.authorised_filter.load_brand_by_auth_id')
 def test_brand_not_already_associated_with__user_response_with_200(mock_load):
     mock_load.return_value = None
 
