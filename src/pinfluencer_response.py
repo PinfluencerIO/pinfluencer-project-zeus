@@ -27,25 +27,5 @@ class PinfluencerResponse:
         return PinfluencerResponse(500, {"message": message})
 
     @staticmethod
-    def as_401_error(message: str = 'Not authorised'):
-        return PinfluencerResponse(401, {"message": message})
-
-    @staticmethod
-    def as_404_error():
-        return PinfluencerResponse(404, {"message": 'Not found'})
-
-    @staticmethod
     def as_400_error(message: str = 'Client error, please check request.'):
         return PinfluencerResponse(400, {"message": message})
-
-    @staticmethod
-    def as_updated(id: str):
-        return PinfluencerResponse(body={"message": f'{id} updated successfully'})
-
-    @staticmethod
-    def as_created(id: str):
-        return PinfluencerResponse(body={"id": f'{id} created successfully'}, status_code=201)
-
-    @staticmethod
-    def as_deleted():
-        return PinfluencerResponse(body={"id": f'resource deleted successfully'})
