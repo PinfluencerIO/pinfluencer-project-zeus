@@ -1,6 +1,6 @@
 from collections import OrderedDict
 
-from src.common.log_util import print_exception
+from src.log_util import print_exception
 from src.container import Container
 from src.filters import *
 from src.filters.authorised_filter import *

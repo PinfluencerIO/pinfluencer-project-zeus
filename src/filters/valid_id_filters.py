@@ -1,6 +1,6 @@
 import uuid
 
-from src.common import log_util
+from src import log_util
 from src.data_access_layer.brand import Brand
 from src.data_access_layer.product import Product
 from src.interfaces.data_manager_interface import DataManagerInterface

@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime
+from unittest.mock import Mock
 
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
@@ -61,11 +62,11 @@ class FakeDataManager(DataManagerInterface):
 class StubDataManager(DataManagerInterface):
     @property
     def engine(self) -> Engine:
-        pass
+        return Mock()
 
     @property
     def session(self) -> Session:
-        pass
+        return Mock()
 
     def cleanup(self) -> None:
         pass

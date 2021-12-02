@@ -18,7 +18,7 @@ from tests.unit import FakeDataManager, brand_generator, product_generator
 def update_auth_product_fixture():
     data_manager = FakeDataManager()
     auth_filter = AuthFilter(data_manager)
-    valid_product_filter = LoadResourceById('product')
+    valid_product_filter = LoadResourceById(data_manager, 'product')
     status_manager = RequestStatusManager()
     product_processor = ProcessAuthenticatedPutProduct(
         FilterChainImp(

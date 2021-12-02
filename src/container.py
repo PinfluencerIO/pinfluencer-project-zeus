@@ -1,8 +1,8 @@
 from src.data_access_layer.data_manager import DataManager
 from src.data_access_layer.image_repository import S3ImageRepository
+from src.filters.authorised_filter import AuthFilter
 from src.interfaces.data_manager_interface import DataManagerInterface
 from src.interfaces.image_repository_interface import ImageRepositoryInterface
-from src.filters import AuthFilter
 from src.filters.valid_id_filters import LoadResourceById
 from src.web.request_status_manager import RequestStatusManager
 
