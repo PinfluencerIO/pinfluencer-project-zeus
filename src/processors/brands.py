@@ -3,9 +3,10 @@ import json
 from src.data_access_layer import to_list
 from src.data_access_layer.brand import Brand, brand_from_dict
 from src.data_access_layer.product import Product
+from src.filters import FilterChain
+from src.filters.valid_id_filters import LoadResourceById
 from src.interfaces.data_manager_interface import DataManagerInterface
 from src.interfaces.image_repository_interface import ImageRepositoryInterface
-from src.filters import FilterChain
 from src.pinfluencer_response import PinfluencerResponse
 from src.processors import ProcessInterface, get_user
 from src.web.request_status_manager import RequestStatusManager
@@ -21,12 +22,16 @@ class ProcessPublicBrands(ProcessInterface):
                                                 .all()))
 
 
-class ProcessPublicGetBrandBy(ProcessInterface):
-    def __init__(self, filter_chain: FilterChain, data_manager: DataManagerInterface):
-        super().__init__(data_manager, filter_chain)
+class ProcessPublicGetBrandBy:
+    def __init__(self, load_resource_by_id: LoadResourceById):
+        self.load_resource_by_id = load_resource_by_id
 
     def do_process(self, event: dict) -> PinfluencerResponse:
-        return PinfluencerResponse(body=event["brand"])
+        response = self.load_resource_by_id.load(event)
+        if response.is_success():
+            return PinfluencerResponse(body=response.get_payload())
+        else:
+            return PinfluencerResponse.as_400_error(response.get_message())
 
 
 class ProcessPublicAllProductsForBrand(ProcessInterface):

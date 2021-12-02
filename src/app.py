@@ -17,8 +17,7 @@ def lambda_handler(event, context):
             # public endpoints
             'GET /feed': ProcessPublicFeed(container.data_manager),
             'GET /brands': ProcessPublicBrands(container.data_manager),
-            'GET /brands/{brand_id}': ProcessPublicGetBrandBy(FilterChainImp([container.valid_brand_filter]),
-                                                              container.data_manager),
+            'GET /brands/{brand_id}': ProcessPublicGetBrandBy(LoadResourceById(container.data_manager, 'brand')),
             'GET /brands/{brand_id}/products': ProcessPublicAllProductsForBrand(
                 FilterChainImp([container.valid_brand_filter]),
                 container.data_manager),

@@ -3,12 +3,12 @@ import uuid
 from src import log_util
 from src.data_access_layer.brand import Brand
 from src.data_access_layer.product import Product
-from src.interfaces.data_manager_interface import DataManagerInterface
 from src.data_access_layer.read_data_access import load_by_id
-from src.filters import FilterInterface, FilterResponse
+from src.filters import FilterResponse
+from src.interfaces.data_manager_interface import DataManagerInterface
 
 
-class LoadResourceById(FilterInterface):
+class LoadResourceById:
     __resources = {'brand': Brand, 'product': Product}
 
     def __init__(self, data_manager: DataManagerInterface, resource: str) -> None:
@@ -17,21 +17,21 @@ class LoadResourceById(FilterInterface):
         self.__resource_type = self.__resources[resource]
         self.__resource_key = resource + '_id'
 
-    def do_filter(self, event: dict):
+    def load(self, event: dict):
         try:
             id_ = event['pathParameters'][self.__resource_key]
         except KeyError:
-            return FilterResponse(f'Missing key in event pathParameters.{self.__resource_key}', 400)
+            return FilterResponse(f'Missing key in event pathParameters.{self.__resource_key}', 400, {})
 
         if valid_uuid(id_):
             loaded_resource = load_by_id(id_, self.__resource_type, self.__data_manager)
             if loaded_resource is None:
-                return FilterResponse(f'No {self.resource} found with id {id_}', 404)
+                return FilterResponse(f'No {self.resource} found with id {id_}', 404, {})
             else:
-                event[self.resource] = loaded_resource.as_dict()
-                return FilterResponse('', 200)
+                # event[self.resource] = loaded_resource.as_dict()
+                return FilterResponse('', 200, loaded_resource.as_dict())
         else:
-            return FilterResponse(f'{id_} is invalid', 400)
+            return FilterResponse(f'{id_} is invalid', 400, {})
 
 
 def valid_uuid(id_):

@@ -11,10 +11,10 @@ class BrandPutPayloadValidation(FilterInterface):
         payload = json.loads(body_)
         try:
             validate(instance=payload, schema=update_brand_payload_schema())
-            return FilterResponse('', 200)
+            return FilterResponse('', 200, {})
         except Exception as e:
             print(f'Validating BrandPutPayload failed {e}')
-            return FilterResponse('Invalid payload', 400)
+            return FilterResponse('Invalid payload', 400, {})
 
 
 class BrandImagePatchPayloadValidation(FilterInterface):
@@ -23,10 +23,10 @@ class BrandImagePatchPayloadValidation(FilterInterface):
         payload = json.loads(body_)
         try:
             validate(instance=payload, schema=get_image_update_payload_schema())
-            return FilterResponse('', 200)
+            return FilterResponse('', 200, {})
         except Exception as e:
             print(f'Validating ImagePatchPayload failed {e}')
-            return FilterResponse('Invalid payload', 400)
+            return FilterResponse('Invalid payload', 400, {})
 
 
 class BrandPostPayloadValidation(FilterInterface):
@@ -42,10 +42,10 @@ class BrandPostPayloadValidation(FilterInterface):
             if len(payload['website']) > 120:
                 print(f'website is longer than column size, clipping ')
                 payload['website'] = payload['website'][:120]
-            return FilterResponse('', 200)
+            return FilterResponse('', 200, {})
         except Exception as e:
             print(f'Validating brand payload failed {e}')
-            return FilterResponse('Invalid payload', 400)
+            return FilterResponse('Invalid payload', 400, {})
 
 
 class ProductPostPayloadValidation(FilterInterface):
@@ -55,10 +55,10 @@ class ProductPostPayloadValidation(FilterInterface):
         print(f'payload {payload}')
         try:
             validate(instance=payload, schema=(get_product_payload_schema()))
-            return FilterResponse('', 200)
+            return FilterResponse('', 200, {})
         except Exception as e:
             print(f'Validating product payload failed {e}')
-            return FilterResponse('Invalid payload', 400)
+            return FilterResponse('Invalid payload', 400, {})
 
 
 class ProductPutPayloadValidation(FilterInterface):
@@ -68,10 +68,10 @@ class ProductPutPayloadValidation(FilterInterface):
         print(f'payload {payload}')
         try:
             validate(instance=payload, schema=(get_product_update_payload_schema()))
-            return FilterResponse('', 200)
+            return FilterResponse('', 200, {})
         except Exception as e:
             print(f'Validating product update payload failed {e}')
-            return FilterResponse('Invalid payload', 400)
+            return FilterResponse('Invalid payload', 400, {})
 
 
 class ProductImagePatchPayloadValidation(FilterInterface):
@@ -81,10 +81,10 @@ class ProductImagePatchPayloadValidation(FilterInterface):
         print(f'payload {payload}')
         try:
             validate(instance=payload, schema=(get_image_update_payload_schema()))
-            return FilterResponse('', 200)
+            return FilterResponse('', 200, {})
         except Exception as e:
             print(f'Validating product update payload failed {e}')
-            return FilterResponse('Invalid payload', 400)
+            return FilterResponse('Invalid payload', 400, {})
 
 
 def get_image_update_payload_schema():
