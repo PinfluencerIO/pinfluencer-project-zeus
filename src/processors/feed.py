@@ -3,7 +3,7 @@ from src.data_access_layer.brand import Brand
 from src.data_access_layer.product import Product
 from src.interfaces.data_manager_interface import DataManagerInterface
 from src.pinfluencer_response import PinfluencerResponse
-from src.web.processors import ProcessInterface
+from src.processors import ProcessInterface
 
 
 class ProcessPublicFeed(ProcessInterface):

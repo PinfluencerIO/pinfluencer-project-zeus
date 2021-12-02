@@ -2,7 +2,7 @@ import pytest
 
 from src.data_access_layer.brand import Brand
 from src.pinfluencer_response import PinfluencerResponse
-from src.web.processors.brands import ProcessPublicBrands
+from src.processors.brands import ProcessPublicBrands
 from tests.unit import FakeDataManager, brand_generator
 
 

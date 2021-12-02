@@ -6,7 +6,7 @@ from src.interfaces.data_manager_interface import DataManagerInterface
 from src.interfaces.image_repository_interface import ImageRepositoryInterface
 from src.filters import FilterChain
 from src.pinfluencer_response import PinfluencerResponse
-from src.web.processors import ProcessInterface
+from src.processors import ProcessInterface
 # Todo: Implement all these processors
 from src.web.request_status_manager import RequestStatusManager
 

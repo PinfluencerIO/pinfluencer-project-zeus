@@ -2,12 +2,12 @@ from collections import OrderedDict
 
 from src.log_util import print_exception
 from src.container import Container
-from src.filters import *
 from src.filters.authorised_filter import *
 from src.filters.payload_validation import *
-from src.web.processors.brands import *
-from src.web.processors.feed import *
-from src.web.processors.products import *
+from src.processors import *
+from src.processors.brands import *
+from src.processors.products import *
+from src.processors.feed import ProcessPublicFeed
 
 
 def lambda_handler(event, context):

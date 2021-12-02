@@ -6,7 +6,7 @@ from src.data_access_layer.product import Product
 from src.filters import FilterChainImp
 from src.filters.valid_id_filters import LoadResourceById
 from src.pinfluencer_response import PinfluencerResponse
-from src.web.processors.products import ProcessPublicGetProductBy
+from src.processors.products import ProcessPublicGetProductBy
 from tests.unit import FakeDataManager, product_generator, brand_generator
 
 
