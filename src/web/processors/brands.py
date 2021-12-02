@@ -6,7 +6,7 @@ from src.data_access_layer.product import Product
 from src.interfaces.data_manager_interface import DataManagerInterface
 from src.interfaces.image_repository_interface import ImageRepositoryInterface
 from src.filters import FilterChain
-from src.web.http_util import PinfluencerResponse
+from src.pinfluencer_response import PinfluencerResponse
 from src.web.processors import ProcessInterface, get_user
 from src.web.request_status_manager import RequestStatusManager
 

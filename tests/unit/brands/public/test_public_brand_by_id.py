@@ -5,7 +5,7 @@ import pytest
 from src.data_access_layer.brand import Brand
 from src.filters import FilterChainImp
 from src.filters.valid_id_filters import LoadResourceById
-from src.web.http_util import PinfluencerResponse
+from src.pinfluencer_response import PinfluencerResponse
 from src.web.processors.brands import ProcessPublicGetBrandBy
 from tests.unit import FakeDataManager, brand_generator
 

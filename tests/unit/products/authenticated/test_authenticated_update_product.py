@@ -8,7 +8,7 @@ from src.filters import *
 from src.filters.authorised_filter import AuthFilter, OwnerOnly
 from src.filters.payload_validation import ProductPutPayloadValidation
 from src.filters.valid_id_filters import LoadResourceById
-from src.web.http_util import PinfluencerResponse
+from src.pinfluencer_response import PinfluencerResponse
 from src.web.processors.products import ProcessPublicProducts, ProcessAuthenticatedPutProduct
 from src.web.request_status_manager import RequestStatusManager
 from tests.unit import FakeDataManager, brand_generator, product_generator

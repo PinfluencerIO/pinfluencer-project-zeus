@@ -5,7 +5,7 @@ import pytest
 from src.data_access_layer.product import Product
 from src.filters import FilterChainImp, NotFoundById
 from src.filters.valid_id_filters import LoadResourceById
-from src.web.http_util import PinfluencerResponse
+from src.pinfluencer_response import PinfluencerResponse
 from src.web.processors.products import ProcessPublicGetProductBy
 from tests.unit import FakeDataManager, product_generator, brand_generator
 
