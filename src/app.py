@@ -64,23 +64,14 @@ def lambda_handler(event, context):
         print(f'route: {event["routeKey"]}')
         print(f'event: {event}')
         processor: ProcessInterface = routes[event['routeKey']]
-        print("start run filters")
-        filter_response: FilterResponse = processor.run_filters(event)
 
-        if filter_response.is_success():
-            print("finished run filters successfully")
-            print("start run processor")
-            response: PinfluencerResponse = processor.do_process(event)
-            if response.is_ok():
-                print("finished run processor successfully")
-                container.status_manager.status = True
-            else:
-                print("finished run processor unsuccessfully")
-            return response.as_json()
-        else:
-            print("finished run filters unsuccessfully")
+        response: PinfluencerResponse = processor.do_process(event)
+        if response.is_ok():
+            print("finished run processor successfully")
             container.status_manager.status = True
-            return PinfluencerResponse(filter_response.get_code(), filter_response.get_message())
+        else:
+            print("finished run processor unsuccessfully")
+        return response.as_json()
 
     except KeyError as ke:
         print(f'Missing required key {ke}')

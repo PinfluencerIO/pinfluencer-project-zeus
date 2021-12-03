@@ -21,9 +21,9 @@ class DataManager(DataManagerInterface):
         #         'secret_arn': os.environ['DB_SECRET_ARN']
         #     }
         # )
-        THE_PASSWORD = os.environ['db_password']
+        THE_PASSWORD = ''
         engine = create_engine(
-            "postgresql://postgres:%s@pinfluencer.czqff0jhbhz3.eu-west-2.rds.amazonaws.com/pinfluencer" % THE_PASSWORD)
+            "mysql+mysqlconnector://admin:%s@pinfluencerdb.czqff0jhbhz3.eu-west-2.rds.amazonaws.com/pinfluencerdb" % THE_PASSWORD)
         self.__engine = engine
         session = sessionmaker(bind=self.__engine, autocommit=False)
         self.__session = session()

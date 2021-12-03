@@ -9,8 +9,9 @@ CREATE TABLE brand
   website varchar(120) NOT NULL, 
   email varchar(120) NOT NULL, 
   instahandle varchar(30) DEFAULT NULL, 
+  image varchar(36) DEFAULT NULL, 
   auth_user_id varchar(64) DEFAULT NULL, 
-  created TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+  created datetime NOT NULL
 ) 
 
 CREATE TABLE product
@@ -18,8 +19,9 @@ CREATE TABLE product
   name varchar(120) NOT NULL,
   description varchar(500) NOT NULL, 
   requirements varchar(500) DEFAULT NULL, 
+  image varchar(36) DEFAULT NULL, 
   brand_id varchar(36) NOT NULL, 
-  created TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+  created datetime NOT NULL, 
   CONSTRAINT fk_brand
     FOREIGN KEY(brand_id) 
 	REFERENCES brand(id)
