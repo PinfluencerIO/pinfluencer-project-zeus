@@ -2,6 +2,7 @@ import json
 
 from src.data_access_layer import to_list
 from src.data_access_layer.product import Product, product_from_dict
+from src.data_access_layer.read_data_access import load_all_products
 from src.interfaces.data_manager_interface import DataManagerInterface
 from src.interfaces.image_repository_interface import ImageRepositoryInterface
 from src.filters import FilterChain
@@ -11,13 +12,16 @@ from src.processors import ProcessInterface
 from src.web.request_status_manager import RequestStatusManager
 
 
-class ProcessPublicProducts(ProcessInterface):
+class ProcessPublicProducts:
     def __init__(self, data_manager: DataManagerInterface):
-        super().__init__(data_manager)
+        self.data_manager = data_manager
 
     def do_process(self, event: dict) -> PinfluencerResponse:
-        print(self)
-        return PinfluencerResponse(body=to_list(self._data_manager.session.query(Product).all()))
+        list_of_all_products = to_list(self.load_all_products())
+        return PinfluencerResponse(body=list_of_all_products)
+
+    def load_all_products(self):
+        return load_all_products(self.data_manager)
 
 
 class ProcessPublicGetProductBy(ProcessInterface):

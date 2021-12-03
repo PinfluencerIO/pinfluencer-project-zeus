@@ -43,3 +43,9 @@ def load_all_products_for_brand_id(id_, data_manager):
     finally:
         data_manager.session.commit()
 
+
+def load_all_products(data_manager):
+    try:
+        return data_manager.session.query(Product).all()
+    finally:
+        data_manager.session.commit()
