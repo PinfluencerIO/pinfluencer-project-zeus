@@ -1,13 +1,13 @@
 from collections import OrderedDict
 
-from src.log_util import print_exception
 from src.container import Container
 from src.filters.authorised_filter import *
 from src.filters.payload_validation import *
+from src.log_util import print_exception
 from src.processors import *
 from src.processors.brands import *
-from src.processors.products import *
 from src.processors.feed import ProcessPublicFeed
+from src.processors.products import *
 
 
 def lambda_handler(event, context):
@@ -19,8 +19,7 @@ def lambda_handler(event, context):
             'GET /brands': ProcessPublicBrands(container.data_manager),
             'GET /brands/{brand_id}': ProcessPublicGetBrandBy(LoadResourceById(container.data_manager, 'brand')),
             'GET /brands/{brand_id}/products': ProcessPublicAllProductsForBrand(
-                FilterChainImp([container.valid_brand_filter]),
-                container.data_manager),
+                LoadResourceById(container.data_manager, 'brand'), container.data_manager),
             'GET /products': ProcessPublicProducts(container.data_manager),
             'GET /products/{product_id}': ProcessPublicGetProductBy(
                 FilterChainImp([container.valid_product_filter]),

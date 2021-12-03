@@ -2,7 +2,7 @@ import json
 
 from src.data_access_layer import to_list
 from src.data_access_layer.brand import Brand, brand_from_dict
-from src.data_access_layer.product import Product
+from src.data_access_layer.read_data_access import load_all_products_for_brand_id
 from src.filters import FilterChain
 from src.filters.valid_id_filters import LoadResourceById
 from src.interfaces.data_manager_interface import DataManagerInterface
@@ -34,15 +34,19 @@ class ProcessPublicGetBrandBy:
             return PinfluencerResponse.as_400_error(response.get_message())
 
 
-class ProcessPublicAllProductsForBrand(ProcessInterface):
-    def __init__(self, filter_chain: FilterChain, data_manager: DataManagerInterface):
-        super().__init__(data_manager, filter_chain)
+class ProcessPublicAllProductsForBrand:
+    def __init__(self, load_resource_by_id: LoadResourceById, data_manager: DataManagerInterface):
+        self.load_resource_by_id = load_resource_by_id
+        self.data_manager = data_manager
 
     def do_process(self, event: dict) -> PinfluencerResponse:
-        return PinfluencerResponse(body=to_list(self._data_manager.session
-                                                .query(Product)
-                                                .filter(Product.brand_id == event['brand']['id'])
-                                                .all()))
+        response = self.load_resource_by_id.load(event)
+        if response.is_success():
+            brand = response.get_payload()
+            products_for_brand = load_all_products_for_brand_id(brand['id'], self.data_manager)
+            return PinfluencerResponse(body=(to_list(products_for_brand)))
+        else:
+            return PinfluencerResponse.as_400_error(response.get_message())
 
 
 class ProcessAuthenticatedGetBrand(ProcessInterface):

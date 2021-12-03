@@ -35,3 +35,11 @@ def load_max_3_products_for_brand(id_, data_manager: DataManagerInterface):
         return data_manager.session.query(Product).filter(Product.brand_id == id_).limit(3).all()
     finally:
         data_manager.session.commit()
+
+
+def load_all_products_for_brand_id(id_, data_manager):
+    try:
+        return data_manager.session.query(Product).filter(Product.brand_id == id_).all()
+    finally:
+        data_manager.session.commit()
+
