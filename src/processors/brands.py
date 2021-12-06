@@ -3,8 +3,10 @@ import json
 from src.data_access_layer import to_list
 from src.data_access_layer.brand import Brand, brand_from_dict
 from src.data_access_layer.read_data_access import load_all_products_for_brand_id
+from src.data_access_layer.write_data_access import write_new_brand
 from src.filters import FilterChain
-from src.filters.authorised_filter import AuthFilter
+from src.filters.authorised_filter import AuthFilter, OneTimeCreateBrandFilter
+from src.filters.payload_validation import BrandPostPayloadValidation
 from src.filters.valid_id_filters import LoadResourceById
 from src.interfaces.data_manager_interface import DataManagerInterface
 from src.interfaces.image_repository_interface import ImageRepositoryInterface
@@ -86,33 +88,51 @@ class ProcessAuthenticatedPutBrand(ProcessInterface):
         return PinfluencerResponse(body=brand.as_dict())
 
 
-class ProcessAuthenticatedPostBrand(ProcessInterface):
+class ProcessAuthenticatedPostBrand:
     def __init__(self,
-                 filter_chain: FilterChain,
-                 data_manager: DataManagerInterface,
-                 image_repository: ImageRepositoryInterface,
-                 status_manager: RequestStatusManager):
-        super().__init__(data_manager, filter_chain)
-        self.__image_repository = image_repository
-        self.__status_manager = status_manager
+                 auth_filter: AuthFilter,
+                 one_time_create: OneTimeCreateBrandFilter,
+                 post_validation: BrandPostPayloadValidation,
+                 data_manager: DataManagerInterface):
+        self.auth_filter = auth_filter
+        self.post_validation = post_validation
+        self.one_time_create = one_time_create
+        self.data_manager = data_manager
 
     def do_process(self, event: dict) -> PinfluencerResponse:
-        brand_dict = json.loads(event['body'])
-        update_email(brand_dict, event)
-        brand_dict["auth_user_id"] = get_user(event=event)
-        image_bytes = brand_dict['image']
-        brand_dict['image'] = None
-        brand = brand_from_dict(brand_dict)
+        # must be authenticated
+        filter_response = self.must_be_authenticated(event)
+        if filter_response.is_success():
+            # must not be brand associated with authenticated user
+            filter_response = self.check_no_brand_associated_with_authenticated_user(event)
+            if filter_response.is_success():
+                # validate payload
+                filter_response = self.validate_new_brand_payload(event)
+                if filter_response.is_success():
+                    payload = filter_response.get_payload()
+                    payload["auth_user_id"] = get_user(event=event)
+                    image_bytes = payload['image']
+                    payload['image'] = None
+                    brand = self.create_new_brand(payload, image_bytes)
+                    return PinfluencerResponse(201, brand.as_dict())
+                else:
+                    return PinfluencerResponse(filter_response.get_code())
+            else:
+                return PinfluencerResponse(filter_response.get_code())
+        else:
+            return PinfluencerResponse(filter_response.get_code())
 
-        self._data_manager.session.add(brand)
-        self._data_manager.session.flush()
-        image_id = self.__image_repository.upload(f'{brand.id}', image_bytes)
-        brand: Brand = self._data_manager.session.query(Brand) \
-            .filter(Brand.id == brand.id) \
-            .first()
-        brand.image = image_id
-        self._data_manager.session.flush()
-        return PinfluencerResponse(body=brand.as_dict(), status_code=201)
+    def create_new_brand(self, payload, image_bytes) -> Brand:
+        return write_new_brand(payload, image_bytes, self.data_manager)
+
+    def validate_new_brand_payload(self, event):
+        return self.post_validation.do_filter(event)
+
+    def check_no_brand_associated_with_authenticated_user(self, event):
+        return self.one_time_create.do_filter(event)
+
+    def must_be_authenticated(self, event):
+        return self.auth_filter.do_filter(event)
 
 
 class ProcessAuthenticatedPatchBrandImage(ProcessInterface):

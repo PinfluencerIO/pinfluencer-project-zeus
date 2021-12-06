@@ -42,7 +42,7 @@ class BrandPostPayloadValidation(FilterInterface):
             if len(payload['website']) > 120:
                 print(f'website is longer than column size, clipping ')
                 payload['website'] = payload['website'][:120]
-            return FilterResponse('', 200, {})
+            return FilterResponse('', 200, payload)
         except Exception as e:
             print(f'Validating brand payload failed {e}')
             return FilterResponse('Invalid payload', 400, {})

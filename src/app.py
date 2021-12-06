@@ -27,10 +27,11 @@ def lambda_handler(event, context):
             # authenticated brand endpoints
             'GET /brands/me': ProcessAuthenticatedGetBrand(container.auth_filter,
                                                            container.data_manager),
-            'POST /brands/me': ProcessAuthenticatedPostBrand(
-                FilterChainImp([OneTimeCreateBrandFilter(container.data_manager),
-                                BrandPostPayloadValidation()]),
-                container.data_manager, container.image_repository, container.status_manager),
+            'POST /brands/me': ProcessAuthenticatedPostBrand(container.auth_filter,
+                                                             OneTimeCreateBrandFilter(container.data_manager),
+                                                             BrandPostPayloadValidation(),
+                                                             container.data_manager,
+                                                             container.image_repository),
             'PUT /brands/me': ProcessAuthenticatedPutBrand(FilterChainImp([container.auth_filter,
                                                                            BrandPutPayloadValidation()]),
                                                            container.data_manager, container.status_manager),

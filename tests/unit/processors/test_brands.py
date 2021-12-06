@@ -1,14 +1,33 @@
 import uuid
 from unittest.mock import patch
 
+import pytest
+
 from src.data_access_layer.brand import Brand
 from src.data_access_layer.product import Product
 from src.filters import FilterResponse
-from src.filters.authorised_filter import AuthFilter
+from src.filters.authorised_filter import AuthFilter, OneTimeCreateBrandFilter
+from src.filters.payload_validation import BrandPostPayloadValidation
 from src.filters.valid_id_filters import LoadResourceById
 from src.processors.brands import ProcessPublicBrands, ProcessPublicGetBrandBy, ProcessPublicAllProductsForBrand, \
-    ProcessAuthenticatedGetBrand
+    ProcessAuthenticatedGetBrand, ProcessAuthenticatedPostBrand
 from tests.unit import StubDataManager
+
+user_id = 'user_id'
+event_cognito_user = {
+    'requestContext': {
+        'authorizer': {
+            'jwt': {
+                'claims': {
+                    'cognito:username': user_id
+                }
+            }
+        }
+    },
+    'body': {
+        'image': 'image bytes'
+    }
+}
 
 
 @patch('src.processors.brands.to_list')
@@ -74,10 +93,6 @@ def test_process_authenticated_brand_success():
     assert pinfluencer_response.is_ok() is True
 
 
-def mock_get_authenticated_brand_success(event):
-    return FilterResponse('', 200, Brand())
-
-
 def test_process_authenticated_brand_failure():
     authenticated_get_brand = ProcessAuthenticatedGetBrand(AuthFilter(StubDataManager()), StubDataManager())
     authenticated_get_brand.get_authenticated_brand = mock_get_authenticated_brand_failure
@@ -86,5 +101,96 @@ def test_process_authenticated_brand_failure():
     assert pinfluencer_response.status_code == 401
 
 
+def test_process_new_brand_success():
+    manager = StubDataManager()
+    post_brand = ProcessAuthenticatedPostBrand(AuthFilter(manager), OneTimeCreateBrandFilter(manager),
+                                               BrandPostPayloadValidation(), manager)
+    post_brand.must_be_authenticated = mock_get_authenticated_brand_success
+    post_brand.check_no_brand_associated_with_authenticated_user = mock_no_brand_associated_with_authenticated_user
+    post_brand.validate_new_brand_payload = mock_valid_brand_payload
+    post_brand.create_new_brand = mock_create_new_brand_successful
+
+    pinfluencer_response = post_brand.do_process(event_cognito_user)
+    assert pinfluencer_response.is_ok() is True
+
+
+def test_process_new_brand_failed_authentication():
+    manager = StubDataManager()
+    post_brand = ProcessAuthenticatedPostBrand(AuthFilter(manager), OneTimeCreateBrandFilter(manager),
+                                               BrandPostPayloadValidation(), manager)
+    post_brand.must_be_authenticated = mock_get_authenticated_brand_failure
+
+    pinfluencer_response = post_brand.do_process(event_cognito_user)
+    assert pinfluencer_response.is_ok() is False
+    assert pinfluencer_response.status_code == 401
+
+
+def test_process_new_brand_failed_already_associated_brand():
+    manager = StubDataManager()
+    post_brand = ProcessAuthenticatedPostBrand(AuthFilter(manager), OneTimeCreateBrandFilter(manager),
+                                               BrandPostPayloadValidation(), manager)
+    post_brand.must_be_authenticated = mock_get_authenticated_brand_success
+    post_brand.check_no_brand_associated_with_authenticated_user = mock_brand_associated_with_authenticated_user
+
+    pinfluencer_response = post_brand.do_process(event_cognito_user)
+    assert pinfluencer_response.is_ok() is False
+    assert pinfluencer_response.status_code == 400
+
+
+def test_process_new_brand_failed_invalid_brand_payload():
+    manager = StubDataManager()
+    post_brand = ProcessAuthenticatedPostBrand(AuthFilter(manager), OneTimeCreateBrandFilter(manager),
+                                               BrandPostPayloadValidation(), manager)
+    post_brand.must_be_authenticated = mock_get_authenticated_brand_success
+    post_brand.check_no_brand_associated_with_authenticated_user = mock_no_brand_associated_with_authenticated_user
+    post_brand.validate_new_brand_payload = mock_invalid_brand_payload
+
+    pinfluencer_response = post_brand.do_process(event_cognito_user)
+    assert pinfluencer_response.is_ok() is False
+    assert pinfluencer_response.status_code == 400
+
+
+def test_process_new_brand_failed_write_brand():
+    manager = StubDataManager()
+    post_brand = ProcessAuthenticatedPostBrand(AuthFilter(manager), OneTimeCreateBrandFilter(manager),
+                                               BrandPostPayloadValidation(), manager)
+    post_brand.must_be_authenticated = mock_get_authenticated_brand_success
+    post_brand.check_no_brand_associated_with_authenticated_user = mock_no_brand_associated_with_authenticated_user
+    post_brand.validate_new_brand_payload = mock_valid_brand_payload
+    post_brand.create_new_brand = mock_failed_create_new_brand_successful
+
+    with pytest.raises(Exception):
+        post_brand.do_process(event_cognito_user)
+
+
+
+def mock_no_brand_associated_with_authenticated_user(event):
+    return FilterResponse('', 200, {})
+
+
+def mock_brand_associated_with_authenticated_user(event):
+    return FilterResponse('', 400, {})
+
+
+def mock_valid_brand_payload(event):
+    return FilterResponse('', 200, event_cognito_user['body'])
+
+
+def mock_invalid_brand_payload(event):
+    return FilterResponse('', 400, event_cognito_user['body'])
+
+
+def mock_create_new_brand_successful(payload, image_bytes):
+    return Brand()
+
+
+def mock_failed_create_new_brand_successful(payload, image_bytes):
+    raise Exception()
+
+
 def mock_get_authenticated_brand_failure(event):
     return FilterResponse('', 401, Brand())
+
+
+def mock_get_authenticated_brand_success(event):
+    return FilterResponse('', 200, Brand())
