@@ -7,10 +7,10 @@ from src.data_access_layer.brand import Brand
 from src.data_access_layer.product import Product
 from src.filters import FilterResponse
 from src.filters.authorised_filter import AuthFilter, OneTimeCreateBrandFilter
-from src.filters.payload_validation import BrandPostPayloadValidation
+from src.filters.payload_validation import BrandPostPayloadValidation, BrandPutPayloadValidation
 from src.filters.valid_id_filters import LoadResourceById
 from src.processors.brands import ProcessPublicBrands, ProcessPublicGetBrandBy, ProcessPublicAllProductsForBrand, \
-    ProcessAuthenticatedGetBrand, ProcessAuthenticatedPostBrand
+    ProcessAuthenticatedGetBrand, ProcessAuthenticatedPostBrand, ProcessAuthenticatedPutBrand
 from tests.unit import StubDataManager
 
 user_id = 'user_id'
@@ -163,6 +163,56 @@ def test_process_new_brand_failed_write_brand():
         post_brand.do_process(event_cognito_user)
 
 
+def test_process_update_brand_success():
+    manager = StubDataManager()
+    put_brand = ProcessAuthenticatedPutBrand(AuthFilter(manager),
+                                             BrandPutPayloadValidation(),
+                                             manager)
+    put_brand.must_be_authenticated = mock_get_authenticated_brand_success
+    put_brand.validate_update_brand_payload = mock_valid_update_brand_payload
+    put_brand.update_brand = mock_update_brand_successful
+
+    pinfluencer_response = put_brand.do_process(event_cognito_user)
+    assert pinfluencer_response.is_ok() is True
+
+
+def test_process_update_brand_failed_authentication():
+    manager = StubDataManager()
+    put_brand = ProcessAuthenticatedPutBrand(AuthFilter(manager),
+                                             BrandPutPayloadValidation(),
+                                             manager)
+    put_brand.must_be_authenticated = mock_get_authenticated_brand_failure
+
+    pinfluencer_response = put_brand.do_process(event_cognito_user)
+    assert pinfluencer_response.is_ok() is False
+    assert pinfluencer_response.status_code == 401
+
+
+def test_process_update_brand_failed_invalid_payload():
+    manager = StubDataManager()
+    put_brand = ProcessAuthenticatedPutBrand(AuthFilter(manager),
+                                             BrandPutPayloadValidation(),
+                                             manager)
+    put_brand.must_be_authenticated = mock_get_authenticated_brand_success
+    put_brand.validate_update_brand_payload = mock_invalid_update_brand_payload
+
+    pinfluencer_response = put_brand.do_process(event_cognito_user)
+    assert pinfluencer_response.is_ok() is False
+    assert pinfluencer_response.status_code == 400
+
+
+def test_process_update_brand_failed_update_brand():
+    manager = StubDataManager()
+    put_brand = ProcessAuthenticatedPutBrand(AuthFilter(manager),
+                                             BrandPutPayloadValidation(),
+                                             manager)
+    put_brand.must_be_authenticated = mock_get_authenticated_brand_success
+    put_brand.validate_update_brand_payload = mock_valid_update_brand_payload
+    put_brand.update_brand = mock_failed_update_brand
+
+    with pytest.raises(Exception):
+        put_brand.do_process(event_cognito_user)
+
 
 def mock_no_brand_associated_with_authenticated_user(event):
     return FilterResponse('', 200, {})
@@ -176,6 +226,14 @@ def mock_valid_brand_payload(event):
     return FilterResponse('', 200, event_cognito_user['body'])
 
 
+def mock_valid_update_brand_payload(event):
+    return FilterResponse('', 200, event_cognito_user['body'])
+
+
+def mock_invalid_update_brand_payload(event):
+    return FilterResponse('', 400, event_cognito_user['body'])
+
+
 def mock_invalid_brand_payload(event):
     return FilterResponse('', 400, event_cognito_user['body'])
 
@@ -184,13 +242,23 @@ def mock_create_new_brand_successful(payload, image_bytes):
     return Brand()
 
 
+def mock_update_brand_successful(id, payload):
+    return Brand()
+
+
 def mock_failed_create_new_brand_successful(payload, image_bytes):
     raise Exception()
 
 
+def mock_failed_update_brand(id, payload):
+    raise Exception()
+
+
 def mock_get_authenticated_brand_failure(event):
-    return FilterResponse('', 401, Brand())
+    return FilterResponse('', 401, {})
 
 
 def mock_get_authenticated_brand_success(event):
-    return FilterResponse('', 200, Brand())
+    brand = Brand()
+    brand.id = str(uuid.uuid4())
+    return FilterResponse('', 200, brand.as_dict())

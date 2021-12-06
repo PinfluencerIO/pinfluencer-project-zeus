@@ -11,7 +11,7 @@ class BrandPutPayloadValidation(FilterInterface):
         payload = json.loads(body_)
         try:
             validate(instance=payload, schema=update_brand_payload_schema())
-            return FilterResponse('', 200, {})
+            return FilterResponse('', 200, payload)
         except Exception as e:
             print(f'Validating BrandPutPayload failed {e}')
             return FilterResponse('Invalid payload', 400, {})

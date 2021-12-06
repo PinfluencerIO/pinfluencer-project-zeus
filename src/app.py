@@ -16,25 +16,32 @@ def lambda_handler(event, context):
         routes = OrderedDict({
             # public endpoints
             'GET /feed': ProcessPublicFeed(container.data_manager),
+
             'GET /brands': ProcessPublicBrands(container.data_manager),
+
             'GET /brands/{brand_id}': ProcessPublicGetBrandBy(LoadResourceById(container.data_manager, 'brand')),
+
             'GET /brands/{brand_id}/products': ProcessPublicAllProductsForBrand(
                 LoadResourceById(container.data_manager, 'brand'), container.data_manager),
+
             'GET /products': ProcessPublicProducts(container.data_manager),
+
             'GET /products/{product_id}': ProcessPublicGetProductBy(LoadResourceById(container.data_manager, 'product'),
                                                                     container.data_manager),
 
             # authenticated brand endpoints
             'GET /brands/me': ProcessAuthenticatedGetBrand(container.auth_filter,
                                                            container.data_manager),
+
             'POST /brands/me': ProcessAuthenticatedPostBrand(container.auth_filter,
                                                              OneTimeCreateBrandFilter(container.data_manager),
                                                              BrandPostPayloadValidation(),
-                                                             container.data_manager,
-                                                             container.image_repository),
-            'PUT /brands/me': ProcessAuthenticatedPutBrand(FilterChainImp([container.auth_filter,
-                                                                           BrandPutPayloadValidation()]),
-                                                           container.data_manager, container.status_manager),
+                                                             container.data_manager),
+
+            'PUT /brands/me': ProcessAuthenticatedPutBrand(container.auth_filter,
+                                                           BrandPutPayloadValidation(),
+                                                           container.data_manager),
+
             'PATCH /brands/me/image': ProcessAuthenticatedPatchBrandImage(
                 FilterChainImp([container.auth_filter, BrandImagePatchPayloadValidation()]),
                 container.data_manager,

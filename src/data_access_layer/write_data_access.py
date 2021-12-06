@@ -20,3 +20,19 @@ def write_new_brand(brand_as_dict, image_bytes, data_manager: DataManagerInterfa
         print(f'Failed to write_new_brand {e}')
         data_manager.session.rollback()
         raise e
+
+
+def update_brand(brand_id, brand_as_dict, data_manager: DataManagerInterface):
+    try:
+        brand: Brand = data_manager.session.query(Brand).filter(Brand.id == brand_id).first()
+        brand.name = brand_as_dict.name
+        brand.description = brand_as_dict.description
+        brand.website = brand_as_dict.website
+        brand.instahandle = brand_as_dict.instahandle
+        data_manager.session.flush()
+        data_manager.session.commit()
+        return brand
+    except Exception as e:
+        print(f'Failed to update_brand {e}')
+        data_manager.session.rollback()
+        raise e
