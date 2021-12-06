@@ -3,6 +3,7 @@ import json
 from src.data_access_layer import to_list
 from src.data_access_layer.product import Product, product_from_dict
 from src.data_access_layer.read_data_access import load_all_products
+from src.filters.valid_id_filters import LoadResourceById
 from src.interfaces.data_manager_interface import DataManagerInterface
 from src.interfaces.image_repository_interface import ImageRepositoryInterface
 from src.filters import FilterChain
@@ -24,12 +25,20 @@ class ProcessPublicProducts:
         return load_all_products(self.data_manager)
 
 
-class ProcessPublicGetProductBy(ProcessInterface):
-    def __init__(self, filter_chain: FilterChain, data_manager: DataManagerInterface):
-        super().__init__(data_manager, filter_chain)
+class ProcessPublicGetProductBy:
+    def __init__(self, load_resource_by_id: LoadResourceById, data_manager: DataManagerInterface):
+        self.load_resource_by_id = load_resource_by_id
+        self.data_manager = data_manager
 
     def do_process(self, event: dict) -> PinfluencerResponse:
-        return PinfluencerResponse(body=event['product'])
+        response = self.load_product_from_cmd(event)
+        if response.is_success():
+            return PinfluencerResponse(body=response.get_payload())
+        else:
+            return PinfluencerResponse.as_400_error(response.get_message())
+
+    def load_product_from_cmd(self, event):
+        return self.load_resource_by_id.load(event)
 
 
 class ProcessAuthenticatedGetProductById(ProcessInterface):

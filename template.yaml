@@ -10,15 +10,18 @@ Parameters:
   ClientIdAudience:
     Type: String
     Description: Client id for user pool
+  DatabaseUser:
+    Type: String
+    Description: DB_USER
+  DatabasePassword:
+    Type: String
+    Description: DB_PASSWORD
+  DatabaseUrl:
+    Type: String
+    Description: DB_URL
   DatabaseName:
     Type: String
     Description: DATABASE_NAME
-  DbClusterARN:
-    Type: String
-    Description: DB_CLUSTER_ARN
-  DatabaseSecretARN:
-    Type: String
-    Description: DB_SECRET_ARN
   LambdaRole:
     Type: String
     Description: The role which the lambda executes
