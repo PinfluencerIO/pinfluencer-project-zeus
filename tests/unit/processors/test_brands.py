@@ -3,8 +3,11 @@ from unittest.mock import patch
 
 from src.data_access_layer.brand import Brand
 from src.data_access_layer.product import Product
+from src.filters import FilterResponse
+from src.filters.authorised_filter import AuthFilter
 from src.filters.valid_id_filters import LoadResourceById
-from src.processors.brands import ProcessPublicBrands, ProcessPublicGetBrandBy, ProcessPublicAllProductsForBrand
+from src.processors.brands import ProcessPublicBrands, ProcessPublicGetBrandBy, ProcessPublicAllProductsForBrand, \
+    ProcessAuthenticatedGetBrand
 from tests.unit import StubDataManager
 
 
@@ -62,3 +65,26 @@ def test_process_public_all_products_for_brand(mock_load_by_id, mock_load_all_pr
     pinfluencer_response = processor.do_process({'pathParameters': {'brand_id': str(uuid.uuid4())}})
     assert pinfluencer_response.is_ok() is False
     assert pinfluencer_response.status_code == 400
+
+
+def test_process_authenticated_brand_success():
+    authenticated_get_brand = ProcessAuthenticatedGetBrand(AuthFilter(StubDataManager()), StubDataManager())
+    authenticated_get_brand.get_authenticated_brand = mock_get_authenticated_brand_success
+    pinfluencer_response = authenticated_get_brand.do_process({})
+    assert pinfluencer_response.is_ok() is True
+
+
+def mock_get_authenticated_brand_success(event):
+    return FilterResponse('', 200, Brand())
+
+
+def test_process_authenticated_brand_failure():
+    authenticated_get_brand = ProcessAuthenticatedGetBrand(AuthFilter(StubDataManager()), StubDataManager())
+    authenticated_get_brand.get_authenticated_brand = mock_get_authenticated_brand_failure
+    pinfluencer_response = authenticated_get_brand.do_process({})
+    assert pinfluencer_response.is_ok() is False
+    assert pinfluencer_response.status_code == 401
+
+
+def mock_get_authenticated_brand_failure(event):
+    return FilterResponse('', 401, Brand())

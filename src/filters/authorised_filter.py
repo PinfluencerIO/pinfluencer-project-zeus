@@ -24,8 +24,7 @@ class AuthFilter(FilterInterface):
             print(f'Failed to find brand by auth_user_id {auth_user_id}')
             return FilterResponse('Not authorised', 401, {})
         else:
-            event['auth_brand'] = loaded_brand.as_dict()
-            return FilterResponse('Authorised', 200, {})
+            return FilterResponse('Authorised', 200, loaded_brand.as_dict())
 
 
 class OwnerOnly(FilterInterface):

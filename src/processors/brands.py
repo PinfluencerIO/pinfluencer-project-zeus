@@ -4,6 +4,7 @@ from src.data_access_layer import to_list
 from src.data_access_layer.brand import Brand, brand_from_dict
 from src.data_access_layer.read_data_access import load_all_products_for_brand_id
 from src.filters import FilterChain
+from src.filters.authorised_filter import AuthFilter
 from src.filters.valid_id_filters import LoadResourceById
 from src.interfaces.data_manager_interface import DataManagerInterface
 from src.interfaces.image_repository_interface import ImageRepositoryInterface
@@ -49,13 +50,21 @@ class ProcessPublicAllProductsForBrand:
             return PinfluencerResponse.as_400_error(response.get_message())
 
 
-class ProcessAuthenticatedGetBrand(ProcessInterface):
-    def __init__(self, filter_chain: FilterChain, data_manager: DataManagerInterface):
-        super().__init__(data_manager, filter_chain)
+class ProcessAuthenticatedGetBrand:
+    def __init__(self, auth_filter: AuthFilter, data_manager: DataManagerInterface):
+        self.auth_filter = auth_filter
+        self.data_manager = data_manager
 
     def do_process(self, event: dict) -> PinfluencerResponse:
-        print(f'found auth brand {event["auth_brand"]}')
-        return PinfluencerResponse(body=event["auth_brand"])
+        filter_response = self.get_authenticated_brand(event)
+
+        if filter_response.is_success():
+            return PinfluencerResponse(filter_response.get_code(), filter_response.get_payload())
+        else:
+            return PinfluencerResponse(filter_response.get_code())
+
+    def get_authenticated_brand(self, event):
+        return self.auth_filter.do_filter(event)
 
 
 class ProcessAuthenticatedPutBrand(ProcessInterface):

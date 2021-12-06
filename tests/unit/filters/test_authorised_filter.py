@@ -22,7 +22,8 @@ event_cognito_user = {
 
 @patch('src.filters.authorised_filter.load_brand_by_auth_id')
 def test_brand_found_for_cognito_user_and_added_to_event(mock_load):
-    mock_load.return_value = Brand()
+    brand = Brand()
+    mock_load.return_value = brand
 
     data_manager = StubDataManager()
     _filter = AuthFilter(data_manager)
@@ -31,7 +32,7 @@ def test_brand_found_for_cognito_user_and_added_to_event(mock_load):
 
     assert response.is_success() is True
     assert response.get_code() == 200
-    assert 'auth_brand' in event_cognito_user
+    assert response.get_payload() == brand.as_dict()
     mock_load.assert_called_with(user_id, data_manager)
 
 
