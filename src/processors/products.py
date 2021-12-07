@@ -6,7 +6,7 @@ from src.data_access_layer.read_data_access import load_all_products
 from src.filters.valid_id_filters import LoadResourceById
 from src.interfaces.data_manager_interface import DataManagerInterface
 from src.interfaces.image_repository_interface import ImageRepositoryInterface
-from src.filters import FilterChain
+from src.filters import FilterChain, FilterInterface
 from src.pinfluencer_response import PinfluencerResponse
 from src.processors import ProcessInterface
 # Todo: Implement all these processors
@@ -49,16 +49,24 @@ class ProcessAuthenticatedGetProductById(ProcessInterface):
         return PinfluencerResponse(body=event["product"])
 
 
-class ProcessAuthenticatedGetProduct(ProcessInterface):
-    def __init__(self, filter_chain: FilterChain, data_manager: DataManagerInterface):
-        super().__init__(data_manager, filter_chain)
+class ProcessAuthenticatedGetProduct:
+    def __init__(self, get_brand_associated_with_cognito_user: FilterInterface,
+                 load_all_products_for_brand_id,
+                 data_manager: DataManagerInterface):
+        self.get_brand_associated_with_cognito_user = get_brand_associated_with_cognito_user
+        self.load_all_products_for_brand_id = load_all_products_for_brand_id
+        self.data_manager = data_manager
 
     def do_process(self, event: dict) -> PinfluencerResponse:
-        products: list[Product] = (self._data_manager.session
-                                   .query(Product)
-                                   .filter(Product.brand_id == event["auth_brand"]['id'])
-                                   .all())
-        return PinfluencerResponse(body=to_list(products))
+        filter_response = self.get_brand_associated_with_cognito_user.do_filter(event)
+
+        if filter_response.is_success():
+            products: list[Product] = self.load_all_products_for_brand_id(
+                filter_response.get_payload()['id'],
+                self.data_manager)
+            return PinfluencerResponse(body=to_list(products))
+        else:
+            return PinfluencerResponse(401, filter_response.get_message())
 
 
 class ProcessAuthenticatedPostProduct(ProcessInterface):
