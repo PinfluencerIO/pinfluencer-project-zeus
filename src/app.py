@@ -43,9 +43,9 @@ def lambda_handler(event, context):
                                                            container.data_manager),
 
             'PATCH /brands/me/image': ProcessAuthenticatedPatchBrandImage(
-                FilterChainImp([container.auth_filter, BrandImagePatchPayloadValidation()]),
-                container.data_manager,
-                container.image_repository, container.status_manager),
+                                        container.auth_filter,
+                                        BrandImagePatchPayloadValidation(),
+                                        container.data_manager),
 
             # authenticated product endpoints
             'GET /products/me': ProcessAuthenticatedGetProduct(FilterChainImp([container.auth_filter]),

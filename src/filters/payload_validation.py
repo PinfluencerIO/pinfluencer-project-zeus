@@ -23,7 +23,7 @@ class BrandImagePatchPayloadValidation(FilterInterface):
         payload = json.loads(body_)
         try:
             validate(instance=payload, schema=get_image_update_payload_schema())
-            return FilterResponse('', 200, {})
+            return FilterResponse('', 200, payload)
         except Exception as e:
             print(f'Validating ImagePatchPayload failed {e}')
             return FilterResponse('Invalid payload', 400, {})

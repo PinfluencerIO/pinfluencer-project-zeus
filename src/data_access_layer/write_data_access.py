@@ -36,3 +36,18 @@ def update_brand(brand_id, brand_as_dict, data_manager: DataManagerInterface):
         print(f'Failed to update_brand {e}')
         data_manager.session.rollback()
         raise e
+
+
+def update_brand_image(brand_id, image_bytes, data_manager: DataManagerInterface):
+    try:
+        brand: Brand = data_manager.session.query(Brand).filter(Brand.id == brand_id).first()
+        image_id = s3_image_repository.upload(f'{brand.id}', image_bytes)
+        s3_image_repository.delete(f'{brand.id}/{brand.image}')
+        brand.image = image_id
+        data_manager.session.flush()
+        data_manager.session.commit()
+        return brand
+    except Exception as e:
+        print(f'Failed to update brand image {e}')
+        data_manager.session.rollback()
+        raise e

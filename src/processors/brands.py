@@ -1,18 +1,14 @@
-import json
-
 from src.data_access_layer import to_list
-from src.data_access_layer.brand import Brand, brand_from_dict
+from src.data_access_layer.brand import Brand
 from src.data_access_layer.read_data_access import load_all_products_for_brand_id
 from src.data_access_layer.write_data_access import write_new_brand, update_brand
-from src.filters import FilterChain
+from src.filters import FilterInterface
 from src.filters.authorised_filter import AuthFilter, OneTimeCreateBrandFilter
 from src.filters.payload_validation import BrandPostPayloadValidation, BrandPutPayloadValidation
 from src.filters.valid_id_filters import LoadResourceById
 from src.interfaces.data_manager_interface import DataManagerInterface
-from src.interfaces.image_repository_interface import ImageRepositoryInterface
 from src.pinfluencer_response import PinfluencerResponse
 from src.processors import ProcessInterface, get_user
-from src.web.request_status_manager import RequestStatusManager
 
 
 class ProcessPublicBrands(ProcessInterface):
@@ -148,23 +144,35 @@ class ProcessAuthenticatedPostBrand:
         return self.auth_filter.do_filter(event)
 
 
-class ProcessAuthenticatedPatchBrandImage(ProcessInterface):
+class ProcessAuthenticatedPatchBrandImage:
     def __init__(self,
-                 filter_chain: FilterChain,
-                 data_manager: DataManagerInterface,
-                 image_repository: ImageRepositoryInterface,
-                 status_manager: RequestStatusManager) -> None:
-        super().__init__(data_manager, filter_chain)
-        self.__image_repository = image_repository
-        self.__status_manager = status_manager
+                 auth_filter: FilterInterface,
+                 brand_image_patch_payload_validation: FilterInterface,
+                 update_brand_image,
+                 data_manager: DataManagerInterface) -> None:
+        self.auth_filter = auth_filter
+        self.brand_image_patch_payload_validation = brand_image_patch_payload_validation
+        self.update_brand_image = update_brand_image
+        self.data_manager = data_manager
 
     def do_process(self, event: dict) -> PinfluencerResponse:
-        brand: Brand = self._data_manager.session.query(Brand).filter(Brand.id == event['auth_brand']['id']).first()
-        image_id = self.__image_repository.upload(f'{brand.id}', json.loads(event['body'])['image'])
-        self.__image_repository.delete(f'{brand.id}/{brand.image}')
-        brand.image = image_id
-        self._data_manager.session.flush()
-        return PinfluencerResponse(body=brand.as_dict())
+        filter_response = self.auth_filter.do_filter(event)
+        if filter_response.is_success():
+            brand = filter_response.get_payload()
+            filter_response = self.brand_image_patch_payload_validation.do_filter(event)
+            if filter_response.is_success():
+                filter_response = self.brand_image_patch_payload_validation.do_filter(event)
+                if filter_response.is_success():
+                    updated_brand = self.update_brand_image(brand['id'],
+                                                            filter_response.get_payload()['image'],
+                                                            self.data_manager)
+                    return PinfluencerResponse(200, updated_brand.as_dict())
+                else:
+                    return PinfluencerResponse(filter_response.get_code(), filter_response.get_message())
+            else:
+                return PinfluencerResponse(filter_response.get_code(), filter_response.get_message())
+        else:
+            return PinfluencerResponse(filter_response.get_code(), filter_response.get_message())
 
 
 def update_email(body, event):

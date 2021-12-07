@@ -5,12 +5,13 @@ import pytest
 
 from src.data_access_layer.brand import Brand
 from src.data_access_layer.product import Product
-from src.filters import FilterResponse
+from src.filters import FilterResponse, FilterInterface
 from src.filters.authorised_filter import AuthFilter, OneTimeCreateBrandFilter
 from src.filters.payload_validation import BrandPostPayloadValidation, BrandPutPayloadValidation
 from src.filters.valid_id_filters import LoadResourceById
 from src.processors.brands import ProcessPublicBrands, ProcessPublicGetBrandBy, ProcessPublicAllProductsForBrand, \
-    ProcessAuthenticatedGetBrand, ProcessAuthenticatedPostBrand, ProcessAuthenticatedPutBrand
+    ProcessAuthenticatedGetBrand, ProcessAuthenticatedPostBrand, ProcessAuthenticatedPutBrand, \
+    ProcessAuthenticatedPatchBrandImage
 from tests.unit import StubDataManager
 
 user_id = 'user_id'
@@ -214,6 +215,53 @@ def test_process_update_brand_failed_update_brand():
         put_brand.do_process(event_cognito_user)
 
 
+def test_process_patch_brand_image_success():
+    manager = StubDataManager()
+    patch_brand_image = ProcessAuthenticatedPatchBrandImage(
+        MockAuthFilter(success=True),
+        MockBrandImagePatchPayloadValidation(success=True),
+        mock_successful_update_brand_image,
+        manager)
+    pinfluencer_response = patch_brand_image.do_process(event_cognito_user)
+    assert pinfluencer_response.is_ok() is True
+
+
+def test_process_patch_brand_image_failed_authentication():
+    manager = StubDataManager()
+    patch_brand_image = ProcessAuthenticatedPatchBrandImage(
+        MockAuthFilter(success=False),
+        MockBrandImagePatchPayloadValidation(success=False),
+        mock_successful_update_brand_image,
+        manager)
+    pinfluencer_response = patch_brand_image.do_process(event_cognito_user)
+    assert pinfluencer_response.is_ok() is False
+    assert pinfluencer_response.status_code == 400
+
+
+def test_process_patch_brand_image_failed_validation():
+    manager = StubDataManager()
+    patch_brand_image = ProcessAuthenticatedPatchBrandImage(
+        MockAuthFilter(success=True),
+        MockBrandImagePatchPayloadValidation(success=False),
+        mock_successful_update_brand_image,
+        manager)
+    pinfluencer_response = patch_brand_image.do_process(event_cognito_user)
+    assert pinfluencer_response.is_ok() is False
+    assert pinfluencer_response.status_code == 400
+
+
+def test_process_patch_brand_image_failed_update_brand_write():
+    manager = StubDataManager()
+    patch_brand_image = ProcessAuthenticatedPatchBrandImage(
+        MockAuthFilter(success=True),
+        MockBrandImagePatchPayloadValidation(success=True),
+        mock_unsuccessful_update_brand_image,
+        manager)
+
+    with pytest.raises(Exception):
+        patch_brand_image.do_process(event_cognito_user)
+
+
 def mock_no_brand_associated_with_authenticated_user(event):
     return FilterResponse('', 200, {})
 
@@ -262,3 +310,36 @@ def mock_get_authenticated_brand_success(event):
     brand = Brand()
     brand.id = str(uuid.uuid4())
     return FilterResponse('', 200, brand.as_dict())
+
+
+class MockAuthFilter(FilterInterface):
+    def __init__(self, success) -> None:
+        super().__init__()
+        self.success = success
+
+    def do_filter(self, event: dict) -> FilterResponse:
+        if self.success:
+            return FilterResponse('', 200, Brand().as_dict())
+        else:
+            return FilterResponse('', 400, {})
+
+
+class MockBrandImagePatchPayloadValidation(FilterInterface):
+
+    def __init__(self, success) -> None:
+        super().__init__()
+        self.success = success
+
+    def do_filter(self, event: dict) -> FilterResponse:
+        if self.success:
+            return FilterResponse('', 200, event['body'])
+        else:
+            return FilterResponse('', 400, {})
+
+
+def mock_successful_update_brand_image(brand_id, image_bytes, data_manager):
+    return Brand()
+
+
+def mock_unsuccessful_update_brand_image(brand_id, image_bytes, data_manager):
+    raise Exception('failed to write brand image')
