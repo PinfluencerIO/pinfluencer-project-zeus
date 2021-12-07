@@ -21,7 +21,7 @@ Parameters:
     Description: DB_URL
   DatabaseName:
     Type: String
-    Description: DATABASE_NAME
+    Description: DB_NAME
   LambdaRole:
     Type: String
     Description: The role which the lambda executes
@@ -31,9 +31,10 @@ Globals:
     Timeout: 10
     Environment:
       Variables:
-        DATABASE_NAME: !Ref DatabaseName
-        DB_CLUSTER_ARN: !Ref DbClusterARN
-        DB_SECRET_ARN: !Ref DatabaseSecretARN
+        DB_USER: !Ref DatabaseUser
+        DB_PASSWORD: !Ref DatabasePassword
+        DB_URL: !Ref DatabaseUrl
+        DB_NAME: !Ref DatabaseName
 
 Resources:
   PinfluencerHttpApi:

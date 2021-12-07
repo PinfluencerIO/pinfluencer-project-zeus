@@ -3,7 +3,7 @@ from unittest.mock import patch
 import pytest
 
 from src.data_access_layer.brand import Brand
-from src.filters.authorised_filter import AuthFilter, OwnerOnly, OneTimeCreateBrandFilter
+from src.filters.authorised_filter import GetBrandAssociatedWithCognitoUser, OwnerOnly, NoBrandAssociatedWithCognitoUser
 from tests.unit import StubDataManager
 
 user_id = 'user_id'
@@ -26,7 +26,7 @@ def test_brand_found_for_cognito_user_and_added_to_event(mock_load):
     mock_load.return_value = brand
 
     data_manager = StubDataManager()
-    _filter = AuthFilter(data_manager)
+    _filter = GetBrandAssociatedWithCognitoUser(data_manager)
 
     response = _filter.do_filter(event_cognito_user)
 
@@ -41,7 +41,7 @@ def test_brand_not_found_for_cognito_user_response_with_401(mock_load):
     mock_load.return_value = None
 
     data_manager = StubDataManager()
-    _filter = AuthFilter(data_manager)
+    _filter = GetBrandAssociatedWithCognitoUser(data_manager)
 
     response = _filter.do_filter(event_cognito_user)
 
@@ -55,7 +55,7 @@ def test_missing_cognito_user_response_with_401(mock_load):
     mock_load.return_value = None
 
     data_manager = StubDataManager()
-    _filter = AuthFilter(data_manager)
+    _filter = GetBrandAssociatedWithCognitoUser(data_manager)
 
     response = _filter.do_filter({})
 
@@ -118,7 +118,7 @@ def test_brand_already_associated_with__user_response_with_400(mock_load):
     mock_load.return_value = Brand()
 
     data_manager = StubDataManager()
-    _filter = OneTimeCreateBrandFilter(data_manager)
+    _filter = NoBrandAssociatedWithCognitoUser(data_manager)
 
     response = _filter.do_filter(event_cognito_user)
 
@@ -132,7 +132,7 @@ def test_brand_not_already_associated_with__user_response_with_200(mock_load):
     mock_load.return_value = None
 
     data_manager = StubDataManager()
-    _filter = OneTimeCreateBrandFilter(data_manager)
+    _filter = NoBrandAssociatedWithCognitoUser(data_manager)
 
     response = _filter.do_filter(event_cognito_user)
 

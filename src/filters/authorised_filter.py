@@ -3,20 +3,20 @@ from src.data_access_layer.read_data_access import load_brand_by_auth_id
 from src.filters import FilterInterface, FilterResponse
 
 
-class AuthFilter(FilterInterface):
+class GetBrandAssociatedWithCognitoUser(FilterInterface):
 
     def __init__(self, data_manager: DataManagerInterface):
         self.__data_manager = data_manager
 
     def do_filter(self, event: dict):
-        print('AuthFilter')
+        print('GetBrandAssociatedWithCognitoUser')
         try:
             auth_user_id = event['requestContext']['authorizer']['jwt']['claims']['cognito:username']
         except KeyError:
             print('event was missing the required keys to extract cognito:username')
             return FilterResponse('Missing username in event', 401, {})
 
-        print(f'AuthFilter has found the require cognito:username key with {auth_user_id}')
+        print(f'GetBrandAssociatedWithCognitoUser has found the require cognito:username key with {auth_user_id}')
 
         loaded_brand = load_brand_by_auth_id(auth_user_id, self.__data_manager)
 
@@ -41,7 +41,7 @@ class OwnerOnly(FilterInterface):
             return FilterResponse('Not authorised', 401, {})
 
 
-class OneTimeCreateBrandFilter(FilterInterface):
+class NoBrandAssociatedWithCognitoUser(FilterInterface):
     def __init__(self, data_manager: DataManagerInterface):
         self.__data_manager = data_manager
 

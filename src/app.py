@@ -1,6 +1,7 @@
 from collections import OrderedDict
 
 from src.container import Container
+from src.data_access_layer.write_data_access import update_brand_image
 from src.filters.authorised_filter import *
 from src.filters.payload_validation import *
 from src.log_util import print_exception
@@ -30,42 +31,41 @@ def lambda_handler(event, context):
                                                                     container.data_manager),
 
             # authenticated brand endpoints
-            'GET /brands/me': ProcessAuthenticatedGetBrand(container.auth_filter,
+            'GET /brands/me': ProcessAuthenticatedGetBrand(container.get_brand_associated_with_cognito_user,
                                                            container.data_manager),
 
-            'POST /brands/me': ProcessAuthenticatedPostBrand(container.auth_filter,
-                                                             OneTimeCreateBrandFilter(container.data_manager),
-                                                             BrandPostPayloadValidation(),
-                                                             container.data_manager),
+            'POST /brands/me': ProcessAuthenticatedPostBrand(NoBrandAssociatedWithCognitoUser(container.data_manager),
+                                                             BrandPostPayloadValidation(), container.data_manager),
 
-            'PUT /brands/me': ProcessAuthenticatedPutBrand(container.auth_filter,
+            'PUT /brands/me': ProcessAuthenticatedPutBrand(container.get_brand_associated_with_cognito_user,
                                                            BrandPutPayloadValidation(),
                                                            container.data_manager),
 
             'PATCH /brands/me/image': ProcessAuthenticatedPatchBrandImage(
-                                        container.auth_filter,
+                                        container.get_brand_associated_with_cognito_user,
                                         BrandImagePatchPayloadValidation(),
+                                        update_brand_image,
                                         container.data_manager),
 
             # authenticated product endpoints
-            'GET /products/me': ProcessAuthenticatedGetProduct(FilterChainImp([container.auth_filter]),
+            'GET /products/me': ProcessAuthenticatedGetProduct(FilterChainImp([container.get_brand_associated_with_cognito_user]),
                                                                container.data_manager),
             'GET /products/me/{product_id}': ProcessAuthenticatedGetProductById(
-                FilterChainImp([container.auth_filter, container.valid_product_filter, OwnerOnly('product')]),
+                FilterChainImp([container.get_brand_associated_with_cognito_user, container.valid_product_filter, OwnerOnly('product')]),
                 container.data_manager),
             'POST /products/me': ProcessAuthenticatedPostProduct(
-                FilterChainImp([container.auth_filter, ProductPostPayloadValidation()]),
+                FilterChainImp([container.get_brand_associated_with_cognito_user, ProductPostPayloadValidation()]),
                 container.data_manager, container.image_repository, container.status_manager),
             'PUT /products/me/{product_id}': ProcessAuthenticatedPutProduct(
                 FilterChainImp(
-                    [container.auth_filter, container.valid_product_filter, OwnerOnly('product'),
+                    [container.get_brand_associated_with_cognito_user, container.valid_product_filter, OwnerOnly('product'),
                      ProductPutPayloadValidation()]), container.data_manager, container.status_manager),
             'PATCH /products/me/{product_id}/image': ProcessAuthenticatedPatchProductImage(FilterChainImp(
-                [container.auth_filter, container.valid_product_filter, OwnerOnly('product'),
+                [container.get_brand_associated_with_cognito_user, container.valid_product_filter, OwnerOnly('product'),
                  ProductImagePatchPayloadValidation()]), container.image_repository, container.data_manager,
                 container.status_manager),
             'DELETE /products/me/{product_id}': ProcessAuthenticatedDeleteProduct(
-                FilterChainImp([container.auth_filter, container.valid_product_filter, OwnerOnly('product')]),
+                FilterChainImp([container.get_brand_associated_with_cognito_user, container.valid_product_filter, OwnerOnly('product')]),
                 container.data_manager, container.image_repository, container.status_manager),
         })
         print(f'route: {event["routeKey"]}')

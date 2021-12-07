@@ -3,7 +3,7 @@ from src.data_access_layer.brand import Brand
 from src.data_access_layer.read_data_access import load_all_products_for_brand_id
 from src.data_access_layer.write_data_access import write_new_brand, update_brand
 from src.filters import FilterInterface
-from src.filters.authorised_filter import AuthFilter, OneTimeCreateBrandFilter
+from src.filters.authorised_filter import GetBrandAssociatedWithCognitoUser, NoBrandAssociatedWithCognitoUser
 from src.filters.payload_validation import BrandPostPayloadValidation, BrandPutPayloadValidation
 from src.filters.valid_id_filters import LoadResourceById
 from src.interfaces.data_manager_interface import DataManagerInterface
@@ -49,7 +49,7 @@ class ProcessPublicAllProductsForBrand:
 
 
 class ProcessAuthenticatedGetBrand:
-    def __init__(self, auth_filter: AuthFilter, data_manager: DataManagerInterface):
+    def __init__(self, auth_filter: GetBrandAssociatedWithCognitoUser, data_manager: DataManagerInterface):
         self.auth_filter = auth_filter
         self.data_manager = data_manager
 
@@ -59,7 +59,7 @@ class ProcessAuthenticatedGetBrand:
         if filter_response.is_success():
             return PinfluencerResponse(filter_response.get_code(), filter_response.get_payload())
         else:
-            return PinfluencerResponse(filter_response.get_code(), filter_response.get_message())
+            return PinfluencerResponse(404, "No brand associated with auth_key")
 
     def get_authenticated_brand(self, event):
         return self.auth_filter.do_filter(event)
@@ -67,25 +67,29 @@ class ProcessAuthenticatedGetBrand:
 
 class ProcessAuthenticatedPutBrand:
     def __init__(self,
-                 auth_filter: AuthFilter,
+                 get_brand_associated_with_cognito_user: GetBrandAssociatedWithCognitoUser,
                  put_validation: BrandPutPayloadValidation,
                  data_manager: DataManagerInterface):
-        self.auth_filter = auth_filter
+        self.get_brand_associated_with_cognito_user = get_brand_associated_with_cognito_user
         self.put_validation = put_validation
         self.data_manager = data_manager
 
     def do_process(self, event: dict) -> PinfluencerResponse:
-        filter_response = self.must_be_authenticated(event)
+        filter_response = self.call_get_brand_associated_with_cognito_user(event)
         if filter_response.is_success():
+
             brand = filter_response.get_payload()
             filter_response = self.validate_update_brand_payload(event)
             if filter_response.is_success():
-                updated_brand = self.update_brand(brand['id'], filter_response.get_payload())
+                update_email(filter_response.get_payload(), event)
+                id_ = brand['id']
+                payload = filter_response.get_payload()
+                updated_brand = self.update_brand(id_, payload)
                 return PinfluencerResponse(200, updated_brand.as_dict())
             else:
                 return PinfluencerResponse(filter_response.get_code(), filter_response.get_message())
         else:
-            return PinfluencerResponse(filter_response.get_code(), filter_response.get_message())
+            return PinfluencerResponse(401, filter_response.get_message())
 
     def update_brand(self, brand_id, payload) -> Brand:
         return update_brand(brand_id, payload, self.data_manager)
@@ -93,39 +97,30 @@ class ProcessAuthenticatedPutBrand:
     def validate_update_brand_payload(self, event):
         return self.put_validation.do_filter(event)
 
-    def must_be_authenticated(self, event):
-        return self.auth_filter.do_filter(event)
+    def call_get_brand_associated_with_cognito_user(self, event):
+        return self.get_brand_associated_with_cognito_user.do_filter(event)
 
 
 class ProcessAuthenticatedPostBrand:
-    def __init__(self,
-                 auth_filter: AuthFilter,
-                 one_time_create: OneTimeCreateBrandFilter,
+    def __init__(self, no_associated_brand_with_cognito_user: NoBrandAssociatedWithCognitoUser,
                  post_validation: BrandPostPayloadValidation,
                  data_manager: DataManagerInterface):
-        self.auth_filter = auth_filter
         self.post_validation = post_validation
-        self.one_time_create = one_time_create
+        self.no_associated_brand_with_cognito_user = no_associated_brand_with_cognito_user
         self.data_manager = data_manager
 
     def do_process(self, event: dict) -> PinfluencerResponse:
-        # must be authenticated
-        filter_response = self.must_be_authenticated(event)
+        filter_response = self.check_no_brand_associated_with_authenticated_user(event)
         if filter_response.is_success():
-            # must not be brand associated with authenticated user
-            filter_response = self.check_no_brand_associated_with_authenticated_user(event)
+            filter_response = self.validate_new_brand_payload(event)
             if filter_response.is_success():
-                # validate payload
-                filter_response = self.validate_new_brand_payload(event)
-                if filter_response.is_success():
-                    payload = filter_response.get_payload()
-                    payload["auth_user_id"] = get_user(event=event)
-                    image_bytes = payload['image']
-                    payload['image'] = None
-                    brand = self.create_new_brand(payload, image_bytes)
-                    return PinfluencerResponse(201, brand.as_dict())
-                else:
-                    return PinfluencerResponse(filter_response.get_code())
+                payload = filter_response.get_payload()
+                payload["auth_user_id"] = get_user(event=event)
+                update_email(payload, event)
+                image_bytes = payload['image']
+                payload['image'] = None
+                brand = self.create_new_brand(payload, image_bytes)
+                return PinfluencerResponse(201, brand.as_dict())
             else:
                 return PinfluencerResponse(filter_response.get_code())
         else:
@@ -138,10 +133,7 @@ class ProcessAuthenticatedPostBrand:
         return self.post_validation.do_filter(event)
 
     def check_no_brand_associated_with_authenticated_user(self, event):
-        return self.one_time_create.do_filter(event)
-
-    def must_be_authenticated(self, event):
-        return self.auth_filter.do_filter(event)
+        return self.no_associated_brand_with_cognito_user.do_filter(event)
 
 
 class ProcessAuthenticatedPatchBrandImage:
@@ -178,4 +170,7 @@ class ProcessAuthenticatedPatchBrandImage:
 def update_email(body, event):
     if ('email' in event['requestContext']['authorizer']['jwt']['claims'] and
             event['requestContext']['authorizer']['jwt']['claims']['email'] is not None):
+        print(f"Found email in claim: {event['requestContext']['authorizer']['jwt']['claims']['email']}")
+        print(f'before {body}')
         body['email'] = event['requestContext']['authorizer']['jwt']['claims']['email']
+        print(f'after {body}')
