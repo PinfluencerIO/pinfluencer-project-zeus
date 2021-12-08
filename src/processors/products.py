@@ -49,7 +49,7 @@ class ProcessAuthenticatedGetProductById(ProcessInterface):
         return PinfluencerResponse(body=event["product"])
 
 
-class ProcessAuthenticatedGetProduct:
+class ProcessAuthenticatedGetProducts:
     def __init__(self, get_brand_associated_with_cognito_user: FilterInterface,
                  load_all_products_for_brand_id,
                  data_manager: DataManagerInterface):

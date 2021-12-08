@@ -48,9 +48,9 @@ def lambda_handler(event, context):
                                         container.data_manager),
 
             # authenticated product endpoints
-            'GET /products/me': ProcessAuthenticatedGetProduct(container.get_brand_associated_with_cognito_user,
-                                                               load_all_products_for_brand_id,
-                                                               container.data_manager),
+            'GET /products/me': ProcessAuthenticatedGetProducts(container.get_brand_associated_with_cognito_user,
+                                                                load_all_products_for_brand_id,
+                                                                container.data_manager),
 
             'GET /products/me/{product_id}': ProcessAuthenticatedGetProductById(
                 FilterChainImp([container.get_brand_associated_with_cognito_user, container.valid_product_filter, OwnerOnly('product')]),

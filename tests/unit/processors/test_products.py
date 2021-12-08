@@ -2,9 +2,9 @@ import uuid
 
 from src.data_access_layer.brand import Brand
 from src.data_access_layer.product import Product
-from src.filters import FilterResponse
+from src.filters import FilterResponse, FilterInterface
 from src.filters.valid_id_filters import LoadResourceById
-from src.processors.products import ProcessPublicProducts, ProcessPublicGetProductBy
+from src.processors.products import ProcessPublicProducts, ProcessPublicGetProductBy, ProcessAuthenticatedGetProducts
 from tests.unit import StubDataManager
 
 
@@ -39,12 +39,46 @@ def test_process_unsuccessful_public_get_brand_by_id():
     assert pinfluencer_response.status_code == 400
 
 
+def test_process_authenticated_products():
+    processor = ProcessAuthenticatedGetProducts(MockBrandAssociatedWithCognitoUser(),
+                                                mock_by_id,
+                                                StubDataManager())
+    pinfluencer_response = processor.do_process({})
+    assert pinfluencer_response.is_ok() is True
+
+
+def test_process_authenticated_products_authentication_failed():
+    processor = ProcessAuthenticatedGetProducts(MockBrandAssociatedWithCognitoUser(failed=True),
+                                                mock_by_id,
+                                                StubDataManager())
+    pinfluencer_response = processor.do_process({})
+    assert pinfluencer_response.is_ok() is False
+    assert pinfluencer_response.status_code == 401
+
+
+class MockBrandAssociatedWithCognitoUser(FilterInterface):
+
+    def __init__(self, failed=False) -> None:
+        super().__init__()
+        self.failed = failed
+
+    def do_filter(self, event: dict) -> FilterResponse:
+        if self.failed:
+            return FilterResponse('', 401, {})
+        else:
+            return FilterResponse('', 200, Brand().as_dict())
+
+
 def mock_load_product(event):
     return FilterResponse('', 200, mock_response_from_db()[0])
 
 
 def mock_load_product_failed(event):
     return FilterResponse('', 400, {})
+
+
+def mock_by_id(id, data_manager):
+    return mock_response_from_db()
 
 
 def mock_response_from_db():
