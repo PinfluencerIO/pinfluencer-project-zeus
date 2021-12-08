@@ -49,3 +49,11 @@ def load_all_products(data_manager):
         return data_manager.session.query(Product).all()
     finally:
         data_manager.session.commit()
+
+
+def load_product_by_id_owned_by_brand(product_id, brand_dict, data_manager):
+    try:
+        return data_manager.session.query(Product).filter((Product.brand_id == brand_dict['id']),
+                                                          (Product.id == product_id)).first()
+    finally:
+        data_manager.session.commit()

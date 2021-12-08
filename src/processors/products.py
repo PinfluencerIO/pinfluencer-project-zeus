@@ -3,7 +3,7 @@ import json
 from src.data_access_layer import to_list
 from src.data_access_layer.product import Product, product_from_dict
 from src.data_access_layer.read_data_access import load_all_products
-from src.filters.valid_id_filters import LoadResourceById
+from src.filters.valid_id_filters import LoadResourceById, valid_uuid
 from src.interfaces.data_manager_interface import DataManagerInterface
 from src.interfaces.image_repository_interface import ImageRepositoryInterface
 from src.filters import FilterChain, FilterInterface
@@ -42,11 +42,26 @@ class ProcessPublicGetProductBy:
 
 
 class ProcessAuthenticatedGetProductById(ProcessInterface):
-    def __init__(self, filter_chain: FilterChain, data_manager: DataManagerInterface):
-        super().__init__(data_manager, filter_chain)
+    def __init__(self, get_brand_associated_with_cognito_user: FilterInterface, load_product_by_id_owned_by_brand,
+                 data_manager: DataManagerInterface):
+        super().__init__(data_manager)
+        self.get_brand_associated_with_cognito_user = get_brand_associated_with_cognito_user
+        self.load_product_by_id_owned_by_brand = load_product_by_id_owned_by_brand
 
     def do_process(self, event: dict) -> PinfluencerResponse:
-        return PinfluencerResponse(body=event["product"])
+        filter_response = self.get_brand_associated_with_cognito_user.do_filter(event)
+        if filter_response.is_success():
+            product_id = event['pathParameters']['product_id']
+            if valid_uuid(product_id):
+                product = self.load_product_by_id_owned_by_brand(product_id, filter_response.get_payload(), self._data_manager)
+                if product:
+                    return PinfluencerResponse(200, product.as_dict())
+                else:
+                    return PinfluencerResponse(404, 'Not found')
+            else:
+                return PinfluencerResponse.as_400_error('Invalid key in event pathParameters.product_id')
+        else:
+            return PinfluencerResponse(401, filter_response.get_message())
 
 
 class ProcessAuthenticatedGetProducts:

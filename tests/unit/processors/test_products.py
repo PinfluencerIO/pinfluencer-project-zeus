@@ -4,7 +4,8 @@ from src.data_access_layer.brand import Brand
 from src.data_access_layer.product import Product
 from src.filters import FilterResponse, FilterInterface
 from src.filters.valid_id_filters import LoadResourceById
-from src.processors.products import ProcessPublicProducts, ProcessPublicGetProductBy, ProcessAuthenticatedGetProducts
+from src.processors.products import ProcessPublicProducts, ProcessPublicGetProductBy, ProcessAuthenticatedGetProducts, \
+    ProcessAuthenticatedGetProductById
 from tests.unit import StubDataManager
 
 
@@ -56,6 +57,32 @@ def test_process_authenticated_products_authentication_failed():
     assert pinfluencer_response.status_code == 401
 
 
+def test_process_authenticated_product_by_id():
+    processor = ProcessAuthenticatedGetProductById(MockBrandAssociatedWithCognitoUser(),
+                                                   mock_load_product_by_id_for_brand,
+                                                   StubDataManager())
+    pinfluencer_response = processor.do_process({'pathParameters': {'product_id': str(uuid.uuid4())}})
+    assert pinfluencer_response.is_ok() is True
+
+
+def test_process_authenticated_product_by_id_failed_authentication():
+    processor = ProcessAuthenticatedGetProductById(MockBrandAssociatedWithCognitoUser(failed=True),
+                                                   mock_load_product_by_id_for_brand,
+                                                   StubDataManager())
+    pinfluencer_response = processor.do_process({'pathParameters': {'product_id': str(uuid.uuid4())}})
+    assert pinfluencer_response.is_ok() is False
+    assert pinfluencer_response.status_code == 401
+
+
+def test_process_authenticated_product_by_id_404_not_found():
+    processor = ProcessAuthenticatedGetProductById(MockBrandAssociatedWithCognitoUser(),
+                                                   mock_not_found_product_by_id_for_brand,
+                                                   StubDataManager())
+    pinfluencer_response = processor.do_process({'pathParameters': {'product_id': str(uuid.uuid4())}})
+    assert pinfluencer_response.is_ok() is False
+    assert pinfluencer_response.status_code == 404
+
+
 class MockBrandAssociatedWithCognitoUser(FilterInterface):
 
     def __init__(self, failed=False) -> None:
@@ -75,6 +102,18 @@ def mock_load_product(event):
 
 def mock_load_product_failed(event):
     return FilterResponse('', 400, {})
+
+
+def mock_load_product_by_id_for_brand(product_id, brand, data_manager):
+    product = Product()
+    brand = Brand()
+    brand.id = str(uuid.uuid4())
+    product.brand = brand
+    return product
+
+
+def mock_not_found_product_by_id_for_brand(product_id, brand, data_manager):
+    return None
 
 
 def mock_by_id(id, data_manager):

@@ -1,6 +1,7 @@
 from collections import OrderedDict
 
 from src.container import Container
+from src.data_access_layer.read_data_access import load_product_by_id_owned_by_brand
 from src.data_access_layer.write_data_access import update_brand_image
 from src.filters.authorised_filter import *
 from src.filters.payload_validation import *
@@ -53,8 +54,10 @@ def lambda_handler(event, context):
                                                                 container.data_manager),
 
             'GET /products/me/{product_id}': ProcessAuthenticatedGetProductById(
-                FilterChainImp([container.get_brand_associated_with_cognito_user, container.valid_product_filter, OwnerOnly('product')]),
+                container.get_brand_associated_with_cognito_user,
+                load_product_by_id_owned_by_brand,
                 container.data_manager),
+
             'POST /products/me': ProcessAuthenticatedPostProduct(
                 FilterChainImp([container.get_brand_associated_with_cognito_user, ProductPostPayloadValidation()]),
                 container.data_manager, container.image_repository, container.status_manager),
