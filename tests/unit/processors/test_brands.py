@@ -1,5 +1,4 @@
 import uuid
-from unittest.mock import patch
 
 import pytest
 
@@ -8,10 +7,10 @@ from src.data_access_layer.product import Product
 from src.filters import FilterResponse, FilterInterface
 from src.filters.authorised_filter import GetBrandAssociatedWithCognitoUser, NoBrandAssociatedWithCognitoUser
 from src.filters.payload_validation import BrandPostPayloadValidation, BrandPutPayloadValidation
-from src.filters.valid_id_filters import LoadResourceById
-from src.processors.brands import ProcessPublicBrands, ProcessPublicGetBrandBy, ProcessPublicAllProductsForBrand, \
-    ProcessAuthenticatedGetBrand, ProcessAuthenticatedPostBrand, ProcessAuthenticatedPutBrand, \
-    ProcessAuthenticatedPatchBrandImage
+from src.processors.create_brand_for_authenticated_user import ProcessAuthenticatedPostBrand
+from src.processors.get_brand_for_authenticated_user import ProcessAuthenticatedGetBrand
+from src.processors.update_brand_for_authenticated_user import ProcessAuthenticatedPutBrand
+from src.processors.update_image_for_brand_of_authenticated_user import ProcessAuthenticatedPatchBrandImage
 from tests.unit import StubDataManager
 
 user_id = 'user_id'
@@ -32,62 +31,6 @@ event_cognito_user = {
         'email': 'new@email.should.not.update.com'
     }
 }
-
-
-@patch('src.processors.brands.to_list')
-def test_process_public_brands_response_is_200(mock_to_list):
-    mock_to_list.return_value = [{}]
-    process_public_brands = ProcessPublicBrands(StubDataManager())
-    pinfluencer_response = process_public_brands.do_process({})
-    assert pinfluencer_response.is_ok() is True
-
-
-@patch('src.filters.valid_id_filters.load_by_id')
-def test_process_successful_public_get_brand_by_id(mock_load_by_id):
-    load_resource = LoadResourceById(StubDataManager(), 'brand')
-    uuid_ = uuid.uuid4()
-    brand = Brand()
-    mock_load_by_id.return_value = brand
-    processor = ProcessPublicGetBrandBy(load_resource)
-    pinfluencer_response = processor.do_process(
-        {'pathParameters': {'brand_id': str(uuid_)}})
-    assert pinfluencer_response.is_ok() is True
-    assert pinfluencer_response.body == brand.as_dict()
-
-
-@patch('src.filters.valid_id_filters.load_by_id')
-def test_process_unsuccessful_public_get_brand_by_id(mock_load_by_id):
-    load_resource = LoadResourceById(StubDataManager(), 'brand')
-    mock_load_by_id.return_value = None
-    processor = ProcessPublicGetBrandBy(load_resource)
-    pinfluencer_response = processor.do_process({'pathParameters': {'brand_id': str(uuid.uuid4())}})
-    assert pinfluencer_response.is_ok() is False
-    assert pinfluencer_response.status_code == 400
-
-
-@patch('src.processors.brands.load_all_products_for_brand_id')
-@patch('src.filters.valid_id_filters.load_by_id')
-def test_process_public_all_products_for_brand(mock_load_by_id, mock_load_all_products_for_brand):
-    brand = Brand()
-    mock_load_by_id.return_value = brand
-    product = Product()
-    product.brand = brand
-    mock_load_all_products_for_brand.return_value = [product]
-    load_resource = LoadResourceById(StubDataManager(), 'brand')
-    processor = ProcessPublicAllProductsForBrand(load_resource, StubDataManager())
-    pinfluencer_response = processor.do_process({'pathParameters': {'brand_id': str(uuid.uuid4())}})
-    assert pinfluencer_response.is_ok() is True
-
-
-@patch('src.processors.brands.load_all_products_for_brand_id')
-@patch('src.filters.valid_id_filters.load_by_id')
-def test_process_public_all_products_for_brand(mock_load_by_id, mock_load_all_products_for_brand):
-    mock_load_by_id.return_value = None
-    load_resource = LoadResourceById(StubDataManager(), 'brand')
-    processor = ProcessPublicAllProductsForBrand(load_resource, StubDataManager())
-    pinfluencer_response = processor.do_process({'pathParameters': {'brand_id': str(uuid.uuid4())}})
-    assert pinfluencer_response.is_ok() is False
-    assert pinfluencer_response.status_code == 400
 
 
 def test_process_authenticated_brand_success():
@@ -298,6 +241,22 @@ def mock_invalid_brand_payload(event):
     return FilterResponse('', 400, event_cognito_user['body'])
 
 
+def mock_load_brands(data_manager):
+    return [Brand(), Brand()]
+
+
+def mock_load_max_3_products_for_brand(brand_id, data_manager):
+    brand = Brand()
+    brand.id = str(uuid.uuid4())
+    product1 = Product()
+    product1.brand = brand
+    product2 = Product()
+    product2.brand = brand
+    product3 = Product()
+    product3.brand = brand
+    return [product1, product2, product3]
+
+
 def mock_create_new_brand_successful(payload, image_bytes):
     return Brand()
 
@@ -356,3 +315,15 @@ def mock_successful_update_brand_image(brand_id, image_bytes, data_manager):
 
 def mock_unsuccessful_update_brand_image(brand_id, image_bytes, data_manager):
     raise Exception('failed to write brand image')
+
+
+class MockLoadResourcesId:
+    def __init__(self, return_value: FilterResponse = None):
+        self.return_value = return_value
+
+    def load(self, dict):
+        return self.return_value
+
+
+def mock_load_all_products_for_brand_id(brand_id, data_manager):
+    return mock_load_max_3_products_for_brand(brand_id, data_manager)

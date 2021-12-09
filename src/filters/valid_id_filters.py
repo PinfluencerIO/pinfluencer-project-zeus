@@ -28,7 +28,6 @@ class LoadResourceById:
             if loaded_resource is None:
                 return FilterResponse(f'No {self.resource} found with id {id_}', 404, {})
             else:
-                # event[self.resource] = loaded_resource.as_dict()
                 return FilterResponse('', 200, loaded_resource.as_dict())
         else:
             return FilterResponse(f'{id_} is invalid', 400, {})
