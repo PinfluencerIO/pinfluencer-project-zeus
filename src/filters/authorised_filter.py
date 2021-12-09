@@ -18,7 +18,12 @@ class GetBrandAssociatedWithCognitoUser(FilterInterface):
 
         print(f'GetBrandAssociatedWithCognitoUser has found the require cognito:username key with {auth_user_id}')
 
-        loaded_brand = load_brand_by_auth_id(auth_user_id, self.__data_manager)
+        try:
+            loaded_brand = load_brand_by_auth_id(auth_user_id, self.__data_manager)
+            print(f'loaded_brand {loaded_brand}')
+        except Exception as e:
+            print(f'{e}')
+            raise e
 
         if loaded_brand is None:
             print(f'Failed to find brand by auth_user_id {auth_user_id}')

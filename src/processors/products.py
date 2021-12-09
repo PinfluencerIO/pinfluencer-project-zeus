@@ -111,41 +111,53 @@ class ProcessAuthenticatedPostProduct:
             return PinfluencerResponse(401, filter_response.get_message())
 
 
-        # print(self)
-        # product_dict: dict = json.loads(event['body'])
-        # brand_id: str = event['auth_brand']['id']
-        # image = product_dict['image']
-        # product_dict['brand_id'] = brand_id
-        # product: Product = product_from_dict(product=product_dict)
-        # self._data_manager.session.add(product)
-        # self._data_manager.session.flush()
-        # product.image = self.__image_repository.upload(path=f'{brand_id}/{product.id}',
-        #                                                image_base64_encoded=image)
-        # self._data_manager.session.add(product)
-        # self._data_manager.session.flush()
-        # return PinfluencerResponse(body=product.as_dict())
-
-
-class ProcessAuthenticatedPutProduct(ProcessInterface):
-    def __init__(self,
-                 filter_chain: FilterChain,
-                 data_manager: DataManagerInterface,
-                 status_manager: RequestStatusManager):
-        super().__init__(data_manager, filter_chain)
-        self.__status_manager = status_manager
+class ProcessAuthenticatedPutProduct:
+    def __init__(self,get_brand_associated_with_cognito_user: FilterInterface,
+                 validation: FilterInterface,
+                 update_product,
+                 data_manager: DataManagerInterface):
+        self.get_brand_associated_with_cognito_user = get_brand_associated_with_cognito_user
+        self.validation = validation
+        self.update_product = update_product
+        self.data_manager = data_manager
 
     def do_process(self, event: dict) -> PinfluencerResponse:
-        print(self)
-        product_from_req = json.loads(event['body'])
-        product: Product = (self._data_manager.session
-                            .query(Product)
-                            .filter(Product.id == event['product']['id'])
-                            .first())
-        product.name = product_from_req['name']
-        product.description = product_from_req['description']
-        product.requirements = product_from_req['requirements']
-        self._data_manager.session.flush()
-        return PinfluencerResponse(body=product.as_dict())
+        filter_response = self.get_brand_associated_with_cognito_user.do_filter(event)
+        if filter_response.is_success():
+            product_id = event['pathParameters']['product_id']
+            print(f'{product_id}')
+            print(f'{filter_response.get_payload()}')
+            if valid_uuid(product_id):
+                print(f'valid id')
+                filter_response = self.validation.do_filter(event)
+                if filter_response.is_success():
+                    product = self.update_product(filter_response.get_payload()['id'],
+                                              product_id,
+                                              json.loads(event['body']),
+                                              self.data_manager)
+                    print(f'updated product {product}')
+                    if product:
+                        return PinfluencerResponse(200, body=product.as_dict())
+                    else:
+                        return PinfluencerResponse.as_400_error()
+                else:
+                    return PinfluencerResponse.as_400_error()
+            else:
+                return PinfluencerResponse.as_400_error(filter_response.get_message())
+        else:
+            return PinfluencerResponse(401, filter_response.get_message())
+
+        # print(self)
+        # product_from_req = json.loads(event['body'])
+        # product: Product = (self._data_manager.session
+        #                     .query(Product)
+        #                     .filter(Product.id == event['product']['id'])
+        #                     .first())
+        # product.name = product_from_req['name']
+        # product.description = product_from_req['description']
+        # product.requirements = product_from_req['requirements']
+        # self._data_manager.session.flush()
+        # return PinfluencerResponse(body=product.as_dict())
 
 
 class ProcessAuthenticatedDeleteProduct(ProcessInterface):

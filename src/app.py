@@ -2,7 +2,7 @@ from collections import OrderedDict
 
 from src.container import Container
 from src.data_access_layer.read_data_access import load_product_by_id_owned_by_brand
-from src.data_access_layer.write_data_access import update_brand_image, write_new_product
+from src.data_access_layer.write_data_access import update_brand_image, write_new_product, update_new_product
 from src.filters.authorised_filter import *
 from src.filters.payload_validation import *
 from src.log_util import print_exception
@@ -65,9 +65,10 @@ def lambda_handler(event, context):
                 container.data_manager),
 
             'PUT /products/me/{product_id}': ProcessAuthenticatedPutProduct(
-                FilterChainImp(
-                    [container.get_brand_associated_with_cognito_user, container.valid_product_filter, OwnerOnly('product'),
-                     ProductPutPayloadValidation()]), container.data_manager, container.status_manager),
+                container.get_brand_associated_with_cognito_user,
+                ProductPutPayloadValidation(),
+                update_new_product,
+                container.data_manager),
 
             'PATCH /products/me/{product_id}/image': ProcessAuthenticatedPatchProductImage(FilterChainImp(
                 [container.get_brand_associated_with_cognito_user, container.valid_product_filter, OwnerOnly('product'),

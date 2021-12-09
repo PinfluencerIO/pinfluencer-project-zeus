@@ -1,6 +1,6 @@
 from src.data_access_layer import image_repository
 from src.data_access_layer.brand import Brand, brand_from_dict
-from src.data_access_layer.product import Product, product_from_dict
+from src.data_access_layer.product import product_from_dict, Product
 from src.interfaces.data_manager_interface import DataManagerInterface
 
 s3_image_repository = image_repository.S3ImageRepository()
@@ -42,6 +42,26 @@ def write_new_product(product_dict, brand_id, data_manager: DataManagerInterface
         print(f'Failed to write_new_product {e}')
         data_manager.session.rollback()
         raise e
+
+
+def update_new_product(brand_id, product_id, product_as_dict, data_manager: DataManagerInterface):
+    product = data_manager.session.query(Product).filter((Product.brand_id == brand_id),
+                                                         (Product.id == product_id)).first()
+    print(f'product loaded: {product}')
+    print(f'product payload: {product_as_dict}')
+    if product:
+        try:
+            product.name = product_as_dict['name']
+        except Exception as e:
+            print(f'get name value {e}')
+            raise e
+        product.description = product_as_dict['description']
+        product.requirements = product_as_dict['requirements']
+        data_manager.session.flush()
+        data_manager.session.commit()
+        return product
+    else:
+        return None
 
 
 def update_brand(brand_id, brand_as_dict, data_manager: DataManagerInterface):

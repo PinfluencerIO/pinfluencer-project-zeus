@@ -5,7 +5,7 @@ from src.data_access_layer.product import Product
 from src.filters import FilterResponse, FilterInterface
 from src.filters.valid_id_filters import LoadResourceById
 from src.processors.products import ProcessPublicProducts, ProcessPublicGetProductBy, ProcessAuthenticatedGetProducts, \
-    ProcessAuthenticatedGetProductById, ProcessAuthenticatedPostProduct
+    ProcessAuthenticatedGetProductById, ProcessAuthenticatedPostProduct, ProcessAuthenticatedPutProduct
 from tests.unit import StubDataManager
 
 
@@ -84,7 +84,7 @@ def test_process_authenticated_product_by_id_404_not_found():
 
 
 def test_process_post_product():
-    process = ProcessAuthenticatedPostProduct(MockBrandAssociatedWithCognitoUser(), MockPostProductValidation(),
+    process = ProcessAuthenticatedPostProduct(MockBrandAssociatedWithCognitoUser(), MockValidation(),
                                               mock_write_new_product, StubDataManager())
     pinfluencer_response = process.do_process({})
     assert pinfluencer_response.is_ok() is True
@@ -92,7 +92,7 @@ def test_process_post_product():
 
 def test_process_post_product_failed_authentication():
     process = ProcessAuthenticatedPostProduct(MockBrandAssociatedWithCognitoUser(failed=True),
-                                              MockPostProductValidation(),
+                                              MockValidation(),
                                               mock_write_new_product, StubDataManager())
     pinfluencer_response = process.do_process({})
     assert pinfluencer_response.is_ok() is False
@@ -101,14 +101,55 @@ def test_process_post_product_failed_authentication():
 
 def test_process_post_product_failed_validation():
     process = ProcessAuthenticatedPostProduct(MockBrandAssociatedWithCognitoUser(),
-                                              MockPostProductValidation(failed=True),
+                                              MockValidation(failed=True),
                                               mock_write_new_product, StubDataManager())
     pinfluencer_response = process.do_process({})
     assert pinfluencer_response.is_ok() is False
     assert pinfluencer_response.status_code == 400
 
 
-class MockPostProductValidation(FilterInterface):
+def test_process_put_product():
+    process = ProcessAuthenticatedPutProduct(MockBrandAssociatedWithCognitoUser(),
+                                             MockValidation(),
+                                             mock_update_product,
+                                             StubDataManager())
+
+    pinfluencer_response = process.do_process({'pathParameters': {'product_id': str(uuid.uuid4())},
+                                               'body': ' {"name": "The DOM DOM product Ebert and Sons",'
+                                                       '"description": "A description of the Mozambique Tasty",'
+                                                       '"requirements": "deposit,Practical,transmitter,Specialist"}'})
+    assert pinfluencer_response.is_ok() is True
+
+
+def test_process_put_product_failed_authentication():
+    process = ProcessAuthenticatedPutProduct(MockBrandAssociatedWithCognitoUser(failed=True),
+                                             MockValidation(),
+                                             mock_update_product,
+                                             StubDataManager())
+
+    pinfluencer_response = process.do_process({'pathParameters': {'product_id': str(uuid.uuid4())},
+                                               'body': ' {"name": "The DOM DOM product Ebert and Sons",'
+                                                       '"description": "A description of the Mozambique Tasty",'
+                                                       '"requirements": "deposit,Practical,transmitter,Specialist"}'})
+    assert pinfluencer_response.is_ok() is False
+    assert pinfluencer_response.status_code == 401
+
+
+def test_process_put_product_failed_validation():
+    process = ProcessAuthenticatedPutProduct(MockBrandAssociatedWithCognitoUser(),
+                                             MockValidation(failed=True),
+                                             mock_update_product,
+                                             StubDataManager())
+
+    pinfluencer_response = process.do_process({'pathParameters': {'product_id': str(uuid.uuid4())},
+                                               'body': ' {"name": "The DOM DOM product Ebert and Sons",'
+                                                       '"description": "A description of the Mozambique Tasty",'
+                                                       '"requirements": "deposit,Practical,transmitter,Specialist"}'})
+    assert pinfluencer_response.is_ok() is False
+    assert pinfluencer_response.status_code == 400
+
+
+class MockValidation(FilterInterface):
     def __init__(self, failed=False) -> None:
         super().__init__()
         self.failed = failed
@@ -154,6 +195,10 @@ def mock_not_found_product_by_id_for_brand(product_id, brand, data_manager):
 
 
 def mock_write_new_product(payload, brand_id, data_manager):
+    return mock_response_from_db()[0]
+
+
+def mock_update_product(brand_id, product_id, payload, data_manager):
     return mock_response_from_db()[0]
 
 
