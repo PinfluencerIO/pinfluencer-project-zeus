@@ -5,7 +5,7 @@ from src.data_access_layer.product import Product
 from src.filters import FilterResponse, FilterInterface
 from src.filters.valid_id_filters import LoadResourceById
 from src.processors.products import ProcessPublicProducts, ProcessPublicGetProductBy, ProcessAuthenticatedGetProducts, \
-    ProcessAuthenticatedGetProductById
+    ProcessAuthenticatedGetProductById, ProcessAuthenticatedPostProduct
 from tests.unit import StubDataManager
 
 
@@ -83,6 +83,43 @@ def test_process_authenticated_product_by_id_404_not_found():
     assert pinfluencer_response.status_code == 404
 
 
+def test_process_post_product():
+    process = ProcessAuthenticatedPostProduct(MockBrandAssociatedWithCognitoUser(), MockPostProductValidation(),
+                                              mock_write_new_product, StubDataManager())
+    pinfluencer_response = process.do_process({})
+    assert pinfluencer_response.is_ok() is True
+
+
+def test_process_post_product_failed_authentication():
+    process = ProcessAuthenticatedPostProduct(MockBrandAssociatedWithCognitoUser(failed=True),
+                                              MockPostProductValidation(),
+                                              mock_write_new_product, StubDataManager())
+    pinfluencer_response = process.do_process({})
+    assert pinfluencer_response.is_ok() is False
+    assert pinfluencer_response.status_code == 401
+
+
+def test_process_post_product_failed_validation():
+    process = ProcessAuthenticatedPostProduct(MockBrandAssociatedWithCognitoUser(),
+                                              MockPostProductValidation(failed=True),
+                                              mock_write_new_product, StubDataManager())
+    pinfluencer_response = process.do_process({})
+    assert pinfluencer_response.is_ok() is False
+    assert pinfluencer_response.status_code == 400
+
+
+class MockPostProductValidation(FilterInterface):
+    def __init__(self, failed=False) -> None:
+        super().__init__()
+        self.failed = failed
+
+    def do_filter(self, event: dict) -> FilterResponse:
+        if self.failed:
+            return FilterResponse('', 400, {})
+        else:
+            return FilterResponse('', 200, mock_response_from_db()[0].as_dict())
+
+
 class MockBrandAssociatedWithCognitoUser(FilterInterface):
 
     def __init__(self, failed=False) -> None:
@@ -114,6 +151,10 @@ def mock_load_product_by_id_for_brand(product_id, brand, data_manager):
 
 def mock_not_found_product_by_id_for_brand(product_id, brand, data_manager):
     return None
+
+
+def mock_write_new_product(payload, brand_id, data_manager):
+    return mock_response_from_db()[0]
 
 
 def mock_by_id(id, data_manager):

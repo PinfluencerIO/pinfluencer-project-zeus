@@ -55,7 +55,7 @@ class ProductPostPayloadValidation(FilterInterface):
         print(f'payload {payload}')
         try:
             validate(instance=payload, schema=(get_product_payload_schema()))
-            return FilterResponse('', 200, {})
+            return FilterResponse('', 200, payload)
         except Exception as e:
             print(f'Validating product payload failed {e}')
             return FilterResponse('Invalid payload', 400, {})

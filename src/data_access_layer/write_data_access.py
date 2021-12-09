@@ -1,5 +1,6 @@
 from src.data_access_layer import image_repository
 from src.data_access_layer.brand import Brand, brand_from_dict
+from src.data_access_layer.product import Product, product_from_dict
 from src.interfaces.data_manager_interface import DataManagerInterface
 
 s3_image_repository = image_repository.S3ImageRepository()
@@ -18,6 +19,27 @@ def write_new_brand(brand_as_dict, image_bytes, data_manager: DataManagerInterfa
         return brand
     except Exception as e:
         print(f'Failed to write_new_brand {e}')
+        data_manager.session.rollback()
+        raise e
+
+
+def write_new_product(product_dict, brand_id, data_manager: DataManagerInterface):
+    try:
+        image_bytes = product_dict['image']
+        product_dict['image'] = None
+        product_dict['brand_id'] = brand_id
+        product_entity = product_from_dict(product_dict)
+        data_manager.session.add(product_entity)
+        data_manager.session.flush()
+        image_id = s3_image_repository.upload(f'{brand_id}/{product_entity.id}', image_bytes)
+        print(f'loaded product {product_entity}')
+        product_entity.image = image_id
+        print(f'loaded product {product_entity}')
+        data_manager.session.flush()
+        data_manager.session.commit()
+        return product_entity
+    except Exception as e:
+        print(f'Failed to write_new_product {e}')
         data_manager.session.rollback()
         raise e
 
