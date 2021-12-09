@@ -8,5 +8,9 @@ class ImageRepositoryInterface(ABC):
         pass
 
     @abstractmethod
+    def retrieve(self, path: str) -> str:
+        pass
+
+    @abstractmethod
     def delete(self, path: str) -> None:
         pass

@@ -1,5 +1,6 @@
 import base64
 import io
+import json
 import uuid
 
 import boto3
@@ -36,3 +37,7 @@ class S3ImageRepository(ImageRepositoryInterface):
 
     def delete(self, path: str) -> None:
         self.__s3_client.delete_object(Bucket=self.__bucket_name, Key=path)
+
+    def retrieve(self, path: str) -> str:
+        image_object = self.__s3_client.get_object(self.__bucket_name, path)
+        return json.loads(image_object['Body'].read())

@@ -5,7 +5,8 @@ from src.data_access_layer.product import Product
 from src.filters import FilterResponse, FilterInterface
 from src.filters.valid_id_filters import LoadResourceById
 from src.processors.products import ProcessPublicProducts, ProcessPublicGetProductBy, ProcessAuthenticatedGetProducts, \
-    ProcessAuthenticatedGetProductById, ProcessAuthenticatedPostProduct, ProcessAuthenticatedPutProduct
+    ProcessAuthenticatedGetProductById, ProcessAuthenticatedPostProduct, ProcessAuthenticatedPutProduct, \
+    ProcessAuthenticatedDeleteProduct
 from tests.unit import StubDataManager
 
 
@@ -149,6 +150,25 @@ def test_process_put_product_failed_validation():
     assert pinfluencer_response.status_code == 400
 
 
+def test_process_delete_product():
+    process = ProcessAuthenticatedDeleteProduct(MockBrandAssociatedWithCognitoUser(),
+                                                mock_delete_product,
+                                                StubDataManager())
+
+    pinfluencer_response = process.do_process({'pathParameters': {'product_id': str(uuid.uuid4())}})
+    assert pinfluencer_response.is_ok() is True
+
+
+def test_process_delete_product_failed_authentication():
+    process = ProcessAuthenticatedDeleteProduct(MockBrandAssociatedWithCognitoUser(failed=True),
+                                                mock_delete_product,
+                                                StubDataManager())
+
+    pinfluencer_response = process.do_process({'pathParameters': {'product_id': str(uuid.uuid4())}})
+    assert pinfluencer_response.is_ok() is False
+    assert pinfluencer_response.status_code == 401
+
+
 class MockValidation(FilterInterface):
     def __init__(self, failed=False) -> None:
         super().__init__()
@@ -175,6 +195,10 @@ class MockBrandAssociatedWithCognitoUser(FilterInterface):
 
 
 def mock_load_product(event):
+    return FilterResponse('', 200, mock_response_from_db()[0])
+
+
+def mock_delete_product(brand_id, product_id, data_manager):
     return FilterResponse('', 200, mock_response_from_db()[0])
 
 

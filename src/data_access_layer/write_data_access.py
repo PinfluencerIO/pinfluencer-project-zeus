@@ -50,11 +50,7 @@ def update_new_product(brand_id, product_id, product_as_dict, data_manager: Data
     print(f'product loaded: {product}')
     print(f'product payload: {product_as_dict}')
     if product:
-        try:
-            product.name = product_as_dict['name']
-        except Exception as e:
-            print(f'get name value {e}')
-            raise e
+        product.name = product_as_dict['name']
         product.description = product_as_dict['description']
         product.requirements = product_as_dict['requirements']
         data_manager.session.flush()
@@ -94,5 +90,47 @@ def update_brand_image(brand_id, image_bytes, data_manager: DataManagerInterface
         return brand
     except Exception as e:
         print(f'Failed to update brand image {e}')
+        data_manager.session.rollback()
+        raise e
+
+
+def patch_product_image(brand_id, product_id, image_bytes, data_manager: DataManagerInterface):
+    try:
+        print(f'load product with id {product_id} and brand id {brand_id}')
+        product = data_manager.session.query(Product).filter((Product.brand_id == brand_id),
+                                                             (Product.id == product_id)).first()
+        print(f'product loaded: {product}')
+        if product:
+            image_id = s3_image_repository.upload(f'{brand_id}/{product.id}', image_bytes)
+            s3_image_repository.delete(f'{brand_id}/{product.image}')
+            product.image = image_id
+            data_manager.session.flush()
+            data_manager.session.commit()
+            return product
+        else:
+            return None
+    except Exception as e:
+        print(f'Failed to update product image {e}')
+        data_manager.session.rollback()
+        raise e
+
+
+def delete_product(brand_id, product_id, data_manager):
+    try:
+        product: Product = (data_manager.session
+                            .query(Product)
+                            .filter(Product.id == product_id, Product.brand_id == brand_id)
+                            .first())
+        # TODO: This isn't atomic:
+        # If delete image works, but delete product fails, we have lost the image, and rollback is partial
+        if product:
+            s3_image_repository.delete(path=f'{product.owner.id}/{product.id}/{product.image}')
+            data_manager.session.delete(product)
+            data_manager.session.commit()
+            return product
+        else:
+            return None
+    except Exception as e:
+        print(f'Failed to delete product {e}')
         data_manager.session.rollback()
         raise e
