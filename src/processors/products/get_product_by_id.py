@@ -1,19 +1,25 @@
+from src.data_access_layer.product import Product
 from src.filters.valid_id_filters import valid_uuid
 from src.interfaces.data_manager_interface import DataManagerInterface
 from src.pinfluencer_response import PinfluencerResponse
+from src.processors import valid_path_resource_id
 
 
 class ProcessPublicGetProductBy:
-    def __init__(self, load_resource_by_id, data_manager: DataManagerInterface):
-        self.load_resource_by_id = load_resource_by_id
+    def __init__(self, load_by_id, data_manager: DataManagerInterface):
+        self.load_by_id = load_by_id
         self.data_manager = data_manager
 
     def do_process(self, event: dict) -> PinfluencerResponse:
-        response = self.load_resource_by_id.do_filter(event)
-        if response.is_success():
-            return PinfluencerResponse(body=response.get_payload())
+        id_ = valid_path_resource_id(event, 'product_id')
+        if id_:
+            product = self.load_by_id(id_, Product, self.data_manager)
+            if product:
+                return PinfluencerResponse(200, product.as_dict())
+            else:
+                return PinfluencerResponse(404, 'Not found')
         else:
-            return PinfluencerResponse(response.get_code(), response.get_message())
+            return PinfluencerResponse.as_400_error('Invalid path parameter id')
 
 
 class ProcessAuthenticatedGetProductById:

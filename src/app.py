@@ -44,7 +44,7 @@ def lambda_handler(event, context):
 
             'GET /products': ProcessPublicProducts(load_all_products, container.data_manager),
 
-            'GET /products/{product_id}': ProcessPublicGetProductBy(LoadResourceById(container.data_manager, 'product'),
+            'GET /products/{product_id}': ProcessPublicGetProductBy(load_by_id,
                                                                     container.data_manager),
 
             # authenticated brand endpoints

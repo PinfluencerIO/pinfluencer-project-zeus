@@ -5,21 +5,10 @@ from src.data_access_layer.product import Product
 from src.filters import FilterResponse
 from src.processors.products.create_new_product_for_authenticated_user import ProcessAuthenticatedPostProduct
 from src.processors.products.delete_product import ProcessAuthenticatedDeleteProduct
-from src.processors.products.get_product_by_id import ProcessPublicGetProductBy, ProcessAuthenticatedGetProductById
+from src.processors.products.get_product_by_id import ProcessAuthenticatedGetProductById
 from src.processors.products.get_products_for_authenticated_user import ProcessAuthenticatedGetProducts
 from src.processors.products.upate_product_for_authenticated_user import ProcessAuthenticatedPutProduct
 from tests.unit import StubDataManager
-from tests.unit.processors.brands import MockFilterResponse
-
-
-def test_process_unsuccessful_public_get_brand_by_id():
-    load_resource = MockFilterResponse(FilterResponse('', 400, {}))
-    uuid_ = uuid.uuid4()
-    processor = ProcessPublicGetProductBy(load_resource, StubDataManager())
-    pinfluencer_response = processor.do_process(
-        {'pathParameters': {'product_id': str(uuid_)}})
-    assert pinfluencer_response.is_ok() is False
-    assert pinfluencer_response.status_code == 400
 
 
 def test_process_authenticated_products():
