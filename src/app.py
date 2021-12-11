@@ -39,7 +39,7 @@ def lambda_handler(event, context):
             'GET /brands/{brand_id}': ProcessPublicGetBrandBy(load_by_id, container.data_manager),
 
             'GET /brands/{brand_id}/products': ProcessPublicAllProductsForBrand(
-                LoadResourceById(container.data_manager, 'brand'), load_all_products_for_brand_id,
+                load_all_products_for_brand_id,
                 container.data_manager),
 
             'GET /products': ProcessPublicProducts(load_all_products, container.data_manager),
