@@ -17,7 +17,7 @@ class LoadResourceById:
         self.__resource_type = self.__resources[resource]
         self.__resource_key = resource + '_id'
 
-    def load(self, event: dict):
+    def do_filter(self, event: dict):
         try:
             id_ = event['pathParameters'][self.__resource_key]
         except KeyError:

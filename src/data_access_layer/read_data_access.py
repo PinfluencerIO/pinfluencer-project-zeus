@@ -14,18 +14,18 @@ def load_by_id(id_, resource, data_manager: DataManagerInterface):
 
 
 def load_brand_by_auth_id(id_, data_manager: DataManagerInterface):
+    print(f'load_brand_by_auth_id({id_})')
     try:
-        return (data_manager.session
-                .query(Brand)
-                .filter(Brand.auth_user_id == id_)
-                .first())
+        brand = (data_manager.session.query(Brand).filter(Brand.auth_user_id == id_).first())
+        print(f'loaded by auth_id {brand}')
+        return brand
     finally:
         data_manager.session.commit()
 
 
 def load_brands(data_manager: DataManagerInterface):
     try:
-        return data_manager.session.query(Brand.id).all()
+        return data_manager.session.query(Brand).all()
     finally:
         data_manager.session.commit()
 

@@ -44,7 +44,7 @@ def write_new_product(product_dict, brand_id, data_manager: DataManagerInterface
         raise e
 
 
-def update_new_product(brand_id, product_id, product_as_dict, data_manager: DataManagerInterface):
+def update_product(brand_id, product_id, product_as_dict, data_manager: DataManagerInterface):
     product = data_manager.session.query(Product).filter((Product.brand_id == brand_id),
                                                          (Product.id == product_id)).first()
     print(f'product loaded: {product}')
@@ -57,7 +57,7 @@ def update_new_product(brand_id, product_id, product_as_dict, data_manager: Data
         data_manager.session.commit()
         return product
     else:
-        return None
+        return None #TODO perhaps throw not found exception
 
 
 def update_brand(brand_id, brand_as_dict, data_manager: DataManagerInterface):

@@ -2,39 +2,20 @@ import uuid
 
 from src.data_access_layer.brand import Brand
 from src.data_access_layer.product import Product
-from src.filters import FilterResponse, FilterInterface
-from src.filters.valid_id_filters import LoadResourceById
-from src.processors.products import ProcessPublicProducts, ProcessPublicGetProductBy, ProcessAuthenticatedGetProducts, \
-    ProcessAuthenticatedGetProductById, ProcessAuthenticatedPostProduct, ProcessAuthenticatedPutProduct, \
-    ProcessAuthenticatedDeleteProduct
+from src.filters import FilterResponse
+from src.processors.products.create_new_product_for_authenticated_user import ProcessAuthenticatedPostProduct
+from src.processors.products.delete_product import ProcessAuthenticatedDeleteProduct
+from src.processors.products.get_product_by_id import ProcessPublicGetProductBy, ProcessAuthenticatedGetProductById
+from src.processors.products.get_products_for_authenticated_user import ProcessAuthenticatedGetProducts
+from src.processors.products.upate_product_for_authenticated_user import ProcessAuthenticatedPutProduct
 from tests.unit import StubDataManager
-
-
-def test_load_all_products_response_200():
-    processor = ProcessPublicProducts(StubDataManager())
-    processor.load_all_products = mock_response_from_db
-
-    pinfluencer_response = processor.do_process({})
-    assert pinfluencer_response.is_ok() is True
-    assert type(pinfluencer_response.body) is list
-
-
-# @patch('src.filters.valid_id_filters.load_by_id')
-def test_process_successful_public_get_product_by_id():
-    load_resource = LoadResourceById(StubDataManager(), 'product')
-    uuid_ = uuid.uuid4()
-    processor = ProcessPublicGetProductBy(load_resource, StubDataManager())
-    processor.load_product_from_cmd = mock_load_product
-    pinfluencer_response = processor.do_process(
-        {'pathParameters': {'product_id': str(uuid_)}})
-    assert pinfluencer_response.is_ok() is True
+from tests.unit.processors.brands import MockFilterResponse
 
 
 def test_process_unsuccessful_public_get_brand_by_id():
-    load_resource = LoadResourceById(StubDataManager(), 'product')
+    load_resource = MockFilterResponse(FilterResponse('', 400, {}))
     uuid_ = uuid.uuid4()
     processor = ProcessPublicGetProductBy(load_resource, StubDataManager())
-    processor.load_product_from_cmd = mock_load_product_failed
     pinfluencer_response = processor.do_process(
         {'pathParameters': {'product_id': str(uuid_)}})
     assert pinfluencer_response.is_ok() is False
@@ -169,7 +150,7 @@ def test_process_delete_product_failed_authentication():
     assert pinfluencer_response.status_code == 401
 
 
-class MockValidation(FilterInterface):
+class MockValidation:
     def __init__(self, failed=False) -> None:
         super().__init__()
         self.failed = failed
@@ -181,7 +162,7 @@ class MockValidation(FilterInterface):
             return FilterResponse('', 200, mock_response_from_db()[0].as_dict())
 
 
-class MockBrandAssociatedWithCognitoUser(FilterInterface):
+class MockBrandAssociatedWithCognitoUser:
 
     def __init__(self, failed=False) -> None:
         super().__init__()
@@ -191,7 +172,7 @@ class MockBrandAssociatedWithCognitoUser(FilterInterface):
         if self.failed:
             return FilterResponse('', 401, {})
         else:
-            return FilterResponse('', 200, Brand().as_dict())
+            return FilterResponse('', 200, Brand())
 
 
 def mock_load_product(event):
@@ -226,7 +207,7 @@ def mock_update_product(brand_id, product_id, payload, data_manager):
     return mock_response_from_db()[0]
 
 
-def mock_by_id(id, data_manager):
+def mock_by_id(_id, data_manager):
     return mock_response_from_db()
 
 

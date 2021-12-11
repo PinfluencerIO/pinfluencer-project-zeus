@@ -2,10 +2,10 @@ import json
 
 from jsonschema import validate
 
-from src.filters import FilterInterface, FilterResponse
+from src.filters import FilterResponse
 
 
-class BrandPutPayloadValidation(FilterInterface):
+class BrandPutPayloadValidation:
     def do_filter(self, event: dict):
         body_ = event["body"]
         payload = json.loads(body_)
@@ -17,7 +17,7 @@ class BrandPutPayloadValidation(FilterInterface):
             return FilterResponse('Invalid payload', 400, {})
 
 
-class BrandImagePatchPayloadValidation(FilterInterface):
+class BrandImagePatchPayloadValidation:
     def do_filter(self, event: dict):
         body_ = event["body"]
         payload = json.loads(body_)
@@ -29,7 +29,7 @@ class BrandImagePatchPayloadValidation(FilterInterface):
             return FilterResponse('Invalid payload', 400, {})
 
 
-class BrandPostPayloadValidation(FilterInterface):
+class BrandPostPayloadValidation:
     def do_filter(self, event: dict):
         body_ = event["body"]
         payload = json.loads(body_)
@@ -48,7 +48,7 @@ class BrandPostPayloadValidation(FilterInterface):
             return FilterResponse('Invalid payload', 400, {})
 
 
-class ProductPostPayloadValidation(FilterInterface):
+class ProductPostPayloadValidation:
     def do_filter(self, event: dict):
         body_ = event["body"]
         payload = json.loads(body_)
@@ -61,27 +61,27 @@ class ProductPostPayloadValidation(FilterInterface):
             return FilterResponse('Invalid payload', 400, {})
 
 
-class ProductPutPayloadValidation(FilterInterface):
+class ProductPutPayloadValidation:
     def do_filter(self, event: dict):
         body_ = event["body"]
         payload = json.loads(body_)
         print(f'payload {payload}')
         try:
             validate(instance=payload, schema=(get_product_update_payload_schema()))
-            return FilterResponse('', 200, {})
+            return FilterResponse('', 200, payload)
         except Exception as e:
             print(f'Validating product update payload failed {e}')
             return FilterResponse('Invalid payload', 400, {})
 
 
-class ProductImagePatchPayloadValidation(FilterInterface):
+class ProductImagePatchPayloadValidation:
     def do_filter(self, event: dict):
         body_ = event["body"]
         payload = json.loads(body_)
         print(f'payload {payload}')
         try:
             validate(instance=payload, schema=(get_image_update_payload_schema()))
-            return FilterResponse('', 200, {})
+            return FilterResponse('', 200, payload)
         except Exception as e:
             print(f'Validating product update payload failed {e}')
             return FilterResponse('Invalid payload', 400, {})
@@ -165,11 +165,11 @@ def get_brand_payload_schema():
                 },
                 "website": {
                     "type": "string",
-                    "pattern": "^(https?\:\/\/)?([\da-zA-Z\.-]+)\.([a-z\.]{2,6})(\/[\w]*)*$"
+                    "pattern": r"^(https?\:\/\/)?([\da-zA-Z\.-]+)\.([a-z\.]{2,6})(\/[\w]*)*$"
                 },
                 "email": {
                     "type": "string",
-                    "pattern": "^[a-zA-Z0-9\._-]+[@]{1}[a-zA-Z0-9\._-]+[\.]+[a-zA-Z0-9]+$"
+                    "pattern": r"^[a-zA-Z0-9\._-]+[@]{1}[a-zA-Z0-9\._-]+[\.]+[a-zA-Z0-9]+$"
                 },
                 "instahandle": {
                     "type": "string",
@@ -199,11 +199,11 @@ def update_brand_payload_schema():
                 },
                 "website": {
                     "type": "string",
-                    "pattern": "^(https?\:\/\/)?([\da-zA-Z\.-]+)\.([a-z\.]{2,6})(\/[\w]*)*$"
+                    "pattern": r"^(https?\:\/\/)?([\da-zA-Z\.-]+)\.([a-z\.]{2,6})(\/[\w]*)*$"
                 },
                 "email": {
                     "type": "string",
-                    "pattern": "^[a-zA-Z0-9\._-]+[@]{1}[a-zA-Z0-9\._-]+[\.]+[a-zA-Z0-9]+$"
+                    "pattern": r"^[a-zA-Z0-9\._-]+[@]{1}[a-zA-Z0-9\._-]+[\.]+[a-zA-Z0-9]+$"
                 },
                 "instahandle": {
                     "type": "string",

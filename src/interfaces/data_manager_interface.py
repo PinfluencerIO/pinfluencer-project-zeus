@@ -15,7 +15,3 @@ class DataManagerInterface(ABC):
     @abstractmethod
     def session(self) -> Session:
         pass
-
-    @abstractmethod
-    def cleanup(self) -> None:
-        pass
