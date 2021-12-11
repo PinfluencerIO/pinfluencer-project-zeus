@@ -2,7 +2,7 @@ from collections import OrderedDict
 
 from src.container import Container
 from src.data_access_layer.read_data_access import load_product_by_id_owned_by_brand, load_brands, \
-    load_max_3_products_for_brand, load_all_products_for_brand_id, load_all_products, load_brand_by_auth_id
+    load_max_3_products_for_brand, load_all_products_for_brand_id, load_all_products, load_brand_by_auth_id, load_by_id
 from src.data_access_layer.write_data_access import update_brand_image, write_new_product, update_product, \
     patch_product_image, delete_product, update_brand, write_new_brand
 from src.filters.authorised_filter import NoBrandAssociatedWithCognitoUser
@@ -36,7 +36,7 @@ def lambda_handler(event, context):
 
             'GET /brands': ProcessPublicBrands(load_brands, container.data_manager),
 
-            'GET /brands/{brand_id}': ProcessPublicGetBrandBy(LoadResourceById(container.data_manager, 'brand')),
+            'GET /brands/{brand_id}': ProcessPublicGetBrandBy(load_by_id, container.data_manager),
 
             'GET /brands/{brand_id}/products': ProcessPublicAllProductsForBrand(
                 LoadResourceById(container.data_manager, 'brand'), load_all_products_for_brand_id,

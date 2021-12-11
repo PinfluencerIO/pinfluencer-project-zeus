@@ -1,9 +1,10 @@
+from src.data_access_layer import BaseEntity
 from src.data_access_layer.brand import Brand
 from src.data_access_layer.product import Product
 from src.interfaces.data_manager_interface import DataManagerInterface
 
 
-def load_by_id(id_, resource, data_manager: DataManagerInterface):
+def load_by_id(id_, resource: BaseEntity, data_manager: DataManagerInterface):
     try:
         return (data_manager.session
                 .query(resource)

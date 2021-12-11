@@ -1,13 +1,20 @@
+from src.data_access_layer.brand import Brand
 from src.pinfluencer_response import PinfluencerResponse
+from src.processors import valid_path_resource_id
 
 
 class ProcessPublicGetBrandBy:
-    def __init__(self, load_resource_by_id):
-        self.load_resource_by_id = load_resource_by_id
+    def __init__(self, load_by_id, data_manager):
+        self.load_by_id = load_by_id
+        self.data_manager = data_manager
 
     def do_process(self, event: dict) -> PinfluencerResponse:
-        response = self.load_resource_by_id.do_filter(event)
-        if response.is_success():
-            return PinfluencerResponse(body=response.get_payload())
+        id_ = valid_path_resource_id(event, 'brand_id')
+        if id_:
+            brand = self.load_by_id(id_, Brand, self.data_manager)
+            if brand:
+                return PinfluencerResponse(200, brand.as_dict())
+            else:
+                return PinfluencerResponse(404, 'Not found')
         else:
-            return PinfluencerResponse.as_400_error(response.get_message())
+            return PinfluencerResponse.as_400_error('Invalid path parameter id')
