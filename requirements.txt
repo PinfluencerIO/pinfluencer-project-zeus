@@ -5,4 +5,4 @@ pydataapi
 SQLAlchemy
 filetype
 sqlalchemy-aurora-data-api
-mysql-connector
+mysql-connector-python

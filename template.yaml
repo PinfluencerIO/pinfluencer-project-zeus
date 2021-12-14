@@ -28,7 +28,7 @@ Parameters:
 
 Globals:
   Function:
-    Timeout: 10
+    Timeout: 50
     Environment:
       Variables:
         DB_USER: !Ref DatabaseUser
@@ -70,8 +70,8 @@ Resources:
 
   PinfluencerFunction:
     Type: AWS::Serverless::Function
-    Metadata:
-      BuildMethod: makefile
+#    Metadata:
+#      BuildMethod: makefile
     Properties:
       Role: !Ref LambdaRole
       CodeUri: ./
