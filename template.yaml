@@ -70,8 +70,6 @@ Resources:
 
   PinfluencerFunction:
     Type: AWS::Serverless::Function
-#    Metadata:
-#      BuildMethod: makefile
     Properties:
       Role: !Ref LambdaRole
       CodeUri: ./
