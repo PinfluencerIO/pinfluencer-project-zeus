@@ -34,7 +34,7 @@ def product_generator(num: int, brand: str) -> Product:
                    image=f'{str(uuid.uuid4())}.png')
 
 
-class FakeDataManager(DataManagerInterface):
+class InMemoryMysqlDataManager(DataManagerInterface):
 
     def __init__(self):
         self.__engine: Engine = create_engine('sqlite:///:memory:')

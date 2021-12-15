@@ -1,5 +1,5 @@
 from src.pinfluencer_response import PinfluencerResponse
-from src.processors import valid_path_resource_id, types
+from src.processors import valid_path_resource_id, types, get_cognito_user
 
 
 class ProcessGetByForAuthenticatedUser:
@@ -11,7 +11,7 @@ class ProcessGetByForAuthenticatedUser:
     def do_process(self, event: dict) -> PinfluencerResponse:
         resource_id = valid_path_resource_id(event, types[self.type_]['key'])
         if resource_id:
-            auth_user_id = event['requestContext']['authorizer']['jwt']['claims']['cognito:username']
+            auth_user_id = get_cognito_user(event)
             resource = self.load_by_id_for_auth_id(resource_id, auth_user_id, self.data_manager)
             if resource:
                 return PinfluencerResponse(200, resource.as_dict())

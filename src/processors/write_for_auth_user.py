@@ -5,7 +5,7 @@ from jsonschema import validate
 from src.data_access_layer.write_data_access import NoBrandForAuthenticatedUser, NotFoundException, \
     AlreadyExistsException
 from src.pinfluencer_response import PinfluencerResponse
-from src.processors import valid_path_resource_id, types, protect_email_from_update_if_held_in_claims
+from src.processors import valid_path_resource_id, types, protect_email_from_update_if_held_in_claims, get_cognito_user
 
 
 # TODO This really breaks the idea of a configurable generic write class. Talk to Aidan about this one
@@ -20,13 +20,14 @@ class ProcessWriteForAuthenticatedUser:
     def do_process(self, event):
         body_ = event["body"]
         payload = json.loads(body_)
-        auth_user_id = event['requestContext']['authorizer']['jwt']['claims']['cognito:username']
+        auth_user_id = get_cognito_user(event)
         protect_email_from_update_if_held_in_claims(payload, event)
 
         try:
             resource = self.db_write(auth_user_id, payload, self.data_manager)
             print(f'updated {resource}')
-            return 201 if self.action == 'post' else 200, resource.as_dict()
+            return PinfluencerResponse(201, resource.as_dict()) \
+                if self.action == 'post' else PinfluencerResponse(200, resource.as_dict())
         except NoBrandForAuthenticatedUser as no_brand:
             return PinfluencerResponse.as_400_error()
         except NotFoundException as nfe:
@@ -44,7 +45,7 @@ class ProcessWriteWithValidationForAuthenticatedUser(ProcessWriteForAuthenticate
         try:
             print(f"validator: {types[self.type_][self.action]['validator']}")
             validate(instance=payload, schema=(types[self.type_][self.action]['validator']))
-            super().do_process(event)
+            return super().do_process(event)
         except Exception as e:
             print(f'Failed post payload schema validation {e}')
             return PinfluencerResponse.as_400_error('Invalid post payload')
@@ -62,4 +63,4 @@ class ProcessWriteForAuthenticatedUserWithProductId(ProcessWriteWithValidationFo
             payload['product_id'] = resource_id
             event["body"] = json.dumps(payload)
             print(f'adding product id to payload {event["body"]}')
-            super().do_process(event)
+            return super().do_process(event)

@@ -1,5 +1,6 @@
 from src.data_access_layer import to_list
 from src.pinfluencer_response import PinfluencerResponse
+from src.processors import get_cognito_user
 
 
 class ProcessGetForAuthenticatedUser:
@@ -8,7 +9,7 @@ class ProcessGetForAuthenticatedUser:
         self.data_manager = data_manager
 
     def do_process(self, event):
-        auth_user_id = event['requestContext']['authorizer']['jwt']['claims']['cognito:username']
+        auth_user_id = get_cognito_user(event)
         loaded = self.load_for_authenticated_user(auth_user_id, self.data_manager)
         if loaded:
             return self.build_body(loaded)
