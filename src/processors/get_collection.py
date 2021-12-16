@@ -12,4 +12,6 @@ class ProcessGetCollection:
 
     def do_process(self, event):
         collection = self.load_collection(types[self.type_]['type'], self.data_manager)
+        print('collection')
+        print(collection)
         return PinfluencerResponse(200, to_list(collection))

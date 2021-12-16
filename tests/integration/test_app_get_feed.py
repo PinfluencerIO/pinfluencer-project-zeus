@@ -15,12 +15,13 @@ def test_lambda_handler_get_feed():
     product = pre_load_with_data()
     response = lambda_handler({"routeKey": "GET /feed"}, {})
     assert response['statusCode'] == 200
-    dict = json.loads(response['body'])
-    assert len(dict) == 1
-    product_from_response_dict = product_from_dict(dict[0])
-    assert product_from_response_dict.id == product.id
-    assert product_from_response_dict.brand_id == product.brand_id
-    assert product_from_response_dict.name == product.name
+    print(response['body'])
+    body: list[dict] = json.loads(response['body'])
+    assert len(body) == 1
+    assert product.as_dict().keys() == body[0].keys()
+    for k, v in product.as_dict().items():
+        print(f'{k} => "{v}" and in body "{body[0][k]}"')
+        assert v == body[0][k]
 
 
 def pre_load_with_data():
@@ -32,3 +33,5 @@ def pre_load_with_data():
     product = src.app.container.data_manager.session.query(Product).all()[0]
     print(f'\nloaded {product}')
     return product
+
+
