@@ -15,8 +15,10 @@ from src.processors.write_for_auth_user import ProcessWriteForAuthenticatedUser,
     ProcessWriteForAuthenticatedUserWithProductId, ProcessWriteWithValidationForAuthenticatedUser
 
 
+container = Container()
+
+
 def lambda_handler(event, context):
-    container = Container()
     try:
         routes = OrderedDict({
             # public endpoints
