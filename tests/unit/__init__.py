@@ -14,29 +14,29 @@ from src.interfaces.data_manager_interface import DataManagerInterface
 
 def brand_generator(num: int) -> Brand:
     return Brand(
-        # id=str(uuid.uuid4()),
-        #          created=datetime.utcnow(),
-                 name=f'brand{num}',
-                 description=f'brand{num} desc',
-                 website=f'test{num}.com',
-                 email=f'brand{num}@email.com',
-                 instahandle=f'brand{num}handle',
-                 image=f'{str(uuid.uuid4())}.png',
-                 auth_user_id=f'1234brand{num}')
+        id=str(uuid.uuid4()),
+        created=datetime.utcnow(),
+        name=f'brand{num}',
+        description=f'brand{num} desc',
+        website=f'test{num}.com',
+        email=f'brand{num}@email.com',
+        instahandle=f'brand{num}handle',
+        image=f'{str(uuid.uuid4())}.png',
+        auth_user_id=f'1234brand{num}')
 
 
 def product_generator(num: int, brand: Brand) -> Product:
     return Product(
-        # id=str(uuid.uuid4()),
-        #            created=datetime.utcnow(),
-                   name=f'prod{num}',
-                   description=f'prod{num} desc',
-                   requirements=f'tag1,tag2,tag3',
-                   brand_id=brand.id,
-                   image=f'{str(uuid.uuid4())}.png')
+        id=str(uuid.uuid4()),
+        created=datetime.utcnow(),
+        name=f'prod{num}',
+        description=f'prod{num} desc',
+        requirements=f'tag1,tag2,tag3',
+        brand_id=brand.id,
+        image=f'{str(uuid.uuid4())}.png')
 
 
-class InMemoryMysqlDataManager(DataManagerInterface):
+class InMemorySqliteDataManager(DataManagerInterface):
 
     def __init__(self):
         self.__engine: Engine = create_engine('sqlite:///:memory:')

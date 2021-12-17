@@ -4,14 +4,14 @@ from src.data_access_layer.product import Product
 from src.interfaces.data_manager_interface import DataManagerInterface
 
 
-def load_item(resource: BaseEntity, data_manager: DataManagerInterface):
+def load_item(resource: BaseEntity, data_manager: DataManagerInterface) -> BaseEntity:
     try:
         return data_manager.session.query(resource).first()
     finally:
         data_manager.session.commit()
 
 
-def load_collection(resource: BaseEntity, data_manager: DataManagerInterface):
+def load_collection(resource: BaseEntity, data_manager: DataManagerInterface) -> list[BaseEntity]:
     try:
         return data_manager.session.query(resource).all()
     finally:
