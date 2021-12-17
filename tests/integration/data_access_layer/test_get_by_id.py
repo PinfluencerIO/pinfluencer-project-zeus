@@ -5,7 +5,7 @@ from src.processors import types
 from tests.unit import InMemorySqliteDataManager, brand_generator
 
 
-def test_load_brand_by_id_item_when_brand_exists():
+def test_load_brand_by_id_item_when_brand_can_be_found():
     data_manager = InMemorySqliteDataManager()
     brand = brand_generator(1)
     data_manager.create_fake_data([brand])
