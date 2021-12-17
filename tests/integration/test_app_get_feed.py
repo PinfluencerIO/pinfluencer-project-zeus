@@ -1,37 +1,28 @@
-import json
 import os
 from unittest.mock import patch
 
+from src.container import Container
+from src.data_access_layer import to_list
 from src.data_access_layer.brand import Brand
-from src.data_access_layer.product import Product, product_from_dict
-from tests.unit import brand_generator, product_generator
-
-with patch.dict(os.environ, {'IN_MEMORY': 'True'}, clear=True):
-    from src.app import lambda_handler
-    import src.app
+from src.pinfluencer_response import PinfluencerResponse
+from src.routes import Routes
+from tests.unit import brand_generator, product_generator, InMemorySqliteDataManager
 
 
 def test_lambda_handler_get_feed():
-    product = pre_load_with_data()
-    response = lambda_handler({"routeKey": "GET /feed"}, {})
-    assert response['statusCode'] == 200
-    print(response['body'])
-    body: list[dict] = json.loads(response['body'])
-    assert len(body) == 1
-    assert product.as_dict().keys() == body[0].keys()
-    for k, v in product.as_dict().items():
-        print(f'{k} => "{v}" and in body "{body[0][k]}"')
-        assert v == body[0][k]
+    with patch.dict(os.environ, {'IN_MEMORY': 'True'}, clear=True):
+        container = Container()
+    products = pre_load_with_data(container.data_manager)
+    routes = Routes(container)
+    response: PinfluencerResponse = routes.routes["GET /feed"].do_process({})
+    assert response.status_code == 200
+    assert to_list(products) == response.body
 
 
-def pre_load_with_data():
+def pre_load_with_data(data_manager: InMemorySqliteDataManager):
     brand1 = brand_generator(1)
-    src.app.container.data_manager.create_fake_data([brand1])
-    brand = src.app.container.data_manager.session.query(Brand).all()[0]
-    product1 = product_generator(1, brand)
-    src.app.container.data_manager.create_fake_data([product1])
-    product = src.app.container.data_manager.session.query(Product).all()[0]
-    print(f'\nloaded {product}')
-    return product
-
-
+    data_manager.create_fake_data([brand1])
+    brand = data_manager.session.query(Brand).all()[0]
+    products = [product_generator(1, brand), product_generator(2, brand)]
+    data_manager.create_fake_data(products)
+    return products

@@ -26,7 +26,7 @@ def brand_generator(num: int) -> Brand:
 
 
 def product_generator(num: int, brand: Brand) -> Product:
-    return Product(
+    product = Product(
         id=str(uuid.uuid4()),
         created=datetime.utcnow(),
         name=f'prod{num}',
@@ -34,6 +34,8 @@ def product_generator(num: int, brand: Brand) -> Product:
         requirements=f'tag1,tag2,tag3',
         brand_id=brand.id,
         image=f'{str(uuid.uuid4())}.png')
+    product.brand = brand
+    return product
 
 
 class InMemorySqliteDataManager(DataManagerInterface):
