@@ -248,7 +248,6 @@ packaged.yaml
 .aws-sam/
 samconfig.toml
 samconfig.toml.olddb
-events/*.json
 env.json
 
 # End of https://www.gitignore.io/api/osx,linux,python,windows,pycharm,visualstudiocode
