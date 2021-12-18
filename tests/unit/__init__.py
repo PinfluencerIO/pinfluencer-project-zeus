@@ -1,4 +1,5 @@
 import uuid
+from collections import OrderedDict
 from datetime import datetime
 from unittest.mock import Mock
 
@@ -10,6 +11,7 @@ from src.data_access_layer import Base, BaseEntity
 from src.data_access_layer.brand import Brand
 from src.data_access_layer.product import Product
 from src.interfaces.data_manager_interface import DataManagerInterface
+from src.interfaces.image_repository_interface import ImageRepositoryInterface
 
 
 def brand_generator(num: int) -> Brand:
@@ -67,3 +69,32 @@ class StubDataManager(DataManagerInterface):
     @property
     def session(self) -> Session:
         return Mock()
+
+
+class StubImageRepo(ImageRepositoryInterface):
+    def retrieve(self, path: str) -> str:
+        return ""
+
+    def delete(self, path: str) -> None:
+        pass
+
+    def upload(self, path: str, image_base64_encoded: str) -> str:
+        return ""
+
+
+class FakeImageRepo(ImageRepositoryInterface):
+    def __init__(self):
+        self.__images = OrderedDict({
+            "": ""
+        })
+
+    def retrieve(self, path: str) -> str:
+        return self.__images[path]
+
+    def delete(self, path: str) -> None:
+        del self.__images[path]
+
+    def upload(self, path: str, image_base64_encoded: str) -> str:
+        path = f"{path}/{str(uuid.uuid4())}.png"
+        self.__images.update({f"{path}": image_base64_encoded})
+        return path

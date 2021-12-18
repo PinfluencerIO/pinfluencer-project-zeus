@@ -44,14 +44,17 @@ class Routes:
                                                              self.__container.data_manager),
 
             'POST /brands/me': ProcessWriteForAuthenticatedUser('brand', 'post', db_write_new_brand_for_auth_user,
-                                                                self.__container.data_manager),
+                                                                self.__container.data_manager,
+                                                                self.__container.image_repository),
 
             'PUT /brands/me': ProcessWriteForAuthenticatedUser('brand', 'put', db_write_update_brand_for_auth_user,
-                                                               self.__container.data_manager),
+                                                               self.__container.data_manager,
+                                                               self.__container.image_repository),
 
             'PATCH /brands/me/image': ProcessWriteForAuthenticatedUser('brand', 'patch',
                                                                        db_write_patch_brand_image_for_auth_user,
-                                                                       self.__container.data_manager),
+                                                                       self.__container.data_manager,
+                                                                       self.__container.image_repository),
 
             # authenticated product endpoints
             'GET /products/me': ProcessGetForAuthenticatedUserAsCollection(load_products_for_authenticated_user,
@@ -62,16 +65,19 @@ class Routes:
 
             'POST /products/me': ProcessWriteWithValidationForAuthenticatedUser('product', 'post',
                                                                                 db_write_new_product_for_auth_user,
-                                                                                self.__container.data_manager),
+                                                                                self.__container.data_manager,
+                                                                                self.__container.image_repository),
 
             'PUT /products/me/{product_id}':
                 ProcessWriteForAuthenticatedUserWithProductId('product', 'put', db_write_update_product_for_auth_user,
-                                                              self.__container.data_manager),
+                                                              self.__container.data_manager,
+                                                              self.__container.image_repository),
 
             'PATCH /products/me/{product_id}/image':
                 ProcessWriteForAuthenticatedUserWithProductId('product', 'patch',
                                                               db_write_patch_product_image_for_auth_user,
-                                                              self.__container.data_manager),
+                                                              self.__container.data_manager,
+                                                              self.__container.image_repository),
 
             'DELETE /products/me/{product_id}': ProcessAuthenticatedDeleteProduct(delete_product,
                                                                                   self.__container.data_manager),

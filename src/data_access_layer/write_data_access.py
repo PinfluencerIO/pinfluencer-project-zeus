@@ -1,13 +1,10 @@
-from src.data_access_layer import image_repository
 from src.data_access_layer.brand import Brand, brand_from_dict
 from src.data_access_layer.product import product_from_dict, Product
 from src.data_access_layer.read_data_access import load_brand_for_authenticated_user
 
-s3_image_repository = image_repository.S3ImageRepository()
-
 
 # TODO Need a not found exception instead of return None
-def db_write_new_brand_for_auth_user(auth_user_id, payload, data_manager):
+def db_write_new_brand_for_auth_user(auth_user_id, payload, data_manager, image_repository):
     # There cannot be a brand associated with auth_user_id
     brand = load_brand_for_authenticated_user(auth_user_id, data_manager)
     if brand:
@@ -20,7 +17,7 @@ def db_write_new_brand_for_auth_user(auth_user_id, payload, data_manager):
             brand = brand_from_dict(payload)
             data_manager.session.add(brand)
             data_manager.session.flush()
-            image_id = s3_image_repository.upload(f'{brand.id}', image_bytes)
+            image_id = image_repository.upload(f'{brand.id}', image_bytes)
             brand: Brand = data_manager.session.query(Brand).filter(Brand.id == brand.id).first()
             brand.image = image_id
             data_manager.session.flush()
@@ -32,7 +29,7 @@ def db_write_new_brand_for_auth_user(auth_user_id, payload, data_manager):
             raise e
 
 
-def db_write_update_brand_for_auth_user(auth_user_id, payload, data_manager):
+def db_write_update_brand_for_auth_user(auth_user_id, payload, data_manager, image_repository):
     try:
         brand: Brand = data_manager.session.query(Brand).filter(Brand.auth_user_id == auth_user_id).first()
         brand.name = payload['name']
@@ -48,11 +45,11 @@ def db_write_update_brand_for_auth_user(auth_user_id, payload, data_manager):
         raise e
 
 
-def db_write_patch_brand_image_for_auth_user(auth_user_id, payload, data_manager):
+def db_write_patch_brand_image_for_auth_user(auth_user_id, payload, data_manager, image_repository):
     try:
         brand: Brand = data_manager.session.query(Brand).filter(Brand.auth_user_id == auth_user_id).first()
-        image_id = s3_image_repository.upload(f'{brand.id}', payload['image'])
-        s3_image_repository.delete(f'{brand.id}/{brand.image}')
+        image_id = image_repository.upload(f'{brand.id}', payload['image'])
+        image_repository.delete(f'{brand.id}/{brand.image}')
         brand.image = image_id
         data_manager.session.flush()
         data_manager.session.commit()
@@ -63,7 +60,7 @@ def db_write_patch_brand_image_for_auth_user(auth_user_id, payload, data_manager
         raise e
 
 
-def db_write_new_product_for_auth_user(auth_user_id, payload, data_manager):
+def db_write_new_product_for_auth_user(auth_user_id, payload, data_manager, image_repository):
     try:
         brand = load_brand_for_authenticated_user(auth_user_id, data_manager)
         print(f'check auth has brand {brand} {type(brand)}')
@@ -79,7 +76,7 @@ def db_write_new_product_for_auth_user(auth_user_id, payload, data_manager):
         print(f'{product_entity}')
         data_manager.session.add(product_entity)
         data_manager.session.flush()
-        image_id = s3_image_repository.upload(f'{brand.id}/{product_entity.id}', image_bytes)
+        image_id = image_repository.upload(f'{brand.id}/{product_entity.id}', image_bytes)
         product_entity.image = image_id
         data_manager.session.flush()
         data_manager.session.commit()
@@ -90,7 +87,7 @@ def db_write_new_product_for_auth_user(auth_user_id, payload, data_manager):
         raise e
 
 
-def db_write_update_product_for_auth_user(auth_user_id, payload, data_manager):
+def db_write_update_product_for_auth_user(auth_user_id, payload, data_manager, image_repository):
     brand = load_brand_for_authenticated_user(auth_user_id, data_manager)
     if brand is None:
         raise NoBrandForAuthenticatedUser()
@@ -109,7 +106,7 @@ def db_write_update_product_for_auth_user(auth_user_id, payload, data_manager):
         raise NotFoundException(f'Product not found for id {payload["product_id"]}')
 
 
-def db_write_patch_product_image_for_auth_user(auth_user_id, payload, data_manager):
+def db_write_patch_product_image_for_auth_user(auth_user_id, payload, data_manager, image_repository):
     brand = load_brand_for_authenticated_user(auth_user_id, data_manager)
     if brand is None:
         raise NoBrandForAuthenticatedUser()
@@ -119,8 +116,8 @@ def db_write_patch_product_image_for_auth_user(auth_user_id, payload, data_manag
             Product.brand_id == brand.id, Product.id == payload["product_id"]).first()
         print(f'product loaded: {product}')
         if product:
-            image_id = s3_image_repository.upload(f'{brand.id}/{product.id}', payload['image'])
-            s3_image_repository.delete(f'{brand.id}/{product.image}')
+            image_id = image_repository.upload(f'{brand.id}/{product.id}', payload['image'])
+            image_repository.delete(f'{brand.id}/{product.image}')
             product.image = image_id
             data_manager.session.flush()
             data_manager.session.commit()
@@ -136,7 +133,7 @@ def db_write_patch_product_image_for_auth_user(auth_user_id, payload, data_manag
 
 
 # TODO: This isn't atomic s3 succeeds but db failed, image is lost
-def delete_product(auth_user_id, product_id, data_manager):
+def delete_product(auth_user_id, product_id, data_manager, image_repository):
     brand = load_brand_for_authenticated_user(auth_user_id, data_manager)
     if brand is None:
         raise NoBrandForAuthenticatedUser()
@@ -149,7 +146,7 @@ def delete_product(auth_user_id, product_id, data_manager):
         if product is None:
             raise NotFoundException(f'Product {product_id} for brand {brand.id} not found')
 
-        s3_image_repository.delete(path=f'{product.owner.id}/{product.id}/{product.image}')
+        image_repository.delete(path=f'{product.owner.id}/{product.id}/{product.image}')
         data_manager.session.delete(product)
         data_manager.session.commit()
         return product

@@ -9,7 +9,7 @@ from src.data_access_layer.product import Product
 from src.data_access_layer.write_data_access import NotFoundException
 from src.processors.write_for_auth_user import ProcessWriteForAuthenticatedUser, \
     ProcessWriteWithValidationForAuthenticatedUser, ProcessWriteForAuthenticatedUserWithProductId
-from tests.unit import StubDataManager
+from tests.unit import StubDataManager, StubImageRepo
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -38,7 +38,7 @@ def new_brand_event_invalid():
 
 
 def test_do_process_write_new(new_brand_event):
-    process = ProcessWriteForAuthenticatedUser('brand', 'post', mock_db_write, StubDataManager())
+    process = ProcessWriteForAuthenticatedUser('brand', 'post', mock_db_write, StubDataManager(), StubImageRepo())
     pinfluencer_response = process.do_process(new_brand_event)
 
     assert pinfluencer_response.is_ok() is True
@@ -46,7 +46,7 @@ def test_do_process_write_new(new_brand_event):
 
 
 def test_do_process_write_update(new_brand_event):
-    process = ProcessWriteForAuthenticatedUser('brand', 'put', mock_db_write, StubDataManager())
+    process = ProcessWriteForAuthenticatedUser('brand', 'put', mock_db_write, StubDataManager(), StubImageRepo())
     pinfluencer_response = process.do_process(new_brand_event)
 
     assert pinfluencer_response.is_ok() is True
@@ -54,7 +54,8 @@ def test_do_process_write_update(new_brand_event):
 
 
 def test_do_process_write_failed_validation(new_brand_event_invalid):
-    process = ProcessWriteWithValidationForAuthenticatedUser('brand', 'post', mock_db_write, StubDataManager())
+    process = ProcessWriteWithValidationForAuthenticatedUser('brand', 'post', mock_db_write, StubDataManager(),
+                                                             StubImageRepo())
     pinfluencer_response = process.do_process(new_brand_event_invalid)
 
     assert pinfluencer_response.is_ok() is False
@@ -62,7 +63,7 @@ def test_do_process_write_failed_validation(new_brand_event_invalid):
 
 
 def test_do_process_write_failed_db_update(new_brand_event):
-    process = ProcessWriteForAuthenticatedUser('brand', 'post', mock_db_write_none, StubDataManager())
+    process = ProcessWriteForAuthenticatedUser('brand', 'post', mock_db_write_none, StubDataManager(), StubImageRepo())
     pinfluencer_response = process.do_process(new_brand_event)
 
     assert pinfluencer_response.is_ok() is False
@@ -70,18 +71,19 @@ def test_do_process_write_failed_db_update(new_brand_event):
 
 
 def test_process_write_for_authenticated_user_with_product_id(update_product_event):
-    process = ProcessWriteForAuthenticatedUserWithProductId('product', 'put', mock_db_update_product, StubDataManager())
+    process = ProcessWriteForAuthenticatedUserWithProductId('product', 'put', mock_db_update_product, StubDataManager(),
+                                                            StubImageRepo())
     pinfluencer_response = process.do_process(update_product_event)
 
     assert pinfluencer_response.is_ok() is True
     assert pinfluencer_response.status_code == 200
 
 
-def mock_db_write(auth_user_id, dict_, data_manager):
+def mock_db_write(auth_user_id, dict_, data_manager, image_repository):
     return Brand()
 
 
-def mock_db_update_product(auth_user_id, dict_, data_manager):
+def mock_db_update_product(auth_user_id, dict_, data_manager, image_repository):
     product = Product()
     product.id = str(uuid.uuid4())
     brand = Brand()
@@ -90,5 +92,5 @@ def mock_db_update_product(auth_user_id, dict_, data_manager):
     return product
 
 
-def mock_db_write_none(auth_user_id, dict_, data_manager):
+def mock_db_write_none(auth_user_id, dict_, data_manager, image_repository):
     raise NotFoundException('')

@@ -10,12 +10,13 @@ from src.processors import valid_path_resource_id, types, protect_email_from_upd
 
 # TODO This really breaks the idea of a configurable generic write class. Talk to Aidan about this one
 class ProcessWriteForAuthenticatedUser:
-    def __init__(self, type_: str, action: str, db_write, data_manager) -> None:
+    def __init__(self, type_: str, action: str, db_write, data_manager, image_repository) -> None:
         super().__init__()
         self.type_ = type_
         self.action = action
         self.db_write = db_write
         self.data_manager = data_manager
+        self.image_repository = image_repository
 
     def do_process(self, event):
         body_ = event["body"]
@@ -24,7 +25,7 @@ class ProcessWriteForAuthenticatedUser:
         protect_email_from_update_if_held_in_claims(payload, event)
 
         try:
-            resource = self.db_write(auth_user_id, payload, self.data_manager)
+            resource = self.db_write(auth_user_id, payload, self.data_manager, self.image_repository)
             print(f'updated {resource}')
             return PinfluencerResponse(201, resource.as_dict()) \
                 if self.action == 'post' else PinfluencerResponse(200, resource.as_dict())
