@@ -9,7 +9,7 @@ def test_load_brand_by_auth_id_item_when_brand_can_be_found():
 
 
 def test_load_brand_item_by_auth_id_when_brand_cannot_be_found():
-    [data_manager, _] = setup_database
+    [data_manager, _] = setup_database()
     item = load_brand_for_authenticated_user(data_manager=data_manager, auth_user_id="invalid id")
     assert item is None
 
