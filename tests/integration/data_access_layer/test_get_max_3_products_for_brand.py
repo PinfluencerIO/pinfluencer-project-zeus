@@ -11,7 +11,7 @@ def test_load_max_3_products_for_brand_when_many_products_are_available_for_many
                 product_generator(2, brands[1]),
                 product_generator(2, brands[1])]
     data_manager = setup_database(brands, products)
-    do_work(products, data_manager)
+    assert_test(data_manager, products)
 
 
 def test_load_max_3_products_for_brand_when_less_than_3_products_are_available():
@@ -19,7 +19,7 @@ def test_load_max_3_products_for_brand_when_less_than_3_products_are_available()
     products = [product_generator(1, brands[0]),
                 product_generator(2, brands[0])]
     data_manager = setup_database(brands, products)
-    do_work(products, data_manager)
+    assert_test(data_manager, products)
 
 
 def test_load_max_3_products_for_brand_when_more_than_3_products_are_available():
@@ -29,18 +29,18 @@ def test_load_max_3_products_for_brand_when_more_than_3_products_are_available()
                 product_generator(3, brands[0]),
                 product_generator(4, brands[0])]
     data_manager = setup_database(brands, products)
-    do_work(products, data_manager)
+    assert_test(data_manager, products[:3])
 
 
 def test_load_max_3_products_for_brand_when_no_products_are_available():
     brands = [brand_generator(1)]
     data_manager = setup_database(brands, [])
-    do_work([], data_manager)
+    assert_test(data_manager, [])
 
 
 def test_load_max_3_products_for_brand_when_brands_are_available():
     data_manager = setup_database([], [])
-    do_work([], data_manager)
+    assert_test(data_manager, [])
 
 
 def setup_database(brands, products):
@@ -50,12 +50,6 @@ def setup_database(brands, products):
     return data_manager
 
 
-def do_work(products, data_manager):
+def assert_test(data_manager, expected):
     items = load_max_3_products_for_brand(data_manager=data_manager, type_=None)
-    assert to_list([products[0],
-                    products[1],
-                    products[2],
-                    products[4],
-                    products[5],
-                    products[6],
-                    products[7]]) == to_list(items)
+    assert to_list(expected) == to_list(items)
