@@ -2,24 +2,23 @@ from src.data_access_layer import BaseEntity
 from src.data_access_layer.brand import Brand
 from src.data_access_layer.product import Product
 from src.interfaces.data_manager_interface import DataManagerInterface
-from src.processors import types
 
 
-def load_item(resource: BaseEntity, data_manager: DataManagerInterface) -> BaseEntity:
+def load_item(resource, data_manager: DataManagerInterface) -> BaseEntity:
     try:
         return data_manager.session.query(resource).first()
     finally:
         data_manager.session.commit()
 
 
-def load_collection(resource: BaseEntity, data_manager: DataManagerInterface) -> list[BaseEntity]:
+def load_collection(resource, data_manager: DataManagerInterface) -> list[BaseEntity]:
     try:
         return data_manager.session.query(resource).all()
     finally:
         data_manager.session.commit()
 
 
-def load_by_id(id_, resource: BaseEntity, data_manager: DataManagerInterface):
+def load_by_id(id_, resource, data_manager: DataManagerInterface):
     try:
         return (data_manager.session
                 .query(resource)
@@ -60,7 +59,7 @@ def load_product_by_id_for_auth_id(product_id, auth_user_id, data_manager: DataM
 def load_max_3_products_for_brand(type_, data_manager: DataManagerInterface):
     try:
         # Ignore type for this special case
-        brands = load_collection(types['brand']['type'], data_manager)
+        brands = load_collection(Brand, data_manager)
         products = []
         for brand in brands:
             products.extend(data_manager.session.query(Product).filter(Product.brand_id == brand.id).limit(3).all())
