@@ -10,8 +10,6 @@ from sqlalchemy.orm import Session, sessionmaker
 from src.data_access_layer import Base, BaseEntity
 from src.data_access_layer.brand import Brand
 from src.data_access_layer.product import Product
-from src.interfaces.data_manager_interface import DataManagerInterface
-from src.interfaces.image_repository_interface import ImageRepositoryInterface
 
 
 def brand_generator(num: int) -> Brand:
@@ -40,7 +38,7 @@ def product_generator(num: int, brand: Brand) -> Product:
     return product
 
 
-class InMemorySqliteDataManager(DataManagerInterface):
+class InMemorySqliteDataManager:
 
     def __init__(self):
         self.__engine: Engine = create_engine('sqlite:///:memory:')
@@ -61,7 +59,7 @@ class InMemorySqliteDataManager(DataManagerInterface):
         self.__session.commit()
 
 
-class StubDataManager(DataManagerInterface):
+class StubDataManager:
     @property
     def engine(self) -> Engine:
         return Mock()
@@ -71,7 +69,7 @@ class StubDataManager(DataManagerInterface):
         return Mock()
 
 
-class StubImageRepo(ImageRepositoryInterface):
+class StubImageRepo:
     def retrieve(self, path: str) -> str:
         return ""
 
@@ -82,7 +80,7 @@ class StubImageRepo(ImageRepositoryInterface):
         return ""
 
 
-class FakeImageRepo(ImageRepositoryInterface):
+class FakeImageRepo:
     def __init__(self):
         self.__images = OrderedDict({
             "": ""

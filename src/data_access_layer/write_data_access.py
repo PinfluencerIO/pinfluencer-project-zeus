@@ -47,7 +47,7 @@ def db_write_update_brand_for_auth_user(auth_user_id, payload, data_manager, ima
 
 def db_write_patch_brand_image_for_auth_user(auth_user_id, payload, data_manager, image_repository):
     try:
-        brand: Brand = data_manager.session.query(Brand).filter(Brand.auth_user_id == auth_user_id).first()
+        brand: Brand = data_manager.session.query().filter(Brand.auth_user_id == auth_user_id).first()
         image_id = image_repository.upload(f'{brand.id}', payload['image'])
         image_repository.delete(f'{brand.id}/{brand.image}')
         brand.image = image_id

@@ -4,10 +4,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from src.interfaces.data_manager_interface import DataManagerInterface
 
-
-class DataManager(DataManagerInterface):
+class DataManager:
     __session: Session
     __engine: Engine
 

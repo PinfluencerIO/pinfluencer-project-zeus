@@ -1,11 +1,10 @@
 from src.data_access_layer.write_data_access import NotFoundException
-from src.interfaces.data_manager_interface import DataManagerInterface
 from src.pinfluencer_response import PinfluencerResponse
 from src.processors import valid_uuid, get_cognito_user
 
 
 class ProcessAuthenticatedDeleteProduct:
-    def __init__(self, delete_product, data_manager: DataManagerInterface):
+    def __init__(self, delete_product, data_manager):
         self.delete_product = delete_product
         self.data_manager = data_manager
 

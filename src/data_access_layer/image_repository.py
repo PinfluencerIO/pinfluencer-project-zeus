@@ -7,10 +7,8 @@ import boto3
 from botocore.client import BaseClient
 from filetype import filetype
 
-from src.interfaces.image_repository_interface import ImageRepositoryInterface
 
-
-class S3ImageRepository(ImageRepositoryInterface):
+class S3ImageRepository:
     __bucket_name: str
     __s3_client: BaseClient
 

@@ -1,24 +1,23 @@
 from src.data_access_layer import BaseEntity
 from src.data_access_layer.brand import Brand
 from src.data_access_layer.product import Product
-from src.interfaces.data_manager_interface import DataManagerInterface
 
 
-def load_item(resource, data_manager: DataManagerInterface) -> BaseEntity:
+def load_item(resource, data_manager) -> BaseEntity:
     try:
         return data_manager.session.query(resource).first()
     finally:
         data_manager.session.commit()
 
 
-def load_collection(resource, data_manager: DataManagerInterface) -> list[BaseEntity]:
+def load_collection(resource, data_manager) -> list[BaseEntity]:
     try:
         return data_manager.session.query(resource).all()
     finally:
         data_manager.session.commit()
 
 
-def load_by_id(id_, resource, data_manager: DataManagerInterface):
+def load_by_id(id_, resource, data_manager):
     try:
         return (data_manager.session
                 .query(resource)
@@ -28,7 +27,7 @@ def load_by_id(id_, resource, data_manager: DataManagerInterface):
         data_manager.session.commit()
 
 
-def load_brand_for_authenticated_user(auth_user_id, data_manager: DataManagerInterface):
+def load_brand_for_authenticated_user(auth_user_id, data_manager):
     try:
         first = data_manager.session.query(Brand).filter(Brand.auth_user_id == auth_user_id).first()
         print(f'load_brand_for_authenticated_user: {first}')
@@ -37,7 +36,7 @@ def load_brand_for_authenticated_user(auth_user_id, data_manager: DataManagerInt
         data_manager.session.commit()
 
 
-def load_products_for_authenticated_user(auth_user_id, data_manager: DataManagerInterface):
+def load_products_for_authenticated_user(auth_user_id, data_manager):
     try:
         return (data_manager.session.query(Product).join(Brand).filter(
             Brand.auth_user_id == auth_user_id).all())
@@ -45,7 +44,7 @@ def load_products_for_authenticated_user(auth_user_id, data_manager: DataManager
         data_manager.session.commit()
 
 
-def load_product_by_id_for_auth_id(product_id, auth_user_id, data_manager: DataManagerInterface):
+def load_product_by_id_for_auth_id(product_id, auth_user_id, data_manager):
     print(f'load_product_by_id_for_auth_id({product_id}, {auth_user_id})')
     try:
         loaded = (data_manager.session.query(Product).join(Brand).filter(
@@ -56,7 +55,7 @@ def load_product_by_id_for_auth_id(product_id, auth_user_id, data_manager: DataM
         data_manager.session.commit()
 
 
-def load_max_3_products_for_brand(type_, data_manager: DataManagerInterface):
+def load_max_3_products_for_brand(type_, data_manager):
     try:
         # Ignore type for this special case
         brands = load_collection(Brand, data_manager)
