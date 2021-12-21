@@ -46,6 +46,8 @@ def db_write_update_brand_for_auth_user(auth_user_id, payload, data_manager, ima
 def db_write_patch_brand_image_for_auth_user(auth_user_id, payload, data_manager, image_repository):
     try:
         brand = load_brand_for_authenticated_user(auth_user_id=auth_user_id, data_manager=data_manager)
+        if brand is None:
+            raise NoBrandForAuthenticatedUser()
         image_id = image_repository.upload(f'{brand.id}', payload['image_bytes'])
         image_repository.delete(f'{brand.id}/{brand.image}')
         brand.image = image_id
