@@ -79,27 +79,35 @@ class StubImageRepo:
         return ""
 
 
-class SpyImageRepo:
+class SpyBase:
     def __init__(self, returns):
-        self.called = OrderedDict({})
-        self.called_with = OrderedDict({})
-        self.returns = returns
+        self.__called = OrderedDict({})
+        self.__called_with = OrderedDict({})
+        self.__returns = returns
 
-    def retrieve(self, path):
-        return self.__spy_time("delete", [path])
-
-    def delete(self, path):
-        return self.__spy_time("delete", [path])
-
-    def upload(self, path, image_base64_encoded):
-        return self.__spy_time("upload", [path, image_base64_encoded])
-
-    def __spy_time(self, name, args):
-        if name not in self.called:
-            self.called[name] = 0
-        self.called[name] += 1
-        self.called_with[name] = args
-        if name not in self.returns:
+    def _spy_time(self, name, args):
+        if name not in self.__called:
+            self.__called[name] = 0
+        self.__called[name] += 1
+        self.__called_with[name] = args
+        if name not in self.__returns:
             pass
         else:
-            return self.returns[name]
+            return self.__returns[name]
+
+    def with_args(self, method):
+        return self.__called_with[method]
+
+    def received(self, method):
+        return self.__called[method]
+
+
+class SpyImageRepo(SpyBase):
+    def retrieve(self, path):
+        return self._spy_time("delete", [path])
+
+    def delete(self, path):
+        return self._spy_time("delete", [path])
+
+    def upload(self, path, image_base64_encoded):
+        return self._spy_time("upload", [path, image_base64_encoded])

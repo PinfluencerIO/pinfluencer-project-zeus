@@ -18,5 +18,5 @@ def test_db_write_new_brand_for_auth_user_when_record_is_written_successfully():
                                      },
                                      data_manager=data_manager,
                                      image_repository=image_repo)
-    assert image_repo.called['upload'] == 1 and image_repo.called_with['upload'] == [
+    assert image_repo.received('upload') == 1 and image_repo.with_args('upload') == [
         f'{data_manager.session.query(Brand).first().id}', bytes_]
