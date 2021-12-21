@@ -4,7 +4,15 @@ from tests import InMemorySqliteDataManager, MockImageRepo, brand_generator
 
 
 def test_db_write_update_brand_for_auth_user_when_successful():
-    [data_manager, image_repository, auth_id, payload] = setup()
+    data_manager = InMemorySqliteDataManager()
+    image_repository = MockImageRepo()
+    auth_id = "authid"
+    payload = {
+        "name": "testname",
+        "description": "testdescription",
+        "website": "testwebsite",
+        "instahandle": "instahandle"
+    }
     data_manager.create_fake_data([brand_generator(1, auth_id)])
     db_write_update_brand_for_auth_user(auth_user_id=auth_id,
                                         data_manager=data_manager,
@@ -18,25 +26,13 @@ def test_db_write_update_brand_for_auth_user_when_successful():
 
 
 def test_db_write_update_brand_for_auth_user_when_brand_doesnt_exist():
-    [data_manager, image_repository, auth_id, payload] = setup()
+    data_manager = InMemorySqliteDataManager()
+    image_repository = MockImageRepo()
     try:
-        db_write_update_brand_for_auth_user(auth_user_id=auth_id,
+        db_write_update_brand_for_auth_user(auth_user_id="",
                                             data_manager=data_manager,
                                             image_repository=image_repository,
-                                            payload=payload)
+                                            payload={})
         assert False
     except NoBrandForAuthenticatedUser:
         pass
-
-
-def setup():
-    data_manager = InMemorySqliteDataManager()
-    image_repository = MockImageRepo()
-    auth_id = "authid"
-    payload = {
-        "name": "testname",
-        "description": "testdescription",
-        "website": "testwebsite",
-        "instahandle": "instahandle"
-    }
-    return [data_manager, image_repository, auth_id, payload]
