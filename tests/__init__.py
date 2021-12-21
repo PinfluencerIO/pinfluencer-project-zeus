@@ -78,12 +78,20 @@ class StubImageRepo:
         return ""
 
 
-class FakeImageRepo:
+class SpyImageRepo:
+    def __init__(self):
+        self.retrieve_called = 0
+        self.delete_called = 0
+        self.upload_called = 0
+
     def retrieve(self, path):
-        pass
+        self.retrieve_called += 1
+        self.retrieve_called_with = [path]
 
     def delete(self, path):
-        pass
+        self.delete_called += 1
+        self.delete_called_with = [path]
 
     def upload(self, path, image_base64_encoded):
-        pass
+        self.upload_called += 1
+        self.upload_called_with = [path, image_base64_encoded]
