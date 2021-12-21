@@ -60,11 +60,11 @@ def get_image_update_payload_schema():
         "type": "object",
         "properties":
             {
-                "image": {
+                "image_bytes": {
                     "type": "string"
                 }
             },
-        "required": ["image"]
+        "required": ["image_bytes"]
     }
     return schema
 
@@ -86,11 +86,11 @@ def get_product_payload_schema():
                     "type": "string",
                     "pattern": "^.{1,500}$"
                 },
-                "image": {
+                "image_bytes": {
                     "type": "string"
                 }
             },
-        "required": ["name", "description", "requirements", "image"]
+        "required": ["name", "description", "requirements", "image_bytes"]
     }
     return schema
 
@@ -143,11 +143,11 @@ def get_brand_payload_schema():
                     "type": "string",
                     "pattern": "^.{1,30}$"
                 },
-                "image": {
+                "image_bytes": {
                     "type": "string"
                 }
             },
-        "required": ["name", "description", "website", "email", "image"]
+        "required": ["name", "description", "website", "email", "image_bytes"]
     }
     return schema
 

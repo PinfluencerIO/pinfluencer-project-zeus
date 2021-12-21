@@ -12,12 +12,10 @@ def db_write_new_brand_for_auth_user(auth_user_id, payload, data_manager, image_
     else:
         try:
             payload['auth_user_id'] = auth_user_id
-            image_bytes = payload['image']
-            payload['image'] = None
             brand = brand_from_dict(payload)
             data_manager.session.add(brand)
             data_manager.session.flush()
-            image_id = image_repository.upload(f'{brand.id}', image_bytes)
+            image_id = image_repository.upload(f'{brand.id}', payload['image_bytes'])
             brand = data_manager.session.query(Brand).filter(Brand.id == brand.id).first()
             brand.image = image_id
             data_manager.session.flush()
@@ -48,7 +46,7 @@ def db_write_update_brand_for_auth_user(auth_user_id, payload, data_manager, ima
 def db_write_patch_brand_image_for_auth_user(auth_user_id, payload, data_manager, image_repository):
     try:
         brand = data_manager.session.query().filter(Brand.auth_user_id == auth_user_id).first()
-        image_id = image_repository.upload(f'{brand.id}', payload['image'])
+        image_id = image_repository.upload(f'{brand.id}', payload['image_bytes'])
         image_repository.delete(f'{brand.id}/{brand.image}')
         brand.image = image_id
         data_manager.session.flush()
@@ -69,14 +67,12 @@ def db_write_new_product_for_auth_user(auth_user_id, payload, data_manager, imag
         else:
             print(f'brand found..move to update product')
         print(f'payload: {payload}')
-        image_bytes = payload['image']
-        payload['image'] = None
         payload['brand_id'] = brand.id
         product_entity = product_from_dict(payload)
         print(f'{product_entity}')
         data_manager.session.add(product_entity)
         data_manager.session.flush()
-        image_id = image_repository.upload(f'{brand.id}/{product_entity.id}', image_bytes)
+        image_id = image_repository.upload(f'{brand.id}/{product_entity.id}', payload['image_bytes'])
         product_entity.image = image_id
         data_manager.session.flush()
         data_manager.session.commit()
@@ -116,7 +112,7 @@ def db_write_patch_product_image_for_auth_user(auth_user_id, payload, data_manag
             Product.brand_id == brand.id, Product.id == payload["product_id"]).first()
         print(f'product loaded: {product}')
         if product:
-            image_id = image_repository.upload(f'{brand.id}/{product.id}', payload['image'])
+            image_id = image_repository.upload(f'{brand.id}/{product.id}', payload['image_bytes'])
             image_repository.delete(f'{brand.id}/{product.image}')
             product.image = image_id
             data_manager.session.flush()
