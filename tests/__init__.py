@@ -11,9 +11,11 @@ from src.data_access_layer.brand import Brand
 from src.data_access_layer.product import Product
 
 
-def brand_generator(num, auth_user_id=None):
+def brand_generator(num, auth_user_id=None, image=None):
     if auth_user_id is None:
         auth_user_id = f'1234brand{num}'
+    if image is None:
+        image = f'{str(uuid.uuid4())}.png'
     return Brand(
         id=str(uuid.uuid4()),
         created=datetime.utcnow(),
@@ -22,7 +24,7 @@ def brand_generator(num, auth_user_id=None):
         website=f'test{num}.com',
         email=f'brand{num}@email.com',
         instahandle=f'brand{num}handle',
-        image=f'{str(uuid.uuid4())}.png',
+        image=image,
         auth_user_id=auth_user_id)
 
 
