@@ -76,14 +76,10 @@ def test_db_write_patch_brand_image_when_delete_image_error_occurs():
         "delete": ImageException(),
         "upload": next_image
     })
-    try:
-        db_write_patch_brand_image_for_auth_user(auth_user_id=auth_id,
-                                                 payload={"image_bytes": bytes_},
-                                                 data_manager=data_manager,
-                                                 image_repository=image_repo)
-        assert False
-    except ImageException:
-        pass
+    db_write_patch_brand_image_for_auth_user(auth_user_id=auth_id,
+                                             payload={"image_bytes": bytes_},
+                                             data_manager=data_manager,
+                                             image_repository=image_repo)
     assert image_repo.received('upload', 1)
     assert image_repo.received_with_args('upload', [brand.id, bytes_])
     assert image_repo.received('delete', 1)

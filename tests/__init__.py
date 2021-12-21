@@ -41,12 +41,47 @@ def product_generator(num, brand):
     return product
 
 
-class InMemorySqliteDataManager:
+class MockBase:
+    def __init__(self, returns=None):
+        if returns is None:
+            returns = {}
+        self.__called = OrderedDict({})
+        self.__called_with = OrderedDict({})
+        self.__returns = returns
+
+    def _spy_time(self, name, args):
+        if name not in self.__called:
+            self.__called[name] = 0
+        self.__called[name] += 1
+        self.__called_with[name] = args
+        if name not in self.__returns:
+            return None
+        if isinstance(self.__returns[name], Exception):
+            raise self.__returns[name]
+        else:
+            return self.__returns[name]
+
+    def received_with_args(self, method, args):
+        return self.__called_with[method] == args
+
+    def received(self, method, number_of_times):
+        if method not in self.__called:
+            self.__called[method] = 0
+        return self.__called[method] == number_of_times
+
+    def did_not_receive(self, method):
+        return method not in self.__called
+
+
+class InMemorySqliteDataManager(MockBase):
 
     def __init__(self):
+        super().__init__(None)
         self.__engine = create_engine('sqlite:///:memory:')
         session = sessionmaker(bind=self.__engine)
         self.__session = session()
+        self.__session.rollback = lambda: self._spy_time('rollback', [])
+        self.__session.commit = lambda: self._spy_time('commit', [])
         Base.metadata.create_all(self.__engine)
 
     @property
@@ -81,38 +116,6 @@ class StubImageRepo:
 
     def upload(self, path, image_base64_encoded):
         return ""
-
-
-class MockBase:
-    def __init__(self, returns=None):
-        if returns is None:
-            returns = {}
-        self.__called = OrderedDict({})
-        self.__called_with = OrderedDict({})
-        self.__returns = returns
-
-    def _spy_time(self, name, args):
-        if name not in self.__called:
-            self.__called[name] = 0
-        self.__called[name] += 1
-        self.__called_with[name] = args
-        if name not in self.__returns:
-            return None
-        if isinstance(self.__returns[name], Exception):
-            raise self.__returns[name]
-        else:
-            return self.__returns[name]
-
-    def received_with_args(self, method, args):
-        return self.__called_with[method] == args
-
-    def received(self, method, number_of_times):
-        if method not in self.__called:
-            self.__called[method] = 0
-        return self.__called[method] == number_of_times
-
-    def did_not_receive(self, method):
-        return method not in self.__called
 
 
 class MockImageRepo(MockBase):
