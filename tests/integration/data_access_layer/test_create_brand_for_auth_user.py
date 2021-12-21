@@ -9,7 +9,7 @@ def test_db_write_new_brand_for_auth_user_when_record_is_written_successfully():
     data_manager = InMemorySqliteDataManager()
     bytes_ = "test bytes"
     test_auth_id = "test auth id"
-    payload = payload = {
+    payload = {
         "name": "testname",
         "description": "testdescription",
         "website": "testwebsite",
