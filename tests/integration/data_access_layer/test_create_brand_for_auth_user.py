@@ -49,7 +49,8 @@ def test_db_write_new_brand_for_auth_user_when_brand_already_exists_for_auth_use
                                          image_repository=image_repo)
         assert False
     except AlreadyExistsException:
-        assert data_manager.received('rollback', 1)
+        # nothing to rollback
+        pass
 
 
 def setup_data(bytes_):

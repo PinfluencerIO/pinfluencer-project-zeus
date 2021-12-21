@@ -27,12 +27,9 @@ def load_by_id(id_, resource, data_manager):
 
 
 def load_brand_for_authenticated_user(auth_user_id, data_manager):
-    try:
-        first = data_manager.session.query(Brand).filter(Brand.auth_user_id == auth_user_id).first()
-        print(f'load_brand_for_authenticated_user: {first}')
-        return first
-    finally:
-        data_manager.session.commit()
+    first = data_manager.session.query(Brand).filter(Brand.auth_user_id == auth_user_id).first()
+    print(f'load_brand_for_authenticated_user: {first}')
+    return first
 
 
 def load_products_for_authenticated_user(auth_user_id, data_manager):
