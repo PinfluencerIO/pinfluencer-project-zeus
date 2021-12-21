@@ -17,7 +17,7 @@ class Brand(Base, BaseEntity):
     image: str = Column(type_=String(length=36), nullable=True)
     auth_user_id: str = Column(type_=String(length=64), nullable=False, unique=True)
 
-    def as_dict(self) -> dict:
+    def as_dict(self):
         return {
             "id": self.id,
             "created": self.created,
@@ -31,7 +31,7 @@ class Brand(Base, BaseEntity):
         }
 
 
-def brand_from_dict(brand) -> Brand:
+def brand_from_dict(brand):
     auth_user_id = ""
     if "auth_user_id" in brand:
         auth_user_id = brand["auth_user_id"]

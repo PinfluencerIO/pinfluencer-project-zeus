@@ -1,14 +1,10 @@
 import os
 
 from sqlalchemy import create_engine
-from sqlalchemy.engine import Engine
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import sessionmaker
 
 
 class DataManager:
-    __session: Session
-    __engine: Engine
-
     def __init__(self):
         print("new data manager constructed")
         engine = create_engine(
@@ -19,9 +15,9 @@ class DataManager:
         self.__session = session()
 
     @property
-    def engine(self) -> Engine:
+    def engine(self):
         return self.__engine
 
     @property
-    def session(self) -> Session:
+    def session(self):
         return self.__session

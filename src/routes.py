@@ -19,10 +19,9 @@ from src.processors.write_for_auth_user import ProcessWriteForAuthenticatedUser,
 class Routes:
     def __init__(self, container):
         self.__container = container
-        pass
 
     @property
-    def routes(self) -> OrderedDict:
+    def routes(self):
         return OrderedDict({
             # public endpoints
             'GET /feed': ProcessGetCollection('brand', load_max_3_products_for_brand, self.__container.data_manager),

@@ -8,7 +8,7 @@ class ProcessGetProductsForBrand:
         self.load_all_products_for_brand_id = load_all_products_for_brand_id
         self.data_manager = data_manager
 
-    def do_process(self, event) -> PinfluencerResponse:
+    def do_process(self, event):
         brand_id = valid_path_resource_id(event, 'brand_id')
         if brand_id:
             products_for_brand = self.load_all_products_for_brand_id(brand_id, self.data_manager)

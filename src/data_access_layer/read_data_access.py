@@ -1,16 +1,15 @@
-from src.data_access_layer import BaseEntity
 from src.data_access_layer.brand import Brand
 from src.data_access_layer.product import Product
 
 
-def load_item(resource, data_manager) -> BaseEntity:
+def load_item(resource, data_manager):
     try:
         return data_manager.session.query(resource).first()
     finally:
         data_manager.session.commit()
 
 
-def load_collection(resource, data_manager) -> list[BaseEntity]:
+def load_collection(resource, data_manager):
     try:
         return data_manager.session.query(resource).all()
     finally:

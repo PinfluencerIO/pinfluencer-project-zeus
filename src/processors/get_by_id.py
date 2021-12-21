@@ -8,7 +8,7 @@ class ProcessGetBy:
         self.type_ = type_
         self.data_manager = data_manager
 
-    def do_process(self, event) -> PinfluencerResponse:
+    def do_process(self, event):
         id_ = valid_path_resource_id(event, types[self.type_]['key'])
         if id_:
             resource = self.load_by_id(id_, types[self.type_]['type'], self.data_manager)

@@ -41,7 +41,7 @@ class Product(Base, BaseEntity):
         }
 
 
-def product_from_dict(product) -> Product:
+def product_from_dict(product):
     prod = Product(name=product["name"],
                    description=product["description"],
                    requirements=product["requirements"],

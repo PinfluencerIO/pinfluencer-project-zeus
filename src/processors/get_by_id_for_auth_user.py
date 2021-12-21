@@ -8,7 +8,7 @@ class ProcessGetByForAuthenticatedUser:
         self.load_by_id_for_auth_id = load_by_id_for_auth_id
         self.data_manager = data_manager
 
-    def do_process(self, event) -> PinfluencerResponse:
+    def do_process(self, event):
         resource_id = valid_path_resource_id(event, types[self.type_]['key'])
         if resource_id:
             auth_user_id = get_cognito_user(event)

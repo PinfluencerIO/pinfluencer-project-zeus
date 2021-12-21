@@ -10,7 +10,7 @@ from src.processors import valid_path_resource_id, types, protect_email_from_upd
 
 # TODO This really breaks the idea of a configurable generic write class. Talk to Aidan about this one
 class ProcessWriteForAuthenticatedUser:
-    def __init__(self, type_: str, action: str, db_write, data_manager, image_repository) -> None:
+    def __init__(self, type_, action, db_write, data_manager, image_repository):
         super().__init__()
         self.type_ = type_
         self.action = action

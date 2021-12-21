@@ -4,7 +4,7 @@ from src.processors import get_cognito_user
 
 
 class ProcessGetForAuthenticatedUser:
-    def __init__(self, load_for_authenticated_user, data_manager) -> None:
+    def __init__(self, load_for_authenticated_user, data_manager):
         self.load_for_authenticated_user = load_for_authenticated_user
         self.data_manager = data_manager
 

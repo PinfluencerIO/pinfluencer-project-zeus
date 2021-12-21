@@ -1,18 +1,16 @@
 import uuid
-from collections import OrderedDict
 from datetime import datetime
 from unittest.mock import Mock
 
 from sqlalchemy import create_engine
-from sqlalchemy.engine import Engine
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import sessionmaker
 
-from src.data_access_layer import Base, BaseEntity
+from src.data_access_layer import Base
 from src.data_access_layer.brand import Brand
 from src.data_access_layer.product import Product
 
 
-def brand_generator(num: int) -> Brand:
+def brand_generator(num):
     return Brand(
         id=str(uuid.uuid4()),
         created=datetime.utcnow(),
@@ -25,7 +23,7 @@ def brand_generator(num: int) -> Brand:
         auth_user_id=f'1234brand{num}')
 
 
-def product_generator(num: int, brand: Brand) -> Product:
+def product_generator(num, brand):
     product = Product(
         id=str(uuid.uuid4()),
         created=datetime.utcnow(),
@@ -41,58 +39,51 @@ def product_generator(num: int, brand: Brand) -> Product:
 class InMemorySqliteDataManager:
 
     def __init__(self):
-        self.__engine: Engine = create_engine('sqlite:///:memory:')
+        self.__engine = create_engine('sqlite:///:memory:')
         session = sessionmaker(bind=self.__engine)
         self.__session = session()
         Base.metadata.create_all(self.__engine)
 
     @property
-    def engine(self) -> Engine:
+    def engine(self):
         return self.__engine
 
     @property
-    def session(self) -> Session:
+    def session(self):
         return self.__session
 
-    def create_fake_data(self, objects: list[BaseEntity]):
+    def create_fake_data(self, objects):
         self.__session.bulk_save_objects(objects=objects)
         self.__session.commit()
 
 
 class StubDataManager:
     @property
-    def engine(self) -> Engine:
+    def engine(self):
         return Mock()
 
     @property
-    def session(self) -> Session:
+    def session(self):
         return Mock()
 
 
 class StubImageRepo:
-    def retrieve(self, path: str) -> str:
+    def retrieve(self, path):
         return ""
 
-    def delete(self, path: str) -> None:
+    def delete(self, path):
         pass
 
-    def upload(self, path: str, image_base64_encoded: str) -> str:
+    def upload(self, path, image_base64_encoded):
         return ""
 
 
 class FakeImageRepo:
-    def __init__(self):
-        self.__images = OrderedDict({
-            "": ""
-        })
+    def retrieve(self, path):
+        pass
 
-    def retrieve(self, path: str) -> str:
-        return self.__images[path]
+    def delete(self, path):
+        pass
 
-    def delete(self, path: str) -> None:
-        del self.__images[path]
-
-    def upload(self, path: str, image_base64_encoded: str) -> str:
-        path = f"{path}/{str(uuid.uuid4())}.png"
-        self.__images.update({f"{path}": image_base64_encoded})
-        return path
+    def upload(self, path, image_base64_encoded):
+        pass

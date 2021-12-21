@@ -4,7 +4,7 @@ from src.processors import types
 
 
 class ProcessGetCollection:
-    def __init__(self, type_, load_collection, data_manager) -> None:
+    def __init__(self, type_, load_collection, data_manager):
         super().__init__()
         self.type_ = type_
         self.load_collection = load_collection

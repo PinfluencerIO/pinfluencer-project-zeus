@@ -8,7 +8,7 @@ class ProcessAuthenticatedDeleteProduct:
         self.delete_product = delete_product
         self.data_manager = data_manager
 
-    def do_process(self, event) -> PinfluencerResponse:
+    def do_process(self, event):
         product_id = event['pathParameters']['product_id']
         if valid_uuid(product_id):
             auth_user_id = get_cognito_user(event)

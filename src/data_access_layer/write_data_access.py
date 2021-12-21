@@ -18,7 +18,7 @@ def db_write_new_brand_for_auth_user(auth_user_id, payload, data_manager, image_
             data_manager.session.add(brand)
             data_manager.session.flush()
             image_id = image_repository.upload(f'{brand.id}', image_bytes)
-            brand: Brand = data_manager.session.query(Brand).filter(Brand.id == brand.id).first()
+            brand = data_manager.session.query(Brand).filter(Brand.id == brand.id).first()
             brand.image = image_id
             data_manager.session.flush()
             data_manager.session.commit()
@@ -31,7 +31,7 @@ def db_write_new_brand_for_auth_user(auth_user_id, payload, data_manager, image_
 
 def db_write_update_brand_for_auth_user(auth_user_id, payload, data_manager, image_repository):
     try:
-        brand: Brand = data_manager.session.query(Brand).filter(Brand.auth_user_id == auth_user_id).first()
+        brand = data_manager.session.query(Brand).filter(Brand.auth_user_id == auth_user_id).first()
         brand.name = payload['name']
         brand.description = payload['description']
         brand.website = payload['website']
@@ -47,7 +47,7 @@ def db_write_update_brand_for_auth_user(auth_user_id, payload, data_manager, ima
 
 def db_write_patch_brand_image_for_auth_user(auth_user_id, payload, data_manager, image_repository):
     try:
-        brand: Brand = data_manager.session.query().filter(Brand.auth_user_id == auth_user_id).first()
+        brand = data_manager.session.query().filter(Brand.auth_user_id == auth_user_id).first()
         image_id = image_repository.upload(f'{brand.id}', payload['image'])
         image_repository.delete(f'{brand.id}/{brand.image}')
         brand.image = image_id
@@ -139,10 +139,10 @@ def delete_product(auth_user_id, product_id, data_manager, image_repository):
         raise NoBrandForAuthenticatedUser()
 
     try:
-        product: Product = (data_manager.session
-                            .query(Product)
-                            .filter(Product.id == product_id, Product.brand_id == brand.id)
-                            .first())
+        product = (data_manager.session
+                   .query(Product)
+                   .filter(Product.id == product_id, Product.brand_id == brand.id)
+                   .first())
         if product is None:
             raise NotFoundException(f'Product {product_id} for brand {brand.id} not found')
 
