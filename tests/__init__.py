@@ -95,11 +95,11 @@ class SpyBase:
         else:
             return self.__returns[name]
 
-    def with_args(self, method):
-        return self.__called_with[method]
+    def received_with_args(self, method, args):
+        return self.__called_with[method] == args
 
-    def received(self, method):
-        return self.__called[method]
+    def received(self, method, number_of_times):
+        return self.__called[method] == number_of_times
 
 
 class SpyImageRepo(SpyBase):
