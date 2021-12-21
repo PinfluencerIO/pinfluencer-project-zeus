@@ -95,7 +95,7 @@ class MockBase:
         self.__called[name] += 1
         self.__called_with[name] = args
         if name not in self.__returns:
-            pass
+            return None
         if isinstance(self.__returns[name], Exception):
             raise self.__returns[name]
         else:
