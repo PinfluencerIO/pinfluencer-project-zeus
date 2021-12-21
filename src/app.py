@@ -14,7 +14,7 @@ def lambda_handler(event, context):
         processor = routes.routes[event['routeKey']]
         print(f'process: {processor}')
 
-        response: PinfluencerResponse = processor.do_process(event)
+        response = processor.do_process(event)
         return response.as_json()
     except KeyError as ke:
         print(f'Missing required key {ke}')

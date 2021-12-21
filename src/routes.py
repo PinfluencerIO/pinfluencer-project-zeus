@@ -1,6 +1,5 @@
 from collections import OrderedDict
 
-from src.container import Container
 from src.data_access_layer.read_data_access import load_max_3_products_for_brand, load_collection, load_by_id, \
     load_all_products_for_brand_id, load_brand_for_authenticated_user, load_products_for_authenticated_user, \
     load_product_by_id_for_auth_id
@@ -18,7 +17,7 @@ from src.processors.write_for_auth_user import ProcessWriteForAuthenticatedUser,
 
 
 class Routes:
-    def __init__(self, container: Container):
+    def __init__(self, container):
         self.__container = container
         pass
 

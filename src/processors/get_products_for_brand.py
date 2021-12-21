@@ -8,7 +8,7 @@ class ProcessGetProductsForBrand:
         self.load_all_products_for_brand_id = load_all_products_for_brand_id
         self.data_manager = data_manager
 
-    def do_process(self, event: dict) -> PinfluencerResponse:
+    def do_process(self, event) -> PinfluencerResponse:
         brand_id = valid_path_resource_id(event, 'brand_id')
         if brand_id:
             products_for_brand = self.load_all_products_for_brand_id(brand_id, self.data_manager)
@@ -18,4 +18,3 @@ class ProcessGetProductsForBrand:
                 return PinfluencerResponse(404, "Not found")
         else:
             return PinfluencerResponse.as_400_error(f'{self} Invalid path parameter id')
-

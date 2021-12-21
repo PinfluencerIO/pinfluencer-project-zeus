@@ -47,7 +47,7 @@ def test_do_process_product_delete_failed_product_id_validation():
     assert response.status_code == 400
 
 
-def test_do_process_product_delete_failed_product_id_validation():
+def test_do_process_product_delete_not_found():
     processor = ProcessAuthenticatedDeleteProduct(mock_delete_product_not_found, StubDataManager())
     response = processor.do_process({
         'pathParameters': {

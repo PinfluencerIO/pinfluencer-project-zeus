@@ -31,7 +31,7 @@ class Brand(Base, BaseEntity):
         }
 
 
-def brand_from_dict(brand: dict) -> Brand:
+def brand_from_dict(brand) -> Brand:
     auth_user_id = ""
     if "auth_user_id" in brand:
         auth_user_id = brand["auth_user_id"]
