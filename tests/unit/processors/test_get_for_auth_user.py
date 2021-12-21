@@ -3,7 +3,7 @@ import uuid
 from src.data_access_layer.brand import Brand
 from src.data_access_layer.product import Product
 from src.processors.get_for_auth_user import ProcessGetForAuthenticatedUser, ProcessGetForAuthenticatedUserAsCollection
-from tests.unit import StubDataManager
+from tests import StubDataManager
 
 
 def test_process_get_for_authenticated_user():

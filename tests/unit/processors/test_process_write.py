@@ -9,7 +9,7 @@ from src.data_access_layer.product import Product
 from src.data_access_layer.write_data_access import NotFoundException
 from src.processors.write_for_auth_user import ProcessWriteForAuthenticatedUser, \
     ProcessWriteWithValidationForAuthenticatedUser, ProcessWriteForAuthenticatedUserWithProductId
-from tests.unit import StubDataManager, StubImageRepo
+from tests import StubDataManager, StubImageRepo
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 

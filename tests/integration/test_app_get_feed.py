@@ -5,7 +5,7 @@ from src.container import Container
 from src.data_access_layer import to_list
 from src.data_access_layer.brand import Brand
 from src.routes import Routes
-from tests.unit import brand_generator, product_generator
+from tests import brand_generator, product_generator
 
 
 def test_lambda_handler_get_feed():

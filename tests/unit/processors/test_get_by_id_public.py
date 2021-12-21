@@ -3,7 +3,7 @@ import uuid
 from src.data_access_layer.brand import Brand
 from src.data_access_layer.product import Product
 from src.processors.get_by_id import ProcessGetBy
-from tests.unit import StubDataManager
+from tests import StubDataManager
 
 brand = Brand()
 brand.id = str(uuid.uuid4())

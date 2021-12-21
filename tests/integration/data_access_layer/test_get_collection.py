@@ -1,7 +1,7 @@
 from src.data_access_layer import to_list
 from src.data_access_layer.read_data_access import load_collection
 from src.processors import types
-from tests.unit import brand_generator, InMemorySqliteDataManager
+from tests import brand_generator, InMemorySqliteDataManager
 
 
 def test_load_brand_collection_when_brands_exists():

@@ -1,6 +1,6 @@
 from src.data_access_layer.read_data_access import load_item
 from src.processors import types
-from tests.unit import InMemorySqliteDataManager, brand_generator
+from tests import InMemorySqliteDataManager, brand_generator
 
 
 def test_load_brand_item_when_brand_exists():

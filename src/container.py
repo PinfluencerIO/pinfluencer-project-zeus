@@ -7,7 +7,7 @@ from src.data_access_layer.image_repository import S3ImageRepository
 class Container:
     def __init__(self):
         if 'IN_MEMORY' in os.environ:
-            from tests.unit import InMemorySqliteDataManager
+            from tests import InMemorySqliteDataManager
             print('Creating an in memory mysql database')
             self.data_manager = InMemorySqliteDataManager()
         else:

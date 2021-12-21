@@ -1,7 +1,7 @@
 import uuid
 
 from src.data_access_layer.read_data_access import load_product_by_id_for_auth_id
-from tests.unit import InMemorySqliteDataManager, brand_generator, product_generator
+from tests import InMemorySqliteDataManager, brand_generator, product_generator
 
 
 def test_load_product_by_id_for_brand_when_product_can_be_found_and_belongs_to_brand():

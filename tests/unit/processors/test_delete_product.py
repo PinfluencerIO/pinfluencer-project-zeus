@@ -2,7 +2,7 @@ import uuid
 
 from src.data_access_layer.write_data_access import NotFoundException
 from src.processors.delete_product import ProcessAuthenticatedDeleteProduct
-from tests.unit import StubDataManager
+from tests import StubDataManager
 
 
 def test_do_process_product_delete():

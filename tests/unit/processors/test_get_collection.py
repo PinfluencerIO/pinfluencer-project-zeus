@@ -1,5 +1,5 @@
 from src.processors.get_collection import ProcessGetCollection
-from tests.unit import StubDataManager
+from tests import StubDataManager
 
 
 def test_do_process_get_collection():

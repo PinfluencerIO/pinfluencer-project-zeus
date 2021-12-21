@@ -2,7 +2,7 @@ import uuid
 
 from src.data_access_layer.read_data_access import load_by_id
 from src.processors import types
-from tests.unit import InMemorySqliteDataManager, brand_generator
+from tests import InMemorySqliteDataManager, brand_generator
 
 
 def test_load_brand_by_id_item_when_brand_can_be_found():
