@@ -47,6 +47,6 @@ def setup_data(bytes_):
         "website": "testwebsite",
         "email": "testemail",
         "instahandle": "instahandle",
-        "image": bytes_
+        "image_bytes": bytes_
     }
     return [data_manager, payload]
