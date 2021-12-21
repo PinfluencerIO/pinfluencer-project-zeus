@@ -1,7 +1,7 @@
 from src.data_access_layer.brand import Brand
 from src.data_access_layer.image_repository import ImageError
-from src.data_access_layer.write_data_access import db_write_new_brand_for_auth_user
-from tests import InMemorySqliteDataManager, MockImageRepo
+from src.data_access_layer.write_data_access import db_write_new_brand_for_auth_user, AlreadyExistsException
+from tests import InMemorySqliteDataManager, MockImageRepo, brand_generator
 
 
 def test_db_write_new_brand_for_auth_user_when_record_is_written_successfully():
@@ -37,6 +37,20 @@ def test_db_write_new_brand_for_auth_user_when_image_error_occurs():
         assert type(e) == ImageError
     brand_in_db = data_manager.session.query(Brand).first()
     assert brand_in_db is None
+
+
+def test_db_write_new_brand_for_auth_user_when_brand_already_exists_for_auth_user():
+    image_repo = MockImageRepo()
+    [data_manager, payload] = setup_data("test bytes")
+    auth_id = "testid"
+    data_manager.create_fake_data([brand_generator(1, auth_id)])
+    try:
+        db_write_new_brand_for_auth_user(auth_user_id=auth_id,
+                                         payload=payload,
+                                         data_manager=data_manager,
+                                         image_repository=image_repo)
+    except Exception as e:
+        assert type(e) == AlreadyExistsException
 
 
 def setup_data(bytes_):

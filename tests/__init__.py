@@ -11,7 +11,9 @@ from src.data_access_layer.brand import Brand
 from src.data_access_layer.product import Product
 
 
-def brand_generator(num):
+def brand_generator(num, auth_user_id=None):
+    if auth_user_id is None:
+        auth_user_id = f'1234brand{num}'
     return Brand(
         id=str(uuid.uuid4()),
         created=datetime.utcnow(),
@@ -21,7 +23,7 @@ def brand_generator(num):
         email=f'brand{num}@email.com',
         instahandle=f'brand{num}handle',
         image=f'{str(uuid.uuid4())}.png',
-        auth_user_id=f'1234brand{num}')
+        auth_user_id=auth_user_id)
 
 
 def product_generator(num, brand):
@@ -80,7 +82,7 @@ class StubImageRepo:
 
 
 class MockBase:
-    def __init__(self, returns):
+    def __init__(self, returns={}):
         self.__called = OrderedDict({})
         self.__called_with = OrderedDict({})
         self.__returns = returns
