@@ -15,7 +15,7 @@ def test_db_write_new_brand_for_auth_user_when_record_is_written_successfully():
         "website": "testwebsite",
         "email": "testemail",
         "instahandle": "instahandle",
-        "image": bytes_
+        "image_bytes": bytes_
     }
     db_write_new_brand_for_auth_user(auth_user_id=test_auth_id,
                                      payload=payload,
