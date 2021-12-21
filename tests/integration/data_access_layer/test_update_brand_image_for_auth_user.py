@@ -33,7 +33,8 @@ def test_db_write_patch_brand_image_when_brand_does_not_exist():
                                                  payload={},
                                                  data_manager=data_manager,
                                                  image_repository=image_repo)
+        assert False
     except NoBrandForAuthenticatedUser:
-        assert True
+        pass
     assert image_repo.did_not_receive('upload')
     assert image_repo.did_not_receive('delete')

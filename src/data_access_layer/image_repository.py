@@ -32,21 +32,21 @@ class S3ImageRepository:
                                         Tagging='public=yes')
             return file
         except ClientError:
-            raise ImageError
+            raise ImageException
 
     def delete(self, path):
         try:
             self.__s3_client.delete_object(Bucket=self.__bucket_name, Key=path)
         except ClientError:
-            raise ImageError
+            raise ImageException
 
     def retrieve(self, path):
         try:
             image_object = self.__s3_client.get_object(self.__bucket_name, path)
             return json.loads(image_object['Body'].read())
         except ClientError:
-            raise ImageError
+            raise ImageException
 
 
-class ImageError(Exception):
+class ImageException(Exception):
     pass

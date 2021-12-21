@@ -1,5 +1,5 @@
 from src.data_access_layer.brand import Brand
-from src.data_access_layer.write_data_access import db_write_update_brand_for_auth_user
+from src.data_access_layer.write_data_access import db_write_update_brand_for_auth_user, NoBrandForAuthenticatedUser
 from tests import InMemorySqliteDataManager, MockImageRepo, brand_generator
 
 
@@ -24,8 +24,9 @@ def test_db_write_update_brand_for_auth_user_when_brand_doesnt_exist():
                                             data_manager=data_manager,
                                             image_repository=image_repository,
                                             payload=payload)
-    except Exception as e:
-        type(e) == IndexError
+        assert False
+    except NoBrandForAuthenticatedUser:
+        pass
 
 
 def setup():
