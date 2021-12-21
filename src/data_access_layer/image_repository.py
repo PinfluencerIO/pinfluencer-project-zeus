@@ -4,6 +4,7 @@ import json
 import uuid
 
 import boto3
+from botocore.exceptions import ClientError
 from filetype import filetype
 
 
@@ -24,15 +25,28 @@ class S3ImageRepository:
         image_id = str(uuid.uuid4())
         file = f'{image_id}.{file_type.EXTENSION}'
         key = f'{path}/{file}'
-        self.__s3_client.put_object(Bucket=self.__bucket_name,
-                                    Key=key, Body=image,
-                                    ContentType=mime,
-                                    Tagging='public=yes')
-        return file
+        try:
+            self.__s3_client.put_object(Bucket=self.__bucket_name,
+                                        Key=key, Body=image,
+                                        ContentType=mime,
+                                        Tagging='public=yes')
+            return file
+        except ClientError:
+            raise ImageError
 
     def delete(self, path):
-        self.__s3_client.delete_object(Bucket=self.__bucket_name, Key=path)
+        try:
+            self.__s3_client.delete_object(Bucket=self.__bucket_name, Key=path)
+        except ClientError:
+            raise ImageError
 
     def retrieve(self, path):
-        image_object = self.__s3_client.get_object(self.__bucket_name, path)
-        return json.loads(image_object['Body'].read())
+        try:
+            image_object = self.__s3_client.get_object(self.__bucket_name, path)
+            return json.loads(image_object['Body'].read())
+        except ClientError:
+            raise ImageError
+
+
+class ImageError(Exception):
+    pass

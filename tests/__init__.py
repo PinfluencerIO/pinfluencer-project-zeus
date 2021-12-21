@@ -79,7 +79,7 @@ class StubImageRepo:
         return ""
 
 
-class SpyBase:
+class MockBase:
     def __init__(self, returns):
         self.__called = OrderedDict({})
         self.__called_with = OrderedDict({})
@@ -92,6 +92,8 @@ class SpyBase:
         self.__called_with[name] = args
         if name not in self.__returns:
             pass
+        if isinstance(self.__returns[name], Exception):
+            raise self.__returns[name]
         else:
             return self.__returns[name]
 
@@ -102,7 +104,7 @@ class SpyBase:
         return self.__called[method] == number_of_times
 
 
-class SpyImageRepo(SpyBase):
+class MockImageRepo(MockBase):
     def retrieve(self, path):
         return self._spy_time("delete", [path])
 
