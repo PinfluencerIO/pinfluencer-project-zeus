@@ -1,4 +1,5 @@
 import uuid
+from collections import OrderedDict
 from datetime import datetime
 from unittest.mock import Mock
 
@@ -79,19 +80,26 @@ class StubImageRepo:
 
 
 class SpyImageRepo:
-    def __init__(self):
-        self.retrieve_called = 0
-        self.delete_called = 0
-        self.upload_called = 0
+    def __init__(self, returns):
+        self.called = OrderedDict({})
+        self.called_with = OrderedDict({})
+        self.returns = returns
 
     def retrieve(self, path):
-        self.retrieve_called += 1
-        self.retrieve_called_with = [path]
+        return self.__spy_time("delete", [path])
 
     def delete(self, path):
-        self.delete_called += 1
-        self.delete_called_with = [path]
+        return self.__spy_time("delete", [path])
 
     def upload(self, path, image_base64_encoded):
-        self.upload_called += 1
-        self.upload_called_with = [path, image_base64_encoded]
+        return self.__spy_time("upload", [path, image_base64_encoded])
+
+    def __spy_time(self, name, args):
+        if name not in self.called:
+            self.called[name] = 0
+        self.called[name] += 1
+        self.called_with[name] = args
+        if name not in self.returns:
+            pass
+        else:
+            return self.returns[name]
