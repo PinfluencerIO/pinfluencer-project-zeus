@@ -62,3 +62,31 @@ def test_db_write_patch_brand_image_when_upload_image_error_occurs():
     assert image_repo.did_not_receive('delete')
     brand_in_db = data_manager.session.query(Brand).first()
     assert brand_in_db.image == prev_image
+
+
+def test_db_write_patch_brand_image_when_delete_image_error_occurs():
+    data_manager = InMemorySqliteDataManager()
+    auth_id = "testauthid"
+    prev_image = "prev.png"
+    next_image = "test.png"
+    brand = brand_generator(1, auth_id, prev_image)
+    data_manager.create_fake_data([brand])
+    bytes_ = "testbytes"
+    image_repo = MockImageRepo({
+        "delete": ImageException(),
+        "upload": next_image
+    })
+    try:
+        db_write_patch_brand_image_for_auth_user(auth_user_id=auth_id,
+                                                 payload={"image_bytes": bytes_},
+                                                 data_manager=data_manager,
+                                                 image_repository=image_repo)
+        assert False
+    except ImageException:
+        pass
+    assert image_repo.received('upload', 1)
+    assert image_repo.received_with_args('upload', [brand.id, bytes_])
+    assert image_repo.received('delete', 1)
+    assert image_repo.received_with_args('delete', [f'{brand.id}/{prev_image}'])
+    brand_in_db = data_manager.session.query(Brand).first()
+    assert brand_in_db.image == next_image

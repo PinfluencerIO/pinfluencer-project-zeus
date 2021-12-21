@@ -84,7 +84,9 @@ class StubImageRepo:
 
 
 class MockBase:
-    def __init__(self, returns={}):
+    def __init__(self, returns=None):
+        if returns is None:
+            returns = {}
         self.__called = OrderedDict({})
         self.__called_with = OrderedDict({})
         self.__returns = returns
@@ -115,7 +117,7 @@ class MockBase:
 
 class MockImageRepo(MockBase):
     def retrieve(self, path):
-        return self._spy_time("delete", [path])
+        return self._spy_time("retrieve", [path])
 
     def delete(self, path):
         return self._spy_time("delete", [path])
