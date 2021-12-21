@@ -1,4 +1,5 @@
 from src.data_access_layer.brand import Brand, brand_from_dict
+from src.data_access_layer.image_repository import ImageException
 from src.data_access_layer.product import product_from_dict, Product
 from src.data_access_layer.read_data_access import load_brand_for_authenticated_user
 
@@ -51,7 +52,10 @@ def db_write_patch_brand_image_for_auth_user(auth_user_id, payload, data_manager
         if brand is None:
             raise NoBrandForAuthenticatedUser()
         image_id = image_repository.upload(f'{brand.id}', payload['image_bytes'])
-        image_repository.delete(f'{brand.id}/{brand.image}')
+        try:
+            image_repository.delete(f'{brand.id}/{brand.image}')
+        except ImageException:
+            print(f'Failed to delete image {brand.id}/{brand.image}')
         brand.image = image_id
         data_manager.session.flush()
         data_manager.session.commit()
