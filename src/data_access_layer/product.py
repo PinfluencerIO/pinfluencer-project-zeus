@@ -44,9 +44,11 @@ class Product(Base, BaseEntity):
 def product_from_dict(product):
     prod = Product(name=product["name"],
                    description=product["description"],
-                   requirements=product["requirements"],
-                   created=product['created'],
-                   image=product['image'])
+                   requirements=product["requirements"])
+    if 'created' in product:
+        prod.created = product['created']
+    if 'image' in product:
+        prod.created = product['image']
     if 'brand' in product:
         prod.brand_id = product['brand']['id']
     else:
