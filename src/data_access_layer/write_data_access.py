@@ -29,7 +29,9 @@ def db_write_new_brand_for_auth_user(auth_user_id, payload, data_manager, image_
 
 def db_write_update_brand_for_auth_user(auth_user_id, payload, data_manager, image_repository):
     try:
-        brand = data_manager.session.query(Brand).filter(Brand.auth_user_id == auth_user_id).first()
+        brand = load_brand_for_authenticated_user(auth_user_id=auth_user_id, data_manager=data_manager)
+        if brand is None:
+            raise NoBrandForAuthenticatedUser()
         brand.name = payload['name']
         brand.description = payload['description']
         brand.website = payload['website']
