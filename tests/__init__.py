@@ -105,7 +105,12 @@ class MockBase:
         return self.__called_with[method] == args
 
     def received(self, method, number_of_times):
+        if method not in self.__called:
+            self.__called[method] = 0
         return self.__called[method] == number_of_times
+
+    def did_not_receive(self, method):
+        return method not in self.__called
 
 
 class MockImageRepo(MockBase):

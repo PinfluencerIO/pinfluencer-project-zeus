@@ -1,5 +1,6 @@
 from src.data_access_layer.brand import Brand
-from src.data_access_layer.write_data_access import db_write_patch_brand_image_for_auth_user
+from src.data_access_layer.write_data_access import db_write_patch_brand_image_for_auth_user, \
+    NoBrandForAuthenticatedUser
 from tests import InMemorySqliteDataManager, MockImageRepo, brand_generator
 
 
@@ -22,3 +23,17 @@ def test_db_write_patch_brand_image_for_auth_user_successfully():
     assert image_repo.received_with_args('delete', [f'{brand.id}/{prev_image}'])
     brand_in_db = data_manager.session.query(Brand).first()
     assert brand_in_db.image == next_image
+
+
+def test_db_write_patch_brand_image_when_brand_does_not_exist():
+    data_manager = InMemorySqliteDataManager()
+    image_repo = MockImageRepo()
+    try:
+        db_write_patch_brand_image_for_auth_user(auth_user_id="",
+                                                 payload={},
+                                                 data_manager=data_manager,
+                                                 image_repository=image_repo)
+    except NoBrandForAuthenticatedUser:
+        assert True
+    assert image_repo.did_not_receive('upload')
+    assert image_repo.did_not_receive('delete')
