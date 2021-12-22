@@ -80,7 +80,6 @@ class InMemorySqliteDataManager(MockBase):
         self.__engine = create_engine('sqlite:///:memory:')
         session = sessionmaker(bind=self.__engine)
         self.__session = session()
-        self.__session.rollback = lambda: self._spy_time('rollback', [])
         self.__session.commit = lambda: self._spy_time('commit', [])
         Base.metadata.create_all(self.__engine)
 
