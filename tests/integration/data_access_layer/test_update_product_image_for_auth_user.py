@@ -24,8 +24,8 @@ def common_setup(image_repo_setup):
     data_manager = InMemorySqliteDataManager()
     auth_id = "testauthid"
     prev_image = "prev.png"
-    brand = brand_generator(1, auth_id, prev_image)
-    product = product_generator(1, brand=brand)
+    brand = brand_generator(1, auth_id)
+    product = product_generator(1, brand=brand, image=prev_image)
     bytes_ = "testbytes"
     data_manager.create_fake_data([brand, product])
     image_repo = MockImageRepo(image_repo_setup)

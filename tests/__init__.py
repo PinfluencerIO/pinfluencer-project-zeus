@@ -28,7 +28,9 @@ def brand_generator(num, auth_user_id=None, image=None):
         auth_user_id=auth_user_id)
 
 
-def product_generator(num, brand):
+def product_generator(num, brand, image=None):
+    if image is None:
+        image = f'{str(uuid.uuid4())}.png'
     product = Product(
         id=str(uuid.uuid4()),
         created=datetime.utcnow(),
@@ -36,7 +38,7 @@ def product_generator(num, brand):
         description=f'prod{num} desc',
         requirements=f'tag1,tag2,tag3',
         brand_id=brand.id,
-        image=f'{str(uuid.uuid4())}.png')
+        image=image)
     product.brand = brand
     return product
 

@@ -121,7 +121,7 @@ def db_write_patch_product_image_for_auth_user(auth_user_id, payload, data_manag
         print(f'product loaded: {product}')
         if product:
             image_id = image_repository.upload(f'{brand.id}/{product.id}', payload['image_bytes'])
-            image_repository.delete(f'{brand.id}/{product.image}')
+            image_repository.delete(f'{brand.id}/{product.id}/{product.image}')
             product.image = image_id
             data_manager.session.flush()
             data_manager.session.commit()
