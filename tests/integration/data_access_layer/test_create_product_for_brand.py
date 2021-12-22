@@ -1,3 +1,4 @@
+from src.data_access_layer.image_repository import ImageException
 from src.data_access_layer.product import Product
 from src.data_access_layer.write_data_access import db_write_new_product_for_auth_user, NoBrandForAuthenticatedUser
 from tests import InMemorySqliteDataManager, MockImageRepo, brand_generator
@@ -32,6 +33,21 @@ def test_db_write_new_product_when_brand_does_not_exist():
         pass
     assert data_manager.commit_was_not_called()
     assert image_repo.upload_was_not_called()
+
+
+def test_db_write_new_product_for_auth_user_when_image_error_occurs():
+    [data_manager, image_repo, auth_user_id, brand, bytes_, payload] = common_setup({"upload": ImageException()})
+    try:
+        db_write_new_product_for_auth_user(data_manager=data_manager,
+                                           image_repository=image_repo,
+                                           auth_user_id=auth_user_id,
+                                           payload=payload)
+        assert False
+    except ImageException:
+        pass
+    assert data_manager.commit_was_not_called()
+    assert image_repo.upload_was_called_once_with(
+        [f'{brand.id}/{data_manager.session.query(Product).first().id}', bytes_])
 
 
 def common_setup(image_repo_setup):
