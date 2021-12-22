@@ -126,3 +126,17 @@ class MockImageRepo(MockBase):
 
     def upload(self, path, image_base64_encoded):
         return self._spy_time("upload", [path, image_base64_encoded])
+
+    def upload_was_called_once_with(self, args):
+        assert self.received('upload', 1)
+        assert self.received_with_args('upload', args)
+
+    def delete_was_called_once_with(self, args):
+        assert self.received('delete', 1)
+        assert self.received_with_args('delete', args)
+
+    def upload_was_not_called(self):
+        assert self.did_not_receive('upload')
+
+    def delete_was_not_called(self):
+        assert self.did_not_receive('delete')

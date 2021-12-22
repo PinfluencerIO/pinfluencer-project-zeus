@@ -26,6 +26,4 @@ def test_db_write_new_product_for_auth_user_successfully():
     assert product.description == payload['description']
     assert product.requirements == payload['requirements']
     assert product.image == test_image
-    assert image_repo.received('upload', 1)
-    assert image_repo.received_with_args('upload',
-                                         [f'{brand.id}/{data_manager.session.query(Product).first().id}', bytes_])
+    image_repo.upload_was_called_once_with([f'{brand.id}/{data_manager.session.query(Product).first().id}', bytes_])

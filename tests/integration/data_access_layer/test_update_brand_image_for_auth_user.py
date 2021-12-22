@@ -18,10 +18,8 @@ def test_db_write_patch_brand_image_for_auth_user_successfully():
                                                            payload={"image_bytes": bytes_},
                                                            data_manager=data_manager,
                                                            image_repository=image_repo)
-    assert image_repo.received('upload', 1)
-    assert image_repo.received_with_args('upload', [brand.id, bytes_])
-    assert image_repo.received('delete', 1)
-    assert image_repo.received_with_args('delete', [f'{brand.id}/{prev_image}'])
+    image_repo.upload_was_called_once_with([brand.id, bytes_])
+    image_repo.delete_was_called_once_with([f'{brand.id}/{prev_image}'])
     assert brand_in_db.image == next_image
     assert data_manager.received('commit', 1)
 
@@ -37,8 +35,8 @@ def test_db_write_patch_brand_image_when_brand_does_not_exist():
         assert False
     except NoBrandForAuthenticatedUser:
         pass
-    assert image_repo.did_not_receive('upload')
-    assert image_repo.did_not_receive('delete')
+    image_repo.upload_was_not_called()
+    image_repo.delete_was_not_called()
     assert data_manager.did_not_receive('commit')
 
 
@@ -58,9 +56,8 @@ def test_db_write_patch_brand_image_when_upload_image_error_occurs():
         assert False
     except ImageException:
         pass
-    assert image_repo.received('upload', 1)
-    assert image_repo.received_with_args('upload', [brand.id, bytes_])
-    assert image_repo.did_not_receive('delete')
+    image_repo.upload_was_called_once_with([brand.id, bytes_])
+    image_repo.delete_was_not_called()
     brand_in_db = data_manager.session.query(Brand).first()
     assert brand_in_db.image == prev_image
     assert data_manager.did_not_receive('commit')
@@ -82,10 +79,8 @@ def test_db_write_patch_brand_image_when_delete_image_error_occurs():
                                              payload={"image_bytes": bytes_},
                                              data_manager=data_manager,
                                              image_repository=image_repo)
-    assert image_repo.received('upload', 1)
-    assert image_repo.received_with_args('upload', [brand.id, bytes_])
-    assert image_repo.received('delete', 1)
-    assert image_repo.received_with_args('delete', [f'{brand.id}/{prev_image}'])
+    image_repo.upload_was_called_once_with([brand.id, bytes_])
+    image_repo.delete_was_called_once_with([f'{brand.id}/{prev_image}'])
     brand_in_db = data_manager.session.query(Brand).first()
     assert brand_in_db.image == next_image
     assert data_manager.received('commit', 1)
