@@ -1,5 +1,5 @@
 from src.data_access_layer.write_data_access import db_write_patch_product_image_for_auth_user, \
-    NoBrandForAuthenticatedUser
+    NoBrandForAuthenticatedUser, NotFoundException
 from tests import InMemorySqliteDataManager, brand_generator, product_generator, MockImageRepo
 
 
@@ -31,6 +31,24 @@ def test_db_write_patch_product_image_when_brand_does_not_exist():
                                                    image_repository=image_repo)
         assert False
     except NoBrandForAuthenticatedUser:
+        pass
+    assert image_repo.upload_was_not_called()
+    assert image_repo.delete_was_not_called()
+    assert data_manager.no_changes_were_rolled_back_or_committed()
+
+
+def test_db_write_patch_product_image_when_product_does_not_exist():
+    data_manager = InMemorySqliteDataManager()
+    auth_id = "testauthid"
+    data_manager.create_fake_data([brand_generator(1, auth_id)])
+    image_repo = MockImageRepo()
+    try:
+        db_write_patch_product_image_for_auth_user(auth_user_id=auth_id,
+                                                   payload={"product_id": "testid"},
+                                                   data_manager=data_manager,
+                                                   image_repository=image_repo)
+        assert False
+    except NotFoundException:
         pass
     assert image_repo.upload_was_not_called()
     assert image_repo.delete_was_not_called()
