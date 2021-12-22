@@ -21,9 +21,10 @@ def test_db_write_new_product_for_auth_user_successfully():
                                                  image_repository=image_repo,
                                                  auth_user_id=auth_user_id,
                                                  payload=payload)
-    data_manager.commit_was_called_once()
+    assert data_manager.commit_was_called_once()
     assert product.name == payload['name']
     assert product.description == payload['description']
     assert product.requirements == payload['requirements']
     assert product.image == test_image
-    image_repo.upload_was_called_once_with([f'{brand.id}/{data_manager.session.query(Product).first().id}', bytes_])
+    assert image_repo.upload_was_called_once_with(
+        [f'{brand.id}/{data_manager.session.query(Product).first().id}', bytes_])

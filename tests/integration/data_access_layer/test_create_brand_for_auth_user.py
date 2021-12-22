@@ -13,7 +13,7 @@ def test_db_write_new_brand_for_auth_user_when_record_is_written_successfully():
                                                    payload=payload,
                                                    data_manager=data_manager,
                                                    image_repository=image_repo)
-    image_repo.upload_was_called_once_with([f'{brand_in_db.id}', bytes_])
+    assert image_repo.upload_was_called_once_with([f'{brand_in_db.id}', bytes_])
     assert brand_in_db.name == payload['name']
     assert brand_in_db.description == payload['description']
     assert brand_in_db.website == payload['website']
@@ -21,7 +21,7 @@ def test_db_write_new_brand_for_auth_user_when_record_is_written_successfully():
     assert brand_in_db.instahandle == payload['instahandle']
     assert brand_in_db.image == test_image
     assert brand_in_db.auth_user_id == test_auth_id
-    data_manager.commit_was_called_once()
+    assert data_manager.commit_was_called_once()
 
 
 def test_db_write_new_brand_for_auth_user_when_image_error_occurs():
@@ -34,7 +34,7 @@ def test_db_write_new_brand_for_auth_user_when_image_error_occurs():
                                          image_repository=image_repo)
         assert False
     except ImageException:
-        data_manager.commit_was_not_called()
+        assert data_manager.commit_was_not_called()
 
 
 def test_db_write_new_brand_for_auth_user_when_brand_already_exists_for_auth_user():
@@ -49,7 +49,7 @@ def test_db_write_new_brand_for_auth_user_when_brand_already_exists_for_auth_use
                                          image_repository=image_repo)
         assert False
     except AlreadyExistsException:
-        data_manager.commit_was_not_called()
+        assert data_manager.commit_was_not_called()
 
 
 def setup_data(bytes_):

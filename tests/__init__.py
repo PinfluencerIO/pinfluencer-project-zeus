@@ -96,10 +96,10 @@ class InMemorySqliteDataManager(MockBase):
         self.__session.bulk_save_objects(objects=objects)
 
     def commit_was_called_once(self):
-        assert self.received('commit', 1)
+        return self.received('commit', 1)
 
     def commit_was_not_called(self):
-        assert self.did_not_receive('commit')
+        return self.did_not_receive('commit')
 
 
 class StubDataManager:
@@ -134,15 +134,13 @@ class MockImageRepo(MockBase):
         return self._spy_time("upload", [path, image_base64_encoded])
 
     def upload_was_called_once_with(self, args):
-        assert self.received('upload', 1)
-        assert self.received_with_args('upload', args)
+        return self.received('upload', 1) and self.received_with_args('upload', args)
 
     def delete_was_called_once_with(self, args):
-        assert self.received('delete', 1)
-        assert self.received_with_args('delete', args)
+        return self.received('delete', 1) and self.received_with_args('delete', args)
 
     def upload_was_not_called(self):
-        assert self.did_not_receive('upload')
+        return self.did_not_receive('upload')
 
     def delete_was_not_called(self):
-        assert self.did_not_receive('delete')
+        return self.did_not_receive('delete')

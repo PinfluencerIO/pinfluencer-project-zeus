@@ -13,10 +13,10 @@ def test_db_write_patch_brand_image_for_auth_user_successfully():
                                                            payload={"image_bytes": bytes_},
                                                            data_manager=data_manager,
                                                            image_repository=image_repo)
-    image_repo.upload_was_called_once_with([brand.id, bytes_])
-    image_repo.delete_was_called_once_with([f'{brand.id}/{prev_image}'])
+    assert image_repo.upload_was_called_once_with([brand.id, bytes_])
+    assert image_repo.delete_was_called_once_with([f'{brand.id}/{prev_image}'])
     assert brand_in_db.image == next_image
-    data_manager.commit_was_called_once()
+    assert data_manager.commit_was_called_once()
 
 
 def test_db_write_patch_brand_image_when_brand_does_not_exist():
@@ -30,9 +30,9 @@ def test_db_write_patch_brand_image_when_brand_does_not_exist():
         assert False
     except NoBrandForAuthenticatedUser:
         pass
-    image_repo.upload_was_not_called()
-    image_repo.delete_was_not_called()
-    data_manager.commit_was_not_called()
+    assert image_repo.upload_was_not_called()
+    assert image_repo.delete_was_not_called()
+    assert data_manager.commit_was_not_called()
 
 
 def test_db_write_patch_brand_image_when_upload_image_error_occurs():
@@ -46,11 +46,11 @@ def test_db_write_patch_brand_image_when_upload_image_error_occurs():
         assert False
     except ImageException:
         pass
-    image_repo.upload_was_called_once_with([brand.id, bytes_])
-    image_repo.delete_was_not_called()
+    assert image_repo.upload_was_called_once_with([brand.id, bytes_])
+    assert image_repo.delete_was_not_called()
     brand_in_db = data_manager.session.query(Brand).first()
     assert brand_in_db.image == prev_image
-    data_manager.commit_was_not_called()
+    assert data_manager.commit_was_not_called()
 
 
 def test_db_write_patch_brand_image_when_delete_image_error_occurs():
@@ -63,11 +63,11 @@ def test_db_write_patch_brand_image_when_delete_image_error_occurs():
                                              payload={"image_bytes": bytes_},
                                              data_manager=data_manager,
                                              image_repository=image_repo)
-    image_repo.upload_was_called_once_with([brand.id, bytes_])
-    image_repo.delete_was_called_once_with([f'{brand.id}/{prev_image}'])
+    assert image_repo.upload_was_called_once_with([brand.id, bytes_])
+    assert image_repo.delete_was_called_once_with([f'{brand.id}/{prev_image}'])
     brand_in_db = data_manager.session.query(Brand).first()
     assert brand_in_db.image == next_image
-    data_manager.commit_was_called_once()
+    assert data_manager.commit_was_called_once()
 
 
 def common_setup(image_repo_setup):
