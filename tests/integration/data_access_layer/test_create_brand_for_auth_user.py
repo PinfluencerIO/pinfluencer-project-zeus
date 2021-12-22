@@ -21,7 +21,7 @@ def test_db_write_new_brand_for_auth_user_when_record_is_written_successfully():
     assert brand_in_db.instahandle == payload['instahandle']
     assert brand_in_db.image == test_image
     assert brand_in_db.auth_user_id == test_auth_id
-    assert data_manager.received('commit', 1)
+    data_manager.commit_was_called_once()
 
 
 def test_db_write_new_brand_for_auth_user_when_image_error_occurs():
@@ -34,7 +34,7 @@ def test_db_write_new_brand_for_auth_user_when_image_error_occurs():
                                          image_repository=image_repo)
         assert False
     except ImageException:
-        assert data_manager.did_not_receive('commit')
+        data_manager.commit_was_not_called()
 
 
 def test_db_write_new_brand_for_auth_user_when_brand_already_exists_for_auth_user():
@@ -49,7 +49,7 @@ def test_db_write_new_brand_for_auth_user_when_brand_already_exists_for_auth_use
                                          image_repository=image_repo)
         assert False
     except AlreadyExistsException:
-        assert data_manager.did_not_receive('commit')
+        data_manager.commit_was_not_called()
 
 
 def setup_data(bytes_):

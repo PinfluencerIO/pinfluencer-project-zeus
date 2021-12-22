@@ -94,6 +94,12 @@ class InMemorySqliteDataManager(MockBase):
     def create_fake_data(self, objects):
         self.__session.bulk_save_objects(objects=objects)
 
+    def commit_was_called_once(self):
+        assert self.received('commit', 1)
+
+    def commit_was_not_called(self):
+        assert self.did_not_receive('commit')
+
 
 class StubDataManager:
     @property

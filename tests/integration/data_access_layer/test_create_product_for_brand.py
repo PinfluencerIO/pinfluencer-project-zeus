@@ -21,7 +21,7 @@ def test_db_write_new_product_for_auth_user_successfully():
                                                  image_repository=image_repo,
                                                  auth_user_id=auth_user_id,
                                                  payload=payload)
-    assert data_manager.received('commit', 1)
+    data_manager.commit_was_called_once()
     assert product.name == payload['name']
     assert product.description == payload['description']
     assert product.requirements == payload['requirements']
