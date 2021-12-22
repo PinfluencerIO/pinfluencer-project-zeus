@@ -1,4 +1,3 @@
-from src.data_access_layer.brand import Brand
 from src.data_access_layer.image_repository import ImageException
 from src.data_access_layer.write_data_access import db_write_patch_brand_image_for_auth_user, \
     NoBrandForAuthenticatedUser
@@ -48,8 +47,6 @@ def test_db_write_patch_brand_image_when_upload_image_error_occurs():
         pass
     assert image_repo.upload_was_called_once_with([brand.id, bytes_])
     assert image_repo.delete_was_not_called()
-    brand_in_db = data_manager.session.query(Brand).first()
-    assert brand_in_db.image == prev_image
     assert data_manager.changes_were_rolled_back_once()
 
 
@@ -59,13 +56,12 @@ def test_db_write_patch_brand_image_when_delete_image_error_occurs():
         "delete": ImageException(),
         "upload": next_image
     })
-    db_write_patch_brand_image_for_auth_user(auth_user_id=auth_id,
-                                             payload={"image_bytes": bytes_},
-                                             data_manager=data_manager,
-                                             image_repository=image_repo)
+    brand_in_db = db_write_patch_brand_image_for_auth_user(auth_user_id=auth_id,
+                                                           payload={"image_bytes": bytes_},
+                                                           data_manager=data_manager,
+                                                           image_repository=image_repo)
     assert image_repo.upload_was_called_once_with([brand.id, bytes_])
     assert image_repo.delete_was_called_once_with([f'{brand.id}/{prev_image}'])
-    brand_in_db = data_manager.session.query(Brand).first()
     assert brand_in_db.image == next_image
     assert data_manager.changes_were_committed_once()
 
