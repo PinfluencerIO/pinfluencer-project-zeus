@@ -34,7 +34,8 @@ def test_db_write_new_brand_for_auth_user_when_image_error_occurs():
                                          image_repository=image_repo)
         assert False
     except ImageException:
-        assert data_manager.commit_was_not_called()
+        pass
+    assert data_manager.commit_was_not_called()
 
 
 def test_db_write_new_brand_for_auth_user_when_brand_already_exists_for_auth_user():
@@ -49,7 +50,8 @@ def test_db_write_new_brand_for_auth_user_when_brand_already_exists_for_auth_use
                                          image_repository=image_repo)
         assert False
     except AlreadyExistsException:
-        assert data_manager.commit_was_not_called()
+        pass
+    assert data_manager.commit_was_not_called()
 
 
 def setup_data(bytes_):

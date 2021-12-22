@@ -34,4 +34,5 @@ def test_db_write_update_brand_for_auth_user_when_brand_doesnt_exist():
                                             payload={})
         assert False
     except NoBrandForAuthenticatedUser:
-        assert data_manager.commit_was_not_called()
+        pass
+    assert data_manager.commit_was_not_called()
