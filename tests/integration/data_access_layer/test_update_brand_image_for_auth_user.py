@@ -6,14 +6,9 @@ from tests import InMemorySqliteDataManager, MockImageRepo, brand_generator
 
 
 def test_db_write_patch_brand_image_for_auth_user_successfully():
-    data_manager = InMemorySqliteDataManager()
-    auth_id = "testauthid"
-    prev_image = "prev.png"
-    brand = brand_generator(1, auth_id, prev_image)
-    data_manager.create_fake_data([brand])
     next_image = "test.png"
-    bytes_ = "testbytes"
-    image_repo = MockImageRepo({"upload": next_image})
+    [data_manager, image_repo, brand, bytes_, prev_image, auth_id] = common_setup(
+        image_repo_setup={"upload": next_image})
     brand_in_db = db_write_patch_brand_image_for_auth_user(auth_user_id=auth_id,
                                                            payload={"image_bytes": bytes_},
                                                            data_manager=data_manager,
@@ -41,13 +36,8 @@ def test_db_write_patch_brand_image_when_brand_does_not_exist():
 
 
 def test_db_write_patch_brand_image_when_upload_image_error_occurs():
-    data_manager = InMemorySqliteDataManager()
-    auth_id = "testauthid"
-    prev_image = "prev.png"
-    brand = brand_generator(1, auth_id, prev_image)
-    data_manager.create_fake_data([brand])
-    bytes_ = "testbytes"
-    image_repo = MockImageRepo({"upload": ImageException()})
+    [data_manager, image_repo, brand, bytes_, prev_image, auth_id] = common_setup(
+        image_repo_setup={"upload": ImageException()})
     try:
         db_write_patch_brand_image_for_auth_user(auth_user_id=auth_id,
                                                  payload={"image_bytes": bytes_},
@@ -64,14 +54,8 @@ def test_db_write_patch_brand_image_when_upload_image_error_occurs():
 
 
 def test_db_write_patch_brand_image_when_delete_image_error_occurs():
-    data_manager = InMemorySqliteDataManager()
-    auth_id = "testauthid"
-    prev_image = "prev.png"
     next_image = "test.png"
-    brand = brand_generator(1, auth_id, prev_image)
-    data_manager.create_fake_data([brand])
-    bytes_ = "testbytes"
-    image_repo = MockImageRepo({
+    [data_manager, image_repo, brand, bytes_, prev_image, auth_id] = common_setup(image_repo_setup={
         "delete": ImageException(),
         "upload": next_image
     })
@@ -84,3 +68,14 @@ def test_db_write_patch_brand_image_when_delete_image_error_occurs():
     brand_in_db = data_manager.session.query(Brand).first()
     assert brand_in_db.image == next_image
     data_manager.commit_was_called_once()
+
+
+def common_setup(image_repo_setup):
+    data_manager = InMemorySqliteDataManager()
+    auth_id = "testauthid"
+    prev_image = "prev.png"
+    brand = brand_generator(1, auth_id, prev_image)
+    bytes_ = "testbytes"
+    data_manager.create_fake_data([brand])
+    image_repo = MockImageRepo(image_repo_setup)
+    return [data_manager, image_repo, brand, bytes_, prev_image, auth_id]
