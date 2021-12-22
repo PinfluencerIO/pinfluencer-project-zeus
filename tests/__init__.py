@@ -80,7 +80,7 @@ class InMemorySqliteDataManager(MockBase):
         self.__engine = create_engine('sqlite:///:memory:')
         session = sessionmaker(bind=self.__engine)
         self.__session = session()
-        self.__session.rollback = lambda: print("transactions smansactions :P")
+        self.__session.rollback = lambda: self._spy_time('rollback', [])
         self.__session.commit = lambda: self._spy_time('commit', [])
         Base.metadata.create_all(self.__engine)
 
@@ -95,11 +95,14 @@ class InMemorySqliteDataManager(MockBase):
     def create_fake_data(self, objects):
         self.__session.bulk_save_objects(objects=objects)
 
-    def commit_was_called_once(self):
-        return self.received('commit', 1)
+    def changes_were_committed_once(self):
+        return self.received('commit', 1) and self.did_not_receive('rollback')
 
-    def commit_was_not_called(self):
-        return self.did_not_receive('commit')
+    def changes_were_rolled_back_once(self):
+        return self.did_not_receive('commit') and self.received('rollback', 1)
+
+    def no_changes_were_rolled_back_or_committed(self):
+        return self.did_not_receive('commit') and self.did_not_receive('rollback')
 
 
 class StubDataManager:

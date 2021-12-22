@@ -21,7 +21,7 @@ def test_db_write_update_brand_for_auth_user_when_successful():
     assert brand_in_db.description == payload['description']
     assert brand_in_db.website == payload['website']
     assert brand_in_db.instahandle == payload['instahandle']
-    assert data_manager.commit_was_called_once()
+    assert data_manager.changes_were_committed_once()
 
 
 def test_db_write_update_brand_for_auth_user_when_brand_doesnt_exist():
@@ -35,4 +35,4 @@ def test_db_write_update_brand_for_auth_user_when_brand_doesnt_exist():
         assert False
     except NoBrandForAuthenticatedUser:
         pass
-    assert data_manager.commit_was_not_called()
+    assert data_manager.changes_were_rolled_back_once()

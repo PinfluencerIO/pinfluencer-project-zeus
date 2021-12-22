@@ -11,7 +11,7 @@ def test_db_write_new_product_for_auth_user_successfully():
                                                  image_repository=image_repo,
                                                  auth_user_id=auth_user_id,
                                                  payload=payload)
-    assert data_manager.commit_was_called_once()
+    assert data_manager.changes_were_committed_once()
     assert product.name == payload['name']
     assert product.description == payload['description']
     assert product.requirements == payload['requirements']
@@ -31,7 +31,7 @@ def test_db_write_new_product_when_brand_does_not_exist():
         assert False
     except NoBrandForAuthenticatedUser:
         pass
-    assert data_manager.commit_was_not_called()
+    assert data_manager.changes_were_rolled_back_once()
     assert image_repo.upload_was_not_called()
 
 
@@ -45,7 +45,7 @@ def test_db_write_new_product_for_auth_user_when_image_error_occurs():
         assert False
     except ImageException:
         pass
-    assert data_manager.commit_was_not_called()
+    assert data_manager.changes_were_rolled_back_once()
     assert image_repo.upload_was_called_once_with(
         [f'{brand.id}/{data_manager.session.query(Product).first().id}', bytes_])
 

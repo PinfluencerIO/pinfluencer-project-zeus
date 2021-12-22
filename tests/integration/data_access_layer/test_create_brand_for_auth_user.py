@@ -21,7 +21,7 @@ def test_db_write_new_brand_for_auth_user_when_record_is_written_successfully():
     assert brand_in_db.instahandle == payload['instahandle']
     assert brand_in_db.image == test_image
     assert brand_in_db.auth_user_id == test_auth_id
-    assert data_manager.commit_was_called_once()
+    assert data_manager.changes_were_committed_once()
 
 
 def test_db_write_new_brand_for_auth_user_when_image_error_occurs():
@@ -35,7 +35,7 @@ def test_db_write_new_brand_for_auth_user_when_image_error_occurs():
         assert False
     except ImageException:
         pass
-    assert data_manager.commit_was_not_called()
+    assert data_manager.changes_were_rolled_back_once()
 
 
 def test_db_write_new_brand_for_auth_user_when_brand_already_exists_for_auth_user():
@@ -51,7 +51,7 @@ def test_db_write_new_brand_for_auth_user_when_brand_already_exists_for_auth_use
         assert False
     except AlreadyExistsException:
         pass
-    assert data_manager.commit_was_not_called()
+    assert data_manager.no_changes_were_rolled_back_or_committed()
 
 
 def setup_data(bytes_):
