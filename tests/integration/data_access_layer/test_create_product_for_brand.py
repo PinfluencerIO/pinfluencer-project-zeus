@@ -47,7 +47,7 @@ def test_db_write_new_product_for_auth_user_when_image_error_occurs():
         pass
     assert data_manager.changes_were_rolled_back_once()
     assert image_repo.upload_was_called_once_with(
-        [f'{brand.id}/{data_manager.session.query(Product).first().id}', bytes_])
+        [f'{brand.id}/{data_manager.get_last_uncommitted_or_committed_added_entity().id}', bytes_])
 
 
 def common_setup(image_repo_setup):

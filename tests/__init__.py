@@ -82,9 +82,33 @@ class InMemorySqliteDataManager(MockBase):
         self.__engine = create_engine('sqlite:///:memory:')
         session = sessionmaker(bind=self.__engine)
         self.__session = session()
-        self.__session.rollback = lambda: self._spy_time('rollback', [])
-        self.__session.commit = lambda: self._spy_time('commit', [])
+        self.__real_rollback = self.__session.rollback
+        self.__real_commit = self.__session.commit
+        self.__real_add = self.__session.add
+        self.__real_delete = self.__session.delete
+        self.__session.rollback = self.__rollback
+        self.__session.commit = self.__commit
+        self.__session.add = self.__add
+        self.__session.delete = self.__delete
+        self.__added_entities = []
+        self.__deleted_entities = []
         Base.metadata.create_all(self.__engine)
+
+    def __rollback(self):
+        self._spy_time('rollback', [])
+        self.__real_rollback()
+
+    def __commit(self):
+        self._spy_time('commit', [])
+        self.__real_commit()
+
+    def __add(self, entity):
+        self.__added_entities.append(entity)
+        self.__real_add(entity)
+
+    def __delete(self, entity):
+        self.__deleted_entities.append(entity)
+        self.__real_delete(entity)
 
     @property
     def engine(self):
@@ -105,6 +129,12 @@ class InMemorySqliteDataManager(MockBase):
 
     def no_changes_were_rolled_back_or_committed(self):
         return self.did_not_receive('commit') and self.did_not_receive('rollback')
+
+    def get_last_uncommitted_or_committed_added_entity(self):
+        return self.__added_entities.pop()
+
+    def get_last_uncommitted_or_committed_deleted_entity(self):
+        return self.__deleted_entities.pop()
 
 
 class StubDataManager:
