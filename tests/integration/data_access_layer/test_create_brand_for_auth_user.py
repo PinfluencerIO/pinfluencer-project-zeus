@@ -1,3 +1,4 @@
+from src.data_access_layer.brand import Brand
 from src.data_access_layer.image_repository import ImageException
 from src.data_access_layer.write_data_access import db_write_new_brand_for_auth_user, AlreadyExistsException
 from tests import InMemorySqliteDataManager, MockImageRepo, brand_generator
@@ -13,6 +14,7 @@ def test_db_write_new_brand_for_auth_user_when_record_is_written_successfully():
                                                    payload=payload,
                                                    data_manager=data_manager,
                                                    image_repository=image_repo)
+    assert data_manager.session.query(Brand).first().id == brand_in_db.id
     assert image_repo.upload_was_called_once_with([f'{brand_in_db.id}', bytes_])
     assert brand_in_db.name == payload['name']
     assert brand_in_db.description == payload['description']

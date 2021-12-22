@@ -11,13 +11,14 @@ def test_db_write_new_product_for_auth_user_successfully():
                                                  image_repository=image_repo,
                                                  auth_user_id=auth_user_id,
                                                  payload=payload)
+    assert data_manager.session.query(Product).first().id == product.id
     assert data_manager.changes_were_committed_once()
     assert product.name == payload['name']
     assert product.description == payload['description']
     assert product.requirements == payload['requirements']
     assert product.image == test_image
     assert image_repo.upload_was_called_once_with(
-        [f'{brand.id}/{data_manager.session.query(Product).first().id}', bytes_])
+        [f'{brand.id}/{data_manager.get_last_uncommitted_or_committed_added_entity().id}', bytes_])
 
 
 def test_db_write_new_product_when_brand_does_not_exist():
