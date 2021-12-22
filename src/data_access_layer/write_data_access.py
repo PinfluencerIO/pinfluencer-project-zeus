@@ -153,7 +153,10 @@ def delete_product(auth_user_id, product_id, data_manager, image_repository):
         if product is None:
             raise NotFoundException(f'Product {product_id} for brand {brand.id} not found')
 
-        image_repository.delete(path=f'{product.owner.id}/{product.id}/{product.image}')
+        try:
+            image_repository.delete(path=f'{product.owner.id}/{product.id}/{product.image}')
+        except ImageException:
+            print(f'Failed to delete image {product.owner.id}/{product.id}/{product.image}')
         data_manager.session.delete(product)
         data_manager.session.commit()
         return product
