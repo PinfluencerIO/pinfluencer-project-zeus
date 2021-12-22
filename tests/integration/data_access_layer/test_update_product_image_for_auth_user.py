@@ -76,6 +76,25 @@ def test_db_write_patch_product_image_for_auth_user_when_upload_image_error_occu
     assert data_manager.changes_were_rolled_back_once()
 
 
+def test_db_write_patch_product_image_for_auth_user_when_delete_image_error_occurs():
+    next_image = "test.png"
+    [data_manager, image_repo, brand, product, bytes_, prev_image, auth_id] = common_setup(image_repo_setup={
+        "upload": next_image,
+        "delete": ImageException()
+    })
+    brand_in_db = db_write_patch_product_image_for_auth_user(auth_user_id=auth_id,
+                                                             payload={
+                                                                 "image_bytes": bytes_,
+                                                                 "product_id": product.id
+                                                             },
+                                                             data_manager=data_manager,
+                                                             image_repository=image_repo)
+    assert image_repo.upload_was_called_once_with([f'{brand.id}/{product.id}', bytes_])
+    assert image_repo.delete_was_called_once_with([f'{brand.id}/{product.id}/{prev_image}'])
+    assert brand_in_db.image == next_image
+    assert data_manager.changes_were_committed_once()
+
+
 def common_setup(image_repo_setup):
     data_manager = InMemorySqliteDataManager()
     auth_id = "testauthid"
