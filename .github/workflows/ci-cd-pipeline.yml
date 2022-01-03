@@ -28,4 +28,4 @@ jobs:
       run: |
         ls
         echo "==============="
-        ls /tests
+        ls ./tests
