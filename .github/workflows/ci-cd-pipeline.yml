@@ -27,3 +27,4 @@ jobs:
     - name: Test output dump
       run: |
         ls
+        cd tests && ls
