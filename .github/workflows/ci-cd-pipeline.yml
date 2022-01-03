@@ -28,4 +28,5 @@ jobs:
       run: |
         ls
         echo "==============="
-        ls ./tests
+        cd tests
+        ls
