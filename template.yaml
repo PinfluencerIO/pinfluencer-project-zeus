@@ -245,4 +245,7 @@ Outputs:
   PinfluencerGetAllCampaigns:
     Description: "API Gateway endpoint URL Post All Campaigns function"
     Value: !Sub "https://${PinfluencerHttpApi}.execute-api.${AWS::Region}.amazonaws.com/campaigns"
+  PinfluencerGetAllInfluencers:
+    Description: "API Gateway endpoint URL Post All Influencers function"
+    Value: !Sub "https://${PinfluencerHttpApi}.execute-api.${AWS::Region}.amazonaws.com/influencers"
     
