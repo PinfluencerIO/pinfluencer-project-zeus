@@ -95,24 +95,68 @@ Resources:
             Path: /brands/{brand_id}
             Method: get
             ApiId: !Ref PinfluencerHttpApi
+        GetAllInfluencers:
+          Type: HttpApi
+          Properties:
+            Path: /influencers
+            Method: get
+            ApiId: !Ref PinfluencerHttpApi
+        GetInfluencerById:
+          Type: HttpApi
+          Properties:
+            Path: /influencers/{influencer_id}
+            Method: get
+            ApiId: !Ref PinfluencerHttpApi
 
-        GetAllProductsForBrandById:
+        GetAllCampaignsForBrandById:
           Type: HttpApi
           Properties:
-            Path: /brands/{brand_id}/products
+            Path: /brands/{brand_id}/campaigns
             Method: get
             ApiId: !Ref PinfluencerHttpApi
-        GetAllProducts:
+        GetAllCampaigns:
           Type: HttpApi
           Properties:
-            Path: /products
+            Path: /campaigns
             Method: get
             ApiId: !Ref PinfluencerHttpApi
-        GetProductById:
+        GetCampaignById:
           Type: HttpApi
           Properties:
-            Path: /products/{product_id}
+            Path: /campaigns/{campaign_id}
             Method: get
+            ApiId: !Ref PinfluencerHttpApi
+        CreateInfluencer:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /influencers/me
+            Method: post
+            ApiId: !Ref PinfluencerHttpApi
+        GetInfluencer:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /influencers/me
+            Method: get
+            ApiId: !Ref PinfluencerHttpApi
+        UpdateInfluencerImage:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /influencers/me/image
+            Method: patch
+            ApiId: !Ref PinfluencerHttpApi
+        UpdateInfluencer:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /influencers/me
+            Method: put
             ApiId: !Ref PinfluencerHttpApi
         CreateBrand:
           Type: HttpApi
@@ -146,59 +190,59 @@ Resources:
             Path: /brands/me
             Method: put
             ApiId: !Ref PinfluencerHttpApi
-        CreateProduct:
+        CreateCampaign:
           Type: HttpApi
           Properties:
             Auth:
               Authorizer: UserAuth
-            Path: /products/me
+            Path: /campaigns/me
             Method: post
             ApiId: !Ref PinfluencerHttpApi
-        ReadAllProduct:
+        ReadAllCampaign:
           Type: HttpApi
           Properties:
             Auth:
               Authorizer: UserAuth
-            Path: /products/me
+            Path: /campaigns/me
             Method: get
             ApiId: !Ref PinfluencerHttpApi
-        ReadProductById:
+        ReadCampaignById:
           Type: HttpApi
           Properties:
             Auth:
               Authorizer: UserAuth
-            Path: /products/me/{product_id}
+            Path: /campaigns/me/{campaign_id}
             Method: get
             ApiId: !Ref PinfluencerHttpApi
-        UpdateProductById:
+        UpdateCampaignById:
           Type: HttpApi
           Properties:
             Auth:
               Authorizer: UserAuth
-            Path: /products/me/{product_id}
+            Path: /campaigns/me/{campaign_id}
             Method: put
             ApiId: !Ref PinfluencerHttpApi
-        UpdateProductImgeById:
+        UpdateCampaignImgeById:
           Type: HttpApi
           Properties:
             Auth:
               Authorizer: UserAuth
-            Path: /products/me/{product_id}/image
+            Path: /campaigns/me/{campaign_id}/image/{image_num}
             Method: patch
             ApiId: !Ref PinfluencerHttpApi
-        DeleteProductById:
+        DeleteCampaignById:
           Type: HttpApi
           Properties:
             Auth:
               Authorizer: UserAuth
-            Path: /products/me/{product_id}
+            Path: /campaigns/me/{campaign_id}
             Method: delete
             ApiId: !Ref PinfluencerHttpApi
 Outputs:
   PinfluencerGetAllBrands:
     Description: "API Gateway endpoint URL Get All Brands function"
     Value: !Sub "https://${PinfluencerHttpApi}.execute-api.${AWS::Region}.amazonaws.com/brands"
-  PinfluencerGetAllProducts:
-    Description: "API Gateway endpoint URL Post All Products function"
-    Value: !Sub "https://${PinfluencerHttpApi}.execute-api.${AWS::Region}.amazonaws.com/products"
+  PinfluencerGetAllCampaigns:
+    Description: "API Gateway endpoint URL Post All Campaigns function"
+    Value: !Sub "https://${PinfluencerHttpApi}.execute-api.${AWS::Region}.amazonaws.com/campaigns"
     
