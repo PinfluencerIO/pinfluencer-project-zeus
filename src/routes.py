@@ -53,13 +53,13 @@ class Routes:
                                                                        self.__container.image_repository),
 
             # authenticated influencer endpoints
-            'GET /influencer/me': ProcessOkResponse(),
+            'GET /influencers/me': ProcessOkResponse(),
 
-            'POST /influencer/me': ProcessOkResponse(),
+            'POST /influencers/me': ProcessOkResponse(),
 
-            'PUT /influencer/me': ProcessOkResponse(),
+            'PUT /influencers/me': ProcessOkResponse(),
 
-            'PATCH /influencer/me/image': ProcessOkResponse(),
+            'PATCH /influencers/me/image': ProcessOkResponse(),
 
             # authenticated campaign endpoints
             'GET /campaigns/me': ProcessOkResponse(),
