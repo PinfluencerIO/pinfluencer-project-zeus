@@ -31,6 +31,10 @@ class Routes:
 
             'GET /campaigns/{campaign_id}': ProcessOkResponse(),
 
+            'GET /influencers': ProcessOkResponse(),
+
+            'GET /influencers/{influencer_id}': ProcessOkResponse(),
+
             # authenticated brand endpoints
             'GET /brands/me': ProcessGetForAuthenticatedUser(load_brand_for_authenticated_user,
                                                              self.__container.data_manager),
@@ -48,6 +52,15 @@ class Routes:
                                                                        self.__container.data_manager,
                                                                        self.__container.image_repository),
 
+            # authenticated influencer endpoints
+            'GET /influencer/me': ProcessOkResponse(),
+
+            'POST /influencer/me': ProcessOkResponse(),
+
+            'PUT /influencer/me': ProcessOkResponse(),
+
+            'PATCH /influencer/me/image': ProcessOkResponse(),
+
             # authenticated campaign endpoints
             'GET /campaigns/me': ProcessOkResponse(),
 
@@ -57,7 +70,7 @@ class Routes:
 
             'PUT /campaigns/me/{campaign_id}': ProcessOkResponse(),
 
-            'PATCH /campaigns/me/{campaign_id}/image': ProcessOkResponse(),
+            'PATCH /campaigns/me/{campaign_id}/image/{image_num}': ProcessOkResponse(),
 
             'DELETE /campaigns/me/{campaign_id}': ProcessOkResponse(),
         })
