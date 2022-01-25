@@ -1,0 +1,630 @@
+openapi: 3.0.0
+info:
+  title: "pin-v2"
+  version: "2022-01-25 16:36:50UTC"
+servers:
+- url: "https://damegcte71.execute-api.eu-west-2.amazonaws.com/{basePath}"
+  variables:
+    basePath:
+      default: ""
+paths:
+  # Get, Update, Delete a BRAND
+  /brand/{id}:
+    get:
+      responses:
+        default:
+          description: "Default response for GET /brand/{id}"
+    x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-brand/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+    put:
+      responses:
+        default:
+          description: "Default response for PUT /brand/{id}"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-brand/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+    delete:
+      responses:
+        default:
+          description: "Default response for DELETE /brand/{id}"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-brand/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+    parameters:
+    - name: "id"
+      in: "path"
+      description: "Generated path parameter for id"
+      required: true
+      schema:
+        type: "string"
+ 
+  # Get, Update, Delete a CAMPAIGN
+  /campaign/{id}:
+    get:
+      responses:
+        default:
+          description: "Default response for GET /campaign/{id}"
+    x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-campaign/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+    put:
+      responses:
+        default:
+          description: "Default response for PUT /campaign/{id}"
+    x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-campaign/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+    delete:
+      responses:
+        default:
+          description: "Default response for DELETE /campaign/{id}"
+    x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-campaign/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+    parameters:
+    - name: "id"
+      in: "path"
+      description: "Generated path parameter for id"
+      required: true
+      schema:
+        type: "string"
+  
+  # Get, Update, Delete a COLLABORATION  
+  /collaboration/{id}:
+    get:
+      responses:
+        default:
+          description: "Default response for GET /collaboration/{id}"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-collaboration/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+    put:
+      responses:
+        default:
+          description: "Default response for PUT /collaboration/{id}"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-collaboration/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+    delete:
+      responses:
+        default:
+          description: "Default response for DELETE /collaboration/{id}"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-collaboration/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+    parameters:
+    - name: "id"
+      in: "path"
+      description: "Generated path parameter for id"
+      required: true
+      schema:
+        type: "string"
+  
+  # Get, Update, Delete a INFLUENCER  
+  /influencer/{id}:
+    get:
+      responses:
+        default:
+          description: "Default response for GET /influencer/{id}"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-influencer/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+    put:
+      responses:
+        default:
+          description: "Default response for PUT /influencer/{id}"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-influencer/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+    delete:
+      responses:
+        default:
+          description: "Default response for DELETE /influencer/{id}"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-influencer/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+    parameters:
+    - name: "id"
+      in: "path"
+      description: "Generated path parameter for id"
+      required: true
+      schema:
+        type: "string"
+ 
+  # List all BRANDS
+  /brand:
+    get:
+      responses:
+        default:
+          description: "Default response for GET /brand"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-brand/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+  
+  # List all INFLUENCERS
+  /influencer:
+    get:
+      responses:
+        default:
+          description: "Default response for GET /influencer"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-influencer/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+
+  # List all CAMPAIGN  
+  /campaign:
+    get:
+      responses:
+        default:
+          description: "Default response for GET /campaign"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-campaign/invocations"
+        connectionType: "INTERNET"
+
+  # List all COLLABORATIONS. Create new COLLABORATION
+  /collaboration:
+    get:
+      responses:
+        default:
+          description: "Default response for GET /collaboration"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-collaboration/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+    post:
+      responses:
+        default:
+          description: "Default response for POST /collaboration"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-collaboration/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+
+  # Get, Update, Delete a COLLABORATION
+  /collaboration/{id}:  
+    get:
+      responses:
+        default:
+          description: "Default response for GET /collaboration/{id}"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-collaboration/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+    put:
+      responses:
+        default:
+          description: "Default response for PUT /collaboration/{id}"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-collaboration/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+    parameters:
+    - name: "id"
+      in: "path"
+      description: "Generated path parameter for id"
+      required: true
+      schema:
+        type: "string"
+
+  # Create step 1 TO 5 of user ONBOARDING
+  /onboarding/step1:
+    post:
+      responses:
+        default:
+          description: "Default response for POST /onboarding/step1"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-onboarding/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+  /onboarding/step2:
+    post:
+      responses:
+        default:
+          description: "Default response for POST /onboarding/step2"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-onboarding/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+  /onboarding/step3:
+    post:
+      responses:
+        default:
+          description: "Default response for POST /onboarding/step3"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-onboarding/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+  /onboarding/step4:
+    post:
+      responses:
+        default:
+          description: "Default response for POST /onboarding/step4"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-onboarding/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+  /onboarding/step5:
+    post:
+      responses:
+        default:
+          description: "Default response for POST /onboarding/step5"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-onboarding/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+
+  # Get, Update step 1 TO 5 of user ONBOARDING
+  /onboarding/step1/{id}:
+    get:
+      responses:
+        default:
+          description: "Default response for GET /onboarding/step1/{id}"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-onboarding/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+    put:
+      responses:
+        default:
+          description: "Default response for PUT /onboarding/step1/{id}"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-onboarding/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+    parameters:
+    - name: "id"
+      in: "path"
+      description: "Generated path parameter for id"
+      required: true
+      schema:
+        type: "string"
+  /onboarding/step2/{id}:
+    get:
+      responses:
+        default:
+          description: "Default response for GET /onboarding/step2/{id}"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-onboarding/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+    put:
+      responses:
+        default:
+          description: "Default response for PUT /onboarding/step2/{id}"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-onboarding/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+    parameters:
+    - name: "id"
+      in: "path"
+      description: "Generated path parameter for id"
+      required: true
+      schema:
+        type: "string"
+  /onboarding/step3/{id}:
+    get:
+      responses:
+        default:
+          description: "Default response for GET /onboarding/step3/{id}"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-onboarding/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+    put:
+      responses:
+        default:
+          description: "Default response for PUT /onboarding/step3/{id}"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-onboarding/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+    parameters:
+    - name: "id"
+      in: "path"
+      description: "Generated path parameter for id"
+      required: true
+      schema:
+        type: "string"
+  /onboarding/step4/{id}:
+    get:
+      responses:
+        default:
+          description: "Default response for GET /onboarding/step4/{id}"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-onboarding/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+    put:
+      responses:
+        default:
+          description: "Default response for PUT /onboarding/step4/{id}"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-onboarding/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+    parameters:
+    - name: "id"
+      in: "path"
+      description: "Generated path parameter for id"
+      required: true
+      schema:
+        type: "string"
+  /onboarding/step5/{id}:
+    get:
+      responses:
+        default:
+          description: "Default response for GET /onboarding/step5/{id}"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-onboarding/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+    put:
+      responses:
+        default:
+          description: "Default response for PUT /onboarding/step5/{id}"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-onboarding/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+    parameters:
+    - name: "id"
+      in: "path"
+      description: "Generated path parameter for id"
+      required: true
+      schema:
+        type: "string"
+
+  # Create step 1 TO 3 of CAMPAIGN
+  /campaign/step1:
+    post:
+      responses:
+        default:
+          description: "Default response for POST /campaign/step1"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-campaign/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+  /campaign/step2:
+    post:
+      responses:
+        default:
+          description: "Default response for POST /campaign/step2"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-campaign/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+  /campaign/step3:
+    post:
+      responses:
+        default:
+          description: "Default response for POST /campaign/step3"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-campaign/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+
+  # Get, Update step 1 TO 3 of CAMPAIGN
+  /campaign/step1/{id}:
+    get:
+      responses:
+        default:
+          description: "Default response for GET /campaign/step1/{id}"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-campaign/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+    put:
+      responses:
+        default:
+          description: "Default response for PUT /campaign/step1/{id}"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-campaign/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+    parameters:
+    - name: "id"
+      in: "path"
+      description: "Generated path parameter for id"
+      required: true
+      schema:
+        type: "string"
+  /campaign/step2/{id}:
+    get:
+      responses:
+        default:
+          description: "Default response for GET /campaign/step2/{id}"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-campaign/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+    put:
+      responses:
+        default:
+          description: "Default response for PUT /campaign/step2/{id}"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-campaign/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+    parameters:
+    - name: "id"
+      in: "path"
+      description: "Generated path parameter for id"
+      required: true
+      schema:
+        type: "string"
+  /campaign/step3/{id}:
+    get:
+      responses:
+        default:
+          description: "Default response for GET /campaign/step3/{id}"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-campaign/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+    put:
+      responses:
+        default:
+          description: "Default response for PUT /campaign/step3/{id}"
+      x-amazon-apigateway-integration:
+        payloadFormatVersion: "2.0"
+        type: "aws_proxy"
+        httpMethod: "POST"
+        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-campaign/invocations"
+        connectionType: "INTERNET"
+        timeoutInMillis: 30000
+    parameters:
+    - name: "id"
+      in: "path"
+      description: "Generated path parameter for id"
+      required: true
+      schema:
+        type: "string"
+
+x-amazon-apigateway-cors:
+  allowMethods:
+  - "*"
+  maxAge: 0
+  allowCredentials: false
+x-amazon-apigateway-importexport-version: "1.0"
