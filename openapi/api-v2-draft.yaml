@@ -1,12 +1,6 @@
-openapi: 3.0.0
+openapi: 3.0.1
 info:
   title: "pin-v2"
-  version: "2022-01-25 16:36:50UTC"
-servers:
-- url: "https://damegcte71.execute-api.eu-west-2.amazonaws.com/{basePath}"
-  variables:
-    basePath:
-      default: ""
 paths:
   # Get, Update, Delete a BRAND
   /brand/{id}:
@@ -57,7 +51,7 @@ paths:
       responses:
         default:
           description: "Default response for GET /campaign/{id}"
-    x-amazon-apigateway-integration:
+      x-amazon-apigateway-integration:
         payloadFormatVersion: "2.0"
         type: "aws_proxy"
         httpMethod: "POST"
@@ -68,7 +62,7 @@ paths:
       responses:
         default:
           description: "Default response for PUT /campaign/{id}"
-    x-amazon-apigateway-integration:
+      x-amazon-apigateway-integration:
         payloadFormatVersion: "2.0"
         type: "aws_proxy"
         httpMethod: "POST"
@@ -79,7 +73,7 @@ paths:
       responses:
         default:
           description: "Default response for DELETE /campaign/{id}"
-    x-amazon-apigateway-integration:
+      x-amazon-apigateway-integration:
         payloadFormatVersion: "2.0"
         type: "aws_proxy"
         httpMethod: "POST"
@@ -245,38 +239,6 @@ paths:
         uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-collaboration/invocations"
         connectionType: "INTERNET"
         timeoutInMillis: 30000
-
-  # Get, Update, Delete a COLLABORATION
-  /collaboration/{id}:  
-    get:
-      responses:
-        default:
-          description: "Default response for GET /collaboration/{id}"
-      x-amazon-apigateway-integration:
-        payloadFormatVersion: "2.0"
-        type: "aws_proxy"
-        httpMethod: "POST"
-        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-collaboration/invocations"
-        connectionType: "INTERNET"
-        timeoutInMillis: 30000
-    put:
-      responses:
-        default:
-          description: "Default response for PUT /collaboration/{id}"
-      x-amazon-apigateway-integration:
-        payloadFormatVersion: "2.0"
-        type: "aws_proxy"
-        httpMethod: "POST"
-        uri: "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:324303852622:function:pin-v2-collaboration/invocations"
-        connectionType: "INTERNET"
-        timeoutInMillis: 30000
-    parameters:
-    - name: "id"
-      in: "path"
-      description: "Generated path parameter for id"
-      required: true
-      schema:
-        type: "string"
 
   # Create step 1 TO 5 of user ONBOARDING
   /onboarding/step1:
