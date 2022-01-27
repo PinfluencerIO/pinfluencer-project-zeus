@@ -17,21 +17,17 @@ class Routes:
 
     @property
     def routes(self):
-        return OrderedDict({
-            # public endpoints
-            'GET /feed': ProcessGetCollection('brand', load_max_3_products_for_brand, self.__container.data_manager),
+
+        feed = OrderedDict(
+            {'GET /feed': ProcessGetCollection('brand', load_max_3_products_for_brand, self.__container.data_manager)}
+        )
+
+        users = OrderedDict(
+            {
 
             'GET /brands': ProcessGetCollection('brand', load_collection, self.__container.data_manager),
 
             'GET /brands/{brand_id}': ProcessGetBy(load_by_id, 'brand', self.__container.data_manager),
-
-            'GET /brands/{brand_id}/campaigns': ProcessOkResponse(),
-
-            'GET /campaigns': ProcessOkResponse(),
-
-            'GET /campaigns/{campaign_id}': ProcessOkResponse(),
-
-            'GET /influencers': ProcessOkResponse(),
 
             'GET /influencers/{influencer_id}': ProcessOkResponse(),
 
@@ -60,17 +56,15 @@ class Routes:
             'PUT /influencers/me': ProcessOkResponse(),
 
             'PATCH /influencers/me/image': ProcessOkResponse(),
+        }
+        )
 
-            # authenticated campaign endpoints
-            'GET /campaigns/me': ProcessOkResponse(),
+        campaigns = OrderedDict(
+            {}
+        )
 
-            'GET /campaigns/me/{campaign_id}': ProcessOkResponse(),
-
-            'POST /campaigns/me': ProcessOkResponse(),
-
-            'PUT /campaigns/me/{campaign_id}': ProcessOkResponse(),
-
-            'PATCH /campaigns/me/{campaign_id}/image/{image_num}': ProcessOkResponse(),
-
-            'DELETE /campaigns/me/{campaign_id}': ProcessOkResponse(),
-        })
+        routes = {}
+        routes.update(feed)
+        routes.update(users)
+        routes.update(campaigns)
+        return routes
