@@ -76,13 +76,14 @@ Resources:
       Handler: src/app.lambda_handler
       Runtime: python3.9
       Events:
-#        PUBLIC Endpoints
+        #PUBLIC Endpoints START
         Feed:
           Type: HttpApi
           Properties:
             Path: /feed
             Method: get
             ApiId: !Ref PinfluencerHttpApi
+
         GetAllBrands:
           Type: HttpApi
           Properties:
@@ -95,6 +96,7 @@ Resources:
             Path: /brands/{brand_id}
             Method: get
             ApiId: !Ref PinfluencerHttpApi
+
         GetAllInfluencers:
           Type: HttpApi
           Properties:
@@ -107,26 +109,10 @@ Resources:
             Path: /influencers/{influencer_id}
             Method: get
             ApiId: !Ref PinfluencerHttpApi
+        #PUBLIC Endpoints END
 
-        GetAllCampaignsForBrandById:
-          Type: HttpApi
-          Properties:
-            Path: /brands/{brand_id}/campaigns
-            Method: get
-            ApiId: !Ref PinfluencerHttpApi
-        GetAllCampaigns:
-          Type: HttpApi
-          Properties:
-            Path: /campaigns
-            Method: get
-            ApiId: !Ref PinfluencerHttpApi
-        GetCampaignById:
-          Type: HttpApi
-          Properties:
-            Path: /campaigns/{campaign_id}
-            Method: get
-            ApiId: !Ref PinfluencerHttpApi
-        CreateInfluencer:
+        #Authenticated Influencer endpoints START
+        CreateMyInfluencer:
           Type: HttpApi
           Properties:
             Auth:
@@ -134,7 +120,7 @@ Resources:
             Path: /influencers/me
             Method: post
             ApiId: !Ref PinfluencerHttpApi
-        GetInfluencer:
+        GetMyInfluencer:
           Type: HttpApi
           Properties:
             Auth:
@@ -142,7 +128,7 @@ Resources:
             Path: /influencers/me
             Method: get
             ApiId: !Ref PinfluencerHttpApi
-        UpdateInfluencerImage:
+        UpdateMyInfluencerImage:
           Type: HttpApi
           Properties:
             Auth:
@@ -150,7 +136,7 @@ Resources:
             Path: /influencers/me/image
             Method: patch
             ApiId: !Ref PinfluencerHttpApi
-        UpdateInfluencer:
+        UpdateMyInfluencer:
           Type: HttpApi
           Properties:
             Auth:
@@ -158,7 +144,10 @@ Resources:
             Path: /influencers/me
             Method: put
             ApiId: !Ref PinfluencerHttpApi
-        CreateBrand:
+        #Authenticated Influencer endpoints END
+
+        #Authenticated Brand endpoints START
+        CreateMyBrand:
           Type: HttpApi
           Properties:
             Auth:
@@ -166,7 +155,7 @@ Resources:
             Path: /brands/me
             Method: post
             ApiId: !Ref PinfluencerHttpApi
-        GetBrand:
+        GetMyBrand:
           Type: HttpApi
           Properties:
             Auth:
@@ -174,7 +163,7 @@ Resources:
             Path: /brands/me
             Method: get
             ApiId: !Ref PinfluencerHttpApi
-        UpdateBrandImage:
+        UpdateMyBrandImage:
           Type: HttpApi
           Properties:
             Auth:
@@ -182,7 +171,7 @@ Resources:
             Path: /brands/me/image
             Method: patch
             ApiId: !Ref PinfluencerHttpApi
-        UpdateBrand:
+        UpdateMyBrand:
           Type: HttpApi
           Properties:
             Auth:
@@ -190,7 +179,10 @@ Resources:
             Path: /brands/me
             Method: put
             ApiId: !Ref PinfluencerHttpApi
-        CreateCampaign:
+        #Authenticated Brand endpoints END
+
+        #Authenticated Campaign endpoints START
+        CreateMyCampaign:
           Type: HttpApi
           Properties:
             Auth:
@@ -198,7 +190,7 @@ Resources:
             Path: /campaigns/me
             Method: post
             ApiId: !Ref PinfluencerHttpApi
-        ReadAllCampaign:
+        GetAllMyCampaigns:
           Type: HttpApi
           Properties:
             Auth:
@@ -206,7 +198,7 @@ Resources:
             Path: /campaigns/me
             Method: get
             ApiId: !Ref PinfluencerHttpApi
-        ReadCampaignById:
+        GetMyCampaignById:
           Type: HttpApi
           Properties:
             Auth:
@@ -214,7 +206,7 @@ Resources:
             Path: /campaigns/me/{campaign_id}
             Method: get
             ApiId: !Ref PinfluencerHttpApi
-        UpdateCampaignById:
+        UpdateMyCampaignById:
           Type: HttpApi
           Properties:
             Auth:
@@ -222,15 +214,7 @@ Resources:
             Path: /campaigns/me/{campaign_id}
             Method: put
             ApiId: !Ref PinfluencerHttpApi
-        UpdateCampaignImgeById:
-          Type: HttpApi
-          Properties:
-            Auth:
-              Authorizer: UserAuth
-            Path: /campaigns/me/{campaign_id}/image/{image_num}
-            Method: patch
-            ApiId: !Ref PinfluencerHttpApi
-        DeleteCampaignById:
+        DeleteMyCampaignById:
           Type: HttpApi
           Properties:
             Auth:
@@ -238,14 +222,8 @@ Resources:
             Path: /campaigns/me/{campaign_id}
             Method: delete
             ApiId: !Ref PinfluencerHttpApi
+        #Authenticated Campaign endpoints END
 Outputs:
-  PinfluencerGetAllBrands:
-    Description: "API Gateway endpoint URL Get All Brands function"
-    Value: !Sub "https://${PinfluencerHttpApi}.execute-api.${AWS::Region}.amazonaws.com/brands"
-  PinfluencerGetAllCampaigns:
-    Description: "API Gateway endpoint URL Post All Campaigns function"
-    Value: !Sub "https://${PinfluencerHttpApi}.execute-api.${AWS::Region}.amazonaws.com/campaigns"
-  PinfluencerGetAllInfluencers:
-    Description: "API Gateway endpoint URL Post All Influencers function"
-    Value: !Sub "https://${PinfluencerHttpApi}.execute-api.${AWS::Region}.amazonaws.com/influencers"
-    
+  PinfluencerBaseUrl:
+    Description: "Base URL for Pinfluencer API"
+    Value: !Sub "https://${PinfluencerHttpApi}.execute-api.${AWS::Region}.amazonaws.com/"

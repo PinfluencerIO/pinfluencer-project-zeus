@@ -2,7 +2,6 @@ import os
 from unittest.mock import patch
 
 from src.container import Container
-from src.data_access_layer import to_list
 from src.routes import Routes
 
 
