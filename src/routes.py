@@ -4,6 +4,7 @@ from src.data_access_layer.read_data_access import load_max_3_products_for_brand
     load_brand_for_authenticated_user
 from src.data_access_layer.write_data_access import db_write_new_brand_for_auth_user, \
     db_write_update_brand_for_auth_user, db_write_patch_brand_image_for_auth_user
+from src.processors.get_all_campaigns import GetAllMyCampaigns
 from src.processors.get_by_id import ProcessGetBy
 from src.processors.get_collection import ProcessGetCollection
 from src.processors.get_for_auth_user import ProcessGetForAuthenticatedUser
@@ -60,7 +61,7 @@ class Routes:
         )
 
         campaigns = OrderedDict(
-            {}
+            {'GET /campaigns/me': GetAllMyCampaigns()}
         )
 
         routes = {}
