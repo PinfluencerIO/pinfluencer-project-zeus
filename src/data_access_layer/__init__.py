@@ -2,6 +2,7 @@ import uuid
 from abc import abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
+from enum import Enum
 
 from sqlalchemy import Column, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
@@ -32,3 +33,17 @@ def to_list(data):
     for data_item in data:
         data_dict.append(data_item.as_dict())
     return data_dict
+
+
+class ValueEnum(Enum):
+    Sustainable = "Sustainable"
+    Organic = "Organic"
+    Recycled = "Recycled"
+    Vegan = "Vegan"
+
+
+class CategoryEnum(Enum):
+    Food = "Food"
+    Fashion = "Fashion"
+    Fitness = "Fitness"
+    Pet = "Pet"
