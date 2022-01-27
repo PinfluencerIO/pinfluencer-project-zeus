@@ -1,7 +1,7 @@
 {
    "version":"2.0",
-   "routeKey":"GET /feed",
-   "rawPath":"/feed",
+   "routeKey":"GET /campaigns/me",
+   "rawPath":"/campaigns/me",
    "rawQueryString":"",
    "headers":{
       "accept":"*/*",
@@ -46,13 +46,13 @@
       "domainPrefix":"7uwicgrhm1",
       "http":{
          "method":"GET",
-         "path":"/feed",
+         "path":"/campaigns/me",
          "protocol":"HTTP/1.1",
          "sourceIp":"198.90.85.149",
          "userAgent":"PostmanRuntime/7.28.4"
       },
       "requestId":"KTpXRhmirPEEMRA=",
-      "routeKey":"GET /feed",
+      "routeKey":"GET /campaigns/me",
       "stage":"$default",
       "time":"13/Dec/2021:21:33:34 +0000",
       "timeEpoch":1639431214365

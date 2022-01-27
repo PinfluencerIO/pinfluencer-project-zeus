@@ -37,17 +37,17 @@ def new_brand_event_invalid():
     return data
 
 
-def test_do_process_write_new(new_brand_event):
+def test_do_process_write_new(event):
     process = ProcessWriteForAuthenticatedUser('brand', 'post', mock_db_write, StubDataManager(), StubImageRepo())
-    pinfluencer_response = process.do_process(new_brand_event)
+    pinfluencer_response = process.do_process(event)
 
     assert pinfluencer_response.is_ok() is True
     assert pinfluencer_response.status_code == 201
 
 
-def test_do_process_write_update(new_brand_event):
+def test_do_process_write_update(event):
     process = ProcessWriteForAuthenticatedUser('brand', 'put', mock_db_write, StubDataManager(), StubImageRepo())
-    pinfluencer_response = process.do_process(new_brand_event)
+    pinfluencer_response = process.do_process(event)
 
     assert pinfluencer_response.is_ok() is True
     assert pinfluencer_response.status_code == 200
@@ -62,9 +62,9 @@ def test_do_process_write_failed_validation(new_brand_event_invalid):
     assert pinfluencer_response.status_code == 400
 
 
-def test_do_process_write_failed_db_update(new_brand_event):
+def test_do_process_write_failed_db_update(event):
     process = ProcessWriteForAuthenticatedUser('brand', 'post', mock_db_write_none, StubDataManager(), StubImageRepo())
-    pinfluencer_response = process.do_process(new_brand_event)
+    pinfluencer_response = process.do_process(event)
 
     assert pinfluencer_response.is_ok() is False
     assert pinfluencer_response.status_code == 404
