@@ -19,7 +19,7 @@ class Routes:
     def routes(self):
 
         feed = OrderedDict(
-            {'GET /feed': ProcessGetCollection('brand', load_max_3_products_for_brand, self.__container.data_manager)}
+            {'GET /feed': ProcessOkResponse()}
         )
 
         users = OrderedDict(
