@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 
-from sqlalchemy import Column, String, DateTime, ARRAY
+from sqlalchemy import Column, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 
 PRODUCT_TBL_NAME = 'product'
@@ -60,10 +60,11 @@ class CategoryEnum(Enum):
     Category9 = "Category9"
     Category10 = "Category10"
 
+
 class BaseUser(BaseEntity, ABC):
     first_name: str = Column(type_=String(length=120), nullable=False)
     last_name: str = Column(type_=String(length=120), nullable=False)
     email: str = Column(type_=String(length=120), nullable=False)
-    values: list[ValueEnum] = Column(type_=ARRAY(String), nullable=False)
-    categories: list[CategoryEnum] = Column(type_=ARRAY(String), nullable=False)
+    auth_user_id: str = Column(type_=String(length=64), nullable=False, unique=True)
+
 
