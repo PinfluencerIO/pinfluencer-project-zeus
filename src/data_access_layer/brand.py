@@ -20,17 +20,18 @@ class Brand(Base, BaseUser):
 
     # TODO: implement
     def as_dict(self):
-        return {
-            "id": self.id,
-            "created": self.created,
+        dict = super().as_dict()
+        dict.update({
             "name": self.name,
             "description": self.description,
-            "website": self.website,
-            "email": self.email,
+            "header_image": self.header_image,
+            "values": self.values,
+            "categories": self.categories,
             "instahandle": self.instahandle,
-            "image": self.image,
-            "auth_user_id": self.auth_user_id
-        }
+            "website": self.website,
+            "logo": self.logo
+        })
+        return dict
 
 
 # TODO: implement

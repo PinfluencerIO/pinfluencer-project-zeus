@@ -1,5 +1,4 @@
 import uuid
-from abc import abstractmethod, ABC
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
@@ -20,9 +19,11 @@ class BaseEntity:
     id: str = Column(String(length=36), primary_key=True, default=uuid4_str, nullable=False)
     created: datetime = Column(DateTime, nullable=False, default=datetime.utcnow)
 
-    @abstractmethod
     def as_dict(self):
-        pass
+        return {
+            "id": self.id,
+            "created": self.created
+        }
 
 
 Base = declarative_base()
@@ -61,10 +62,18 @@ class CategoryEnum(Enum):
     Category10 = "Category10"
 
 
-class BaseUser(BaseEntity, ABC):
+class BaseUser(BaseEntity):
     first_name: str = Column(type_=String(length=120), nullable=False)
     last_name: str = Column(type_=String(length=120), nullable=False)
     email: str = Column(type_=String(length=120), nullable=False)
     auth_user_id: str = Column(type_=String(length=64), nullable=False, unique=True)
 
-
+    def as_dict(self):
+        dict = super().as_dict()
+        dict.update({
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "email": self.email,
+            "auth_user_id": self.auth_user_id
+        })
+        return dict
