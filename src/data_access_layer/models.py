@@ -1,5 +1,5 @@
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 
@@ -9,24 +9,24 @@ def uuid4_str():
 
 
 class GenderEnum(Enum):
-    Male = "Male"
-    Female = "Female"
+    MALE = "MALE"
+    FEMALE = "FEMALE"
 
 
 @dataclass
 class Metric:
-    Value: float
+    value: float = 0.0
 
 
 @dataclass
 class AudienceAge(Metric):
-    Min: int
-    Max: int
+    min: int = 0
+    max: int = 0
 
 
 @dataclass
 class AudienceGender(Metric):
-    Gender: GenderEnum
+    gender: GenderEnum = GenderEnum.MALE
 
 
 class ValueEnum(Enum):
@@ -43,16 +43,16 @@ class ValueEnum(Enum):
 
 
 class CategoryEnum(Enum):
-    Food = "Food"
-    Fashion = "Fashion"
-    Fitness = "Fitness"
-    Pet = "Pet"
-    Category5 = "Category5"
-    Category6 = "Category6"
-    Category7 = "Category7"
-    Category8 = "Category8"
-    Category9 = "Category9"
-    Category10 = "Category10"
+    FOOD = "FOOD"
+    FASHION = "FASHION"
+    FITNESS = "FITNESS"
+    PET = "PET"
+    CATEGORY5 = "CATEGORY5"
+    CATEGORY6 = "CATEGORY6"
+    CATEGORY7 = "CATEGORY7"
+    CATEGORY8 = "CATEGORY8"
+    CATEGORY9 = "CATEGORY9"
+    CATEGORY10 = "CATEGORY10"
 
 
 class Model:
@@ -62,32 +62,32 @@ class Model:
 
 @dataclass
 class User(Model):
-    first_name: str
-    last_name: str
-    email: str
-    auth_user_id: str
+    first_name: str = ""
+    last_name: str = ""
+    email: str = ""
+    auth_user_id: str = ""
 
 
 @dataclass
 class Brand(User):
-    name: str
-    description: str
-    website: str
-    logo: str
-    header_image: str
-    instahandle: str
-    values: list[ValueEnum]
-    categories: list[CategoryEnum]
+    name: str = ""
+    description: str = ""
+    website: str = ""
+    logo: str = ""
+    header_image: str = ""
+    instahandle: str = ""
+    values: list[ValueEnum] = field(default_factory=list)
+    categories: list[CategoryEnum] = field(default_factory=list)
 
 
 @dataclass
 class Influencer(User):
-    instahandle: str
-    name: str
-    website: str
-    bio: str
-    image: str
-    audience_age_split: list[AudienceAge]
-    audience_gender_split: list[AudienceGender]
-    values: list[ValueEnum]
-    categories: list[CategoryEnum]
+    instahandle = ""
+    name = ""
+    website = ""
+    bio = ""
+    image = ""
+    audience_age_split = []
+    audience_gender_split = []
+    values = []
+    categories = []
