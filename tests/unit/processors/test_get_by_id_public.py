@@ -1,3 +1,4 @@
+import uuid
 from unittest.mock import Mock, MagicMock
 
 from src.processors.get_by_id import ProcessGetBy
@@ -20,11 +21,11 @@ def test_process_public_get_by_id_for_brand_not_found():
     mock_repository = Mock()
     mock_repository.load_by_id = MagicMock(return_value=None)
     controller = BrandController(brand_repository=mock_repository, data_manager=None, image_repo=None)
-    field = '12345'
+    field = str(uuid.uuid4())
     pinfluencer_response = controller.handle_get_by_id({'pathParameters': {'brand_id': field}})
     mock_repository.load_by_id.assert_called_once_with(id_=field)
     assert pinfluencer_response.body == {}
-    assert pinfluencer_response.status_code() is 404
+    assert pinfluencer_response.status_code == 404
 
 
 def test_process_public_get_by_id_for_brand_invalid_uuid():
