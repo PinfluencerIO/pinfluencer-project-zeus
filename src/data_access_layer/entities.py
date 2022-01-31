@@ -23,7 +23,7 @@ class BaseEntity:
     created = Column(DateTime, nullable=False, default=datetime.utcnow)
 
 
-class BaseUser(BaseEntity):
+class BaseUserEntity(BaseEntity):
     def __init__(self, dto=None):
         super().__init__(dto)
         self.first_name = dto.first_name
@@ -37,7 +37,7 @@ class BaseUser(BaseEntity):
     auth_user_id = Column(type_=String(length=64), nullable=False, unique=True)
 
 
-class Brand(Base, BaseUser):
+class BrandEntity(Base, BaseUser):
     __tablename__ = BRAND_TBL_NAME
 
     def __init__(self, dto=None):
@@ -61,7 +61,7 @@ class Brand(Base, BaseUser):
     logo = Column(type_=String(length=36), nullable=True)
 
 
-class Influencer(Base, BaseUser):
+class InfluencerEntity(Base, BaseUser):
     __tablename__ = INFLUENCER_TBL_NAME
 
     name = Column(type_=String(length=120), nullable=False)
