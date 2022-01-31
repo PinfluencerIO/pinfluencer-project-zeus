@@ -5,7 +5,7 @@ from jsonschema import validate
 from src.data_access_layer.write_data_access import NoBrandForAuthenticatedUser, NotFoundException, \
     AlreadyExistsException
 from src.pinfluencer_response import PinfluencerResponse
-from src.processors import valid_path_resource_id, types, protect_email_from_update_if_held_in_claims, get_cognito_user
+from src.processors import types, protect_email_from_update_if_held_in_claims, get_cognito_user
 
 
 # TODO This really breaks the idea of a configurable generic write class. Talk to Aidan about this one
@@ -57,7 +57,8 @@ class ProcessWriteForAuthenticatedUserWithProductId(ProcessWriteWithValidationFo
         print('With product_id')
         body_ = event["body"]
         payload = json.loads(body_)
-        resource_id = valid_path_resource_id(event, types[self.type_]['key'])
+        resource_id = None
+        # resource_id = valid_path_resource_id(event, types[self.type_]['key'])
         if resource_id is None:
             return PinfluencerResponse.as_400_error(f'{self} Invalid path parameter id')
         else:

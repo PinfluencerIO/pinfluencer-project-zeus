@@ -1,5 +1,6 @@
 from src.pinfluencer_response import PinfluencerResponse
-from src.processors import valid_path_resource_id, types, get_cognito_user
+from src.processors import types, get_cognito_user
+from src.routes import valid_path_resource_id
 
 
 class ProcessGetByForAuthenticatedUser:

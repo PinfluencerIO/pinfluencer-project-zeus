@@ -24,19 +24,6 @@ def protect_email_from_update_if_held_in_claims(body, event):
         print(f'after {body}')
 
 
-def valid_path_resource_id(event, resource_key):
-    try:
-        id_ = event['pathParameters'][resource_key]
-        if valid_uuid(id_):
-            return id_
-        else:
-            print(f'Path parameter not a valid uuid {id_}')
-    except KeyError:
-        print(f'Missing key in event pathParameters.{resource_key}')
-
-    return None
-
-
 def valid_uuid(id_):
     try:
         val = uuid.UUID(id_, version=4)

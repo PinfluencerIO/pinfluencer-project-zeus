@@ -1,11 +1,10 @@
 from collections import OrderedDict
 
-from src.data_access_layer.read_data_access import load_collection, load_by_id, \
-    load_brand_for_authenticated_user
+from src.data_access_layer.read_data_access import load_collection, load_brand_for_authenticated_user
 from src.data_access_layer.write_data_access import db_write_new_brand_for_auth_user, \
     db_write_update_brand_for_auth_user, db_write_patch_brand_image_for_auth_user
 from src.pinfluencer_response import PinfluencerResponse
-from src.processors.get_by_id import ProcessGetBy
+from src.processors import valid_uuid, types
 from src.processors.get_collection import ProcessGetCollection
 from src.processors.get_for_auth_user import ProcessGetForAuthenticatedUser
 from src.processors.ok_response import ProcessOkResponse
@@ -28,6 +27,7 @@ class FeedController(Controller):
 class BrandController(Controller):
     def __init__(self, data_manager, image_repo, brand_repository) -> None:
         super().__init__(data_manager)
+        self.__type_ = 'brand'
         self.__brand_repository = brand_repository
         self._image_repository = image_repo
 
@@ -35,7 +35,9 @@ class BrandController(Controller):
         return ProcessGetCollection('brand', load_collection, self._data_manager).do_process(event)
 
     def handle_get_by_id(self, event):
-        return PinfluencerResponse(status_code=400, body={})
+        id_ = valid_path_resource_id(event, types[self.__type_]['key'])
+        brand = self.__brand_repository.load_by_id(id_=id_)
+        return PinfluencerResponse(status_code=200, body=brand.__dict__)
 
     def handle_get_brand(self, event):
         return ProcessGetForAuthenticatedUser(load_brand_for_authenticated_user, self._data_manager).do_process(event)
@@ -66,7 +68,7 @@ class InfluencerController(Controller):
         return ProcessGetCollection('influencers', load_collection, self._data_manager).do_process(event)
 
     def handle_get_by_id(self, event):
-        return ProcessGetBy(load_by_id, 'influencers', self._data_manager).do_process(event)
+        return None
 
     def handle_get_influencer(self, event):
         raise NotImplemented
@@ -93,7 +95,7 @@ class CampaignController(Controller):
 class Routes:
     def __init__(self, data_manager, image_repository):
         self.__feed_ctr = FeedController(data_manager)
-        self.__brand_ctr = BrandController(data_manager, image_repository)
+        self.__brand_ctr = BrandController(data_manager, image_repository, brand_repository=None)
         self.__influencer_ctr = InfluencerController(data_manager, image_repository)
         self.__campaign_ctr = CampaignController(data_manager, image_repository)
 
@@ -143,3 +145,16 @@ class Routes:
         routes.update(users)
         routes.update(campaigns)
         return routes
+
+
+def valid_path_resource_id(event, resource_key):
+    try:
+        id_ = event['pathParameters'][resource_key]
+        if valid_uuid(id_):
+            return id_
+        else:
+            print(f'Path parameter not a valid uuid {id_}')
+    except KeyError:
+        print(f'Missing key in event pathParameters.{resource_key}')
+
+    return None
