@@ -30,16 +30,16 @@ class AudienceGender(Metric):
 
 
 class ValueEnum(Enum):
-    Sustainable = "Sustainable"
-    Organic = "Organic"
-    Recycled = "Recycled"
-    Vegan = "Vegan"
-    Value5 = "Value5"
-    Value6 = "Value6"
-    Value7 = "Value7"
-    Value8 = "Value8"
-    Value9 = "Value9"
-    Value10 = "Value10"
+    SUSTAINABLE = "SUSTAINABLE"
+    ORGANIC = "ORGANIC"
+    RECYCLED = "RECYCLED"
+    VEGAN = "VEGAN"
+    VALUE5 = "VALUE5"
+    VALUE6 = "VALUE6"
+    VALUE7 = "VALUE7"
+    VALUE8 = "VALUE8"
+    VALUE9 = "VALUE9"
+    VALUE10 = "VALUE10"
 
 
 class CategoryEnum(Enum):
@@ -82,12 +82,12 @@ class Brand(User):
 
 @dataclass
 class Influencer(User):
-    instahandle = ""
-    name = ""
-    website = ""
-    bio = ""
-    image = ""
-    audience_age_split = []
-    audience_gender_split = []
-    values = []
-    categories = []
+    instahandle: str = ""
+    name: str = ""
+    website: str = ""
+    bio: str = ""
+    image: str = ""
+    audience_age_split: list[AudienceAge] = field(default_factory=list)
+    audience_gender_split: list[AudienceGender] = field(default_factory=list)
+    values: list[ValueEnum] = field(default_factory=list)
+    categories: list[CategoryEnum] = field(default_factory=list)

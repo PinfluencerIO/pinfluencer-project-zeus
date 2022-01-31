@@ -47,7 +47,7 @@ class BrandEntity(Base, BaseUserEntity):
     __tablename__ = 'brand'
 
     @staticmethod
-    def brand_from_dto(dto=None):
+    def create_from_dto(dto=None):
         return BrandEntity().from_dto(dto)
 
     def from_dto(self, dto):
@@ -88,6 +88,10 @@ class BrandEntity(Base, BaseUserEntity):
 
 class InfluencerEntity(Base, BaseUserEntity):
     __tablename__ = 'influencer'
+
+    @staticmethod
+    def create_from_dto(dto=None):
+        return InfluencerEntity().from_dto(dto)
 
     def from_dto(self, dto):
         super().from_dto(dto=dto)

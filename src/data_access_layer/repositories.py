@@ -7,7 +7,7 @@ import boto3
 from botocore.exceptions import ClientError
 from filetype import filetype
 
-from src.data_access_layer.entities import BrandEntity
+from src.data_access_layer.entities import BrandEntity, InfluencerEntity
 from src.data_access_layer.image_repository import ImageException
 from src.data_access_layer.write_data_access import AlreadyExistsException
 
@@ -28,35 +28,40 @@ class BaseRepository:
 
 
 class BaseUserRepository(BaseRepository):
-    def __init__(self, data_manager, resource):
+    def __init__(self, data_manager, image_repository, resource):
         super().__init__(data_manager, resource)
+        self._image_repository = image_repository
 
     def load_for_auth_user(self, auth_user_id):
         first = self._data_manager.session.query(self._resource).filter(self._resource.auth_user_id == auth_user_id).first()
         print(f'load_brand_for_authenticated_user: {first}')
         return first
 
-
-class BrandRepository(BaseUserRepository):
-    def __init__(self, data_manager, image_repository):
-        super().__init__(data_manager, BrandEntity)
-        self.__image_repository = image_repository
-
     def write_new_for_auth_user(self, auth_user_id, payload):
-        brand = self.load_for_auth_user(auth_user_id)
-        if brand:
-            raise AlreadyExistsException(f'Brand {brand.id} already associated with {auth_user_id}')
+        entity = self.load_for_auth_user(auth_user_id)
+        if entity:
+            raise AlreadyExistsException(f'{self._resource.__class__.__name__} {entity.id} already associated with {auth_user_id}')
         else:
             try:
                 payload.auth_user_id = auth_user_id
-                brand = BrandEntity.from_dto(payload)
-                self._data_manager.session.add(brand)
+                entity = self._resource.create_from_dto(dto=payload)
+                self._data_manager.session.add(entity)
                 self._data_manager.session.commit()
-                return brand
+                return entity
             except Exception as e:
-                print(f'Failed to write_new_brand {e}')
+                print(f'Failed to write_new_{self._resource.__class__.__name__}_for_auth_user {e}')
                 self._data_manager.session.rollback()
                 raise e
+
+
+class BrandRepository(BaseUserRepository):
+    def __init__(self, data_manager, image_repository):
+        super().__init__(data_manager=data_manager, resource=BrandEntity, image_repository=image_repository)
+
+
+class InfluencerRepository(BaseUserRepository):
+    def __init__(self, data_manager, image_repository):
+        super().__init__(data_manager=data_manager, resource=InfluencerEntity, image_repository=image_repository)
 
 
 class S3ImageRepository:
