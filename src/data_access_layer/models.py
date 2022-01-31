@@ -51,9 +51,17 @@ class CategoryEnum(Enum):
 
 
 @dataclass
-class User:
+class Model:
     id: str
     created: datetime
+
+
+@dataclass
+class User(Model):
+    first_name: str
+    last_name: str
+    email: str
+    auth_user_id: str
 
 
 @dataclass
