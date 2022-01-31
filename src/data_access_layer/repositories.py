@@ -17,15 +17,15 @@ class BaseRepository:
         self._data_manager = data_manager
         self._resource = resource
 
-    def load_item(self):
-        item = self._data_manager.session.query(self._resource).first()
-        return item.as_dto()
-
     def load_collection(self):
         return list(map(lambda x: x.as_dto(), self._data_manager.session.query(self._resource).all()))
 
     def load_by_id(self, id_):
-        return self._data_manager.session.query(self._resource).filter(self._resource.id == id_).first().as_dto()
+        entity = self._data_manager.session.query(self._resource).filter(self._resource.id == id_).first()
+        if entity:
+            return entity.as_dto()
+        else:
+            return None
 
 
 class BaseUserRepository(BaseRepository):

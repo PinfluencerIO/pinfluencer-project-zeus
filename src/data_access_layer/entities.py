@@ -13,7 +13,7 @@ class BaseEntity:
     id = Column(String(length=36), primary_key=True, nullable=False)
     created = Column(DateTime, nullable=False)
 
-    def from_dto(self, dto):
+    def _from_dto(self, dto):
         self.id = dto.id
         self.created = dto.created
 
@@ -28,8 +28,8 @@ class BaseUserEntity(BaseEntity):
     email = Column(type_=String(length=120), nullable=False)
     auth_user_id = Column(type_=String(length=64), nullable=False, unique=True)
 
-    def from_dto(self, dto):
-        super().from_dto(dto=dto)
+    def _from_dto(self, dto):
+        super()._from_dto(dto=dto)
         self.first_name = dto.first_name
         self.last_name = dto.last_name
         self.email = dto.email
@@ -51,7 +51,7 @@ class BrandEntity(Base, BaseUserEntity):
         return BrandEntity().from_dto(dto)
 
     def from_dto(self, dto):
-        super().from_dto(dto=dto)
+        super()._from_dto(dto=dto)
         self.name = dto.name
         self.description = dto.description
         self.header_image = dto.header_image
@@ -94,7 +94,7 @@ class InfluencerEntity(Base, BaseUserEntity):
         return InfluencerEntity().from_dto(dto)
 
     def from_dto(self, dto):
-        super().from_dto(dto=dto)
+        super()._from_dto(dto=dto)
         self.name = dto.name
         self.website = dto.website
         self.bio = dto.bio
