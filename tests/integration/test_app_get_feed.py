@@ -1,7 +1,7 @@
 import os
 from unittest.mock import patch
 
-from src.data_access_layer.data_manage_factory import DataManageFactory
+from src.data_access_layer.data_access import DataManageFactory
 from src.data_access_layer.image_repository import S3ImageRepository
 from src.routes import Routes
 

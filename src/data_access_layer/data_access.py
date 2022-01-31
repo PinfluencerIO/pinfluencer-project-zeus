@@ -21,3 +21,14 @@ class DataManager:
     @property
     def session(self):
         return self.__session
+
+
+class DataManageFactory:
+    @staticmethod
+    def build():
+        if 'IN_MEMORY' in os.environ:
+            from tests import InMemorySqliteDataManager
+            print('Creating an in memory mysql database')
+            return InMemorySqliteDataManager()
+        else:
+            return DataManager()

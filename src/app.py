@@ -1,4 +1,4 @@
-from src.data_access_layer.data_manage_factory import DataManageFactory
+from src.data_access_layer.data_access import DataManageFactory
 from src.data_access_layer.image_repository import S3ImageRepository
 from src.log_util import print_exception
 from src.pinfluencer_response import PinfluencerResponse
