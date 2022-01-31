@@ -36,11 +36,11 @@ class BrandController(Controller):
 
     def handle_get_by_id(self, event):
         id_ = valid_path_resource_id(event, types[self.__type_]['key'])
-        brand = self.__brand_repository.load_by_id(id_=id_)
-        if brand:
-            return PinfluencerResponse(status_code=200, body=brand.__dict__)
-        else:
-            return PinfluencerResponse(status_code=404, body={})
+        if id_:
+            brand = self.__brand_repository.load_by_id(id_=id_)
+            if brand:
+                return PinfluencerResponse(status_code=200, body=brand.__dict__)
+        return PinfluencerResponse(status_code=404, body={})
 
     def handle_get_brand(self, event):
         return ProcessGetForAuthenticatedUser(load_brand_for_authenticated_user, self._data_manager).do_process(event)
