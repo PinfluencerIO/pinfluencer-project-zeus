@@ -4,6 +4,7 @@ from src.data_access_layer.read_data_access import load_collection, load_by_id, 
     load_brand_for_authenticated_user
 from src.data_access_layer.write_data_access import db_write_new_brand_for_auth_user, \
     db_write_update_brand_for_auth_user, db_write_patch_brand_image_for_auth_user
+from src.pinfluencer_response import PinfluencerResponse
 from src.processors.get_by_id import ProcessGetBy
 from src.processors.get_collection import ProcessGetCollection
 from src.processors.get_for_auth_user import ProcessGetForAuthenticatedUser
@@ -25,15 +26,16 @@ class FeedController(Controller):
 
 
 class BrandController(Controller):
-    def __init__(self, data_manager, image_repo) -> None:
+    def __init__(self, data_manager, image_repo, brand_repository) -> None:
         super().__init__(data_manager)
+        self.__brand_repository = brand_repository
         self._image_repository = image_repo
 
     def handle_get_all_brands(self, event):
         return ProcessGetCollection('brand', load_collection, self._data_manager).do_process(event)
 
     def handle_get_by_id(self, event):
-        return ProcessGetBy(load_by_id, 'brand', self._data_manager).do_process(event)
+        return PinfluencerResponse(status_code=400, body={})
 
     def handle_get_brand(self, event):
         return ProcessGetForAuthenticatedUser(load_brand_for_authenticated_user, self._data_manager).do_process(event)
