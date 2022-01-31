@@ -74,7 +74,7 @@ class BrandEntity(Base, BaseUserEntity):
         dto.instahandle = self.instahandle
         dto.website = self.website
         dto.logo = self.logo
-        return self
+        return dto
 
     name = Column(type_=String(length=120), nullable=False)
     description = Column(type_=String(length=500), nullable=False)

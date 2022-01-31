@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from sqlalchemy import String, Column, ARRAY
+from sqlalchemy import String, Column
 
 from src.data_access_layer import Base, BRAND_TBL_NAME, BaseUser
 
@@ -12,8 +12,6 @@ class Brand(Base, BaseUser):
     name: str = Column(type_=String(length=120), nullable=False)
     description: str = Column(type_=String(length=500), nullable=False)
     header_image: str = Column(type_=String(length=36), nullable=True)
-    values: list[str] = Column(type_=ARRAY(String), nullable=False)
-    categories: list[str] = Column(type_=ARRAY(String), nullable=False)
     instahandle: str = Column(type_=String(length=30), nullable=True)
     website: str = Column(type_=String(length=120), nullable=False)
     logo: str = Column(type_=String(length=36), nullable=True)

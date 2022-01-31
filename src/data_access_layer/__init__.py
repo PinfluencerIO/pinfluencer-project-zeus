@@ -6,7 +6,7 @@ from sqlalchemy import Column, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 
 PRODUCT_TBL_NAME = 'product'
-BRAND_TBL_NAME = 'brand'
+BRAND_TBL_NAME = 'brand_tbl'
 
 
 def uuid4_str():

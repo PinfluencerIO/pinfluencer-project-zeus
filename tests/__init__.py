@@ -6,26 +6,34 @@ from unittest.mock import Mock
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from src.data_access_layer import Base
-from src.data_access_layer.brand import Brand
+from src.data_access_layer.entities import BrandEntity, Base
+from src.data_access_layer.models import Brand
 from src.data_access_layer.product import Product
 
 
-def brand_generator(num, auth_user_id=None, image=None):
+def brand_generator(dto):
+    return BrandEntity.create_from_dto(dto=dto)
+
+
+def brand_dto_generator(num, auth_user_id=None, image=None, header_image=None):
     if auth_user_id is None:
         auth_user_id = f'1234brand{num}'
     if image is None:
         image = f'{str(uuid.uuid4())}.png'
     return Brand(
-        id=str(uuid.uuid4()),
-        created=datetime.utcnow(),
-        name=f'brand{num}',
-        description=f'brand{num} desc',
-        website=f'test{num}.com',
-        email=f'brand{num}@email.com',
-        instahandle=f'brand{num}handle',
-        image=image,
-        auth_user_id=auth_user_id)
+        first_name=f"first_name{num}",
+        last_name=f"last_name{num}",
+        email=f"email{num}",
+        auth_user_id=auth_user_id,
+        name=f"name{num}",
+        description=f"description{num}",
+        website=f"website{num}",
+        logo=image,
+        header_image=header_image,
+        instahandle=f"instahandle{num}",
+        values=[],
+        categories=[]
+    )
 
 
 def product_generator(num, brand, image=None):

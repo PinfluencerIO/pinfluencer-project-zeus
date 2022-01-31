@@ -1,17 +1,9 @@
-from src.data_access_layer.read_data_access import load_item
-from src.processors import types
-from tests import InMemorySqliteDataManager, brand_generator
+from src.data_access_layer.repositories import BrandRepository
+from tests import InMemorySqliteDataManager
 
 
-def test_load_brand_item_when_brand_exists():
+def test_load_entity_item_when_no_entity_exist():
     data_manager = InMemorySqliteDataManager()
-    brand = brand_generator(1)
-    data_manager.create_fake_data([brand])
-    item = load_item(resource=types['brand']['type'], data_manager=data_manager)
-    assert brand.as_dict() == item.as_dict()
-
-
-def test_load_brand_item_when_no_brands_exist():
-    data_manager = InMemorySqliteDataManager()
-    item = load_item(resource=types['brand']['type'], data_manager=data_manager)
-    assert item is None
+    repository = BrandRepository(data_manager=data_manager, image_repository=None)
+    item = repository.load_item()
+    assert item == None

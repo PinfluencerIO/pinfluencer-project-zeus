@@ -14,18 +14,20 @@ class GenderEnum(Enum):
 
 
 @dataclass
-class Metric:
+class BaseAudienceProportion:
     value: float = 0.0
 
 
 @dataclass
-class AudienceAge(Metric):
+class AudienceAge(BaseAudienceProportion):
     min: int = 0
     max: int = 0
 
 
+# TODO: add audience age ranges class
+
 @dataclass
-class AudienceGender(Metric):
+class AudienceGender(BaseAudienceProportion):
     gender: GenderEnum = GenderEnum.MALE
 
 
@@ -55,9 +57,10 @@ class CategoryEnum(Enum):
     CATEGORY10 = "CATEGORY10"
 
 
+@dataclass
 class Model:
-    id = uuid4_str()
-    created = datetime.utcnow()
+    id: str = uuid4_str()
+    created: datetime = datetime.utcnow()
 
 
 @dataclass

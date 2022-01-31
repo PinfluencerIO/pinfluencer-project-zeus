@@ -18,13 +18,14 @@ class BaseRepository:
         self._resource = resource
 
     def load_item(self):
-        return self._data_manager.session.query(self._resource).first()
+        item = self._data_manager.session.query(self._resource).first()
+        return item.as_dto()
 
     def load_collection(self):
-        return self._data_manager.session.query(self._resource).all()
+        return list(map(lambda x: x.as_dto(), self._data_manager.session.query(self._resource).all()))
 
     def load_by_id(self, id_):
-        return self._data_manager.session.query(self._resource).filter(self._resource.id == id_).first()
+        return self._data_manager.session.query(self._resource).filter(self._resource.id == id_).first().as_dto()
 
 
 class BaseUserRepository(BaseRepository):
@@ -34,13 +35,13 @@ class BaseUserRepository(BaseRepository):
 
     def load_for_auth_user(self, auth_user_id):
         first = self._data_manager.session.query(self._resource).filter(self._resource.auth_user_id == auth_user_id).first()
-        print(f'load_brand_for_authenticated_user: {first}')
+        print(f'load_{self._resource.__name__}_for_authenticated_user: {first}')
         return first
 
     def write_new_for_auth_user(self, auth_user_id, payload):
         entity = self.load_for_auth_user(auth_user_id)
         if entity:
-            raise AlreadyExistsException(f'{self._resource.__class__.__name__} {entity.id} already associated with {auth_user_id}')
+            raise AlreadyExistsException(f'{self._resource.__name__} {entity.id} already associated with {auth_user_id}')
         else:
             try:
                 payload.auth_user_id = auth_user_id
