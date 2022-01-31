@@ -1,6 +1,11 @@
+import uuid
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
+
+
+def uuid4_str():
+    return str(uuid.uuid4())
 
 
 class GenderEnum(Enum):
@@ -50,10 +55,9 @@ class CategoryEnum(Enum):
     Category10 = "Category10"
 
 
-@dataclass
 class Model:
-    id: str
-    created: datetime
+    id = uuid4_str()
+    created = datetime.utcnow()
 
 
 @dataclass
