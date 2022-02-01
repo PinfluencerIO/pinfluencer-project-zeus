@@ -64,7 +64,7 @@ class StubDataManager:
 
 
 class StubImageRepo:
-    def retrieve(self, path):
+    def retrieve(path):
         return ""
 
     def delete(self, path):

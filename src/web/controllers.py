@@ -7,7 +7,8 @@ class BrandController:
         self.__brand_repository = brand_repository
 
     def handle_get_all_brands(self, event):
-        return PinfluencerResponse(status_code=200, body=list(map(lambda x: x.__dict__, self.__brand_repository.load_collection())))
+        return PinfluencerResponse(status_code=200, body=list(map(lambda x: x.__dict__,
+                                                                  self.__brand_repository.load_collection())))
 
     def handle_get_by_id(self, event):
         id_ = valid_path_resource_id(event, BRAND_ID_PATH_KEY)

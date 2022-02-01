@@ -54,5 +54,3 @@ class Routes:
         routes.update(users)
         routes.update(campaigns)
         return routes
-
-

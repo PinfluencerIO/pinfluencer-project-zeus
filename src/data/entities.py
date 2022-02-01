@@ -63,7 +63,7 @@ class BrandEntity(Base, BaseUserEntity):
         return self
 
     def as_dto(self, dto=None):
-        if dto == None:
+        if dto is None:
             dto = Brand()
         super().as_dto(dto=dto)
         dto.name = self.name
@@ -114,8 +114,8 @@ class InfluencerEntity(Base, BaseUserEntity):
         return self
 
     @staticmethod
-    def __get_audience_age_split_value(dto, min, max):
-        return [t.value for t in dto.audience_age_split if t.min == min and t.max == max][0]
+    def __get_audience_age_split_value(dto, _min, _max):
+        return [t.value for t in dto.audience_age_split if t.min == _min and t.max == _max][0]
 
     @staticmethod
     def __get_audience_gender_split_value(dto, gender):
