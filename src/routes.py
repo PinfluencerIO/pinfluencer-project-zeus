@@ -32,7 +32,7 @@ class BrandController(Controller):
         self._image_repository = image_repo
 
     def handle_get_all_brands(self, event):
-        return ProcessGetCollection('brand', load_collection, self._data_manager).do_process(event)
+        return PinfluencerResponse(status_code=200, body=list(map(lambda x: x.__dict__, self.__brand_repository.load_collection())))
 
     def handle_get_by_id(self, event):
         id_ = valid_path_resource_id(event, types[self.__type_]['key'])

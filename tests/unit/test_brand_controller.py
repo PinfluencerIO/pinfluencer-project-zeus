@@ -46,7 +46,7 @@ class TestBrandController(TestCase):
             brand_dto_generator(num=4)
         ]
         self.__brand_repository.load_collection = MagicMock(return_value=expected_brands)
-        pinfluencer_response = self.__sut.handle_get_by_id({})
+        pinfluencer_response = self.__sut.handle_get_all_brands({})
         self.__brand_repository.load_collection.assert_called_once()
         assert pinfluencer_response.body == list(map(lambda x: x.__dict__, expected_brands))
         assert pinfluencer_response.status_code == 200
