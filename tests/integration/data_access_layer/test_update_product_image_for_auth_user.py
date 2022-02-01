@@ -1,4 +1,4 @@
-from src.data_access_layer.image_repository import ImageException
+from src.data_access_layer.repositories import ImageException
 from src.data_access_layer.write_data_access import db_write_patch_product_image_for_auth_user, \
     NoBrandForAuthenticatedUser, NotFoundException
 from tests import InMemorySqliteDataManager, brand_generator, product_generator, MockImageRepo

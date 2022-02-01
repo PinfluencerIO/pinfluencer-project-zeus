@@ -1,7 +1,7 @@
 from src.data_access_layer.brand import Brand, brand_from_dict
-from src.data_access_layer.image_repository import ImageException
 from src.data_access_layer.product import product_from_dict, Product
 from src.data_access_layer.read_data_access import load_brand_for_authenticated_user
+from src.data_access_layer.repositories import ImageException
 
 
 # TODO Need a not found exception instead of return None

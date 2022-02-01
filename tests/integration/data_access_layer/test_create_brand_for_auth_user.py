@@ -1,5 +1,5 @@
 from src.data_access_layer.brand import Brand
-from src.data_access_layer.image_repository import ImageException
+from src.data_access_layer.repositories import ImageException
 from src.data_access_layer.write_data_access import db_write_new_brand_for_auth_user, AlreadyExistsException
 from tests import InMemorySqliteDataManager, MockImageRepo, brand_generator
 

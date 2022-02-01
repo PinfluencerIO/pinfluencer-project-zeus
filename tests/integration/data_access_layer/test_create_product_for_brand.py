@@ -1,5 +1,5 @@
-from src.data_access_layer.image_repository import ImageException
 from src.data_access_layer.product import Product
+from src.data_access_layer.repositories import ImageException
 from src.data_access_layer.write_data_access import db_write_new_product_for_auth_user, NoBrandForAuthenticatedUser
 from tests import InMemorySqliteDataManager, MockImageRepo, brand_generator
 

@@ -8,7 +8,6 @@ from botocore.exceptions import ClientError
 from filetype import filetype
 
 from src.data_access_layer.entities import BrandEntity, InfluencerEntity
-from src.data_access_layer.image_repository import ImageException
 from src.data_access_layer.write_data_access import AlreadyExistsException
 
 
@@ -88,7 +87,7 @@ class S3ImageRepository:
                                         Key=key, Body=image,
                                         ContentType=mime,
                                         Tagging='public=yes')
-            return file
+            return key
         except ClientError:
             raise ImageException
 
@@ -104,3 +103,7 @@ class S3ImageRepository:
             return json.loads(image_object['Body'].read())
         except ClientError:
             raise ImageException
+
+
+class ImageException(Exception):
+    pass
