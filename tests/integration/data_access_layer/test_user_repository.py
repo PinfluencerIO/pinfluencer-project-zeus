@@ -1,5 +1,4 @@
 from unittest import TestCase
-from unittest.mock import Mock, MagicMock
 
 from src.data_access_layer.repositories import BrandRepository
 from tests import InMemorySqliteDataManager, brand_generator, brand_dto_generator
@@ -8,10 +7,9 @@ from tests import InMemorySqliteDataManager, brand_generator, brand_dto_generato
 class TestUserRepository(TestCase):
 
     def setUp(self):
-        self.__data_manager = InMemorySqliteDataManager()
-        self.__image_repository = Mock()
-        self.__sut = BrandRepository(data_manager=self.__data_manager,
-                                     image_repository=self.__image_repository)
+        self.__session = None
+        self.__data_manager = InMemorySqliteDataManager(session_ref=self.__session)
+        self.__sut = BrandRepository(data_manager=self.__data_manager)
 
     def test_load_for_auth_user(self):
         expected = brand_dto_generator(num=1)
@@ -24,10 +22,9 @@ class TestUserRepository(TestCase):
         assert actual is None
 
     def test_write_new_for_auth_user(self):
-        self.__image_repository.upload = MagicMock(return_value="")
         expected = brand_dto_generator(num=1)
         self.__sut.write_new_for_auth_user(auth_user_id="1234brand1",
                                            payload=expected)
-
-        assert self.__sut.load_by_id(id_=expected.id).__dict__ == expected.__dict__
-        assert self.__data_manager.changes_were_committed_once()
+        actual = self.__sut.load_by_id(id_=expected.id)
+        assert actual.__dict__ == expected.__dict__
+        assert self.__session.commit.assert_called_once()

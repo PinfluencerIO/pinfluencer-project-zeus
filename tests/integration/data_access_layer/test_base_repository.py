@@ -8,7 +8,7 @@ class TestBaseRepository(TestCase):
 
     def setUp(self):
         self.__data_manager = InMemorySqliteDataManager()
-        self.__sut = BrandRepository(data_manager=self.__data_manager, image_repository=None)
+        self.__sut = BrandRepository(data_manager=self.__data_manager)
 
     def test_load_by_id(self):
         expected_brand = brand_dto_generator(1)

@@ -28,9 +28,8 @@ class BaseRepository:
 
 
 class BaseUserRepository(BaseRepository):
-    def __init__(self, data_manager, image_repository, resource):
+    def __init__(self, data_manager, resource):
         super().__init__(data_manager, resource)
-        self._image_repository = image_repository
 
     def load_for_auth_user(self, auth_user_id):
         first = self._data_manager.session.query(self._resource).filter(self._resource.auth_user_id == auth_user_id).first()
@@ -56,13 +55,13 @@ class BaseUserRepository(BaseRepository):
 
 
 class BrandRepository(BaseUserRepository):
-    def __init__(self, data_manager, image_repository):
-        super().__init__(data_manager=data_manager, resource=BrandEntity, image_repository=image_repository)
+    def __init__(self, data_manager):
+        super().__init__(data_manager=data_manager, resource=BrandEntity)
 
 
 class InfluencerRepository(BaseUserRepository):
-    def __init__(self, data_manager, image_repository):
-        super().__init__(data_manager=data_manager, resource=InfluencerEntity, image_repository=image_repository)
+    def __init__(self, data_manager):
+        super().__init__(data_manager=data_manager, resource=InfluencerEntity)
 
 
 class S3ImageRepository:

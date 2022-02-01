@@ -1,7 +1,6 @@
 from src.data_access_layer.brand import Brand, brand_from_dict
 from src.data_access_layer.product import product_from_dict, Product
 from src.data_access_layer.read_data_access import load_brand_for_authenticated_user
-from src.data_access_layer.repositories import ImageException
 
 
 # TODO Need a not found exception instead of return None
@@ -54,7 +53,7 @@ def db_write_patch_brand_image_for_auth_user(auth_user_id, payload, data_manager
         image_id = image_repository.upload(f'{brand.id}', payload['image_bytes'])
         try:
             image_repository.delete(f'{brand.id}/{brand.image}')
-        except ImageException:
+        except Exception:
             print(f'Failed to delete image {brand.id}/{brand.image}')
         brand.image = image_id
         data_manager.session.flush()
@@ -123,7 +122,7 @@ def db_write_patch_product_image_for_auth_user(auth_user_id, payload, data_manag
             image_id = image_repository.upload(f'{brand.id}/{product.id}', payload['image_bytes'])
             try:
                 image_repository.delete(f'{brand.id}/{product.id}/{product.image}')
-            except ImageException:
+            except Exception:
                 print(f'Failed to delete image {brand.id}/{product.id}/{product.image}')
             product.image = image_id
             data_manager.session.flush()
@@ -155,7 +154,7 @@ def delete_product(auth_user_id, product_id, data_manager, image_repository):
 
         try:
             image_repository.delete(path=f'{product.owner.id}/{product.id}/{product.image}')
-        except ImageException:
+        except Exception:
             print(f'Failed to delete image {product.owner.id}/{product.id}/{product.image}')
         data_manager.session.delete(product)
         data_manager.session.commit()
