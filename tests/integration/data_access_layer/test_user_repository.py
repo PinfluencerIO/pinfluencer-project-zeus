@@ -18,4 +18,4 @@ class TestUserRepository(TestCase):
 
     def test_load_for_auth_user_when_brand_not_found(self):
         actual = self.__sut.load_for_auth_user(auth_user_id="1234brand1")
-        assert None == actual.__dict__
+        assert None == actual
