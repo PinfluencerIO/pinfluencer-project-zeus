@@ -10,9 +10,7 @@ class TestBrandController(TestCase):
 
     def setUp(self):
         self.__brand_repository = Mock()
-        self.__sut = BrandController(brand_repository=self.__brand_repository,
-                                     data_manager=None,
-                                     image_repo=None)
+        self.__sut = BrandController(brand_repository=self.__brand_repository)
 
     def test_handle_get_by_id(self):
         brand = brand_dto_generator(num=1)

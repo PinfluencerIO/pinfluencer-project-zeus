@@ -1,6 +1,9 @@
 import json
 
 
+BRAND_ID_PATH_KEY = 'brand_id'
+
+
 class PinfluencerResponse:
     def __init__(self, status_code=200, body=None):
         if body is None:

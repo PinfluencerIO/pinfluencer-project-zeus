@@ -1,12 +1,10 @@
 import uuid
-from datetime import datetime
 from unittest.mock import Mock
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from src.data_access_layer.product import Product
 
-from src.data import BrandEntity, Base
+from src.data.data_access import BrandEntity, Base
 from src.domain.models import Brand
 
 
@@ -33,21 +31,6 @@ def brand_dto_generator(num, auth_user_id=None, image=None, header_image=None):
         values=[],
         categories=[]
     )
-
-
-def product_generator(num, brand, image=None):
-    if image is None:
-        image = f'{str(uuid.uuid4())}.png'
-    product = Product(
-        id=str(uuid.uuid4()),
-        created=datetime.utcnow(),
-        name=f'prod{num}',
-        description=f'prod{num} desc',
-        requirements=f'tag1,tag2,tag3',
-        brand_id=brand.id,
-        image=image)
-    product.brand = brand
-    return product
 
 
 class InMemorySqliteDataManager:

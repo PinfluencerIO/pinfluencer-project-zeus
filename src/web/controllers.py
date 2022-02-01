@@ -1,5 +1,4 @@
-from src.data.data_access import BrandEntity
-from src.web import PinfluencerResponse, get_cognito_user
+from src.web import PinfluencerResponse, get_cognito_user, BRAND_ID_PATH_KEY
 from src.web.validation import valid_path_resource_id
 
 
@@ -11,7 +10,7 @@ class BrandController:
         return PinfluencerResponse(status_code=200, body=list(map(lambda x: x.__dict__, self.__brand_repository.load_collection())))
 
     def handle_get_by_id(self, event):
-        id_ = valid_path_resource_id(event, BrandEntity)
+        id_ = valid_path_resource_id(event, BRAND_ID_PATH_KEY)
         if id_:
             brand = self.__brand_repository.load_by_id(id_=id_)
             if brand:
