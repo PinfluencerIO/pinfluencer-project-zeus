@@ -1,12 +1,11 @@
 from collections import OrderedDict
 
-from src.data_access_layer.read_data_access import load_collection, load_brand_for_authenticated_user
+from src.data_access_layer.read_data_access import load_collection
 from src.data_access_layer.write_data_access import db_write_new_brand_for_auth_user, \
     db_write_update_brand_for_auth_user, db_write_patch_brand_image_for_auth_user
 from src.pinfluencer_response import PinfluencerResponse
-from src.processors import valid_uuid, types
+from src.processors import valid_uuid, types, get_cognito_user
 from src.processors.get_collection import ProcessGetCollection
-from src.processors.get_for_auth_user import ProcessGetForAuthenticatedUser
 from src.processors.ok_response import ProcessOkResponse
 from src.processors.write_for_auth_user import ProcessWriteForAuthenticatedUser
 
@@ -43,7 +42,8 @@ class BrandController(Controller):
         return PinfluencerResponse(status_code=404, body={})
 
     def handle_get_brand(self, event):
-        return ProcessGetForAuthenticatedUser(load_brand_for_authenticated_user, self._data_manager).do_process(event)
+        auth_user_id = get_cognito_user(event)
+        return PinfluencerResponse(status_code=200, body=self.__brand_repository.load_for_auth_user(auth_user_id=auth_user_id).__dict__)
 
     def handle_create_brand(self, event):
         return ProcessWriteForAuthenticatedUser('brand', 'post', db_write_new_brand_for_auth_user,

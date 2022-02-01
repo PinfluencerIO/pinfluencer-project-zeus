@@ -56,6 +56,6 @@ class TestBrandController(TestCase):
         self.__brand_repository.load_for_auth_user = MagicMock(return_value=expected_brand)
         auth_id = "1234brand1"
         response = self.__sut.handle_get_brand({"requestContext": {"authorizer": {"jwt": {"claims":{"cognito:username": auth_id}}}}})
-        self.__brand_repository.assert_called_once_with(auth_user_id=auth_id)
+        self.__brand_repository.load_for_auth_user.assert_called_once_with(auth_user_id=auth_id)
         assert response.body == expected_brand.__dict__
         assert response.status_code == 200
