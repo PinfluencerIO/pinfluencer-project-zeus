@@ -1,12 +1,10 @@
-from src.data_access_layer.data_access import DataManageFactory
-from src.data_access_layer.repositories import S3ImageRepository
-from src.log_util import print_exception
-from src.pinfluencer_response import PinfluencerResponse
-from src.routes import Routes
+from src.crosscutting import print_exception
+from src.web import PinfluencerResponse
+from src.web.routes import Routes
 
 
 def lambda_handler(event, context):
-    routes = Routes(DataManageFactory.build(), S3ImageRepository())
+    routes = Routes()
     try:
         print(f'route: {event["routeKey"]}')
         print(f'event: {event}')

@@ -29,3 +29,7 @@ class PinfluencerResponse:
     @staticmethod
     def as_400_error(message='Client error, please check request.'):
         return PinfluencerResponse(400, {"message": message})
+
+
+def get_cognito_user(event):
+    return event['requestContext']['authorizer']['jwt']['claims']['cognito:username']

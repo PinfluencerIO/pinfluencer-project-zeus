@@ -7,8 +7,7 @@ import boto3
 from botocore.exceptions import ClientError
 from filetype import filetype
 
-from src.data_access_layer.entities import BrandEntity, InfluencerEntity
-from src.data_access_layer.write_data_access import AlreadyExistsException
+from src.data.data_access import BrandEntity, InfluencerEntity
 
 
 class BaseRepository:
@@ -105,4 +104,8 @@ class S3ImageRepository:
 
 
 class ImageException(Exception):
+    pass
+
+
+class AlreadyExistsException(Exception):
     pass

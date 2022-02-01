@@ -2,7 +2,7 @@ import uuid
 from unittest import TestCase
 from unittest.mock import Mock, MagicMock
 
-from src.routes import BrandController
+from src.web.controllers import BrandController
 from tests import brand_dto_generator
 
 

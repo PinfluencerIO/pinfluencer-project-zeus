@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from src.data_access_layer.repositories import BrandRepository
+from src.data.repositories import BrandRepository
 from tests import InMemorySqliteDataManager, brand_generator, brand_dto_generator
 
 

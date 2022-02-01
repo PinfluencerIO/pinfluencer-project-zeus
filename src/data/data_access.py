@@ -3,7 +3,7 @@ import json
 from sqlalchemy import Column, String, DateTime, Float
 from sqlalchemy.ext.declarative import declarative_base
 
-from src.data_access_layer.models import Brand, ValueEnum, CategoryEnum, AudienceAge, AudienceGender, GenderEnum, \
+from src.domain.models import Brand, ValueEnum, CategoryEnum, AudienceAge, AudienceGender, GenderEnum, \
     Influencer
 
 Base = declarative_base()
