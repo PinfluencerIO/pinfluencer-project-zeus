@@ -36,7 +36,7 @@ class TestBrandController(TestCase):
         pinfluencer_response = self.__sut.handle_get_by_id({'pathParameters': {'brand_id': field}})
         self.__brand_repository.load_by_id.assert_not_called()
         assert pinfluencer_response.body == {}
-        assert pinfluencer_response.status_code == 404
+        assert pinfluencer_response.status_code == 400
 
     def test_handle_get_all_brands(self):
         expected_brands = [
