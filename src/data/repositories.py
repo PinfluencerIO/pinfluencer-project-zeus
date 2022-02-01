@@ -7,7 +7,7 @@ import boto3
 from botocore.exceptions import ClientError
 from filetype import filetype
 
-from src.data.data_access import BrandEntity, InfluencerEntity
+from src.data.entities import BrandEntity, InfluencerEntity
 
 
 class BaseRepository:

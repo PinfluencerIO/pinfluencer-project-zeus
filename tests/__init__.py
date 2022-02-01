@@ -4,7 +4,7 @@ from unittest.mock import Mock
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from src.data.data_access import BrandEntity, Base
+from src.data.entities import BrandEntity, Base
 from src.domain.models import Brand
 
 
