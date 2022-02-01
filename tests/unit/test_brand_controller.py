@@ -67,3 +67,10 @@ class TestBrandController(TestCase):
         self.__brand_repository.load_for_auth_user.assert_called_once_with(auth_user_id=auth_id)
         assert response.body == {}
         assert response.status_code == 404
+
+    def test_handle_get_brand_when_auth_id_not_in_request(self):
+        self.__brand_repository.load_for_auth_user = MagicMock(return_value=None)
+        response = self.__sut.handle_get_brand({})
+        self.__brand_repository.load_for_auth_user.assert_not_called()
+        assert response.body == {}
+        assert response.status_code == 400
