@@ -4,15 +4,15 @@ from src.web import PinfluencerResponse
 from src.web.controllers import BrandController
 
 
-class Routes:
+class Dispatcher:
     def __init__(self):
         self.__brand_ctr = BrandController(brand_repository=None)
 
     @property
-    def routes(self):
+    def dispatch_route_to_ctr(self):
 
         feed = OrderedDict(
-            {'GET /feed': lambda: PinfluencerResponse(status_code=200)}
+            {'GET /feed': PinfluencerResponse}
         )
 
         users = OrderedDict(

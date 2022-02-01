@@ -27,6 +27,7 @@ class TestBaseRepository(BrandRepositoryTestCase):
         expected_brands = [brand_dto_generator(1), brand_dto_generator(2), brand_dto_generator(3)]
         self._data_manager.create_fake_data(list(map(lambda x: brand_generator(x), expected_brands)))
         actual_brands = self._sut.load_collection()
+        
         assert list(map(lambda x: x.__dict__, expected_brands)) == list(map(lambda x: x.__dict__, actual_brands))
 
     def test_load_collection_when_no_brands_exist(self):
