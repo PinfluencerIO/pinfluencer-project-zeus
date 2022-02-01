@@ -39,7 +39,8 @@ class BrandController(Controller):
             brand = self.__brand_repository.load_by_id(id_=id_)
             if brand:
                 return PinfluencerResponse(status_code=200, body=brand.__dict__)
-        return PinfluencerResponse(status_code=404, body={})
+            return PinfluencerResponse(status_code=404, body={})
+        return PinfluencerResponse(status_code=400, body={})
 
     def handle_get_brand(self, event):
         auth_user_id = get_cognito_user(event)
