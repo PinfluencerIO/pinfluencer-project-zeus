@@ -50,3 +50,12 @@ class TestBrandController(TestCase):
         self.__brand_repository.load_collection.assert_called_once()
         assert pinfluencer_response.body == list(map(lambda x: x.__dict__, expected_brands))
         assert pinfluencer_response.status_code == 200
+
+    def test_handle_get_brand(self):
+        expected_brand = brand_dto_generator(num=1)
+        self.__brand_repository.load_for_auth_user = MagicMock(return_value=expected_brand)
+        auth_id = "1234brand1"
+        response = self.__sut.handle_get_brand({"requestContext": {"authorizer": {"jwt": {"claims":{"cognito:username": auth_id}}}}})
+        self.__brand_repository.assert_called_once_with(auth_user_id=auth_id)
+        assert response.body == expected_brand.__dict__
+        assert response.status_code == 200
