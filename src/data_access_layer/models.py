@@ -59,8 +59,8 @@ class CategoryEnum(Enum):
 
 @dataclass
 class Model:
-    id: str = uuid4_str()
-    created: datetime = datetime.utcnow()
+    id: str = field(default_factory=uuid4_str)
+    created: datetime = field(default_factory=datetime.utcnow)
 
 
 @dataclass
