@@ -35,8 +35,7 @@ class BaseUserRepository(BaseRepository):
 
     def load_for_auth_user(self, auth_user_id):
         first = self._data_manager.session.query(self._resource).filter(self._resource.auth_user_id == auth_user_id).first()
-        print(f'load_{self._resource.__name__}_for_authenticated_user: {first}')
-        return first
+        return first.as_dto()
 
     def write_new_for_auth_user(self, auth_user_id, payload):
         entity = self.load_for_auth_user(auth_user_id)
