@@ -40,3 +40,5 @@ def protect_email_from_update_if_held_in_claims(body, event):
         print(f'before {body}')
         body['email'] = event['requestContext']['authorizer']['jwt']['claims']['email']
         print(f'after {body}')
+
+
