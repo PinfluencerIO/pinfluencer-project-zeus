@@ -1,12 +1,10 @@
 import json
 
 from sqlalchemy import Column, String, DateTime, Float
-from sqlalchemy.ext.declarative import declarative_base
 
+from src.data import Base, DEFAULT_BRAND_LOGO, DEFAULT_BRAND_HEADER_IMAGE, DEFAULT_INFLUENCER_PROFILE_IMAGE
 from src.domain.models import Brand, ValueEnum, CategoryEnum, AudienceAge, AudienceGender, GenderEnum, \
     Influencer
-
-Base = declarative_base()
 
 
 class BaseEntity:
@@ -62,6 +60,12 @@ class BrandEntity(Base, BaseUserEntity):
         self.logo = dto.logo
         return self
 
+    @staticmethod
+    def create_from_dto_without_images(dto):
+        dto.logo = DEFAULT_BRAND_LOGO
+        dto.header_image = DEFAULT_BRAND_HEADER_IMAGE
+        return BrandEntity.create_from_dto(dto=dto)
+
     def as_dto(self, dto=None):
         if dto is None:
             dto = Brand()
@@ -92,6 +96,11 @@ class InfluencerEntity(Base, BaseUserEntity):
     @staticmethod
     def create_from_dto(dto=None):
         return InfluencerEntity().from_dto(dto)
+
+    @staticmethod
+    def create_from_dto_without_images(dto):
+        dto.image = DEFAULT_INFLUENCER_PROFILE_IMAGE
+        return InfluencerEntity.create_from_dto(dto=dto)
 
     def from_dto(self, dto):
         super()._from_dto(dto=dto)

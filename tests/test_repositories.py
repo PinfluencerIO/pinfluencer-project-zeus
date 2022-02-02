@@ -1,7 +1,8 @@
 from unittest import TestCase
 
-from src.data.repositories import BrandRepository
-from tests import InMemorySqliteDataManager, brand_generator, brand_dto_generator
+from src.data.repositories import BrandRepository, InfluencerRepository
+from tests import InMemorySqliteDataManager, brand_generator, brand_dto_generator, TEST_DEFAULT_BRAND_LOGO, \
+    TEST_DEFAULT_BRAND_HEADER_IMAGE, TEST_DEFAULT_INFLUENCER_PROFILE_IMAGE, influencer_dto_generator
 
 
 class BrandRepositoryTestCase(TestCase):
@@ -27,7 +28,6 @@ class TestBaseRepository(BrandRepositoryTestCase):
         expected_brands = [brand_dto_generator(1), brand_dto_generator(2), brand_dto_generator(3)]
         self._data_manager.create_fake_data(list(map(lambda x: brand_generator(x), expected_brands)))
         actual_brands = self._sut.load_collection()
-        
         assert list(map(lambda x: x.__dict__, expected_brands)) == list(map(lambda x: x.__dict__, actual_brands))
 
     def test_load_collection_when_no_brands_exist(self):
@@ -53,3 +53,28 @@ class TestUserRepository(BrandRepositoryTestCase):
                                           payload=expected)
         actual = self._sut.load_by_id(id_=expected.id)
         assert actual.__dict__ == expected.__dict__
+
+
+class TestBrandRepository(BrandRepositoryTestCase):
+
+    def test_write_new_for_auth_user(self):
+        expected = brand_dto_generator(num=1)
+        self._sut.write_new_for_auth_user(auth_user_id="1234brand1",
+                                          payload=expected)
+        actual = self._sut.load_by_id(id_=expected.id)
+        assert actual.logo == TEST_DEFAULT_BRAND_LOGO
+        assert actual.header_image == TEST_DEFAULT_BRAND_HEADER_IMAGE
+
+
+class TestInfluencerRepository(TestCase):
+
+    def setUp(self):
+        self.__data_manager = InMemorySqliteDataManager()
+        self.__sut = InfluencerRepository(data_manager=self.__data_manager)
+
+    def test_write_new_for_auth_user(self):
+        expected = influencer_dto_generator(num=1)
+        self.__sut.write_new_for_auth_user(auth_user_id="1234brand1",
+                                           payload=expected)
+        actual = self.__sut.load_by_id(id_=expected.id)
+        assert actual.image == TEST_DEFAULT_INFLUENCER_PROFILE_IMAGE

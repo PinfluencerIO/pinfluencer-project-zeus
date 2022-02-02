@@ -17,22 +17,24 @@ class Dispatcher:
 
         users = OrderedDict(
             {
-                'GET /brands': self.__brand_ctr.handle_get_all_brands,
+                'GET /brands': self.__brand_ctr.get_all,
 
                 'GET /influencers': lambda: PinfluencerResponse(status_code=200),
 
-                'GET /brands/{brand_id}': self.__brand_ctr.handle_get_by_id,
+                'GET /brands/{brand_id}': self.__brand_ctr.get_by_id,
 
                 'GET /influencers/{influencer_id}': lambda: PinfluencerResponse(status_code=200),
 
                 # authenticated brand endpoints
-                'GET /brands/me': self.__brand_ctr.handle_get_brand,
+                'GET /brands/me': self.__brand_ctr.get,
 
-                'POST /brands/me': self.__brand_ctr.handle_create_brand,
+                'POST /brands/me': self.__brand_ctr.create,
 
-                'PUT /brands/me': self.__brand_ctr.handle_update_brand,
+                'PUT /brands/me': self.__brand_ctr.update,
 
-                'PATCH /brands/me/image': self.__brand_ctr.handle_update_brand_image,
+                'POST /brands/me/header_image': self.__brand_ctr.update_header_image,
+
+                'POST /brands/me/logo': self.__brand_ctr.update_logo,
 
                 # authenticated influencer endpoints
                 'GET /influencers/me': lambda: PinfluencerResponse(status_code=200),

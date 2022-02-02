@@ -47,7 +47,7 @@ class BaseUserRepository(BaseRepository):
         else:
             try:
                 payload.auth_user_id = auth_user_id
-                entity = self._resource.create_from_dto(dto=payload)
+                entity = self._resource.create_from_dto_without_images(dto=payload)
                 self._data_manager.session.add(entity)
                 self._data_manager.session.commit()
                 return entity

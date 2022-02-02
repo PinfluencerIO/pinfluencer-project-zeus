@@ -1,7 +1,10 @@
 import os
 
 from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+
+Base = declarative_base()
 
 
 class DataManager:
@@ -32,3 +35,8 @@ class DataManageFactory:
             return InMemorySqliteDataManager()
         else:
             return DataManager()
+
+
+DEFAULT_BRAND_LOGO = "default_brand_logo.png"
+DEFAULT_BRAND_HEADER_IMAGE = "default_brand_header_image.png"
+DEFAULT_INFLUENCER_PROFILE_IMAGE = "default_influencer_profile_image.png"
