@@ -1,3 +1,9 @@
+import json
+from types import SimpleNamespace
+
+from dateutil.parser import parse
+
+from src.domain.models import ValueEnum, CategoryEnum
 from src.web import PinfluencerResponse, get_cognito_user, BRAND_ID_PATH_KEY
 from src.web.validation import valid_path_resource_id
 
@@ -28,7 +34,17 @@ class BrandController:
         return PinfluencerResponse(status_code=404, body={})
 
     def create(self, event):
-        raise NotImplemented
+        auth_user_id = get_cognito_user(event)
+        payload_json_string = event['body']
+        payload_dto = json.loads(payload_json_string, object_hook=lambda x: SimpleNamespace(**x))
+        self.__do_custom_conversion(payload_dto)
+        self.__brand_repository.write_new_for_auth_user(auth_user_id=auth_user_id, payload=payload_dto)
+
+    @staticmethod
+    def __do_custom_conversion(payload_dto):
+        payload_dto.values = list(map(lambda x: ValueEnum[x], payload_dto.values))
+        payload_dto.categories = list(map(lambda x: CategoryEnum[x], payload_dto.categories))
+        payload_dto.created = parse(timestr=payload_dto.created)
 
     def update(self, event):
         raise NotImplemented
