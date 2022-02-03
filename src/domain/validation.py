@@ -1,6 +1,5 @@
 from jsonschema.validators import validate
 
-
 brand_payload_schema = {
     "type": "object",
     "properties":
@@ -28,6 +27,7 @@ brand_payload_schema = {
         },
     "required": ["name", "description", "website", "email"]
 }
+
 
 class BrandValidator:
 

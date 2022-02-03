@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 Base = declarative_base()
 
 
-class DataManager:
+class SqlAlchemyDataManager:
     def __init__(self):
         print("new data manager constructed")
         engine = create_engine(
@@ -34,9 +34,17 @@ class DataManageFactory:
             print('Creating an in memory mysql database')
             return InMemorySqliteDataManager()
         else:
-            return DataManager()
+            return SqlAlchemyDataManager()
 
 
 DEFAULT_BRAND_LOGO = "default_brand_logo.png"
 DEFAULT_BRAND_HEADER_IMAGE = "default_brand_header_image.png"
 DEFAULT_INFLUENCER_PROFILE_IMAGE = "default_influencer_profile_image.png"
+
+
+class AlreadyExistsException(Exception):
+    pass
+
+
+class ImageException(Exception):
+    pass

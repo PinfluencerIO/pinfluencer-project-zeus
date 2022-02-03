@@ -5,8 +5,10 @@ from unittest.mock import Mock, MagicMock
 
 from callee import Captor
 
-from src.data.repositories import AlreadyExistsException
+from src.data import AlreadyExistsException
+from src.domain.models import Brand, ValueEnum, CategoryEnum
 from src.domain.validation import BrandValidator
+from src.typing import BrandRepository
 from src.web.controllers import BrandController
 from src.web.validation import valid_uuid
 from tests import brand_dto_generator
@@ -20,21 +22,30 @@ def get_auth_user_event(auth_id):
     return {"requestContext": {"authorizer": {"jwt": {"claims": {"cognito:username": auth_id}}}}}
 
 
-def get_brand_payload():
+def update_brand_payload():
     return {
         "first_name": "first_name",
         "last_name": "last_name",
         "email": "email@gmail.com",
-        "auth_user_id": "auth_user_id",
         "name": "name",
         "description": "description",
         "website": "https://website.com",
-        "logo": "logo",
-        "header_image": "header_image",
         "instahandle": "instahandle",
         "values": ["VALUE7", "VALUE8", "VALUE9"],
         "categories": ["CATEGORY7", "CATEGORY6", "CATEGORY5"]
     }
+
+
+def update_brand_return_dto():
+    return Brand(first_name="first_name",
+                 last_name="last_name",
+                 email="email@gmail.com",
+                 name="name",
+                 description="description",
+                 website="https://website.com",
+                 instahandle="instahandle",
+                 values=[ValueEnum.VALUE7, ValueEnum.VALUE8, ValueEnum.VALUE9],
+                 categories=[CategoryEnum.CATEGORY7, CategoryEnum.CATEGORY6, CategoryEnum.CATEGORY5])
 
 
 def create_brand_for_auth_user_event(auth_id, payload):
@@ -47,7 +58,7 @@ def create_brand_for_auth_user_event(auth_id, payload):
 class TestBrandController(TestCase):
 
     def setUp(self):
-        self.__brand_repository = Mock()
+        self.__brand_repository: BrandRepository = Mock()
         self.__brand_validator = BrandValidator()
         self.__sut = BrandController(brand_repository=self.__brand_repository,
                                      brand_validator=self.__brand_validator)
@@ -107,9 +118,9 @@ class TestBrandController(TestCase):
         assert response.status_code == 404
 
     def test_create(self):
-        expected_payload = get_brand_payload()
+        expected_payload = update_brand_payload()
         auth_id = "1234brand1"
-        event = create_brand_for_auth_user_event(auth_id=auth_id, payload=get_brand_payload())
+        event = create_brand_for_auth_user_event(auth_id=auth_id, payload=update_brand_payload())
         self.__brand_repository.write_new_for_auth_user = MagicMock()
         response = self.__sut.create(event=event)
         payload_captor = Captor()
@@ -130,7 +141,7 @@ class TestBrandController(TestCase):
 
     def test_create_when_exists(self):
         auth_id = "1234brand1"
-        event = create_brand_for_auth_user_event(auth_id=auth_id, payload=get_brand_payload())
+        event = create_brand_for_auth_user_event(auth_id=auth_id, payload=update_brand_payload())
         self.__brand_repository.write_new_for_auth_user = MagicMock(side_effect=AlreadyExistsException())
 
         response = self.__sut.create(event=event)
@@ -139,10 +150,42 @@ class TestBrandController(TestCase):
 
     def test_create_when_invalid_payload(self):
         auth_id = "1234brand1"
-        payload = get_brand_payload()
+        payload = update_brand_payload()
         payload['name'] = 120
-        event = create_brand_for_auth_user_event(auth_id=auth_id, payload=get_brand_payload())
+        event = create_brand_for_auth_user_event(auth_id=auth_id, payload=payload)
 
         response = self.__sut.create(event=event)
         assert response.status_code == 400
         assert response.body == {}
+
+    def test_update(self):
+        expected_payload = update_brand_payload()
+        expected_payload_dto = update_brand_return_dto()
+        auth_id = "1234brand1"
+        event = create_brand_for_auth_user_event(auth_id=auth_id, payload=update_brand_payload())
+        self.__brand_repository.update_for_auth_user = MagicMock(return_value=expected_payload_dto)
+        response = self.__sut.update(event=event)
+        payload_captor = Captor()
+        self.__brand_repository.update_for_auth_user.assert_called_once_with(auth_user_id=auth_id,
+                                                                             payload=payload_captor)
+        actual_payload = payload_captor.arg
+        assert valid_uuid(actual_payload.id)
+        assert actual_payload.first_name == expected_payload['first_name']
+        assert actual_payload.last_name == expected_payload['last_name']
+        assert actual_payload.email == expected_payload['email']
+        assert actual_payload.name == expected_payload['name']
+        assert actual_payload.description == expected_payload['description']
+        assert actual_payload.website == expected_payload['website']
+        assert list(map(lambda x: x.name, actual_payload.values)) == expected_payload['values']
+        assert list(map(lambda x: x.name, actual_payload.categories)) == expected_payload['categories']
+        assert response.status_code == 200
+        assert response.body == expected_payload_dto.__dict__
+
+
+def assert_brand_updatable_fields_are_equal(brand1, brand2):
+    assert brand1['first_name'] == brand2['first_name']
+    assert brand1['last_name'] == brand2['last_name']
+    assert brand1['email'] == brand2['email']
+    assert brand1['name'] == brand2['name']
+    assert brand1['description'] == brand2['description']
+    assert brand1['website'] == brand2['website']

@@ -1,6 +1,7 @@
 from unittest import TestCase
 
-from src.data.repositories import BrandRepository, InfluencerRepository, AlreadyExistsException
+from src.data import AlreadyExistsException
+from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository
 from tests import InMemorySqliteDataManager, brand_generator, brand_dto_generator, TEST_DEFAULT_BRAND_LOGO, \
     TEST_DEFAULT_BRAND_HEADER_IMAGE, TEST_DEFAULT_INFLUENCER_PROFILE_IMAGE, influencer_dto_generator
 
@@ -9,7 +10,7 @@ class BrandRepositoryTestCase(TestCase):
 
     def setUp(self):
         self._data_manager = InMemorySqliteDataManager()
-        self._sut = BrandRepository(data_manager=self._data_manager)
+        self._sut = SqlAlchemyBrandRepository(data_manager=self._data_manager)
 
 
 class TestBaseRepository(BrandRepositoryTestCase):
@@ -80,7 +81,7 @@ class TestInfluencerRepository(TestCase):
 
     def setUp(self):
         self.__data_manager = InMemorySqliteDataManager()
-        self.__sut = InfluencerRepository(data_manager=self.__data_manager)
+        self.__sut = SqlAlchemyInfluencerRepository(data_manager=self.__data_manager)
 
     def test_write_new_for_auth_user(self):
         expected = influencer_dto_generator(num=1)

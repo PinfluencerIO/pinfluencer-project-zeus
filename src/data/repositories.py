@@ -7,11 +7,13 @@ import boto3
 from botocore.exceptions import ClientError
 from filetype import filetype
 
+from src.data import AlreadyExistsException, ImageException
 from src.data.entities import BrandEntity, InfluencerEntity
+from src.typing import DataManager
 
 
-class BaseRepository:
-    def __init__(self, data_manager, resource):
+class BaseSqlAlchemyRepository:
+    def __init__(self, data_manager: DataManager, resource):
         self._data_manager = data_manager
         self._resource = resource
 
@@ -26,7 +28,7 @@ class BaseRepository:
             return None
 
 
-class BaseUserRepository(BaseRepository):
+class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):
     def __init__(self, data_manager, resource):
         super().__init__(data_manager, resource)
 
@@ -56,13 +58,16 @@ class BaseUserRepository(BaseRepository):
                 self._data_manager.session.rollback()
                 raise e
 
+    def update_for_auth_user(self, auth_user_id, payload):
+        raise NotImplemented
 
-class BrandRepository(BaseUserRepository):
+
+class SqlAlchemyBrandRepository(BaseSqlAlchemyUserRepository):
     def __init__(self, data_manager):
         super().__init__(data_manager=data_manager, resource=BrandEntity)
 
 
-class InfluencerRepository(BaseUserRepository):
+class SqlAlchemyInfluencerRepository(BaseSqlAlchemyUserRepository):
     def __init__(self, data_manager):
         super().__init__(data_manager=data_manager, resource=InfluencerEntity)
 
@@ -105,11 +110,3 @@ class S3ImageRepository:
             return json.loads(image_object['Body'].read())
         except ClientError:
             raise ImageException
-
-
-class ImageException(Exception):
-    pass
-
-
-class AlreadyExistsException(Exception):
-    pass
