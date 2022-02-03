@@ -3,9 +3,9 @@ import json
 from jsonschema.exceptions import ValidationError
 
 from src.crosscutting import print_exception
-from src.data import AlreadyExistsException
 from src.domain.models import ValueEnum, CategoryEnum, Brand
-from src.typing import BrandRepository, Validatable
+from src.exceptions import AlreadyExistsException, NotFoundException
+from src.types import BrandRepository, Validatable
 from src.web import PinfluencerResponse, get_cognito_user, BRAND_ID_PATH_KEY
 from src.web.validation import valid_path_resource_id
 
@@ -60,20 +60,27 @@ class BrandController:
         auth_user_id = get_cognito_user(event)
         payload_json_string = event['body']
         payload_dict = json.loads(payload_json_string)
-        brand = Brand(first_name=payload_dict["first_name"],
-              last_name=payload_dict["last_name"],
-              email=payload_dict["email"],
-              name=payload_dict["name"],
-              description=payload_dict["description"],
-              website=payload_dict["website"],
-              values=list(map(lambda x: ValueEnum[x], payload_dict["values"])),
-              categories=list(map(lambda x: CategoryEnum[x], payload_dict["categories"])))
-        brand_to_return = self.__brand_repository.update_for_auth_user(auth_user_id=auth_user_id, payload=brand)
-        return PinfluencerResponse(status_code=200, body=brand_to_return.__dict__)
+        try:
+            self.__brand_validator.validate(payload_dict)
+            brand = Brand(first_name=payload_dict["first_name"],
+                          last_name=payload_dict["last_name"],
+                          email=payload_dict["email"],
+                          name=payload_dict["name"],
+                          description=payload_dict["description"],
+                          website=payload_dict["website"],
+                          values=list(map(lambda x: ValueEnum[x], payload_dict["values"])),
+                          categories=list(map(lambda x: CategoryEnum[x], payload_dict["categories"])))
+            brand_to_return = self.__brand_repository.update_for_auth_user(auth_user_id=auth_user_id, payload=brand)
+            return PinfluencerResponse(status_code=200, body=brand_to_return.__dict__)
+        except ValidationError as e:
+            print_exception(e)
+            return PinfluencerResponse(status_code=400, body={})
+        except NotFoundException as e:
+            print_exception(e)
+            return PinfluencerResponse(status_code=404, body={})
 
     def update_header_image(self, event):
         raise NotImplemented
 
     def update_logo(self, event):
         raise NotImplemented
-

@@ -1,7 +1,7 @@
 from unittest import TestCase
 
-from src.data import AlreadyExistsException
 from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository
+from src.exceptions import AlreadyExistsException
 from tests import InMemorySqliteDataManager, brand_generator, brand_dto_generator, TEST_DEFAULT_BRAND_LOGO, \
     TEST_DEFAULT_BRAND_HEADER_IMAGE, TEST_DEFAULT_INFLUENCER_PROFILE_IMAGE, influencer_dto_generator, \
     assert_brand_updatable_fields_are_equal

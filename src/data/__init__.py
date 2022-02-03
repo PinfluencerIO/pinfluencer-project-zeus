@@ -42,9 +42,3 @@ DEFAULT_BRAND_HEADER_IMAGE = "default_brand_header_image.png"
 DEFAULT_INFLUENCER_PROFILE_IMAGE = "default_influencer_profile_image.png"
 
 
-class AlreadyExistsException(Exception):
-    pass
-
-
-class ImageException(Exception):
-    pass

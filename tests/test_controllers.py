@@ -5,10 +5,10 @@ from unittest.mock import Mock, MagicMock
 
 from callee import Captor
 
-from src.data import AlreadyExistsException
 from src.domain.models import Brand, ValueEnum, CategoryEnum
 from src.domain.validation import BrandValidator
-from src.typing import BrandRepository
+from src.exceptions import AlreadyExistsException, NotFoundException
+from src.types import BrandRepository
 from src.web.controllers import BrandController
 from src.web.validation import valid_uuid
 from tests import brand_dto_generator
@@ -180,3 +180,22 @@ class TestBrandController(TestCase):
         assert list(map(lambda x: x.name, actual_payload.categories)) == expected_payload['categories']
         assert response.status_code == 200
         assert response.body == expected_payload_dto.__dict__
+
+    def test_update_when_invalid_payload(self):
+        auth_id = "1234brand1"
+        payload = update_brand_payload()
+        payload['name'] = 120
+        event = create_brand_for_auth_user_event(auth_id=auth_id, payload=payload)
+
+        response = self.__sut.update(event=event)
+        assert response.status_code == 400
+        assert response.body == {}
+
+    def test_update_when_not_found(self):
+        auth_id = "1234brand1"
+        payload = update_brand_payload()
+        event = create_brand_for_auth_user_event(auth_id=auth_id, payload=payload)
+        self.__brand_repository.update_for_auth_user = MagicMock(side_effect=NotFoundException())
+        response = self.__sut.update(event=event)
+        assert response.status_code == 404
+        assert response.body == {}

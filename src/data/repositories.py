@@ -7,10 +7,10 @@ import boto3
 from botocore.exceptions import ClientError
 from filetype import filetype
 
-from src.data import AlreadyExistsException, ImageException
 from src.data.entities import BrandEntity, InfluencerEntity
 from src.domain.models import Brand
-from src.typing import DataManager
+from src.exceptions import AlreadyExistsException, ImageException
+from src.types import DataManager
 
 
 class BaseSqlAlchemyRepository:
