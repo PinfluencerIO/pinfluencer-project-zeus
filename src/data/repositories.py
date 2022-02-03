@@ -9,6 +9,7 @@ from filetype import filetype
 
 from src.data import AlreadyExistsException, ImageException
 from src.data.entities import BrandEntity, InfluencerEntity
+from src.domain.models import Brand
 from src.typing import DataManager
 
 
@@ -58,13 +59,22 @@ class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):
                 self._data_manager.session.rollback()
                 raise e
 
-    def update_for_auth_user(self, auth_user_id, payload):
-        raise NotImplemented
-
 
 class SqlAlchemyBrandRepository(BaseSqlAlchemyUserRepository):
     def __init__(self, data_manager):
         super().__init__(data_manager=data_manager, resource=BrandEntity)
+
+    def update_for_auth_user(self, auth_user_id, payload: Brand):
+        entity = self._data_manager.session.query(self._resource).first()
+        entity.first_name = payload.first_name
+        entity.last_name = payload.last_name
+        entity.email = payload.email
+        entity.name = payload.name
+        entity.description = payload.description
+        entity.values = json.dumps(list(map(lambda x: x.name, payload.values)))
+        entity.categories = json.dumps(list(map(lambda x: x.name, payload.categories)))
+        entity.website = payload.website
+        self._data_manager.session.commit()
 
 
 class SqlAlchemyInfluencerRepository(BaseSqlAlchemyUserRepository):

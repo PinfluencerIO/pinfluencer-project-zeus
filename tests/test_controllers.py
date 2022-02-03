@@ -180,12 +180,3 @@ class TestBrandController(TestCase):
         assert list(map(lambda x: x.name, actual_payload.categories)) == expected_payload['categories']
         assert response.status_code == 200
         assert response.body == expected_payload_dto.__dict__
-
-
-def assert_brand_updatable_fields_are_equal(brand1, brand2):
-    assert brand1['first_name'] == brand2['first_name']
-    assert brand1['last_name'] == brand2['last_name']
-    assert brand1['email'] == brand2['email']
-    assert brand1['name'] == brand2['name']
-    assert brand1['description'] == brand2['description']
-    assert brand1['website'] == brand2['website']

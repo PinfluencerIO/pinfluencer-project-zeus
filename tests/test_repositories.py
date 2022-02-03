@@ -3,7 +3,8 @@ from unittest import TestCase
 from src.data import AlreadyExistsException
 from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository
 from tests import InMemorySqliteDataManager, brand_generator, brand_dto_generator, TEST_DEFAULT_BRAND_LOGO, \
-    TEST_DEFAULT_BRAND_HEADER_IMAGE, TEST_DEFAULT_INFLUENCER_PROFILE_IMAGE, influencer_dto_generator
+    TEST_DEFAULT_BRAND_HEADER_IMAGE, TEST_DEFAULT_INFLUENCER_PROFILE_IMAGE, influencer_dto_generator, \
+    assert_brand_updatable_fields_are_equal
 
 
 class BrandRepositoryTestCase(TestCase):
@@ -75,6 +76,18 @@ class TestBrandRepository(BrandRepositoryTestCase):
         actual = self._sut.load_by_id(id_=expected.id)
         assert actual.logo == TEST_DEFAULT_BRAND_LOGO
         assert actual.header_image == TEST_DEFAULT_BRAND_HEADER_IMAGE
+
+    def test_update_for_auth_user(self):
+        existing_brand = brand_dto_generator(num=1)
+        expected = brand_dto_generator(num=2)
+        expected.auth_user_id = existing_brand.auth_user_id
+        self._data_manager.create_fake_data([brand_generator(existing_brand)])
+        self._sut.update_for_auth_user(auth_user_id=existing_brand.auth_user_id,
+                                       payload=expected)
+        actual = self._sut.load_by_id(id_=existing_brand.id)
+        assert_brand_updatable_fields_are_equal(actual.__dict__, expected.__dict__)
+        assert actual.values == expected.values
+        assert actual.categories == expected.categories
 
 
 class TestInfluencerRepository(TestCase):

@@ -27,6 +27,36 @@ class Validatable(Protocol):
         ...
 
 
+class Queryable(Protocol):
+
+    def filter(self, filter) -> 'Queryable':
+        ...
+
+    def first(self) -> Optional:
+        ...
+
+    def all(self) -> Optional[list]:
+        ...
+
+
+class Session(Protocol):
+
+    def query(self, entity) -> Queryable:
+        ...
+
+    def commit(self) -> None:
+        ...
+
+    def rollback(self) -> None:
+        ...
+
+    def add(self, entity) -> None:
+        ...
+
+    def flush(self) -> None:
+        ...
+
+
 class DataManager(Protocol):
 
     @property
@@ -34,5 +64,5 @@ class DataManager(Protocol):
         ...
 
     @property
-    def session(self):
+    def session(self) -> Session:
         ...

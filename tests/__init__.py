@@ -17,6 +17,15 @@ def brand_generator(dto):
 
 
 def brand_dto_generator(num):
+    if num == 1:
+        values = [ValueEnum.VALUE5, ValueEnum.VALUE6, ValueEnum.VALUE7]
+        categories = [CategoryEnum.CATEGORY6, CategoryEnum.CATEGORY5, CategoryEnum.CATEGORY7]
+    elif num == 2:
+        values = [ValueEnum.VALUE5, ValueEnum.RECYCLED, ValueEnum.VALUE7, ValueEnum.SUSTAINABLE]
+        categories = [CategoryEnum.CATEGORY6, CategoryEnum.CATEGORY9, CategoryEnum.CATEGORY8, CategoryEnum.FASHION]
+    else:
+        values = [ValueEnum.VALUE5, ValueEnum.RECYCLED, ValueEnum.VALUE7, ValueEnum.SUSTAINABLE, ValueEnum.VEGAN]
+        categories = [CategoryEnum.CATEGORY6, CategoryEnum.CATEGORY9, CategoryEnum.CATEGORY8, CategoryEnum.FASHION, CategoryEnum.PET]
     return Brand(
         first_name=f"first_name{num}",
         last_name=f"last_name{num}",
@@ -28,8 +37,8 @@ def brand_dto_generator(num):
         logo=f'logo{num}.png',
         header_image=f'header_image{num}.png',
         instahandle=f"instahandle{num}",
-        values=[ValueEnum.VALUE5, ValueEnum.VALUE6, ValueEnum.VALUE7],
-        categories=[CategoryEnum.CATEGORY6, CategoryEnum.CATEGORY5, CategoryEnum.CATEGORY7]
+        values=values,
+        categories=categories
     )
 
 
@@ -97,3 +106,12 @@ class StubImageRepo:
 
     def upload(self, path, image_base64_encoded):
         return ""
+
+
+def assert_brand_updatable_fields_are_equal(brand1, brand2):
+    assert brand1['first_name'] == brand2['first_name']
+    assert brand1['last_name'] == brand2['last_name']
+    assert brand1['email'] == brand2['email']
+    assert brand1['name'] == brand2['name']
+    assert brand1['description'] == brand2['description']
+    assert brand1['website'] == brand2['website']
