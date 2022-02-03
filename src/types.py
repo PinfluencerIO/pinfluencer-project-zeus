@@ -1,6 +1,6 @@
-from typing import Protocol, Optional
+from typing import Protocol, Optional, Union
 
-from src.domain.models import Brand
+from src.domain.models import Brand, Influencer
 
 
 class BrandRepository(Protocol):
@@ -8,7 +8,7 @@ class BrandRepository(Protocol):
     def load_collection(self) -> list[Brand]:
         ...
 
-    def load_by_id(self, id_: str) -> Optional[Brand]:
+    def load_by_id(self, id_: str) -> Brand:
         ...
 
     def update_for_auth_user(self, auth_user_id: str, payload: Brand) -> Brand:
@@ -17,7 +17,13 @@ class BrandRepository(Protocol):
     def write_new_for_auth_user(self, auth_user_id: str, payload: Brand) -> Brand:
         ...
 
-    def load_for_auth_user(self, auth_user_id: str) -> Optional[Brand]:
+    def load_for_auth_user(self, auth_user_id: str) -> Brand:
+        ...
+
+    def update_logo_for_auth_user(self, auth_user_id: str, image_bytes: str) -> Brand:
+        ...
+
+    def update_header_image_for_auth_user(self, auth_user_id: str, image_bytes: str) -> Brand:
         ...
 
 
@@ -66,3 +72,15 @@ class DataManager(Protocol):
     @property
     def session(self) -> Session:
         ...
+
+
+class ImageRepository(Protocol):
+
+    def upload(self, path: str, image_base64_encoded: str) -> str:
+        pass
+
+
+Model = Union[Brand, Influencer]
+
+# TODO: add rest
+User = Union[Model]

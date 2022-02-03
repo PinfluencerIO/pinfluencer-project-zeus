@@ -1,7 +1,9 @@
 from unittest import TestCase
+from unittest.mock import Mock, MagicMock
 
 from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository
-from src.exceptions import AlreadyExistsException
+from src.exceptions import AlreadyExistsException, NotFoundException
+from src.types import ImageRepository
 from tests import InMemorySqliteDataManager, brand_generator, brand_dto_generator, TEST_DEFAULT_BRAND_LOGO, \
     TEST_DEFAULT_BRAND_HEADER_IMAGE, TEST_DEFAULT_INFLUENCER_PROFILE_IMAGE, influencer_dto_generator, \
     assert_brand_updatable_fields_are_equal
@@ -11,7 +13,9 @@ class BrandRepositoryTestCase(TestCase):
 
     def setUp(self):
         self._data_manager = InMemorySqliteDataManager()
-        self._sut = SqlAlchemyBrandRepository(data_manager=self._data_manager)
+        self._image_repository: ImageRepository = Mock()
+        self._sut = SqlAlchemyBrandRepository(data_manager=self._data_manager,
+                                              image_repository=self._image_repository)
 
 
 class TestBaseRepository(BrandRepositoryTestCase):
@@ -23,8 +27,7 @@ class TestBaseRepository(BrandRepositoryTestCase):
         assert expected_brand.__dict__ == actual_brand.__dict__
 
     def test_load_by_id_when_brand_cannot_be_found(self):
-        actual_brand = self._sut.load_by_id(id_="1234")
-        assert actual_brand is None
+        self.assertRaises(NotFoundException, lambda: self._sut.load_by_id(id_="1234"))
 
     def test_load_collection(self):
         expected_brands = [brand_dto_generator(1), brand_dto_generator(2), brand_dto_generator(3)]
@@ -46,8 +49,7 @@ class TestUserRepository(BrandRepositoryTestCase):
         assert expected.__dict__ == actual.__dict__
 
     def test_load_for_auth_user_when_brand_not_found(self):
-        actual = self._sut.load_for_auth_user(auth_user_id="1234brand1")
-        assert actual is None
+        self.assertRaises(NotFoundException, lambda: self._sut.load_for_auth_user(auth_user_id="1234brand1"))
 
     def test_write_new_for_auth_user(self):
         expected = brand_dto_generator(num=1)
@@ -88,6 +90,45 @@ class TestBrandRepository(BrandRepositoryTestCase):
         assert_brand_updatable_fields_are_equal(actual.__dict__, expected.__dict__)
         assert actual.values == expected.values
         assert actual.categories == expected.categories
+
+    def test_update_for_auth_user_when_not_found(self):
+        expected = brand_dto_generator(num=1)
+        self.assertRaises(NotFoundException, lambda: self._sut.update_for_auth_user(auth_user_id=expected.auth_user_id,
+                                                                                    payload=expected))
+
+    def test_update_logo_for_auth_user(self):
+        image_bytes = "bytes"
+        brand = brand_dto_generator(num=1)
+        expected_logo = "test.png"
+        self._image_repository.upload = MagicMock(return_value=expected_logo)
+        self._data_manager.create_fake_data([brand_generator(brand)])
+        self._sut.update_logo_for_auth_user(auth_user_id=brand.auth_user_id,
+                                            image_bytes=image_bytes)
+        self._image_repository.upload.assert_called_once_with(path=brand.id,
+                                                              image_base64_encoded=image_bytes)
+        actual_logo = self._sut.load_by_id(id_=brand.id).logo
+        assert actual_logo == expected_logo
+
+    def test_update_logo_for_auth_user_when_not_found(self):
+        self.assertRaises(NotFoundException, lambda: self._sut.update_logo_for_auth_user(auth_user_id="12345",
+                                                                                         image_bytes="imagebytes"))
+
+    def test_update_header_image_for_auth_user(self):
+        image_bytes = "bytes"
+        brand = brand_dto_generator(num=1)
+        expected_header_image = "test.png"
+        self._image_repository.upload = MagicMock(return_value=expected_header_image)
+        self._data_manager.create_fake_data([brand_generator(brand)])
+        self._sut.update_header_image_for_auth_user(auth_user_id=brand.auth_user_id,
+                                                    image_bytes=image_bytes)
+        self._image_repository.upload.assert_called_once_with(path=brand.id,
+                                                              image_base64_encoded=image_bytes)
+        actual_header_image = self._sut.load_by_id(id_=brand.id).header_image
+        assert actual_header_image == expected_header_image
+
+    def test_update_header_image_for_auth_user_when_not_found(self):
+        self.assertRaises(NotFoundException, lambda: self._sut.update_header_image_for_auth_user(auth_user_id="12345",
+                                                                                                 image_bytes="imagebytes"))
 
 
 class TestInfluencerRepository(TestCase):

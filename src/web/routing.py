@@ -1,7 +1,7 @@
 from collections import OrderedDict
 
 from src.data import SqlAlchemyDataManager
-from src.data.repositories import SqlAlchemyBrandRepository
+from src.data.repositories import SqlAlchemyBrandRepository, S3ImageRepository
 from src.domain.validation import BrandValidator
 from src.web import PinfluencerResponse
 from src.web.controllers import BrandController
@@ -10,7 +10,8 @@ from src.web.controllers import BrandController
 class Dispatcher:
     def __init__(self):
         self.__brand_ctr = BrandController(
-            brand_repository=SqlAlchemyBrandRepository(data_manager=SqlAlchemyDataManager()),
+            brand_repository=SqlAlchemyBrandRepository(data_manager=SqlAlchemyDataManager(),
+                                                       image_repository=S3ImageRepository()),
             brand_validator=BrandValidator())
 
     @property

@@ -36,6 +36,12 @@ def update_brand_payload():
     }
 
 
+def update_image_payload():
+    return {
+        "image_bytes": "random_bytes"
+    }
+
+
 def update_brand_return_dto():
     return Brand(first_name="first_name",
                  last_name="last_name",
@@ -72,7 +78,7 @@ class TestBrandController(TestCase):
         assert pinfluencer_response.is_ok() is True
 
     def test_get_by_id_when_not_found(self):
-        self.__brand_repository.load_by_id = MagicMock(return_value=None)
+        self.__brand_repository.load_by_id = MagicMock(side_effect=NotFoundException())
         field = str(uuid.uuid4())
         pinfluencer_response = self.__sut.get_by_id(get_brand_id_event(field))
         self.__brand_repository.load_by_id.assert_called_once_with(id_=field)
@@ -110,7 +116,7 @@ class TestBrandController(TestCase):
         assert response.status_code == 200
 
     def test_get_when_not_found(self):
-        self.__brand_repository.load_for_auth_user = MagicMock(return_value=None)
+        self.__brand_repository.load_for_auth_user = MagicMock(side_effect=NotFoundException())
         auth_id = "1234brand1"
         response = self.__sut.get(get_auth_user_event(auth_id))
         self.__brand_repository.load_for_auth_user.assert_called_once_with(auth_user_id=auth_id)
@@ -197,5 +203,43 @@ class TestBrandController(TestCase):
         event = create_brand_for_auth_user_event(auth_id=auth_id, payload=payload)
         self.__brand_repository.update_for_auth_user = MagicMock(side_effect=NotFoundException())
         response = self.__sut.update(event=event)
+        assert response.status_code == 404
+        assert response.body == {}
+
+    def test_update_logo(self):
+        auth_id = "1234brand1"
+        payload = update_image_payload()
+        expected_brand = brand_dto_generator(num=1)
+        event = create_brand_for_auth_user_event(auth_id=auth_id, payload=payload)
+        self.__brand_repository.update_logo_for_auth_user = MagicMock(return_value=expected_brand)
+        response = self.__sut.update_logo(event=event)
+        assert response.status_code == 200
+        assert response.body == expected_brand.__dict__
+
+    def test_update_logo_when_not_found(self):
+        auth_id = "1234brand1"
+        payload = update_image_payload()
+        event = create_brand_for_auth_user_event(auth_id=auth_id, payload=payload)
+        self.__brand_repository.update_logo_for_auth_user = MagicMock(side_effect=NotFoundException())
+        response = self.__sut.update_logo(event=event)
+        assert response.status_code == 404
+        assert response.body == {}
+
+    def test_update_header_image(self):
+        auth_id = "1234brand1"
+        payload = update_image_payload()
+        expected_brand = brand_dto_generator(num=1)
+        event = create_brand_for_auth_user_event(auth_id=auth_id, payload=payload)
+        self.__brand_repository.update_header_image_for_auth_user = MagicMock(return_value=expected_brand)
+        response = self.__sut.update_header_image(event=event)
+        assert response.status_code == 200
+        assert response.body == expected_brand.__dict__
+
+    def test_update_header_image_when_not_found(self):
+        auth_id = "1234brand1"
+        payload = update_image_payload()
+        event = create_brand_for_auth_user_event(auth_id=auth_id, payload=payload)
+        self.__brand_repository.update_header_image_for_auth_user = MagicMock(side_effect=NotFoundException())
+        response = self.__sut.update_header_image(event=event)
         assert response.status_code == 404
         assert response.body == {}

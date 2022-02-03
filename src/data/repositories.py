@@ -9,8 +9,8 @@ from filetype import filetype
 
 from src.data.entities import BrandEntity, InfluencerEntity
 from src.domain.models import Brand
-from src.exceptions import AlreadyExistsException, ImageException
-from src.types import DataManager
+from src.exceptions import AlreadyExistsException, ImageException, NotFoundException
+from src.types import DataManager, ImageRepository, Model, User
 
 
 class BaseSqlAlchemyRepository:
@@ -18,36 +18,36 @@ class BaseSqlAlchemyRepository:
         self._data_manager = data_manager
         self._resource = resource
 
-    def load_collection(self):
+    def load_collection(self) -> list[Model]:
         return list(map(lambda x: x.as_dto(), self._data_manager.session.query(self._resource).all()))
 
-    def load_by_id(self, id_):
+    def load_by_id(self, id_) -> Model:
         entity = self._data_manager.session.query(self._resource).filter(self._resource.id == id_).first()
         if entity:
             return entity.as_dto()
         else:
-            return None
+            raise NotFoundException(f'model {id} was not found')
 
 
 class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):
     def __init__(self, data_manager, resource):
         super().__init__(data_manager, resource)
 
-    def load_for_auth_user(self, auth_user_id):
-        first = self._data_manager.session\
-            .query(self._resource)\
-            .filter(self._resource.auth_user_id == auth_user_id)\
+    def load_for_auth_user(self, auth_user_id) -> User:
+        first = self._data_manager.session \
+            .query(self._resource) \
+            .filter(self._resource.auth_user_id == auth_user_id) \
             .first()
         if first:
             return first.as_dto()
-        return None
+        raise NotFoundException(f'user {auth_user_id} not found')
 
-    def write_new_for_auth_user(self, auth_user_id, payload):
-        entity = self.load_for_auth_user(auth_user_id)
-        if entity:
+    def write_new_for_auth_user(self, auth_user_id, payload) -> User:
+        try:
+            entity = self.load_for_auth_user(auth_user_id)
             raise AlreadyExistsException(f'{self._resource.__name__}'
                                          f'{entity.id} already associated with {auth_user_id}')
-        else:
+        except NotFoundException:
             try:
                 payload.auth_user_id = auth_user_id
                 entity = self._resource.create_from_dto_without_images(dto=payload)
@@ -61,20 +61,45 @@ class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):
 
 
 class SqlAlchemyBrandRepository(BaseSqlAlchemyUserRepository):
-    def __init__(self, data_manager):
+    def __init__(self, data_manager, image_repository: ImageRepository):
         super().__init__(data_manager=data_manager, resource=BrandEntity)
+        self.__image_repository = image_repository
 
-    def update_for_auth_user(self, auth_user_id, payload: Brand):
+    def update_for_auth_user(self, auth_user_id, payload: Brand) -> Brand:
         entity = self._data_manager.session.query(self._resource).first()
-        entity.first_name = payload.first_name
-        entity.last_name = payload.last_name
-        entity.email = payload.email
-        entity.name = payload.name
-        entity.description = payload.description
-        entity.values = json.dumps(list(map(lambda x: x.name, payload.values)))
-        entity.categories = json.dumps(list(map(lambda x: x.name, payload.categories)))
-        entity.website = payload.website
-        self._data_manager.session.commit()
+        if entity:
+            entity.first_name = payload.first_name
+            entity.last_name = payload.last_name
+            entity.email = payload.email
+            entity.name = payload.name
+            entity.description = payload.description
+            entity.values = json.dumps(list(map(lambda x: x.name, payload.values)))
+            entity.categories = json.dumps(list(map(lambda x: x.name, payload.categories)))
+            entity.website = payload.website
+            self._data_manager.session.commit()
+            return entity.as_dto()
+        else:
+            raise NotFoundException(f'brand {auth_user_id} not found')
+
+    def update_logo_for_auth_user(self, auth_user_id, image_bytes) -> Brand:
+        brand = self._data_manager.session.query(BrandEntity).filter(BrandEntity.auth_user_id == auth_user_id).first()
+        if brand:
+            image = self.__image_repository.upload(path=brand.id, image_base64_encoded=image_bytes)
+            brand.logo = image
+            self._data_manager.session.commit()
+            return brand
+        else:
+            raise NotFoundException(f'brand {auth_user_id} could not be found')
+
+    def update_header_image_for_auth_user(self, auth_user_id, image_bytes) -> Brand:
+        brand = self._data_manager.session.query(BrandEntity).filter(BrandEntity.auth_user_id == auth_user_id).first()
+        if brand:
+            image = self.__image_repository.upload(path=brand.id, image_base64_encoded=image_bytes)
+            brand.header_image = image
+            self._data_manager.session.commit()
+            return brand
+        else:
+            raise NotFoundException(f'brand {auth_user_id} could not be found')
 
 
 class SqlAlchemyInfluencerRepository(BaseSqlAlchemyUserRepository):
@@ -105,18 +130,5 @@ class S3ImageRepository:
                                         ContentType=mime,
                                         Tagging='public=yes')
             return key
-        except ClientError:
-            raise ImageException
-
-    def delete(self, path):
-        try:
-            self.__s3_client.delete_object(Bucket=self.__bucket_name, Key=path)
-        except ClientError:
-            raise ImageException
-
-    def retrieve(self, path):
-        try:
-            image_object = self.__s3_client.get_object(self.__bucket_name, path)
-            return json.loads(image_object['Body'].read())
         except ClientError:
             raise ImageException

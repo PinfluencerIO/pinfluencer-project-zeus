@@ -1,4 +1,5 @@
 import json
+from typing import Callable
 
 from jsonschema.exceptions import ValidationError
 
@@ -10,7 +11,22 @@ from src.web import PinfluencerResponse, get_cognito_user, BRAND_ID_PATH_KEY
 from src.web.validation import valid_path_resource_id
 
 
-class BrandController:
+class BaseController:
+
+    def _update_image(self, event, updater: Callable[[str, str], dict]):
+        auth_user_id = get_cognito_user(event)
+        payload_json_string = event['body']
+        payload_dict = json.loads(payload_json_string)
+        try:
+            return PinfluencerResponse(status_code=200,
+                                       body=updater(auth_user_id,
+                                                    payload_dict['image_bytes']))
+        except NotFoundException as e:
+            print_exception(e)
+            return PinfluencerResponse(status_code=404, body={})
+
+
+class BrandController(BaseController):
     def __init__(self, brand_repository: BrandRepository, brand_validator: Validatable):
         self.__brand_validator = brand_validator
         self.__brand_repository = brand_repository
@@ -22,18 +38,22 @@ class BrandController:
     def get_by_id(self, event):
         id_ = valid_path_resource_id(event, BRAND_ID_PATH_KEY)
         if id_:
-            brand = self.__brand_repository.load_by_id(id_=id_)
-            if brand:
+            try:
+                brand = self.__brand_repository.load_by_id(id_=id_)
                 return PinfluencerResponse(status_code=200, body=brand.__dict__)
-            return PinfluencerResponse(status_code=404, body={})
+            except NotFoundException as e:
+                print_exception(e)
+                return PinfluencerResponse(status_code=404, body={})
         return PinfluencerResponse(status_code=400, body={})
 
     def get(self, event):
         auth_user_id = get_cognito_user(event)
         if auth_user_id:
-            brand = self.__brand_repository.load_for_auth_user(auth_user_id=auth_user_id)
-            if brand:
+            try:
+                brand = self.__brand_repository.load_for_auth_user(auth_user_id=auth_user_id)
                 return PinfluencerResponse(status_code=200, body=brand.__dict__)
+            except NotFoundException as e:
+                print_exception(e)
         return PinfluencerResponse(status_code=404, body={})
 
     def create(self, event):
@@ -79,8 +99,13 @@ class BrandController:
             print_exception(e)
             return PinfluencerResponse(status_code=404, body={})
 
-    def update_header_image(self, event):
-        raise NotImplemented
-
     def update_logo(self, event):
-        raise NotImplemented
+        return self._update_image(event=event,
+                           updater=lambda auth_id, bytes: self.__brand_repository.update_logo_for_auth_user(auth_id,
+                                                                                                            bytes).__dict__)
+
+    def update_header_image(self, event):
+        return self._update_image(event=event,
+                           updater=lambda auth_id, bytes: self.__brand_repository.update_header_image_for_auth_user(
+                               auth_id,
+                               bytes).__dict__)

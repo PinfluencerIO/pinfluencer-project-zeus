@@ -97,17 +97,6 @@ class StubDataManager:
         return Mock()
 
 
-class StubImageRepo:
-    def retrieve(path):
-        return ""
-
-    def delete(self, path):
-        pass
-
-    def upload(self, path, image_base64_encoded):
-        return ""
-
-
 def assert_brand_updatable_fields_are_equal(brand1, brand2):
     assert brand1['first_name'] == brand2['first_name']
     assert brand1['last_name'] == brand2['last_name']
