@@ -2,6 +2,7 @@ import base64
 import io
 import json
 import uuid
+from typing import Callable
 
 import boto3
 from botocore.exceptions import ClientError
@@ -30,8 +31,9 @@ class BaseSqlAlchemyRepository:
 
 
 class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):
-    def __init__(self, data_manager, resource):
+    def __init__(self, data_manager, resource, image_repository):
         super().__init__(data_manager, resource)
+        self.__image_repository = image_repository
 
     def load_for_auth_user(self, auth_user_id) -> User:
         first = self._data_manager.session \
@@ -59,11 +61,27 @@ class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):
                 self._data_manager.session.rollback()
                 raise e
 
+    def _update_image(self, auth_user_id, image_bytes, field_setter: Callable[[str, User], None]):
+        user = self._data_manager.session.query(self._resource).filter(
+            self._resource.auth_user_id == auth_user_id).first()
+        if user:
+            image = self.__image_repository.upload(path=user.id,
+                                                   image_base64_encoded=image_bytes)
+            print(f'setting user {auth_user_id} image to {image}')
+            field_setter(image, user)
+            self._data_manager.session.commit()
+            return user.as_dto()
+        else:
+            raise NotFoundException(f'brand {auth_user_id} could not be found')
+
 
 class SqlAlchemyBrandRepository(BaseSqlAlchemyUserRepository):
-    def __init__(self, data_manager, image_repository: ImageRepository):
-        super().__init__(data_manager=data_manager, resource=BrandEntity)
-        self.__image_repository = image_repository
+    def __init__(self,
+                 data_manager: DataManager,
+                 image_repository: ImageRepository):
+        super().__init__(data_manager=data_manager,
+                         resource=BrandEntity,
+                         image_repository=image_repository)
 
     def update_for_auth_user(self, auth_user_id, payload: Brand) -> Brand:
         entity = self._data_manager.session.query(self._resource).first()
@@ -82,29 +100,31 @@ class SqlAlchemyBrandRepository(BaseSqlAlchemyUserRepository):
             raise NotFoundException(f'brand {auth_user_id} not found')
 
     def update_logo_for_auth_user(self, auth_user_id, image_bytes) -> Brand:
-        brand = self._data_manager.session.query(BrandEntity).filter(BrandEntity.auth_user_id == auth_user_id).first()
-        if brand:
-            image = self.__image_repository.upload(path=brand.id, image_base64_encoded=image_bytes)
-            brand.logo = image
-            self._data_manager.session.commit()
-            return brand.as_dto()
-        else:
-            raise NotFoundException(f'brand {auth_user_id} could not be found')
+        return self._update_image(auth_user_id=auth_user_id,
+                                  image_bytes=image_bytes,
+                                  field_setter=self.__logo_setter)
 
     def update_header_image_for_auth_user(self, auth_user_id, image_bytes) -> Brand:
-        brand = self._data_manager.session.query(BrandEntity).filter(BrandEntity.auth_user_id == auth_user_id).first()
-        if brand:
-            image = self.__image_repository.upload(path=brand.id, image_base64_encoded=image_bytes)
-            brand.header_image = image
-            self._data_manager.session.commit()
-            return brand.as_dto()
-        else:
-            raise NotFoundException(f'brand {auth_user_id} could not be found')
+        return self._update_image(auth_user_id=auth_user_id,
+                                  image_bytes=image_bytes,
+                                  field_setter=self.__header_image_setter)
+
+    @staticmethod
+    def __logo_setter(logo, brand):
+        brand.logo = logo
+
+    @staticmethod
+    def __header_image_setter(header_image, brand):
+        brand.header_image = header_image
 
 
 class SqlAlchemyInfluencerRepository(BaseSqlAlchemyUserRepository):
-    def __init__(self, data_manager):
-        super().__init__(data_manager=data_manager, resource=InfluencerEntity)
+    def __init__(self,
+                 data_manager: DataManager,
+                 image_repository: ImageRepository):
+        super().__init__(data_manager=data_manager,
+                         resource=InfluencerEntity,
+                         image_repository=image_repository)
 
 
 class S3ImageRepository:
@@ -117,13 +137,16 @@ class S3ImageRepository:
         image = base64.b64decode(image_base64_encoded)
         f = io.BytesIO(image)
         file_type = filetype.guess(f)
+        print(f'image uploading to {path}/ of {file_type}')
         if file_type is not None:
             mime = file_type.MIME
         else:
             mime = 'image/jpg'
         image_id = str(uuid.uuid4())
         file = f'{image_id}.{file_type.EXTENSION}'
+        print(f'image {file}')
         key = f'{path}/{file}'
+        print(f'key {key}')
         try:
             self.__s3_client.put_object(Bucket=self.__bucket_name,
                                         Key=key, Body=image,

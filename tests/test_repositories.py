@@ -135,7 +135,9 @@ class TestInfluencerRepository(TestCase):
 
     def setUp(self):
         self.__data_manager = InMemorySqliteDataManager()
-        self.__sut = SqlAlchemyInfluencerRepository(data_manager=self.__data_manager)
+        self.__image_repository = Mock()
+        self.__sut = SqlAlchemyInfluencerRepository(data_manager=self.__data_manager,
+                                                    image_repository=self.__image_repository)
 
     def test_write_new_for_auth_user(self):
         expected = influencer_dto_generator(num=1)
