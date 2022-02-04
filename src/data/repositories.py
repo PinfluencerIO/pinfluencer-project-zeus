@@ -87,7 +87,7 @@ class SqlAlchemyBrandRepository(BaseSqlAlchemyUserRepository):
             image = self.__image_repository.upload(path=brand.id, image_base64_encoded=image_bytes)
             brand.logo = image
             self._data_manager.session.commit()
-            return brand
+            return brand.as_dto()
         else:
             raise NotFoundException(f'brand {auth_user_id} could not be found')
 
@@ -97,7 +97,7 @@ class SqlAlchemyBrandRepository(BaseSqlAlchemyUserRepository):
             image = self.__image_repository.upload(path=brand.id, image_base64_encoded=image_bytes)
             brand.header_image = image
             self._data_manager.session.commit()
-            return brand
+            return brand.as_dto()
         else:
             raise NotFoundException(f'brand {auth_user_id} could not be found')
 
