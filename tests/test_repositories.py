@@ -102,12 +102,12 @@ class TestBrandRepository(BrandRepositoryTestCase):
         expected_logo = "test.png"
         self._image_repository.upload = MagicMock(return_value=expected_logo)
         self._data_manager.create_fake_data([brand_generator(brand)])
-        self._sut.update_logo_for_auth_user(auth_user_id=brand.auth_user_id,
+        returned_brand = self._sut.update_logo_for_auth_user(auth_user_id=brand.auth_user_id,
                                             image_bytes=image_bytes)
         self._image_repository.upload.assert_called_once_with(path=brand.id,
                                                               image_base64_encoded=image_bytes)
         actual_logo = self._sut.load_by_id(id_=brand.id).logo
-        assert actual_logo == expected_logo
+        assert returned_brand.logo == expected_logo == actual_logo
 
     def test_update_logo_for_auth_user_when_not_found(self):
         self.assertRaises(NotFoundException, lambda: self._sut.update_logo_for_auth_user(auth_user_id="12345",
@@ -119,12 +119,12 @@ class TestBrandRepository(BrandRepositoryTestCase):
         expected_header_image = "test.png"
         self._image_repository.upload = MagicMock(return_value=expected_header_image)
         self._data_manager.create_fake_data([brand_generator(brand)])
-        self._sut.update_header_image_for_auth_user(auth_user_id=brand.auth_user_id,
-                                                    image_bytes=image_bytes)
+        returned_brand = self._sut.update_header_image_for_auth_user(auth_user_id=brand.auth_user_id,
+                                                            image_bytes=image_bytes)
         self._image_repository.upload.assert_called_once_with(path=brand.id,
                                                               image_base64_encoded=image_bytes)
         actual_header_image = self._sut.load_by_id(id_=brand.id).header_image
-        assert actual_header_image == expected_header_image
+        assert returned_brand.header_image == expected_header_image == actual_header_image
 
     def test_update_header_image_for_auth_user_when_not_found(self):
         self.assertRaises(NotFoundException, lambda: self._sut.update_header_image_for_auth_user(auth_user_id="12345",

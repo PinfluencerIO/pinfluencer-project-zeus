@@ -71,7 +71,11 @@ class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):
             field_setter(image, user)
             self._data_manager.session.commit()
             print(f'Repository Event: user after image set \n{user.as_dto().__dict__}')
-            return user.as_dto()
+            return self._data_manager.session\
+                .query(self._resource)\
+                .filter(self._resource.auth_user_id == auth_user_id)\
+                .first()\
+                .as_dto()
         else:
             raise NotFoundException(f'brand {auth_user_id} could not be found')
 
