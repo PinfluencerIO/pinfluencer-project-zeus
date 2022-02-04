@@ -11,7 +11,7 @@ from src.exceptions import AlreadyExistsException, NotFoundException
 from src.types import BrandRepository
 from src.web.controllers import BrandController
 from src.web.validation import valid_uuid
-from tests import brand_dto_generator
+from tests import brand_dto_generator, assert_brand_updatable_fields_are_equal
 
 
 def get_brand_id_event(brand_id):
@@ -134,12 +134,7 @@ class TestBrandController(TestCase):
                                                                                 payload=payload_captor)
         actual_payload = payload_captor.arg
         assert valid_uuid(actual_payload.id)
-        assert actual_payload.first_name == expected_payload['first_name']
-        assert actual_payload.last_name == expected_payload['last_name']
-        assert actual_payload.email == expected_payload['email']
-        assert actual_payload.name == expected_payload['name']
-        assert actual_payload.description == expected_payload['description']
-        assert actual_payload.website == expected_payload['website']
+        assert_brand_updatable_fields_are_equal(actual_payload.__dict__, expected_payload)
         assert list(map(lambda x: x.name, actual_payload.values)) == expected_payload['values']
         assert list(map(lambda x: x.name, actual_payload.categories)) == expected_payload['categories']
         assert response.status_code == 201
@@ -149,7 +144,6 @@ class TestBrandController(TestCase):
         auth_id = "1234brand1"
         event = create_brand_for_auth_user_event(auth_id=auth_id, payload=update_brand_payload())
         self.__brand_repository.write_new_for_auth_user = MagicMock(side_effect=AlreadyExistsException())
-
         response = self.__sut.create(event=event)
         assert response.status_code == 400
         assert response.body == {}
@@ -159,7 +153,6 @@ class TestBrandController(TestCase):
         payload = update_brand_payload()
         payload['name'] = 120
         event = create_brand_for_auth_user_event(auth_id=auth_id, payload=payload)
-
         response = self.__sut.create(event=event)
         assert response.status_code == 400
         assert response.body == {}
@@ -176,12 +169,7 @@ class TestBrandController(TestCase):
                                                                              payload=payload_captor)
         actual_payload = payload_captor.arg
         assert valid_uuid(actual_payload.id)
-        assert actual_payload.first_name == expected_payload['first_name']
-        assert actual_payload.last_name == expected_payload['last_name']
-        assert actual_payload.email == expected_payload['email']
-        assert actual_payload.name == expected_payload['name']
-        assert actual_payload.description == expected_payload['description']
-        assert actual_payload.website == expected_payload['website']
+        assert_brand_updatable_fields_are_equal(actual_payload.__dict__, expected_payload)
         assert list(map(lambda x: x.name, actual_payload.values)) == expected_payload['values']
         assert list(map(lambda x: x.name, actual_payload.categories)) == expected_payload['categories']
         assert response.status_code == 200

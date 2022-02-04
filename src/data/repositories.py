@@ -92,6 +92,7 @@ class SqlAlchemyBrandRepository(BaseSqlAlchemyUserRepository):
             entity.email = payload.email
             entity.name = payload.name
             entity.description = payload.description
+            entity.instahandle = payload.instahandle
             entity.values = json.dumps(list(map(lambda x: x.name, payload.values)))
             entity.categories = json.dumps(list(map(lambda x: x.name, payload.categories)))
             entity.website = payload.website
@@ -153,6 +154,6 @@ class S3ImageRepository:
                                         Key=key, Body=image,
                                         ContentType=mime,
                                         Tagging='public=yes')
-            return key
+            return file
         except ClientError:
             raise ImageException
