@@ -18,9 +18,12 @@ class BaseController:
         payload_json_string = event['body']
         payload_dict = json.loads(payload_json_string)
         try:
+            user = updater(auth_user_id, payload_dict['image_bytes'])
+            print(f'Controller Event: user after image set \n{user}')
+            updater(auth_user_id,
+                    payload_dict['image_bytes'])
             return PinfluencerResponse(status_code=200,
-                                       body=updater(auth_user_id,
-                                                    payload_dict['image_bytes']))
+                                       body=user)
         except NotFoundException as e:
             print_exception(e)
             return PinfluencerResponse(status_code=404, body={})
@@ -101,11 +104,12 @@ class BrandController(BaseController):
 
     def update_logo(self, event):
         return self._update_image(event=event,
-                           updater=lambda auth_id, bytes: self.__brand_repository.update_logo_for_auth_user(auth_id,
-                                                                                                            bytes).__dict__)
+                                  updater=lambda auth_id, bytes: self.__brand_repository.update_logo_for_auth_user(
+                                                 auth_id,
+                                                 bytes).__dict__)
 
     def update_header_image(self, event):
         return self._update_image(event=event,
-                           updater=lambda auth_id, bytes: self.__brand_repository.update_header_image_for_auth_user(
-                               auth_id,
-                               bytes).__dict__)
+                                  updater=lambda auth_id, bytes: self.__brand_repository.update_header_image_for_auth_user(
+                                                 auth_id,
+                                                 bytes).__dict__)
