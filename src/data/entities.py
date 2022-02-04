@@ -82,12 +82,12 @@ class BrandEntity(Base, BaseUserEntity):
 
     name = Column(type_=String(length=120), nullable=False)
     description = Column(type_=String(length=500), nullable=False)
-    header_image = Column(type_=String(length=36), nullable=True)
+    header_image = Column(type_=String(length=360), nullable=True)
     values = Column(type_=String(length=120), nullable=False)
     categories = Column(type_=String(length=120), nullable=False)
     instahandle = Column(type_=String(length=30), nullable=True)
     website = Column(type_=String(length=120), nullable=False)
-    logo = Column(type_=String(length=36), nullable=True)
+    logo = Column(type_=String(length=360), nullable=True)
 
 
 class InfluencerEntity(Base, BaseUserEntity):
@@ -155,7 +155,7 @@ class InfluencerEntity(Base, BaseUserEntity):
     name = Column(type_=String(length=120), nullable=False)
     website = Column(type_=String(length=120), nullable=False)
     bio = Column(type_=String(length=500), nullable=False)
-    image = Column(type_=String(length=36), nullable=True)
+    image = Column(type_=String(length=360), nullable=True)
     audience_age_13_17_split = Column(type_=Float, nullable=True)
     audience_age_18_24_split = Column(type_=Float, nullable=True)
     audience_age_25_34_split = Column(type_=Float, nullable=True)

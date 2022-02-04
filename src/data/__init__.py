@@ -16,6 +16,8 @@ class SqlAlchemyDataManager:
         self.__engine = engine
         session = sessionmaker(bind=self.__engine, autocommit=False)
         self.__session = session()
+        Base.metadata.drop_all(bind=engine)
+        Base.metadata.create_all(bind=engine)
 
     @property
     def engine(self):

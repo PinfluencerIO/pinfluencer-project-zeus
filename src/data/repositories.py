@@ -158,6 +158,6 @@ class S3ImageRepository:
                                         Key=key, Body=image,
                                         ContentType=mime,
                                         Tagging='public=yes')
-            return file
+            return key
         except ClientError:
             raise ImageException
