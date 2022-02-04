@@ -169,7 +169,7 @@ Resources:
             Auth:
               Authorizer: UserAuth
             Path: /brands/me/logo
-            Method: patch
+            Method: post
             ApiId: !Ref PinfluencerHttpApi
         UpdateMyBrandHeaderImage:
           Type: HttpApi
@@ -177,7 +177,7 @@ Resources:
             Auth:
               Authorizer: UserAuth
             Path: /brands/me/header_image
-            Method: patch
+            Method: post
             ApiId: !Ref PinfluencerHttpApi
         UpdateMyBrand:
           Type: HttpApi
