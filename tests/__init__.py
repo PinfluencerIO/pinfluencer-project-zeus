@@ -98,10 +98,16 @@ class StubDataManager:
 
 
 def assert_brand_updatable_fields_are_equal(brand1, brand2):
-    assert brand1['instahandle'] == brand2['instahandle']
-    assert brand1['first_name'] == brand2['first_name']
-    assert brand1['last_name'] == brand2['last_name']
-    assert brand1['email'] == brand2['email']
-    assert brand1['name'] == brand2['name']
-    assert brand1['description'] == brand2['description']
-    assert brand1['website'] == brand2['website']
+    for field in brand_brand_updatable_fields():
+        assert brand1[field] == brand2[field]
+        print(f'asserted {field} is valid')
+
+
+def assert_brand_updatable_fields_are_equal_for_three(brand1, brand2, brand3):
+    for field in brand_brand_updatable_fields():
+        assert brand1[field] == brand2[field] == brand3[field]
+        print(f'asserted {field} is valid')
+
+
+def brand_brand_updatable_fields():
+    return ['instahandle', 'first_name', 'last_name', 'email', 'name', 'description', 'website']
