@@ -163,12 +163,20 @@ Resources:
             Path: /brands/me
             Method: get
             ApiId: !Ref PinfluencerHttpApi
-        UpdateMyBrandImage:
+        UpdateMyBrandLogo:
           Type: HttpApi
           Properties:
             Auth:
               Authorizer: UserAuth
-            Path: /brands/me/image
+            Path: /brands/me/logo
+            Method: patch
+            ApiId: !Ref PinfluencerHttpApi
+        UpdateMyBrandHeaderImage:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /brands/me/header_image
             Method: patch
             ApiId: !Ref PinfluencerHttpApi
         UpdateMyBrand:
