@@ -12,8 +12,8 @@ TEST_DEFAULT_BRAND_HEADER_IMAGE = "default_brand_header_image.png"
 TEST_DEFAULT_INFLUENCER_PROFILE_IMAGE = "default_influencer_profile_image.png"
 
 
-def brand_generator(dto):
-    return BrandEntity.create_from_dto(dto=dto)
+def brand_generator(dto, mapper):
+    return mapper.map(dto, BrandEntity)
 
 
 def brand_dto_generator(num):

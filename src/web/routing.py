@@ -1,5 +1,7 @@
 from collections import OrderedDict
 
+from mapper.object_mapper import ObjectMapper
+
 from src.data import SqlAlchemyDataManager
 from src.data.repositories import SqlAlchemyBrandRepository, S3ImageRepository
 from src.domain.validation import BrandValidator
@@ -11,7 +13,8 @@ class Dispatcher:
     def __init__(self):
         self.__brand_ctr = BrandController(
             brand_repository=SqlAlchemyBrandRepository(data_manager=SqlAlchemyDataManager(),
-                                                       image_repository=S3ImageRepository()),
+                                                       image_repository=S3ImageRepository(),
+                                                       object_mapper=ObjectMapper()),
             brand_validator=BrandValidator())
 
     @property

@@ -45,7 +45,7 @@ class Queryable(Protocol):
         ...
 
 
-class Session(Protocol):
+class SessionAdapter(Protocol):
 
     def query(self, entity) -> Queryable:
         ...
@@ -70,7 +70,7 @@ class DataManager(Protocol):
         ...
 
     @property
-    def session(self) -> Session:
+    def session(self) -> SessionAdapter:
         ...
 
 
@@ -80,7 +80,24 @@ class ImageRepository(Protocol):
         pass
 
 
-Model = Union[Brand, Influencer]
+User = Union[Brand, Influencer]
 
 # TODO: add rest
-User = Union[Model]
+Model = Union[User]
+
+
+class ObjectMapperAdapter:
+
+    def create_map(self,
+                   type_from: type,
+                   type_to: type,
+                   mapping: dict = None) -> None:
+        pass
+
+    def map(self,
+            from_obj,
+            to_type: type,
+            ignore_case=False,
+            allow_none=False,
+            excluded=None):
+        pass

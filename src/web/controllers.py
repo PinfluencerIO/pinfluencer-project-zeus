@@ -19,9 +19,6 @@ class BaseController:
         payload_dict = json.loads(payload_json_string)
         try:
             user = updater(auth_user_id, payload_dict['image_bytes'])
-            print(f'Controller Event: user after image set \n{user}')
-            updater(auth_user_id,
-                    payload_dict['image_bytes'])
             return PinfluencerResponse(status_code=200,
                                        body=user)
         except NotFoundException as e:

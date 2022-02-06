@@ -2,80 +2,95 @@ import base64
 import io
 import json
 import uuid
-from typing import Callable
+from typing import Callable, Union
 
 import boto3
 from botocore.exceptions import ClientError
 from filetype import filetype
 
-from src.data.entities import BrandEntity, InfluencerEntity
-from src.domain.models import Brand
+from src.data.entities import BrandEntity, InfluencerEntity, create_mappings
+from src.domain.models import Brand, Influencer
 from src.exceptions import AlreadyExistsException, ImageException, NotFoundException
-from src.types import DataManager, ImageRepository, Model, User
+from src.types import DataManager, ImageRepository, Model, User, ObjectMapperAdapter
 
 
 class BaseSqlAlchemyRepository:
-    def __init__(self, data_manager: DataManager, resource):
+    def __init__(self,
+                 data_manager: DataManager,
+                 resource_entity,
+                 object_mapper: ObjectMapperAdapter,
+                 resource_dto):
+        self._object_mapper = object_mapper
         self._data_manager = data_manager
-        self._resource = resource
+        self._resource_entity = resource_entity
+        self._resource_dto = resource_dto
+
+        create_mappings(mapper=self._object_mapper)
 
     def load_collection(self) -> list[Model]:
-        return list(map(lambda x: x.as_dto(), self._data_manager.session.query(self._resource).all()))
+        return list(map(lambda x: self._object_mapper.map(from_obj=x, to_type=self._resource_dto), self._data_manager.session.query(self._resource_entity).all()))
 
     def load_by_id(self, id_) -> Model:
-        entity = self._data_manager.session.query(self._resource).filter(self._resource.id == id_).first()
+        entity = self._data_manager.session.query(self._resource_entity).filter(self._resource_entity.id == id_).first()
         if entity:
-            return entity.as_dto()
+            return self._object_mapper.map(from_obj=entity, to_type=self._resource_dto)
         else:
             raise NotFoundException(f'model {id} was not found')
 
 
 class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):
-    def __init__(self, data_manager, resource, image_repository):
-        super().__init__(data_manager, resource)
+    def __init__(self, data_manager: DataManager,
+                 resource_entity,
+                 image_repository: ImageRepository,
+                 object_mapper: ObjectMapperAdapter,
+                 resource_dto):
+        super().__init__(data_manager=data_manager,
+                         resource_entity=resource_entity,
+                         object_mapper=object_mapper,
+                         resource_dto=resource_dto)
         self.__image_repository = image_repository
 
     def load_for_auth_user(self, auth_user_id) -> User:
         first = self._data_manager.session \
-            .query(self._resource) \
-            .filter(self._resource.auth_user_id == auth_user_id) \
+            .query(self._resource_entity) \
+            .filter(self._resource_entity.auth_user_id == auth_user_id) \
             .first()
         if first:
-            return first.as_dto()
+            return self._object_mapper.map(from_obj=first, to_type=self._resource_dto)
         raise NotFoundException(f'user {auth_user_id} not found')
 
     def write_new_for_auth_user(self, auth_user_id, payload) -> User:
         try:
             entity = self.load_for_auth_user(auth_user_id)
-            raise AlreadyExistsException(f'{self._resource.__name__}'
+            raise AlreadyExistsException(f'{self._resource_entity.__name__}'
                                          f'{entity.id} already associated with {auth_user_id}')
         except NotFoundException:
             try:
                 payload.auth_user_id = auth_user_id
-                entity = self._resource.create_from_dto_without_images(dto=payload)
+                entity = self._object_mapper.map(from_obj=payload, to_type=self._resource_entity)
                 self._data_manager.session.add(entity)
                 self._data_manager.session.commit()
-                return entity.as_dto()
+                return self._object_mapper.map(from_obj=entity, to_type=self._resource_dto)
             except Exception as e:
-                print(f'Failed to write_new_{self._resource.__class__.__name__}_for_auth_user {e}')
+                print(f'Failed to write_new_{self._resource_entity.__class__.__name__}_for_auth_user {e}')
                 self._data_manager.session.rollback()
                 raise e
 
     def _update_image(self, auth_user_id, image_bytes, field_setter: Callable[[str, User], None]):
-        user = self._data_manager.session.query(self._resource).filter(
-            self._resource.auth_user_id == auth_user_id).first()
+        user = self._data_manager.session.query(self._resource_entity).filter(
+            self._resource_entity.auth_user_id == auth_user_id).first()
         if user:
             image = self.__image_repository.upload(path=user.id,
                                                    image_base64_encoded=image_bytes)
             print(f'setting user {auth_user_id} image to {image}')
             field_setter(image, user)
             self._data_manager.session.commit()
-            print(f'Repository Event: user after image set \n{user.as_dto().__dict__}')
-            return self._data_manager.session\
-                .query(self._resource)\
-                .filter(self._resource.auth_user_id == auth_user_id)\
-                .first()\
-                .as_dto()
+            print(f'Repository Event: user after image set \n{self._object_mapper.map(from_obj=user, to_type=self._resource_dto).__dict__}')
+            first = self._data_manager.session\
+                .query(self._resource_entity)\
+                .filter(self._resource_entity.auth_user_id == auth_user_id)\
+                .first()
+            return self._object_mapper.map(from_obj=first, to_type=self._resource_dto)
         else:
             raise NotFoundException(f'brand {auth_user_id} could not be found')
 
@@ -83,13 +98,16 @@ class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):
 class SqlAlchemyBrandRepository(BaseSqlAlchemyUserRepository):
     def __init__(self,
                  data_manager: DataManager,
-                 image_repository: ImageRepository):
+                 image_repository: ImageRepository,
+                 object_mapper: Union[object, ObjectMapperAdapter]):
         super().__init__(data_manager=data_manager,
-                         resource=BrandEntity,
-                         image_repository=image_repository)
+                         resource_entity=BrandEntity,
+                         image_repository=image_repository,
+                         object_mapper=object_mapper,
+                         resource_dto=Brand)
 
     def update_for_auth_user(self, auth_user_id, payload: Brand) -> Brand:
-        entity = self._data_manager.session.query(self._resource).first()
+        entity = self._data_manager.session.query(self._resource_entity).filter(self._resource_entity.auth_user_id == auth_user_id).first()
         if entity:
             entity.first_name = payload.first_name
             entity.last_name = payload.last_name
@@ -101,7 +119,7 @@ class SqlAlchemyBrandRepository(BaseSqlAlchemyUserRepository):
             entity.categories = json.dumps(list(map(lambda x: x.name, payload.categories)))
             entity.website = payload.website
             self._data_manager.session.commit()
-            return entity.as_dto()
+            return self._object_mapper.map(from_obj=entity, to_type=self._resource_dto)
         else:
             raise NotFoundException(f'brand {auth_user_id} not found')
 
@@ -127,10 +145,13 @@ class SqlAlchemyBrandRepository(BaseSqlAlchemyUserRepository):
 class SqlAlchemyInfluencerRepository(BaseSqlAlchemyUserRepository):
     def __init__(self,
                  data_manager: DataManager,
-                 image_repository: ImageRepository):
+                 image_repository: ImageRepository,
+                 object_mapper: Union[object, ObjectMapperAdapter]):
         super().__init__(data_manager=data_manager,
-                         resource=InfluencerEntity,
-                         image_repository=image_repository)
+                         resource_entity=InfluencerEntity,
+                         image_repository=image_repository,
+                         object_mapper=object_mapper,
+                         resource_dto=Influencer)
 
 
 class S3ImageRepository:

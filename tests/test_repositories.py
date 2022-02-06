@@ -1,6 +1,8 @@
 from unittest import TestCase
 from unittest.mock import Mock, MagicMock
 
+from mapper.object_mapper import ObjectMapper
+
 from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.types import ImageRepository
@@ -14,15 +16,17 @@ class BrandRepositoryTestCase(TestCase):
     def setUp(self):
         self._data_manager = InMemorySqliteDataManager()
         self._image_repository: ImageRepository = Mock()
+        self._object_mapper = ObjectMapper()
         self._sut = SqlAlchemyBrandRepository(data_manager=self._data_manager,
-                                              image_repository=self._image_repository)
+                                              image_repository=self._image_repository,
+                                              object_mapper=self._object_mapper)
 
 
 class TestBaseRepository(BrandRepositoryTestCase):
 
     def test_load_by_id(self):
         expected_brand = brand_dto_generator(1)
-        self._data_manager.create_fake_data([brand_generator(expected_brand)])
+        self._data_manager.create_fake_data([brand_generator(expected_brand, mapper=self._object_mapper)])
         actual_brand = self._sut.load_by_id(id_=expected_brand.id)
         assert expected_brand.__dict__ == actual_brand.__dict__
 
@@ -31,7 +35,7 @@ class TestBaseRepository(BrandRepositoryTestCase):
 
     def test_load_collection(self):
         expected_brands = [brand_dto_generator(1), brand_dto_generator(2), brand_dto_generator(3)]
-        self._data_manager.create_fake_data(list(map(lambda x: brand_generator(x), expected_brands)))
+        self._data_manager.create_fake_data(list(map(lambda x: brand_generator(x, mapper=self._object_mapper), expected_brands)))
         actual_brands = self._sut.load_collection()
         assert list(map(lambda x: x.__dict__, expected_brands)) == list(map(lambda x: x.__dict__, actual_brands))
 
@@ -44,7 +48,7 @@ class TestUserRepository(BrandRepositoryTestCase):
 
     def test_load_for_auth_user(self):
         expected = brand_dto_generator(num=1)
-        self._data_manager.create_fake_data([brand_generator(expected)])
+        self._data_manager.create_fake_data([brand_generator(expected, mapper=self._object_mapper)])
         actual = self._sut.load_for_auth_user(auth_user_id="1234brand1")
         assert expected.__dict__ == actual.__dict__
 
@@ -62,7 +66,7 @@ class TestUserRepository(BrandRepositoryTestCase):
         expected = brand_dto_generator(num=1)
         brand_to_create = brand_dto_generator(num=2)
         brand_to_create.auth_user_id = expected.auth_user_id
-        self._data_manager.create_fake_data([brand_generator(expected)])
+        self._data_manager.create_fake_data([brand_generator(expected, mapper=self._object_mapper)])
         self.assertRaises(AlreadyExistsException, lambda: self._sut.write_new_for_auth_user(auth_user_id="1234brand1",
                                                                                             payload=brand_to_create))
         actual = self._sut.load_for_auth_user(auth_user_id=brand_to_create.auth_user_id)
@@ -73,6 +77,8 @@ class TestBrandRepository(BrandRepositoryTestCase):
 
     def test_write_new_for_auth_user(self):
         expected = brand_dto_generator(num=1)
+        expected.header_image = ""
+        expected.logo = ""
         self._sut.write_new_for_auth_user(auth_user_id="1234brand1",
                                           payload=expected)
         actual = self._sut.load_by_id(id_=expected.id)
@@ -83,7 +89,7 @@ class TestBrandRepository(BrandRepositoryTestCase):
         existing_brand = brand_dto_generator(num=1)
         expected = brand_dto_generator(num=2)
         expected.auth_user_id = existing_brand.auth_user_id
-        self._data_manager.create_fake_data([brand_generator(existing_brand)])
+        self._data_manager.create_fake_data([brand_generator(existing_brand, mapper=self._object_mapper)])
         returned_brand = self._sut.update_for_auth_user(auth_user_id=existing_brand.auth_user_id,
                                        payload=expected)
         actual = self._sut.load_by_id(id_=existing_brand.id)
@@ -101,7 +107,7 @@ class TestBrandRepository(BrandRepositoryTestCase):
         brand = brand_dto_generator(num=1)
         expected_logo = "test.png"
         self._image_repository.upload = MagicMock(return_value=expected_logo)
-        self._data_manager.create_fake_data([brand_generator(brand)])
+        self._data_manager.create_fake_data([brand_generator(brand, mapper=self._object_mapper)])
         returned_brand = self._sut.update_logo_for_auth_user(auth_user_id=brand.auth_user_id,
                                                              image_bytes=image_bytes)
         self._image_repository.upload.assert_called_once_with(path=brand.id,
@@ -118,7 +124,7 @@ class TestBrandRepository(BrandRepositoryTestCase):
         brand = brand_dto_generator(num=1)
         expected_header_image = "test.png"
         self._image_repository.upload = MagicMock(return_value=expected_header_image)
-        self._data_manager.create_fake_data([brand_generator(brand)])
+        self._data_manager.create_fake_data([brand_generator(brand, mapper=self._object_mapper)])
         returned_brand = self._sut.update_header_image_for_auth_user(auth_user_id=brand.auth_user_id,
                                                                      image_bytes=image_bytes)
         self._image_repository.upload.assert_called_once_with(path=brand.id,
@@ -136,11 +142,14 @@ class TestInfluencerRepository(TestCase):
     def setUp(self):
         self.__data_manager = InMemorySqliteDataManager()
         self.__image_repository = Mock()
+        self._object_mapper = ObjectMapper()
         self.__sut = SqlAlchemyInfluencerRepository(data_manager=self.__data_manager,
-                                                    image_repository=self.__image_repository)
+                                                    image_repository=self.__image_repository,
+                                                    object_mapper=self._object_mapper)
 
     def test_write_new_for_auth_user(self):
         expected = influencer_dto_generator(num=1)
+        expected.image = ""
         returned_influencer = self.__sut.write_new_for_auth_user(auth_user_id="1234brand1",
                                                                  payload=expected)
         actual = self.__sut.load_by_id(id_=expected.id)
