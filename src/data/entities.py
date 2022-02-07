@@ -1,4 +1,3 @@
-import json
 from typing import Union
 
 from sqlalchemy import Column, String, DateTime, Float, PickleType
@@ -52,22 +51,6 @@ class InfluencerEntity(Base, BaseUserEntity):
     instahandle = Column(type_=String(length=30), nullable=True)
     values = Column(type_=PickleType, nullable=False)
     categories = Column(type_=PickleType, nullable=False)
-
-
-def get_audience_age_split_value(influencer, _min, _max):
-    return [t.value for t in influencer.audience_age_split if t.min == _min and t.max == _max][0]
-
-
-def get_audience_gender_split_value(influencer, gender):
-    return [t.value for t in influencer.audience_gender_split if t.gender == gender][0]
-
-
-def get_values(user):
-    return json.dumps(list(map(lambda x: x.value, user.values)))
-
-
-def get_categories(user):
-    return json.dumps(list(map(lambda x: x.value, user.categories)))
 
 
 def create_mappings(mapper: Union[ObjectMapperAdapter, object]):
