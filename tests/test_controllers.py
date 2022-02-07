@@ -11,7 +11,8 @@ from src.exceptions import AlreadyExistsException, NotFoundException
 from src.types import BrandRepository
 from src.web.controllers import BrandController
 from src.web.validation import valid_uuid
-from tests import brand_dto_generator, assert_brand_updatable_fields_are_equal
+from tests import brand_dto_generator, assert_brand_updatable_fields_are_equal, TEST_DEFAULT_BRAND_LOGO, \
+    TEST_DEFAULT_BRAND_HEADER_IMAGE
 
 
 def get_brand_id_event(brand_id):
@@ -134,8 +135,8 @@ class TestBrandController(TestCase):
                                                                                 payload=payload_captor)
         actual_payload = payload_captor.arg
         assert valid_uuid(actual_payload.id)
-        assert actual_payload.logo == ""
-        assert actual_payload.header_image == ""
+        assert actual_payload.logo == TEST_DEFAULT_BRAND_LOGO
+        assert actual_payload.header_image == TEST_DEFAULT_BRAND_HEADER_IMAGE
         assert_brand_updatable_fields_are_equal(actual_payload.__dict__, expected_payload)
         assert list(map(lambda x: x.name, actual_payload.values)) == expected_payload['values']
         assert list(map(lambda x: x.name, actual_payload.categories)) == expected_payload['categories']

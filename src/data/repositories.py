@@ -1,6 +1,5 @@
 import base64
 import io
-import json
 import uuid
 from typing import Callable, Union
 
@@ -115,8 +114,8 @@ class SqlAlchemyBrandRepository(BaseSqlAlchemyUserRepository):
             entity.name = payload.name
             entity.description = payload.description
             entity.instahandle = payload.instahandle
-            entity.values = json.dumps(list(map(lambda x: x.name, payload.values)))
-            entity.categories = json.dumps(list(map(lambda x: x.name, payload.categories)))
+            entity.values = payload.values
+            entity.categories = payload.categories
             entity.website = payload.website
             self._data_manager.session.commit()
             return self._object_mapper.map(from_obj=entity, to_type=self._resource_dto)

@@ -77,8 +77,6 @@ class TestBrandRepository(BrandRepositoryTestCase):
 
     def test_write_new_for_auth_user(self):
         expected = brand_dto_generator(num=1)
-        expected.header_image = ""
-        expected.logo = ""
         self._sut.write_new_for_auth_user(auth_user_id="1234brand1",
                                           payload=expected)
         actual = self._sut.load_by_id(id_=expected.id)
@@ -149,7 +147,6 @@ class TestInfluencerRepository(TestCase):
 
     def test_write_new_for_auth_user(self):
         expected = influencer_dto_generator(num=1)
-        expected.image = ""
         returned_influencer = self.__sut.write_new_for_auth_user(auth_user_id="1234brand1",
                                                                  payload=expected)
         actual = self.__sut.load_by_id(id_=expected.id)

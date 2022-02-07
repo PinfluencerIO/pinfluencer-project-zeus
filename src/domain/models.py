@@ -3,32 +3,11 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 
+from src.data import DEFAULT_BRAND_HEADER_IMAGE, DEFAULT_BRAND_LOGO, DEFAULT_INFLUENCER_PROFILE_IMAGE
+
 
 def uuid4_str():
     return str(uuid.uuid4())
-
-
-class GenderEnum(Enum):
-    MALE = "MALE"
-    FEMALE = "FEMALE"
-
-
-@dataclass
-class BaseAudienceProportion:
-    value: float = 0.0
-
-
-@dataclass
-class AudienceAge(BaseAudienceProportion):
-    min: int = 0
-    max: int = 0
-
-
-# TODO: add audience age ranges class
-
-@dataclass
-class AudienceGender(BaseAudienceProportion):
-    gender: GenderEnum = GenderEnum.MALE
 
 
 class ValueEnum(Enum):
@@ -76,8 +55,8 @@ class Brand(User):
     name: str = ""
     description: str = ""
     website: str = ""
-    logo: str = ""
-    header_image: str = ""
+    logo: str = DEFAULT_BRAND_LOGO
+    header_image: str = DEFAULT_BRAND_HEADER_IMAGE
     instahandle: str = ""
     values: list[ValueEnum] = field(default_factory=list)
     categories: list[CategoryEnum] = field(default_factory=list)
@@ -89,8 +68,15 @@ class Influencer(User):
     name: str = ""
     website: str = ""
     bio: str = ""
-    image: str = ""
-    audience_age_split: list[AudienceAge] = field(default_factory=list)
-    audience_gender_split: list[AudienceGender] = field(default_factory=list)
+    image: str = DEFAULT_INFLUENCER_PROFILE_IMAGE
+    audience_age_13_17_split: float = 0.0
+    audience_age_18_24_split: float = 0.0
+    audience_age_25_34_split: float = 0.0
+    audience_age_35_44_split: float = 0.0
+    audience_age_45_54_split: float = 0.0
+    audience_age_55_64_split: float = 0.0
+    audience_age_65_plus_split: float = 0.0
+    audience_male_split: float = 0.0
+    audience_female_split: float = 0.0
     values: list[ValueEnum] = field(default_factory=list)
     categories: list[CategoryEnum] = field(default_factory=list)
