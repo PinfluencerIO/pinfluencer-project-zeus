@@ -1,17 +1,17 @@
 ONBOARDING-BRAND:
 
     -- shared --
-    firstName: str
-    lastName: str
-    email: str
-    values: str[]
-    categories: str[]
-    instaHandle: str
-    website: str
+    firstName:                  str
+    lastName:                   str
+    email:                      str
+    values:                     str[]
+    categories:                 str[]
+    instaHandle:                str
+    website:                    str
 
     -- brand-specific --
-    brandName: str
-    brandDescription: str
+    brandName:                  str
+    brandDescription:           str
 
 
 ONBOARDING-INFLUENCER:
@@ -20,13 +20,13 @@ ONBOARDING-INFLUENCER:
     ... same as brand ...
 
     -- influencer-specific --
-    bio: str
-    audienceAge13To17Split: float
-    audienceAge18To24Split: float
-    audienceAge25To34Split: float
-    audienceAge35To44Split: float
-    audienceAge45To54Split: float
-    audienceAge55To64Split: float
-    audienceAge65PlusSplit: float
-    audienceMaleSplit: float
-    audienceFemaleSplit: float
+    bio:                        str
+    audienceAge13To17Split:     float
+    audienceAge18To24Split:     float
+    audienceAge25To34Split:     float
+    audienceAge35To44Split:     float
+    audienceAge45To54Split:     float
+    audienceAge55To64Split:     float
+    audienceAge65PlusSplit:     float
+    audienceMaleSplit:          float
+    audienceFemaleSplit:        float
