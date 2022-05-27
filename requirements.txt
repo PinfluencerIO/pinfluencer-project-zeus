@@ -9,3 +9,4 @@ pydataapi
 SQLAlchemy
 filetype
 mysql-connector-python
+boto3

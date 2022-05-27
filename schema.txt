@@ -1,0 +1,29 @@
+ONBOARDING-BRAND:
+
+    -- shared --
+    firstName: str
+    lastName: str
+    email: str
+    values: str[]
+    categories: str[]
+    instahandle: str
+    website: str
+
+    -- brand-specific --
+    brandName: str
+    brandDescription: str
+
+
+ONBOARDING-INFLUENCER:
+
+    -- shared --
+    firstName: str
+    lastName: str
+    email: str
+    values: str[]
+    categories: str[]
+    instahandle: str
+    website: str
+
+    -- influencer-specific --
+    ?TODO?
