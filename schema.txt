@@ -26,4 +26,13 @@ ONBOARDING-INFLUENCER:
     website: str
 
     -- influencer-specific --
-    ?TODO?
+    bio: str
+    audienceAge13To17Split: float
+    audienceAge18To24Split: float
+    audienceAge25To34Split: float
+    audienceAge35To44Split: float
+    audienceAge45To54Split: float
+    audienceAge55To64Split: float
+    audienceAge65PlusSplit: float
+    audienceMaleSplit: float
+    audienceFemaleSplit: float
