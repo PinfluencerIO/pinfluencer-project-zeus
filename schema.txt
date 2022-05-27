@@ -6,7 +6,7 @@ ONBOARDING-BRAND:
     email: str
     values: str[]
     categories: str[]
-    instahandle: str
+    instaHandle: str
     website: str
 
     -- brand-specific --
@@ -22,7 +22,7 @@ ONBOARDING-INFLUENCER:
     email: str
     values: str[]
     categories: str[]
-    instahandle: str
+    instaHandle: str
     website: str
 
     -- influencer-specific --
