@@ -17,13 +17,7 @@ ONBOARDING-BRAND:
 ONBOARDING-INFLUENCER:
 
     -- shared --
-    firstName: str
-    lastName: str
-    email: str
-    values: str[]
-    categories: str[]
-    instaHandle: str
-    website: str
+    ... same as brand ...
 
     -- influencer-specific --
     bio: str
