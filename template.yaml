@@ -43,6 +43,7 @@ Resources:
       CorsConfiguration:
         AllowOrigins:
           - "https://localhost:3000"
+          - "http://localhost:3000"
           - "https://app.pinfluencer.io"
         AllowHeaders:
           - "*"
