@@ -41,3 +41,4 @@ class TestJsonCamelToSnakeCaseDeserializer(TestCase):
         actual = self.__json_camel_to_snake_case_deserializer.deserialize(input_data)
 
         assert expected == actual
+
