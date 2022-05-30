@@ -101,3 +101,15 @@ class ObjectMapperAdapter:
             allow_none=False,
             excluded=None):
         pass
+
+
+class Serializer:
+
+    def serialize(self, data: dict) -> str:
+        ...
+
+
+class Deserializer:
+
+    def deserialize(self, data: str) -> dict:
+        ...
