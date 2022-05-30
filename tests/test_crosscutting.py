@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from src.crosscutting import JsonSnakeToCamelSerializer
+from src.crosscutting import JsonSnakeToCamelSerializer, JsonCamelToSnakeCaseDeserializer
 
 
 class TestJsonSnakeToCamelSerializer(TestCase):
@@ -19,5 +19,25 @@ class TestJsonSnakeToCamelSerializer(TestCase):
             "{\"name\": \"adam raymond\", \"snakeInValue\": \"snake_in_value\", \"value2To3Values\": 2}"
 
         actual = self.__json_snake_to_camel_serializer.serialize(input_data)
+
+        assert expected == actual
+
+
+class TestJsonCamelToSnakeCaseDeserializer(TestCase):
+
+    def setUp(self):
+        self.__json_camel_to_snake_case_deserializer = JsonCamelToSnakeCaseDeserializer()
+
+    def test_deserialize(self):
+        expected = {
+            "name": "adam raymond",
+            "snake_in_value": "snake_in_value",
+            "value_2_to_3_values": 2
+        }
+
+        input_data =\
+            "{\"name\": \"adam raymond\", \"snakeInValue\": \"snake_in_value\", \"value2To3Values\": 2}"
+
+        actual = self.__json_camel_to_snake_case_deserializer.deserialize(input_data)
 
         assert expected == actual
