@@ -86,7 +86,7 @@ User = Union[Brand, Influencer]
 Model = Union[User]
 
 
-class ObjectMapperAdapter:
+class ObjectMapperAdapter(Protocol):
 
     def create_map(self,
                    type_from: type,
@@ -103,13 +103,13 @@ class ObjectMapperAdapter:
         pass
 
 
-class Serializer:
+class Serializer(Protocol):
 
     def serialize(self, data: dict) -> str:
         ...
 
 
-class Deserializer:
+class Deserializer(Protocol):
 
     def deserialize(self, data: str) -> dict:
         ...
