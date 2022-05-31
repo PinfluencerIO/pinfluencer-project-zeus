@@ -1,10 +1,17 @@
 from src.crosscutting import print_exception
+from src.service import ServiceLocator
 from src.web import PinfluencerResponse
 from src.web.routing import Dispatcher
 
 
 def lambda_handler(event, context):
-    dispatcher = Dispatcher()
+    bootstrap(event=event,
+              context=context,
+              service_locator=ServiceLocator())
+
+
+def bootstrap(event, context, service_locator: ServiceLocator):
+    dispatcher = Dispatcher(service_locator=service_locator)
     try:
         route = event['routeKey']
         print(f'Route: {route}')

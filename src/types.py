@@ -27,9 +27,15 @@ class BrandRepository(Protocol):
         ...
 
 
-class Validatable(Protocol):
+class InfluencerValidatable(Protocol):
 
-    def validate(self, payload: dict) -> None:
+    def validate_influencer(self, payload: dict) -> None:
+        ...
+
+
+class BrandValidatable(Protocol):
+
+    def validate_brand(self, payload: dict) -> None:
         ...
 
 

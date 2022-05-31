@@ -31,5 +31,5 @@ brand_payload_schema = {
 
 class BrandValidator:
 
-    def validate(self, payload):
+    def validate_brand(self, payload):
         validate(instance=payload, schema=brand_payload_schema)

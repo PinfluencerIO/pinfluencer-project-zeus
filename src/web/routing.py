@@ -1,21 +1,12 @@
 from collections import OrderedDict
 
-from mapper.object_mapper import ObjectMapper
-
-from src.data import SqlAlchemyDataManager
-from src.data.repositories import SqlAlchemyBrandRepository, S3ImageRepository
-from src.domain.validation import BrandValidator
+from src.service import ServiceLocator
 from src.web import PinfluencerResponse
-from src.web.controllers import BrandController
 
 
 class Dispatcher:
-    def __init__(self):
-        self.__brand_ctr = BrandController(
-            brand_repository=SqlAlchemyBrandRepository(data_manager=SqlAlchemyDataManager(),
-                                                       image_repository=S3ImageRepository(),
-                                                       object_mapper=ObjectMapper()),
-            brand_validator=BrandValidator())
+    def __init__(self, service_locator: ServiceLocator):
+        self.__brand_ctr = service_locator.get_new_brand_controller()
 
     @property
     def dispatch_route_to_ctr(self):

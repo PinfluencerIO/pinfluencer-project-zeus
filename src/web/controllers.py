@@ -5,7 +5,7 @@ from jsonschema.exceptions import ValidationError
 from src.crosscutting import print_exception
 from src.domain.models import ValueEnum, CategoryEnum, Brand
 from src.exceptions import AlreadyExistsException, NotFoundException
-from src.types import BrandRepository, Validatable, Deserializer
+from src.types import BrandRepository, Deserializer, BrandValidatable
 from src.web import PinfluencerResponse, get_cognito_user, BRAND_ID_PATH_KEY
 from src.web.validation import valid_path_resource_id
 
@@ -29,7 +29,7 @@ class BaseController:
 
 
 class BrandController(BaseController):
-    def __init__(self, brand_repository: BrandRepository, brand_validator: Validatable, deserializer: Deserializer):
+    def __init__(self, brand_repository: BrandRepository, brand_validator: BrandValidatable, deserializer: Deserializer):
         super().__init__(deserializer)
         self.__brand_validator = brand_validator
         self.__brand_repository = brand_repository
