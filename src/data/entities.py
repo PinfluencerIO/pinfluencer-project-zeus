@@ -22,12 +22,12 @@ class BaseUserEntity(BaseEntity):
 class BrandEntity(Base, BaseUserEntity):
     __tablename__ = 'brand'
 
-    name = Column(type_=String(length=120), nullable=False)
-    description = Column(type_=String(length=500), nullable=False)
+    brand_name = Column(type_=String(length=120), nullable=False)
+    brand_description = Column(type_=String(length=500), nullable=False)
     header_image = Column(type_=String(length=360), nullable=True)
     values = Column(type_=PickleType, nullable=False)
     categories = Column(type_=PickleType, nullable=False)
-    instahandle = Column(type_=String(length=30), nullable=True)
+    insta_handle = Column(type_=String(length=30), nullable=True)
     website = Column(type_=String(length=120), nullable=False)
     logo = Column(type_=String(length=360), nullable=True)
 
