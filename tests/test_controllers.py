@@ -28,10 +28,10 @@ def update_brand_payload():
         "first_name": "first_name",
         "last_name": "last_name",
         "email": "email@gmail.com",
-        "name": "name",
-        "description": "description",
+        "brand_name": "name",
+        "brand_description": "description",
         "website": "https://website.com",
-        "instahandle": "instahandle",
+        "insta_handle": "instahandle",
         "values": ["VALUE7", "VALUE8", "VALUE9"],
         "categories": ["CATEGORY7", "CATEGORY6", "CATEGORY5"]
     }
@@ -47,10 +47,10 @@ def update_brand_return_dto():
     return Brand(first_name="first_name",
                  last_name="last_name",
                  email="email@gmail.com",
-                 name="name",
-                 description="description",
+                 brand_name="name",
+                 brand_description="description",
                  website="https://website.com",
-                 instahandle="instahandle",
+                 insta_handle="instahandle",
                  values=[ValueEnum.VALUE7, ValueEnum.VALUE8, ValueEnum.VALUE9],
                  categories=[CategoryEnum.CATEGORY7, CategoryEnum.CATEGORY6, CategoryEnum.CATEGORY5])
 
@@ -155,7 +155,7 @@ class TestBrandController(TestCase):
     def test_create_when_invalid_payload(self):
         auth_id = "1234brand1"
         payload = update_brand_payload()
-        payload['name'] = 120
+        payload['brand_name'] = 120
         event = create_brand_for_auth_user_event(auth_id=auth_id, payload=payload)
         response = self.__sut.create(event=event)
         assert response.status_code == 400
@@ -182,7 +182,7 @@ class TestBrandController(TestCase):
     def test_update_when_invalid_payload(self):
         auth_id = "1234brand1"
         payload = update_brand_payload()
-        payload['name'] = 120
+        payload['brand_name'] = 120
         event = create_brand_for_auth_user_event(auth_id=auth_id, payload=payload)
 
         response = self.__sut.update(event=event)

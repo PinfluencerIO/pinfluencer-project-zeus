@@ -52,12 +52,12 @@ class User(Model):
 
 @dataclass
 class Brand(User):
-    name: str = ""
-    description: str = ""
+    brand_name: str = ""
+    brand_description: str = ""
     website: str = ""
     logo: str = DEFAULT_BRAND_LOGO
     header_image: str = DEFAULT_BRAND_HEADER_IMAGE
-    instahandle: str = ""
+    insta_handle: str = ""
     values: list[ValueEnum] = field(default_factory=list)
     categories: list[CategoryEnum] = field(default_factory=list)
 

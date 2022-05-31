@@ -39,10 +39,10 @@ def brand_dto_generator(num):
         last_name=f"last_name{num}",
         email=f"email{num}",
         auth_user_id=f'1234brand{num}',
-        name=f"name{num}",
-        description=f"description{num}",
+        brand_name=f"name{num}",
+        brand_description=f"description{num}",
         website=f"website{num}",
-        instahandle=f"instahandle{num}",
+        insta_handle=f"instahandle{num}",
         values=values,
         categories=categories
     )
@@ -125,4 +125,4 @@ def assert_brand_updatable_fields_are_equal_for_three(brand1, brand2, brand3):
 
 
 def brand_brand_updatable_fields():
-    return ['instahandle', 'first_name', 'last_name', 'email', 'name', 'description', 'website']
+    return ['insta_handle', 'first_name', 'last_name', 'email', 'brand_name', 'brand_description', 'website']

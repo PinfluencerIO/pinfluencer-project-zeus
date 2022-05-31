@@ -21,7 +21,7 @@ class Dispatcher:
     def dispatch_route_to_ctr(self):
 
         feed = OrderedDict(
-            {'GET /feed': PinfluencerResponse}
+            {'GET /feed': lambda: PinfluencerResponse(status_code=200)}
         )
 
         users = OrderedDict(

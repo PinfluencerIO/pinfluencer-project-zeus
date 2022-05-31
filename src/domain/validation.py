@@ -4,11 +4,11 @@ brand_payload_schema = {
     "type": "object",
     "properties":
         {
-            "name": {
+            "brand_name": {
                 "type": "string",
                 "pattern": "^.{1,120}$"
             },
-            "description": {
+            "brand_description": {
                 "type": "string",
                 "pattern": "^.{1,500}$"
             },
@@ -20,12 +20,12 @@ brand_payload_schema = {
                 "type": "string",
                 "pattern": r"^[a-zA-Z0-9\._-]+[@]{1}[a-zA-Z0-9\._-]+[\.]+[a-zA-Z0-9]+$"
             },
-            "instahandle": {
+            "insta_handle": {
                 "type": "string",
                 "pattern": "^.{1,30}$"
             }
         },
-    "required": ["name", "description", "website", "email"]
+    "required": ["brand_name", "brand_description", "website", "email"]
 }
 
 

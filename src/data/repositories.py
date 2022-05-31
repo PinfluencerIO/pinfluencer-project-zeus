@@ -111,9 +111,9 @@ class SqlAlchemyBrandRepository(BaseSqlAlchemyUserRepository):
             entity.first_name = payload.first_name
             entity.last_name = payload.last_name
             entity.email = payload.email
-            entity.brand_name = payload.name
-            entity.brand_description = payload.description
-            entity.insta_handle = payload.instahandle
+            entity.brand_name = payload.brand_name
+            entity.brand_description = payload.brand_description
+            entity.insta_handle = payload.insta_handle
             entity.values = payload.values
             entity.categories = payload.categories
             entity.website = payload.website

@@ -68,10 +68,10 @@ class BrandController(BaseController):
             brand = Brand(first_name=payload_dict["first_name"],
                           last_name=payload_dict["last_name"],
                           email=payload_dict["email"],
-                          name=payload_dict["name"],
-                          description=payload_dict["description"],
+                          brand_name=payload_dict["brand_name"],
+                          brand_description=payload_dict["brand_description"],
                           website=payload_dict["website"],
-                          instahandle=payload_dict["instahandle"],
+                          insta_handle=payload_dict["insta_handle"],
                           values=list(map(lambda x: ValueEnum[x], payload_dict["values"])),
                           categories=list(map(lambda x: CategoryEnum[x], payload_dict["categories"])))
             self.__brand_repository.write_new_for_auth_user(auth_user_id=auth_user_id, payload=brand)
@@ -89,10 +89,10 @@ class BrandController(BaseController):
             brand = Brand(first_name=payload_dict["first_name"],
                           last_name=payload_dict["last_name"],
                           email=payload_dict["email"],
-                          name=payload_dict["name"],
-                          description=payload_dict["description"],
+                          brand_name=payload_dict["brand_name"],
+                          brand_description=payload_dict["brand_description"],
                           website=payload_dict["website"],
-                          instahandle=payload_dict["instahandle"],
+                          insta_handle=payload_dict["insta_handle"],
                           values=list(map(lambda x: ValueEnum[x], payload_dict["values"])),
                           categories=list(map(lambda x: CategoryEnum[x], payload_dict["categories"])))
             brand_to_return = self.__brand_repository.update_for_auth_user(auth_user_id=auth_user_id, payload=brand)
