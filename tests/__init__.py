@@ -49,6 +49,16 @@ def brand_dto_generator(num):
 
 
 def influencer_dto_generator(num):
+    if num == 1:
+        values = [ValueEnum.VALUE5, ValueEnum.VALUE6, ValueEnum.VALUE7]
+        categories = [CategoryEnum.CATEGORY6, CategoryEnum.CATEGORY5, CategoryEnum.CATEGORY7]
+    elif num == 2:
+        values = [ValueEnum.VALUE5, ValueEnum.RECYCLED, ValueEnum.VALUE7, ValueEnum.SUSTAINABLE]
+        categories = [CategoryEnum.CATEGORY6, CategoryEnum.CATEGORY9, CategoryEnum.CATEGORY8, CategoryEnum.FASHION]
+    else:
+        values = [ValueEnum.VALUE5, ValueEnum.RECYCLED, ValueEnum.VALUE7, ValueEnum.SUSTAINABLE, ValueEnum.VEGAN]
+        categories = [CategoryEnum.CATEGORY6, CategoryEnum.CATEGORY9, CategoryEnum.CATEGORY8, CategoryEnum.FASHION,
+                      CategoryEnum.PET]
     return Influencer(
         first_name=f"first_name{num}",
         last_name=f"last_name{num}",
@@ -58,8 +68,8 @@ def influencer_dto_generator(num):
         bio=f"bio{num}",
         website=f"website{num}",
         instahandle=f"instahandle{num}",
-        values=[ValueEnum.VALUE5, ValueEnum.VALUE6, ValueEnum.VALUE7],
-        categories=[CategoryEnum.CATEGORY6, CategoryEnum.CATEGORY5, CategoryEnum.CATEGORY7],
+        values=values,
+        categories=categories,
         audience_age_13_17_split=0.14,
         audience_age_18_24_split=0.14,
         audience_age_25_34_split=0.14,
