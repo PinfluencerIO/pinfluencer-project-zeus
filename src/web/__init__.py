@@ -1,5 +1,3 @@
-import json
-
 
 BRAND_ID_PATH_KEY = 'brand_id'
 

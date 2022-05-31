@@ -1,10 +1,10 @@
-import json
 import uuid
 from unittest import TestCase
 from unittest.mock import Mock, MagicMock
 
 from callee import Captor
 
+from src.crosscutting import JsonSnakeToCamelSerializer, JsonCamelToSnakeCaseDeserializer
 from src.domain.models import Brand, ValueEnum, CategoryEnum
 from src.domain.validation import BrandValidator
 from src.exceptions import AlreadyExistsException, NotFoundException
@@ -58,7 +58,7 @@ def update_brand_return_dto():
 def create_brand_for_auth_user_event(auth_id, payload):
     return {
         "requestContext": {"authorizer": {"jwt": {"claims": {"cognito:username": auth_id}}}},
-        "body": json.dumps(payload)
+        "body": JsonSnakeToCamelSerializer().serialize(payload)
     }
 
 
@@ -68,7 +68,8 @@ class TestBrandController(TestCase):
         self.__brand_repository: BrandRepository = Mock()
         self.__brand_validator = BrandValidator()
         self.__sut = BrandController(brand_repository=self.__brand_repository,
-                                     brand_validator=self.__brand_validator)
+                                     brand_validator=self.__brand_validator,
+                                     deserializer=JsonCamelToSnakeCaseDeserializer())
 
     def test_get_by_id(self):
         brand = brand_dto_generator(num=1)
