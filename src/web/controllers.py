@@ -1,4 +1,3 @@
-import json
 from typing import Callable
 
 from jsonschema.exceptions import ValidationError
@@ -6,17 +5,20 @@ from jsonschema.exceptions import ValidationError
 from src.crosscutting import print_exception
 from src.domain.models import ValueEnum, CategoryEnum, Brand
 from src.exceptions import AlreadyExistsException, NotFoundException
-from src.types import BrandRepository, Validatable
+from src.types import BrandRepository, Validatable, Deserializer
 from src.web import PinfluencerResponse, get_cognito_user, BRAND_ID_PATH_KEY
 from src.web.validation import valid_path_resource_id
 
 
 class BaseController:
 
+    def __init__(self, serializer: Deserializer):
+        self._deserializer = serializer
+
     def _update_image(self, event, updater: Callable[[str, str], dict]):
         auth_user_id = get_cognito_user(event)
         payload_json_string = event['body']
-        payload_dict = json.loads(payload_json_string)
+        payload_dict = self._deserializer.deserialize(payload_json_string)
         try:
             user = updater(auth_user_id, payload_dict['image_bytes'])
             return PinfluencerResponse(status_code=200,
@@ -27,7 +29,8 @@ class BaseController:
 
 
 class BrandController(BaseController):
-    def __init__(self, brand_repository: BrandRepository, brand_validator: Validatable):
+    def __init__(self, brand_repository: BrandRepository, brand_validator: Validatable, deserializer: Deserializer):
+        super().__init__(deserializer)
         self.__brand_validator = brand_validator
         self.__brand_repository = brand_repository
 
@@ -59,7 +62,7 @@ class BrandController(BaseController):
     def create(self, event):
         auth_user_id = get_cognito_user(event)
         payload_json_string = event['body']
-        payload_dict = json.loads(payload_json_string)
+        payload_dict = self._deserializer.deserialize(payload_json_string)
         try:
             self.__brand_validator.validate(payload=payload_dict)
             brand = Brand(first_name=payload_dict["first_name"],
@@ -80,7 +83,7 @@ class BrandController(BaseController):
     def update(self, event):
         auth_user_id = get_cognito_user(event)
         payload_json_string = event['body']
-        payload_dict = json.loads(payload_json_string)
+        payload_dict = self._deserializer.deserialize(payload_json_string)
         try:
             self.__brand_validator.validate(payload_dict)
             brand = Brand(first_name=payload_dict["first_name"],
