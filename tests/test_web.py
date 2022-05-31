@@ -29,6 +29,6 @@ class TestPinfluencerResponse(TestCase):
             "years_old": 22
         })
 
-        expected_json = """"{"statusCode": 200, "body": { "first_name": "Aidan", "last_name": "Gannon", "years_old": 22 }, "headers": {"Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Methods": "*"}}"""
+        expected_json = {"statusCode": 200, "body": """{"firstName": "Aidan", "lastName": "Gannon", "yearsOld": 22}""", "headers": {"Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Methods": "*"}}
 
         assert pinf_response.as_json(serializer=JsonSnakeToCamelSerializer()) == expected_json

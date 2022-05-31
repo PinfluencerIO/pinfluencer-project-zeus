@@ -1,3 +1,4 @@
+from src.types import Serializer
 
 BRAND_ID_PATH_KEY = 'brand_id'
 
@@ -13,14 +14,14 @@ class PinfluencerResponse:
     def is_ok(self):
         return 200 <= self.status_code < 300
 
-    def as_json(self):
+    def as_json(self, serializer: Serializer):
         return {
-            'statusCode': self.status_code,
-            'body': json.dumps(self.body, default=str),
-            'headers': {'Content-Type': 'application/json',
-                        'Access-Control-Allow-Origin': '*',
-                        'Access-Control-Allow-Headers': '*',
-                        'Access-Control-Allow-Methods': '*'},
+            "statusCode": self.status_code,
+            "body": serializer.serialize(self.body),
+            "headers": {"Content-Type": "application/json",
+                        'Access-Control-Allow-Origin': "*",
+                        "Access-Control-Allow-Headers": "*",
+                        "Access-Control-Allow-Methods": "*"},
         }
 
     @staticmethod
