@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from src.data import Base
-from src.data.entities import BrandEntity
+from src.data.entities import BrandEntity, BaseEntity
 from src.domain.models import Brand, Influencer, ValueEnum, CategoryEnum
 
 TEST_DEFAULT_BRAND_LOGO = "default_brand_logo.png"
@@ -12,8 +12,15 @@ TEST_DEFAULT_BRAND_HEADER_IMAGE = "default_brand_header_image.png"
 TEST_DEFAULT_INFLUENCER_PROFILE_IMAGE = "default_influencer_profile_image.png"
 
 
+def get_entity_dict(entity: BaseEntity) -> dict:
+    dict = entity.__dict__
+    dict.pop('_sa_instance_state')
+    return dict
+
+
 def brand_generator(dto, mapper):
-    return mapper.map(dto, BrandEntity)
+    brand = mapper.map(dto, BrandEntity)
+    return brand
 
 
 def brand_dto_generator(num):
