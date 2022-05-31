@@ -5,7 +5,7 @@ from src.data import SqlAlchemyDataManager
 from src.data.repositories import SqlAlchemyBrandRepository, S3ImageRepository
 from src.domain.validation import BrandValidator
 from src.types import DataManager, BrandRepository, BrandValidatable, Deserializer, ObjectMapperAdapter, \
-    ImageRepository
+    ImageRepository, Serializer
 from src.web.controllers import BrandController
 
 
@@ -36,3 +36,6 @@ class ServiceLocator:
             brand_repository=self.get_new_brand_repository(),
             brand_validator=self.get_new_brand_validator(),
             deserializer=self.get_new_deserializer())
+
+    def get_new_serializer(self) -> Serializer:
+        pass

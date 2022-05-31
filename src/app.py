@@ -10,17 +10,19 @@ def lambda_handler(event, context):
               service_locator=ServiceLocator())
 
 
-def bootstrap(event, context, service_locator: ServiceLocator):
+def bootstrap(event: dict,
+              context: dict,
+              service_locator: ServiceLocator) -> dict:
     dispatcher = Dispatcher(service_locator=service_locator)
     try:
         route = event['routeKey']
         print(f'Route: {route}')
         print(f'Event: {event}')
         response = dispatcher.dispatch_route_to_ctr[route](event)
-        return response.as_json()
+        return response.as_json(serializer=service_locator.get_new_serializer())
     except KeyError as ke:
         print(f'Missing required key {ke}')
-        return PinfluencerResponse.as_400_error().as_json()
+        return PinfluencerResponse.as_400_error().as_json(serializer=service_locator.get_new_serializer())
     except Exception as e:
         print_exception(e)
         return PinfluencerResponse.as_500_error().as_json()

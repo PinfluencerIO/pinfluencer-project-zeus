@@ -23,6 +23,18 @@ def brand_generator(dto, mapper):
     return brand
 
 
+def test_as_json(status_code: int,
+                 body: str="{}") -> dict:
+    return {
+        "statusCode": status_code,
+        "body": body,
+        "headers": {"Content-Type": "application/json",
+                    'Access-Control-Allow-Origin': "*",
+                    "Access-Control-Allow-Headers": "*",
+                    "Access-Control-Allow-Methods": "*"},
+    }
+
+
 def brand_dto_generator(num):
     if num == 1:
         values = [ValueEnum.VALUE5, ValueEnum.VALUE6, ValueEnum.VALUE7]

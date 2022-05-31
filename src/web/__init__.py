@@ -14,7 +14,7 @@ class PinfluencerResponse:
     def is_ok(self):
         return 200 <= self.status_code < 300
 
-    def as_json(self, serializer: Serializer):
+    def as_json(self, serializer: Serializer) -> dict:
         return {
             "statusCode": self.status_code,
             "body": serializer.serialize(self.body),
