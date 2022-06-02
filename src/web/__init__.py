@@ -1,10 +1,12 @@
+from typing import Union
+
 from src.types import Serializer
 
 BRAND_ID_PATH_KEY = 'brand_id'
 
 
 class PinfluencerResponse:
-    def __init__(self, status_code: int = 200, body: dict = {}) -> None:
+    def __init__(self, status_code: int = 200, body: Union[dict, list] = {}) -> None:
         self.status_code = status_code
         self.body = body
 
