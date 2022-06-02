@@ -24,7 +24,7 @@ class PinfluencerResponse:
         }
 
     @staticmethod
-    def as_500_error(message="Unexpected server error. Please try later."):
+    def as_500_error(message="unexpected server error, please try later :("):
         return PinfluencerResponse(500, {"message": message})
 
     @staticmethod

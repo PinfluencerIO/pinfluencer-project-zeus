@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from typing import Callable
 
 from src.service import ServiceLocator
 from src.web import PinfluencerResponse
@@ -9,7 +10,7 @@ class Dispatcher:
         self.__brand_ctr = service_locator.get_new_brand_controller()
 
     @property
-    def dispatch_route_to_ctr(self):
+    def dispatch_route_to_ctr(self) -> dict[dict[str, Callable[[dict], PinfluencerResponse]]]:
 
         feed = OrderedDict(
             {'GET /feed': lambda event: PinfluencerResponse(status_code=200)}
