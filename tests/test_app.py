@@ -17,6 +17,9 @@ class TestRoutes(TestCase):
         self.__serializer: Serializer = JsonSnakeToCamelSerializer()
         self.__mock_service_locator.get_new_serializer = MagicMock(return_value=self.__serializer)
 
+    def test_route_that_does_not_exist(self):
+        self.__assert_not_found_route(route_key="GET /random")
+
     def test_feed(self):
         self.__assert_empty_response(route_key="GET /feed")
 
@@ -31,6 +34,12 @@ class TestRoutes(TestCase):
                                      brand_function="get_by_id",
                                      actual_body={"brand_by_id": "some_brand_by_id_value"},
                                      route_key="GET /brands/{brand_id}")
+
+    def test_get_all_influencers(self):
+        self.__assert_empty_response(route_key="GET /influencers")
+
+    def test_get_influencer_by_id(self):
+        self.__assert_empty_response(route_key="GET /influencers/{influencer_id}")
 
     def __assert_brand_endpoint(self,
                                 expected_body: str,
@@ -50,3 +59,9 @@ class TestRoutes(TestCase):
                              context={},
                              service_locator=self.__mock_service_locator)
         assert response == get_as_json(status_code=200)
+
+    def __assert_not_found_route(self, route_key: str):
+        response = bootstrap(event={"routeKey": route_key},
+                             context={},
+                             service_locator=self.__mock_service_locator)
+        assert response == get_as_json(status_code=404, body="""{"message": "route: """+route_key+""" not found"}""")
