@@ -15,7 +15,7 @@ class BaseController:
     def __init__(self, serializer: Deserializer):
         self._deserializer = serializer
 
-    def _update_image(self, event, updater: Callable[[str, str], dict]):
+    def _update_image(self, event, updater: Callable[[str, str], dict]) -> PinfluencerResponse:
         auth_user_id = get_cognito_user(event)
         payload_json_string = event['body']
         payload_dict = self._deserializer.deserialize(payload_json_string)
@@ -34,11 +34,11 @@ class BrandController(BaseController):
         self.__brand_validator = brand_validator
         self.__brand_repository = brand_repository
 
-    def get_all(self, event):
+    def get_all(self, event) -> PinfluencerResponse:
         return PinfluencerResponse(status_code=200, body=list(map(lambda x: x.__dict__,
                                                                   self.__brand_repository.load_collection())))
 
-    def get_by_id(self, event):
+    def get_by_id(self, event) -> PinfluencerResponse:
         id_ = valid_path_resource_id(event, BRAND_ID_PATH_KEY)
         if id_:
             try:
@@ -49,7 +49,7 @@ class BrandController(BaseController):
                 return PinfluencerResponse(status_code=404, body={})
         return PinfluencerResponse(status_code=400, body={})
 
-    def get(self, event):
+    def get(self, event) -> PinfluencerResponse:
         auth_user_id = get_cognito_user(event)
         if auth_user_id:
             try:
@@ -59,12 +59,12 @@ class BrandController(BaseController):
                 print_exception(e)
         return PinfluencerResponse(status_code=404, body={})
 
-    def create(self, event):
+    def create(self, event) -> PinfluencerResponse:
         auth_user_id = get_cognito_user(event)
         payload_json_string = event['body']
         payload_dict = self._deserializer.deserialize(payload_json_string)
         try:
-            self.__brand_validator.validate(payload=payload_dict)
+            self.__brand_validator.validate_brand(payload=payload_dict)
             brand = Brand(first_name=payload_dict["first_name"],
                           last_name=payload_dict["last_name"],
                           email=payload_dict["email"],
@@ -80,12 +80,12 @@ class BrandController(BaseController):
             return PinfluencerResponse(status_code=400, body={})
         return PinfluencerResponse(status_code=201, body=brand.__dict__)
 
-    def update(self, event):
+    def update(self, event) -> PinfluencerResponse:
         auth_user_id = get_cognito_user(event)
         payload_json_string = event['body']
         payload_dict = self._deserializer.deserialize(payload_json_string)
         try:
-            self.__brand_validator.validate(payload_dict)
+            self.__brand_validator.validate_brand(payload_dict)
             brand = Brand(first_name=payload_dict["first_name"],
                           last_name=payload_dict["last_name"],
                           email=payload_dict["email"],
@@ -104,13 +104,13 @@ class BrandController(BaseController):
             print_exception(e)
             return PinfluencerResponse(status_code=404, body={})
 
-    def update_logo(self, event):
+    def update_logo(self, event) -> PinfluencerResponse:
         return self._update_image(event=event,
                                   updater=lambda auth_id, bytes: self.__brand_repository.update_logo_for_auth_user(
                                                  auth_id,
                                                  bytes).__dict__)
 
-    def update_header_image(self, event):
+    def update_header_image(self, event) -> PinfluencerResponse:
         return self._update_image(event=event,
                                   updater=lambda auth_id, bytes: self.__brand_repository.update_header_image_for_auth_user(
                                                  auth_id,

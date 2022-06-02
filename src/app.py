@@ -25,4 +25,4 @@ def bootstrap(event: dict,
         return PinfluencerResponse.as_400_error().as_json(serializer=service_locator.get_new_serializer())
     except Exception as e:
         print_exception(e)
-        return PinfluencerResponse.as_500_error().as_json()
+        return PinfluencerResponse.as_500_error().as_json(serializer=service_locator.get_new_serializer())

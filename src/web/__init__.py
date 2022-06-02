@@ -4,10 +4,7 @@ BRAND_ID_PATH_KEY = 'brand_id'
 
 
 class PinfluencerResponse:
-    def __init__(self, status_code=200, body=None):
-        if body is None:
-            body = {}
-
+    def __init__(self, status_code: int = 200, body: dict = {}) -> None:
         self.status_code = status_code
         self.body = body
 

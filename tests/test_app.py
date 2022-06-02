@@ -5,7 +5,9 @@ from src.app import bootstrap
 from src.crosscutting import JsonSnakeToCamelSerializer
 from src.service import ServiceLocator
 from src.types import Serializer
-from tests import test_as_json
+from src.web import PinfluencerResponse
+from src.web.controllers import BrandController
+from tests import get_as_json
 
 
 class TestRoutes(TestCase):
@@ -19,4 +21,13 @@ class TestRoutes(TestCase):
         response = bootstrap(event={"routeKey": "GET /feed"},
                              context={},
                              service_locator=self.__mock_service_locator)
-        assert response == test_as_json(status_code=200)
+        assert response == get_as_json(status_code=200)
+
+    def test_get_all_brands(self):
+        brand_controller: BrandController = Mock()
+        brand_controller.get_all = MagicMock(return_value=PinfluencerResponse(body={"some_key": "some_value"}))
+        self.__mock_service_locator.get_new_brand_controller = MagicMock(return_value=brand_controller)
+        response = bootstrap(event={"routeKey": "GET /brands"},
+                             context={},
+                             service_locator=self.__mock_service_locator)
+        assert response == get_as_json(status_code=200, body="""{"someKey": "some_value"}""")

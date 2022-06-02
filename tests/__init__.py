@@ -23,8 +23,8 @@ def brand_generator(dto, mapper):
     return brand
 
 
-def test_as_json(status_code: int,
-                 body: str="{}") -> dict:
+def get_as_json(status_code: int,
+                body: str="{}") -> dict:
     return {
         "statusCode": status_code,
         "body": body,
