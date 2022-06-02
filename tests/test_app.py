@@ -18,10 +18,7 @@ class TestRoutes(TestCase):
         self.__mock_service_locator.get_new_serializer = MagicMock(return_value=self.__serializer)
 
     def test_feed(self):
-        response = bootstrap(event={"routeKey": "GET /feed"},
-                             context={},
-                             service_locator=self.__mock_service_locator)
-        assert response == get_as_json(status_code=200)
+        self.__assert_empty_response(route_key="GET /feed")
 
     def test_get_all_brands(self):
         self.__assert_brand_endpoint(expected_body="""{"allBrands": "some_all_brands_value"}""",
@@ -47,3 +44,9 @@ class TestRoutes(TestCase):
                              context={},
                              service_locator=self.__mock_service_locator)
         assert response == get_as_json(status_code=200, body=expected_body)
+
+    def __assert_empty_response(self, route_key: str):
+        response = bootstrap(event={"routeKey": route_key},
+                             context={},
+                             service_locator=self.__mock_service_locator)
+        assert response == get_as_json(status_code=200)
