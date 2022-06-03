@@ -80,25 +80,25 @@ class TestRoutes(TestCase):
                                          route_key="POST /brands/me/logo")
 
     def test_get_auth_influencer(self):
-        self.__assert_non_service_layer_route(expected_body="""{"message": "route GET /influencers/me is not implemented"}""",
+        self.__assert_non_service_layer_route(expected_body="""{"message": "GET /influencers/me is not implemented"}""",
                                               expected_status_code=405,
                                               route_key="GET /influencers/me")
 
     def test_create_auth_influencer(self):
         self.__assert_non_service_layer_route(
-            expected_body="""{"message": "route POST /influencers/me is not implemented"}""",
+            expected_body="""{"message": "POST /influencers/me is not implemented"}""",
             expected_status_code=405,
             route_key="POST /influencers/me")
 
     def test_update_auth_influencer(self):
         self.__assert_non_service_layer_route(
-            expected_body="""{"message": "route POST /influencers/me/image is not implemented"}""",
+            expected_body="""{"message": "POST /influencers/me/image is not implemented"}""",
             expected_status_code=405,
             route_key="POST /influencers/me/image")
 
     def test_get_auth_campaigns(self):
         self.__assert_non_service_layer_route(
-            expected_body="""{"message": "route GET /campaigns/me is not implemented"}""",
+            expected_body="""{"message": "GET /campaigns/me is not implemented"}""",
             expected_status_code=405,
             route_key="GET /campaigns/me")
 

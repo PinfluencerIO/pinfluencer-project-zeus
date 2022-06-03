@@ -9,22 +9,26 @@ class Dispatcher:
     def __init__(self, service_locator: ServiceLocator):
         self.__brand_ctr = service_locator.get_new_brand_controller()
 
+    @staticmethod
+    def __get_not_implemented_method(route: str) -> Callable[[dict], PinfluencerResponse]:
+        return lambda event: PinfluencerResponse(status_code=405, body={"message": f"{route} is not implemented"})
+
     @property
     def dispatch_route_to_ctr(self) -> dict[dict[str, Callable[[dict], PinfluencerResponse]]]:
 
         feed = OrderedDict(
-            {'GET /feed': lambda event: PinfluencerResponse(status_code=200)}
+            {'GET /feed': self.__get_not_implemented_method('GET /feed')}
         )
 
         users = OrderedDict(
             {
                 'GET /brands': self.__brand_ctr.get_all,
 
-                'GET /influencers': lambda event: PinfluencerResponse(status_code=200),
+                'GET /influencers': self.__get_not_implemented_method('GET /influencers'),
 
                 'GET /brands/{brand_id}': self.__brand_ctr.get_by_id,
 
-                'GET /influencers/{influencer_id}': lambda event: PinfluencerResponse(status_code=200),
+                'GET /influencers/{influencer_id}': self.__get_not_implemented_method('GET /influencers/{influencer_id}'),
 
                 # authenticated brand endpoints
                 'GET /brands/me': self.__brand_ctr.get,
@@ -38,18 +42,18 @@ class Dispatcher:
                 'POST /brands/me/logo': self.__brand_ctr.update_logo,
 
                 # authenticated influencer endpoints
-                'GET /influencers/me': lambda event: PinfluencerResponse(status_code=200),
+                'GET /influencers/me': self.__get_not_implemented_method('GET /influencers/me'),
 
-                'POST /influencers/me': lambda event: PinfluencerResponse(status_code=200),
+                'POST /influencers/me': self.__get_not_implemented_method('POST /influencers/me'),
 
-                'PUT /influencers/me': lambda event: PinfluencerResponse(status_code=200),
+                'PUT /influencers/me': self.__get_not_implemented_method('PUT /influencers/me'),
 
-                'POST /influencers/me/image': lambda event: PinfluencerResponse(status_code=200),
+                'POST /influencers/me/image': self.__get_not_implemented_method('POST /influencers/me/image'),
             }
         )
 
         campaigns = OrderedDict(
-            {'GET /campaigns/me': lambda event: PinfluencerResponse(status_code=200)}
+            {'GET /campaigns/me': self.__get_not_implemented_method('GET /campaigns/me')}
         )
 
         routes = {}
