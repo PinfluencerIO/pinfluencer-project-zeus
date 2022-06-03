@@ -29,4 +29,4 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: eu-west-2
     - run: ./clean-build.sh
-    - run: sam deploy --no-fail-on-empty-changeset --no-confirm-changeset --stack-name pinfluencer-api-staging --s3-bucket aws-sam-cli-managed-default-samclisourcebucket-1mycbpdtzxnbk --s3_prefix df-postgres-pinfluencer --region eu-west-2 --capabilities CAPABILITY_IAM --parameter_overrides ${{ secrets.SAM_PARAMETER_OVERRIDES }}
+    - run: sam deploy --no-fail-on-empty-changeset --no-confirm-changeset --stack-name pinfluencer-api-staging --s3-bucket aws-sam-cli-managed-default-samclisourcebucket-1mycbpdtzxnbk --region eu-west-2 --capabilities CAPABILITY_IAM --parameter_overrides ${{ secrets.SAM_PARAMETER_OVERRIDES }}
