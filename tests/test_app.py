@@ -17,6 +17,16 @@ class TestRoutes(TestCase):
         self.__serializer: Serializer = JsonSnakeToCamelSerializer()
         self.__mock_service_locator.get_new_serializer = MagicMock(return_value=self.__serializer)
 
+    def test_server_error(self):
+        brand_controller: BrandController = Mock()
+        setattr(brand_controller, 'get_by_id', MagicMock(side_effect=Exception("some exception is thrown")))
+        self.__mock_service_locator.get_new_brand_controller = MagicMock(return_value=brand_controller)
+        response = bootstrap(event={"routeKey": "GET /brands/{brand_id}"},
+                             context={},
+                             service_locator=self.__mock_service_locator)
+        assert response == get_as_json(status_code=500,
+                                       body="""{"message": "unexpected server error, please try later :("}""")
+
     def test_route_that_does_not_exist(self):
         self.__assert_non_service_layer_route(route_key="GET /random",
                                               expected_body="""{"message": "route: GET /random not found"}""",
