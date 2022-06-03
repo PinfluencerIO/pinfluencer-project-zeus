@@ -22,7 +22,7 @@ class TestRoutes(TestCase):
                                               expected_body="""{"message": "route: GET /random not found"}""",
                                               expected_status_code=404)
 
-    def test_get(self):
+    def test_feed(self):
         self.__assert_non_service_layer_route(route_key="GET /feed",
                                               expected_body="""{"message": "GET /feed is not implemented"}""",
                                               expected_status_code=405)
