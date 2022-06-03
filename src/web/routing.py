@@ -44,7 +44,7 @@ class Dispatcher:
 
                 'PUT /influencers/me': lambda event: PinfluencerResponse(status_code=200),
 
-                'PATCH /influencers/me/image': lambda event: PinfluencerResponse(status_code=200),
+                'POST /influencers/me/image': lambda event: PinfluencerResponse(status_code=200),
             }
         )
 

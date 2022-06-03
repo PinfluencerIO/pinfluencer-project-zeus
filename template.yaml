@@ -135,7 +135,7 @@ Resources:
             Auth:
               Authorizer: UserAuth
             Path: /influencers/me/image
-            Method: patch
+            Method: post
             ApiId: !Ref PinfluencerHttpApi
         UpdateMyInfluencer:
           Type: HttpApi
