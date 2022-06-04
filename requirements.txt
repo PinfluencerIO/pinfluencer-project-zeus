@@ -1,7 +1,7 @@
 object-mapper==1.0.7
 pytest
 python-dateutil
-callee
+callee==0.3.1
 attrs
 schema
 jsonschema
