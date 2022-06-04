@@ -10,7 +10,12 @@ def print_exception(e):
 class JsonSnakeToCamelSerializer:
 
     def serialize(self, data: dict) -> str:
-        return json.dumps({self.__snake_case_key_to_camel_case(k): v for k, v in data.items()}, default=str)
+        return json.dumps(self.__snake_case_to_camel_case_dict(d=data))
+
+    def __snake_case_to_camel_case_dict(self, d):
+        if isinstance(d, list):
+            return [self.__snake_case_to_camel_case_dict(i) if isinstance(i, (dict, list)) else i for i in d]
+        return {self.__snake_case_key_to_camel_case(a): self.__snake_case_to_camel_case_dict(b) if isinstance(b, (dict, list)) else b for a, b in d.items()}
 
     @staticmethod
     def __snake_case_key_to_camel_case(key: str) -> str:
