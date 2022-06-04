@@ -111,11 +111,11 @@ class ObjectMapperAdapter(Protocol):
 
 class Serializer(Protocol):
 
-    def serialize(self, data: dict) -> str:
+    def serialize(self, data: Union[dict, list]) -> str:
         ...
 
 
 class Deserializer(Protocol):
 
-    def deserialize(self, data: str) -> dict:
+    def deserialize(self, data: str) -> Union[dict, list]:
         ...

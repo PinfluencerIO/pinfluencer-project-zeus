@@ -1,5 +1,6 @@
 import json
 import re
+from typing import Union
 
 
 def print_exception(e):
@@ -9,7 +10,7 @@ def print_exception(e):
 
 class JsonSnakeToCamelSerializer:
 
-    def serialize(self, data: dict) -> str:
+    def serialize(self, data: Union[dict, list]) -> str:
         return json.dumps(self.__snake_case_to_camel_case_dict(d=data))
 
     def __snake_case_to_camel_case_dict(self, d):
@@ -25,7 +26,7 @@ class JsonSnakeToCamelSerializer:
 
 class JsonCamelToSnakeCaseDeserializer:
 
-    def deserialize(self, data: str) -> dict:
+    def deserialize(self, data: str) -> Union[dict, list]:
         data_dict = json.loads(data)
         return self.__camel_case_to_snake_case_dict(d=data_dict)
 
