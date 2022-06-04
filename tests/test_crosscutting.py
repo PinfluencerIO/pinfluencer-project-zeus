@@ -95,3 +95,20 @@ class TestJsonCamelToSnakeCaseDeserializer(TestCase):
 
         assert expected == actual
 
+    def test_deserialize_nested(self):
+
+        expected = TEST_NESTED_DICT
+        input_data = TEST_DICT_NESTED_JSON
+
+        actual = self.__json_camel_to_snake_case_deserializer.deserialize(input_data)
+
+        assert expected == actual
+
+    def test_deserialize_collection(self):
+
+        expected = TEST_LIST_SERIALIZATION
+        input_data = TEST_LIST_SERIALIZATION_JSON
+
+        actual = self.__json_camel_to_snake_case_deserializer.deserialize(input_data)
+
+        assert expected == actual
