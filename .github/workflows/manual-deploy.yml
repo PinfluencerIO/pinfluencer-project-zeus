@@ -1,10 +1,5 @@
-name: Manual DevOps Target
-on:
-  workflow_dispatch:
-    inputs:
-      target:
-        description: 'DevOps target to run, choose from the following => [ deploy, close, open ]'
-        required: true
+name: Deploy
+on: workflow_dispatch
 jobs:
   run-target:
     runs-on: ubuntu-latest
