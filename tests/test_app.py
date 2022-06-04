@@ -1,3 +1,4 @@
+from typing import Union
 from unittest import TestCase
 from unittest.mock import Mock, MagicMock
 
@@ -41,6 +42,12 @@ class TestRoutes(TestCase):
         self.__assert_brand_endpoint_200(expected_body="""{"allBrands": "some_all_brands_value"}""",
                                          brand_function="get_all",
                                          actual_body={"all_brands": "some_all_brands_value"},
+                                         route_key="GET /brands")
+
+    def test_get_all_empty_list(self):
+        self.__assert_brand_endpoint_200(expected_body="""[]""",
+                                         brand_function="get_all",
+                                         actual_body=[],
                                          route_key="GET /brands")
 
     def test_get_brand_by_id(self):
@@ -114,7 +121,7 @@ class TestRoutes(TestCase):
 
     def __assert_brand_endpoint_200(self,
                                     expected_body: str,
-                                    actual_body: dict,
+                                    actual_body: Union[dict, list],
                                     route_key: str,
                                     brand_function: str):
         brand_controller: BrandController = Mock()

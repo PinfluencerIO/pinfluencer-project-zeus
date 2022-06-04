@@ -26,4 +26,5 @@ def bootstrap(event: dict,
     except Exception as e:
         print_exception(e)
         response = PinfluencerResponse.as_500_error()
+    print(f"output body: {response.body}")
     return response.as_json(serializer=service_locator.get_new_serializer())
