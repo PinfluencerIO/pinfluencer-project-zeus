@@ -28,5 +28,5 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: eu-west-2
-    - run: ./clean-build.sh
+    - run: sam build && cd .aws-sam/build/PinfluencerFunction && rm -fr clean-build.sh tests events env.json README.md samconfig.toml template.yaml requirements.txt
     - run: sam deploy --no-fail-on-empty-changeset --no-confirm-changeset --stack-name pinfluencer-api-staging --s3-bucket aws-sam-cli-managed-default-samclisourcebucket-1mycbpdtzxnbk --region eu-west-2 --capabilities CAPABILITY_IAM --parameter-overrides ${{ secrets.SAM_PARAMETER_OVERRIDES }}
