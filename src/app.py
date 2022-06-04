@@ -5,9 +5,9 @@ from src.web.routing import Dispatcher
 
 
 def lambda_handler(event, context):
-    bootstrap(event=event,
-              context=context,
-              service_locator=ServiceLocator())
+    return bootstrap(event=event,
+                     context=context,
+                     service_locator=ServiceLocator())
 
 
 def bootstrap(event: dict,
