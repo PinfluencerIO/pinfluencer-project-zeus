@@ -27,7 +27,12 @@ class JsonCamelToSnakeCaseDeserializer:
 
     def deserialize(self, data: str) -> dict:
         data_dict = json.loads(data)
-        return {self.__camel_case_key_to_snake_case(k): v for k, v in data_dict.items()}
+        return self.__camel_case_to_snake_case_dict(d=data_dict)
+
+    def __camel_case_to_snake_case_dict(self, d):
+        if isinstance(d, list):
+            return [self.__camel_case_to_snake_case_dict(i) if isinstance(i, (dict, list)) else i for i in d]
+        return {self.__camel_case_key_to_snake_case(a): self.__camel_case_to_snake_case_dict(b) if isinstance(b, (dict, list)) else b for a, b in d.items()}
 
     @staticmethod
     def __camel_case_key_to_snake_case(key: str) -> str:
