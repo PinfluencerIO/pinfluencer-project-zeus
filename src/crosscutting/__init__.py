@@ -11,7 +11,7 @@ def print_exception(e):
 class JsonSnakeToCamelSerializer:
 
     def serialize(self, data: Union[dict, list]) -> str:
-        return json.dumps(self.__snake_case_to_camel_case_dict(d=data))
+        return json.dumps(self.__snake_case_to_camel_case_dict(d=data), default=str)
 
     def __snake_case_to_camel_case_dict(self, d):
         if isinstance(d, list):
