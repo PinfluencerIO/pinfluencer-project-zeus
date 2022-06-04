@@ -1,6 +1,6 @@
 from mapper.object_mapper import ObjectMapper
 
-from src.crosscutting import JsonCamelToSnakeCaseDeserializer
+from src.crosscutting import JsonCamelToSnakeCaseDeserializer, JsonSnakeToCamelSerializer
 from src.data import SqlAlchemyDataManager
 from src.data.repositories import SqlAlchemyBrandRepository, S3ImageRepository
 from src.domain.validation import BrandValidator
@@ -38,4 +38,4 @@ class ServiceLocator:
             deserializer=self.get_new_deserializer())
 
     def get_new_serializer(self) -> Serializer:
-        pass
+        return JsonSnakeToCamelSerializer()
