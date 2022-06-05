@@ -15,7 +15,6 @@ class Dispatcher:
 
     @property
     def dispatch_route_to_ctr(self) -> dict[dict[str, Callable[[dict], PinfluencerResponse]]]:
-
         feed = OrderedDict(
             {'GET /feed': self.__get_not_implemented_method('GET /feed')}
         )
@@ -28,7 +27,8 @@ class Dispatcher:
 
                 'GET /brands/{brand_id}': self.__brand_ctr.get_by_id,
 
-                'GET /influencers/{influencer_id}': self.__get_not_implemented_method('GET /influencers/{influencer_id}'),
+                'GET /influencers/{influencer_id}': self.__get_not_implemented_method(
+                    'GET /influencers/{influencer_id}'),
 
                 # authenticated brand endpoints
                 'GET /brands/me': self.__brand_ctr.get,
@@ -53,7 +53,18 @@ class Dispatcher:
         )
 
         campaigns = OrderedDict(
-            {'GET /campaigns/me': self.__get_not_implemented_method('GET /campaigns/me')}
+            {
+                'GET /campaigns/me': self.__get_not_implemented_method('GET /campaigns/me'),
+
+                'DELETE /campaigns/me/{campaign_id}': self.__get_not_implemented_method(
+                    'DELETE /campaigns/me/{campaign_id}'),
+
+                'GET /campaigns/me/{campaign_id}': self.__get_not_implemented_method('GET /campaigns/me/{campaign_id}'),
+
+                'POST /campaigns/me': self.__get_not_implemented_method('POST /campaigns/me'),
+
+                'PUT /campaigns/me/{campaign_id}': self.__get_not_implemented_method('PUT /campaigns/me/{campaign_id}')
+            }
         )
 
         routes = {}
@@ -61,3 +72,4 @@ class Dispatcher:
         routes.update(users)
         routes.update(campaigns)
         return routes
+
