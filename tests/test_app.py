@@ -122,6 +122,30 @@ class TestRoutes(TestCase):
             expected_status_code=405,
             route_key="GET /campaigns/me")
 
+    def test_delete_auth_campaign_by_id(self):
+        self.__assert_non_service_layer_route(
+            expected_body="""{"message": "DELETE /campaigns/me/{campaign_id} is not implemented"}""",
+            expected_status_code=405,
+            route_key="DELETE /campaigns/me/{campaign_id}")
+
+    def test_get_auth_campaign_by_id(self):
+        self.__assert_non_service_layer_route(
+            expected_body="""{"message": "GET /campaigns/me/{campaign_id} is not implemented"}""",
+            expected_status_code=405,
+            route_key="GET /campaigns/me/{campaign_id}")
+
+    def test_update_auth_campaign_by_id(self):
+        self.__assert_non_service_layer_route(
+            expected_body="""{"message": "PUT /campaigns/me/{campaign_id} is not implemented"}""",
+            expected_status_code=405,
+            route_key="PUT /campaigns/me/{campaign_id}")
+
+    def test_create_auth_campaign(self):
+        self.__assert_non_service_layer_route(
+            expected_body="""{"message": "POST /campaigns/me is not implemented"}""",
+            expected_status_code=405,
+            route_key="POST /campaigns/me")
+
     def test_template_matches_routes(self):
         with open("../template.yaml") as file:
             yaml_str = file.read()
