@@ -147,7 +147,7 @@ class TestRoutes(TestCase):
             route_key="POST /campaigns/me")
 
     def test_template_matches_routes(self):
-        with open("../template.yaml") as file:
+        with open("./../template.yaml") as file:
             yaml_str = file.read()
             data = load_yaml(yaml_str)
             paths = sorted([f"{event[1]['Properties']['Method'].upper()} {event[1]['Properties']['Path']}" for event in data["Resources"]["PinfluencerFunction"]["Properties"]["Events"].items()])
