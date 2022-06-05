@@ -254,3 +254,6 @@ env.json
 
 # sandbox
 sandbox.py
+
+# aws
+awssecrets.secrets
