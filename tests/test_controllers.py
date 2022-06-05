@@ -8,11 +8,11 @@ from src.crosscutting import JsonSnakeToCamelSerializer, JsonCamelToSnakeCaseDes
 from src.domain.models import Brand, ValueEnum, CategoryEnum
 from src.domain.validation import BrandValidator
 from src.exceptions import AlreadyExistsException, NotFoundException
-from src.types import BrandRepository
-from src.web.controllers import BrandController
+from src.types import BrandRepository, InfluencerRepository
+from src.web.controllers import BrandController, InfluencerController
 from src.web.validation import valid_uuid
 from tests import brand_dto_generator, assert_brand_updatable_fields_are_equal, TEST_DEFAULT_BRAND_LOGO, \
-    TEST_DEFAULT_BRAND_HEADER_IMAGE
+    TEST_DEFAULT_BRAND_HEADER_IMAGE, influencer_dto_generator
 
 
 def get_brand_id_event(brand_id):
@@ -61,6 +61,21 @@ def create_brand_for_auth_user_event(auth_id, payload):
         "body": JsonSnakeToCamelSerializer().serialize(payload)
     }
 
+
+class TestInfluencerController(TestCase):
+
+    def setUp(self):
+        self.__influencer_repository: InfluencerRepository = Mock()
+        self.__sut = InfluencerController(user_repository=self.__influencer_repository,
+                                          deserializer=JsonCamelToSnakeCaseDeserializer())
+
+    def test_get_by_id(self):
+        influencer = influencer_dto_generator(num=1)
+        self.__influencer_repository.load_by_id = MagicMock(return_value=influencer)
+        pinfluencer_response = self.__sut.get_by_id(get_brand_id_event(influencer.id))
+        self.__influencer_repository.load_by_id.assert_called_once_with(id_=influencer.id)
+        assert pinfluencer_response.body == influencer.__dict__
+        assert pinfluencer_response.is_ok() is True
 
 class TestBrandController(TestCase):
 

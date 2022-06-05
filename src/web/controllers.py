@@ -5,17 +5,17 @@ from jsonschema.exceptions import ValidationError
 from src.crosscutting import print_exception
 from src.domain.models import ValueEnum, CategoryEnum, Brand
 from src.exceptions import AlreadyExistsException, NotFoundException
-from src.types import BrandRepository, Deserializer, BrandValidatable, UserRepository
+from src.types import BrandRepository, Deserializer, BrandValidatable, UserRepository, InfluencerRepository
 from src.web import PinfluencerResponse, get_cognito_user, BRAND_ID_PATH_KEY
 from src.web.validation import valid_path_resource_id
 
 
 class BaseUserController:
 
-    def __init__(self, serializer: Deserializer,
+    def __init__(self, deserializer: Deserializer,
                  user_repository: UserRepository):
         self.__user_repository = user_repository
-        self._deserializer = serializer
+        self._deserializer = deserializer
 
     def _update_image(self, event, updater: Callable[[str, str], dict]) -> PinfluencerResponse:
         auth_user_id = get_cognito_user(event)
@@ -121,6 +121,10 @@ class BrandController(BaseUserController):
                                                  bytes).__dict__)
 
 class InfluencerController(BaseUserController):
+
+    def __init__(self, deserializer: Deserializer,
+                 user_repository: InfluencerRepository):
+        super().__init__(deserializer, user_repository)
 
     def create(self, event) -> PinfluencerResponse:
         ...

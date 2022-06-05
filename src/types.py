@@ -1,20 +1,20 @@
 from typing import Protocol, Optional, Union
 
-from src.domain.models import Brand, Influencer
+from src.domain.models import Brand, Influencer, User
 
 
 class UserRepository(Protocol):
 
-    def load_collection(self) -> list[Brand]:
+    def load_collection(self) -> list[User]:
         ...
 
-    def load_by_id(self, id_: str) -> Brand:
+    def load_by_id(self, id_: str) -> User:
         ...
 
-    def write_new_for_auth_user(self, auth_user_id: str, payload: Brand) -> Brand:
+    def write_new_for_auth_user(self, auth_user_id: str, payload: User) -> User:
         ...
 
-    def load_for_auth_user(self, auth_user_id: str) -> Brand:
+    def load_for_auth_user(self, auth_user_id: str) -> User:
         ...
 
 
@@ -39,6 +39,27 @@ class BrandRepository(Protocol):
         ...
 
     def update_header_image_for_auth_user(self, auth_user_id: str, image_bytes: str) -> Brand:
+        ...
+
+
+class InfluencerRepository(Protocol):
+
+    def load_collection(self) -> list[Influencer]:
+        ...
+
+    def load_by_id(self, id_: str) -> Influencer:
+        ...
+
+    def update_for_auth_user(self, auth_user_id: str, payload: Influencer) -> Influencer:
+        ...
+
+    def write_new_for_auth_user(self, auth_user_id: str, payload: Influencer) -> Influencer:
+        ...
+
+    def load_for_auth_user(self, auth_user_id: str) -> Influencer:
+        ...
+
+    def update_image_for_auth_user(self, auth_user_id: str, image_bytes: str) -> Influencer:
         ...
 
 
