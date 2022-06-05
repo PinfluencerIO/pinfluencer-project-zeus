@@ -2,12 +2,15 @@ from typing import Union
 from unittest import TestCase
 from unittest.mock import Mock, MagicMock
 
+from cfn_tools import load_yaml
+
 from src.app import bootstrap
 from src.crosscutting import JsonSnakeToCamelSerializer
 from src.service import ServiceLocator
 from src.types import Serializer
 from src.web import PinfluencerResponse
 from src.web.controllers import BrandController
+from src.web.routing import Dispatcher
 from tests import get_as_json
 
 
@@ -118,6 +121,14 @@ class TestRoutes(TestCase):
             expected_body="""{"message": "GET /campaigns/me is not implemented"}""",
             expected_status_code=405,
             route_key="GET /campaigns/me")
+
+    def test_template_matches_routes(self):
+        with open("../template.yaml") as file:
+            yaml_str = file.read()
+            data = load_yaml(yaml_str)
+            paths = sorted([f"{event[1]['Properties']['Method'].upper()} {event[1]['Properties']['Path']}" for event in data["Resources"]["PinfluencerFunction"]["Properties"]["Events"].items()])
+            route_paths = sorted([*Dispatcher(service_locator=self.__mock_service_locator).dispatch_route_to_ctr])
+            assert paths == route_paths
 
     def __assert_brand_endpoint_200(self,
                                     expected_body: str,
