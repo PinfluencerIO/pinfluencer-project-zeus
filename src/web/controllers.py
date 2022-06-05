@@ -5,14 +5,16 @@ from jsonschema.exceptions import ValidationError
 from src.crosscutting import print_exception
 from src.domain.models import ValueEnum, CategoryEnum, Brand
 from src.exceptions import AlreadyExistsException, NotFoundException
-from src.types import BrandRepository, Deserializer, BrandValidatable
+from src.types import BrandRepository, Deserializer, BrandValidatable, UserRepository
 from src.web import PinfluencerResponse, get_cognito_user, BRAND_ID_PATH_KEY
 from src.web.validation import valid_path_resource_id
 
 
-class BaseController:
+class BaseUserController:
 
-    def __init__(self, serializer: Deserializer):
+    def __init__(self, serializer: Deserializer,
+                 user_repository: UserRepository):
+        self.__user_repository = user_repository
         self._deserializer = serializer
 
     def _update_image(self, event, updater: Callable[[str, str], dict]) -> PinfluencerResponse:
@@ -27,22 +29,15 @@ class BaseController:
             print_exception(e)
             return PinfluencerResponse(status_code=404, body={})
 
-
-class BrandController(BaseController):
-    def __init__(self, brand_repository: BrandRepository, brand_validator: BrandValidatable, deserializer: Deserializer):
-        super().__init__(deserializer)
-        self.__brand_validator = brand_validator
-        self.__brand_repository = brand_repository
-
     def get_all(self, event) -> PinfluencerResponse:
         return PinfluencerResponse(status_code=200, body=list(map(lambda x: x.__dict__,
-                                                                  self.__brand_repository.load_collection())))
+                                                                  self.__user_repository.load_collection())))
 
     def get_by_id(self, event) -> PinfluencerResponse:
         id_ = valid_path_resource_id(event, BRAND_ID_PATH_KEY)
         if id_:
             try:
-                brand = self.__brand_repository.load_by_id(id_=id_)
+                brand = self.__user_repository.load_by_id(id_=id_)
                 return PinfluencerResponse(status_code=200, body=brand.__dict__)
             except NotFoundException as e:
                 print_exception(e)
@@ -53,11 +48,20 @@ class BrandController(BaseController):
         auth_user_id = get_cognito_user(event)
         if auth_user_id:
             try:
-                brand = self.__brand_repository.load_for_auth_user(auth_user_id=auth_user_id)
+                brand = self.__user_repository.load_for_auth_user(auth_user_id=auth_user_id)
                 return PinfluencerResponse(status_code=200, body=brand.__dict__)
             except NotFoundException as e:
                 print_exception(e)
         return PinfluencerResponse(status_code=404, body={})
+
+
+class BrandController(BaseUserController):
+    def __init__(self, brand_repository: BrandRepository,
+                 brand_validator: BrandValidatable,
+                 deserializer: Deserializer):
+        super().__init__(deserializer, brand_repository)
+        self.__brand_validator = brand_validator
+        self.__brand_repository = brand_repository
 
     def create(self, event) -> PinfluencerResponse:
         auth_user_id = get_cognito_user(event)
@@ -115,3 +119,8 @@ class BrandController(BaseController):
                                   updater=lambda auth_id, bytes: self.__brand_repository.update_header_image_for_auth_user(
                                                  auth_id,
                                                  bytes).__dict__)
+
+class InfluencerController(BaseUserController):
+
+    def create(self, event) -> PinfluencerResponse:
+        ...

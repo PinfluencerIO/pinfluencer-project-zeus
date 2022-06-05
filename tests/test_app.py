@@ -1,3 +1,4 @@
+import os
 from typing import Union
 from unittest import TestCase
 from unittest.mock import Mock, MagicMock
@@ -147,7 +148,10 @@ class TestRoutes(TestCase):
             route_key="POST /campaigns/me")
 
     def test_template_matches_routes(self):
-        with open(f"./template.yaml") as file:
+        template_file_path = f"./../template.yaml"
+        if "REMOTE_BUILD" in os.environ:
+            template_file_path = f"./template.yaml"
+        with open(template_file_path) as file:
             yaml_str = file.read()
             data = load_yaml(yaml_str)
             paths = sorted([f"{event[1]['Properties']['Method'].upper()} {event[1]['Properties']['Path']}" for event in data["Resources"]["PinfluencerFunction"]["Properties"]["Events"].items()])

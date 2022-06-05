@@ -3,6 +3,21 @@ from typing import Protocol, Optional, Union
 from src.domain.models import Brand, Influencer
 
 
+class UserRepository(Protocol):
+
+    def load_collection(self) -> list[Brand]:
+        ...
+
+    def load_by_id(self, id_: str) -> Brand:
+        ...
+
+    def write_new_for_auth_user(self, auth_user_id: str, payload: Brand) -> Brand:
+        ...
+
+    def load_for_auth_user(self, auth_user_id: str) -> Brand:
+        ...
+
+
 class BrandRepository(Protocol):
 
     def load_collection(self) -> list[Brand]:
