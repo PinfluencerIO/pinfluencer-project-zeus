@@ -66,7 +66,7 @@ class TestInfluencerController(TestCase):
 
     def setUp(self):
         self.__influencer_repository: InfluencerRepository = Mock()
-        self.__sut = InfluencerController(user_repository=self.__influencer_repository,
+        self.__sut = InfluencerController(influencer_repository=self.__influencer_repository,
                                           deserializer=JsonCamelToSnakeCaseDeserializer())
 
     def test_get_by_id(self):

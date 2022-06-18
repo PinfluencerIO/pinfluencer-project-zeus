@@ -123,8 +123,8 @@ class BrandController(BaseUserController):
 class InfluencerController(BaseUserController):
 
     def __init__(self, deserializer: Deserializer,
-                 user_repository: InfluencerRepository):
-        super().__init__(deserializer, user_repository)
+                 influencer_repository: InfluencerRepository):
+        super().__init__(deserializer, influencer_repository)
 
     def create(self, event) -> PinfluencerResponse:
         ...

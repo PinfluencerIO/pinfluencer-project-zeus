@@ -8,6 +8,7 @@ from src.web import PinfluencerResponse
 class Dispatcher:
     def __init__(self, service_locator: ServiceLocator):
         self.__brand_ctr = service_locator.get_new_brand_controller()
+        self.__influencer_ctr = service_locator.get_new_influencer_controller()
 
     @staticmethod
     def __get_not_implemented_method(route: str) -> Callable[[dict], PinfluencerResponse]:
@@ -27,8 +28,7 @@ class Dispatcher:
 
                 'GET /brands/{brand_id}': self.__brand_ctr.get_by_id,
 
-                'GET /influencers/{influencer_id}': self.__get_not_implemented_method(
-                    'GET /influencers/{influencer_id}'),
+                'GET /influencers/{influencer_id}': self.__influencer_ctr.get_by_id,
 
                 # authenticated brand endpoints
                 'GET /brands/me': self.__brand_ctr.get,

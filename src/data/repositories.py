@@ -152,6 +152,12 @@ class SqlAlchemyInfluencerRepository(BaseSqlAlchemyUserRepository):
                          object_mapper=object_mapper,
                          resource_dto=Influencer)
 
+    def update_for_auth_user(self, auth_user_id: str, payload: Influencer) -> Influencer:
+        ...
+
+    def update_image_for_auth_user(self, auth_user_id: str, image_bytes: str) -> Influencer:
+        ...
+
 
 class S3ImageRepository:
 

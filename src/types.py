@@ -50,13 +50,13 @@ class InfluencerRepository(Protocol):
     def load_by_id(self, id_: str) -> Influencer:
         ...
 
-    def update_for_auth_user(self, auth_user_id: str, payload: Influencer) -> Influencer:
+    def load_for_auth_user(self, auth_user_id: str) -> Influencer:
         ...
 
     def write_new_for_auth_user(self, auth_user_id: str, payload: Influencer) -> Influencer:
         ...
 
-    def load_for_auth_user(self, auth_user_id: str) -> Influencer:
+    def update_for_auth_user(self, auth_user_id: str, payload: Influencer) -> Influencer:
         ...
 
     def update_image_for_auth_user(self, auth_user_id: str, image_bytes: str) -> Influencer:
