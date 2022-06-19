@@ -109,9 +109,6 @@ class SqlAlchemyBrandRepository(BaseSqlAlchemyUserRepository):
     def update_for_auth_user(self, auth_user_id, payload: Brand) -> Brand:
         entity = self._data_manager.session.query(self._resource_entity).filter(self._resource_entity.auth_user_id == auth_user_id).first()
         if entity:
-            entity.first_name = payload.first_name
-            entity.last_name = payload.last_name
-            entity.email = payload.email
             entity.brand_name = payload.brand_name
             entity.brand_description = payload.brand_description
             entity.insta_handle = payload.insta_handle

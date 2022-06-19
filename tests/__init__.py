@@ -24,7 +24,7 @@ def brand_generator(dto, mapper):
 
 
 def get_as_json(status_code: int,
-                body: str="{}") -> dict:
+                body: str = "{}") -> dict:
     return {
         "statusCode": status_code,
         "body": body,
@@ -133,6 +133,67 @@ def assert_brand_updatable_fields_are_equal_for_three(brand1, brand2, brand3):
     for field in brand_brand_updatable_fields():
         assert brand1[field] == brand2[field] == brand3[field]
         print(f'asserted {field} is valid')
+
+
+def brand_db_fields():
+    return ['insta_handle',
+            'brand_name',
+            'brand_description',
+            'website',
+            'logo',
+            'header_image',
+            'values',
+            'categories',
+            'auth_user_id']
+
+
+def influencer_db_fields():
+    return ['website',
+            'bio',
+            'image',
+            'audience_age_13_to_17_split',
+            'audience_age_18_to_24_split',
+            'audience_age_25_to_34_split',
+            'audience_age_35_to_44_split',
+            'audience_age_45_to_54_split',
+            'audience_age_55_to_64_split',
+            'audience_age_65_plus_split',
+            'audience_male_split',
+            'audience_female_split',
+            'insta_handle',
+            'values',
+            'categories']
+
+
+def assert_brand_db_fields_are_equal(brand1: dict, brand2: dict):
+    for field in brand_db_fields():
+        assert brand1[field] == brand2[field]
+        print(f'asserted {field} is valid')
+
+
+def assert_influencer_db_fields_are_equal(influencer1: dict, influencer2: dict):
+    for field in influencer_db_fields():
+        assert influencer1[field] == influencer2[field]
+        print(f'asserted {field} is valid')
+
+
+def assert_brand_db_fields_are_equal_for_three(brand1: dict, brand2: dict, brand3: dict):
+    for field in brand_db_fields():
+        assert brand1[field] == brand2[field] == brand3[field]
+        print(f'asserted {field} is valid')
+
+
+def assert_collection_brand_db_fields_are_equal(brand1: list, brand2: list):
+    brand_list1 = list(map(get_db_brand, brand1))
+    brand_list2 = list(map(get_db_brand, brand2))
+    assert brand_list1 == brand_list2
+
+
+def get_db_brand(brand: dict) -> dict:
+    new_brand = {}
+    for field in brand_db_fields():
+        new_brand[field] = brand[field]
+    return new_brand
 
 
 def brand_brand_updatable_fields():
