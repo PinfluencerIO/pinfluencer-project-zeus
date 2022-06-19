@@ -207,11 +207,27 @@ class CognitoAuthUserRepository:
         self.__auth_service = auth_service
 
     def update_brand_claims(self, user: Brand):
-        ...
+        self.__update_user_claims(user=user, type='brand')
 
     def update_influencer_claims(self, user: Influencer):
-        ...
+        self.__update_user_claims(user=user, type='influencer')
 
-    @staticmethod
-    def __update_user_claims(user: User, type: str):
-        ...
+    def __update_user_claims(self, user: User, type: str):
+        self.__auth_service.update_user_claims(username=user.auth_user_id, attributes=[
+            {
+                'Name': 'custom:type',
+                'Value': type
+            },
+            {
+                'Name': 'email',
+                'Value': user.email
+            },
+            {
+                'Name': 'family_name',
+                'Value': user.last_name
+            },
+            {
+                'Name': 'given_name',
+                'Value': user.first_name
+            }
+        ])

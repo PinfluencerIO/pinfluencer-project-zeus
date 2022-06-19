@@ -1,6 +1,7 @@
 from unittest import TestCase
 from unittest.mock import Mock, MagicMock
 
+from callee import Captor
 from mapper.object_mapper import ObjectMapper
 
 from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository, CognitoAuthUserRepository, \
@@ -161,49 +162,61 @@ class TestAuthUserRepository(TestCase):
         self.__sut = CognitoAuthUserRepository(self.__auth_user_service)
 
     def test_update_brand_claims(self):
+        payload_captor = Captor()
         expected_brand = brand_dto_generator(num=1)
         self.__auth_user_service.update_user_claims = MagicMock()
         self.__sut.update_brand_claims(user=expected_brand)
         self.__auth_user_service.update_user_claims.assert_called_once_with(username=expected_brand.auth_user_id,
-                                                                            attributes=[
-                                                                                {
-                                                                                    "Name": "family_name",
-                                                                                    "Value": expected_brand.last_name
-                                                                                },
-                                                                                {
-                                                                                    "Name": "given_name",
-                                                                                    "Value": expected_brand.first_name
-                                                                                },
-                                                                                {
-                                                                                    "Name": "email",
-                                                                                    "Value": expected_brand.email
-                                                                                },
-                                                                                {
-                                                                                    "Name": "custom:type",
-                                                                                    "Value": "brand"
-                                                                                }
-                                                                            ])
+                                                                            attributes=payload_captor)
+        expected_attributes = [
+                                {
+                                    "Name": "family_name",
+                                    "Value": expected_brand.last_name
+                                },
+                                {
+                                    "Name": "given_name",
+                                    "Value": expected_brand.first_name
+                                },
+                                {
+                                    "Name": "email",
+                                    "Value": expected_brand.email
+                                },
+                                {
+                                    "Name": "custom:type",
+                                    "Value": "brand"
+                                }
+                            ]
+        actual_attributes = payload_captor.arg
+        actual_attributes = sorted(actual_attributes, key=lambda d: d['Name'])
+        expected_attributes = sorted(expected_attributes, key=lambda d: d['Name'])
+        self.assertListEqual(expected_attributes, actual_attributes)
 
     def test_update_influencer_claims(self):
+        payload_captor = Captor()
         expected_influencer = influencer_dto_generator(num=1)
         self.__auth_user_service.update_user_claims = MagicMock()
         self.__sut.update_influencer_claims(user=expected_influencer)
         self.__auth_user_service.update_user_claims.assert_called_once_with(username=expected_influencer.auth_user_id,
-                                                                            attributes=[
-                                                                                {
-                                                                                    "Name": "family_name",
-                                                                                    "Value": expected_influencer.last_name
-                                                                                },
-                                                                                {
-                                                                                    "Name": "given_name",
-                                                                                    "Value": expected_influencer.first_name
-                                                                                },
-                                                                                {
-                                                                                    "Name": "email",
-                                                                                    "Value": expected_influencer.email
-                                                                                },
-                                                                                {
-                                                                                    "Name": "custom:type",
-                                                                                    "Value": "influencer"
-                                                                                }
-                                                                            ])
+                                                                            attributes=payload_captor)
+        expected_attributes = [
+            {
+                "Name": "family_name",
+                "Value": expected_influencer.last_name
+            },
+            {
+                "Name": "given_name",
+                "Value": expected_influencer.first_name
+            },
+            {
+                "Name": "email",
+                "Value": expected_influencer.email
+            },
+            {
+                "Name": "custom:type",
+                "Value": "influencer"
+            }
+        ]
+        actual_attributes = payload_captor.arg
+        actual_attributes = sorted(actual_attributes, key=lambda d: d['Name'])
+        expected_attributes = sorted(expected_attributes, key=lambda d: d['Name'])
+        self.assertListEqual(expected_attributes, actual_attributes)
