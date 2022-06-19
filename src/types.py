@@ -3,6 +3,15 @@ from typing import Protocol, Optional, Union
 from src.domain.models import Brand, Influencer, User
 
 
+class AuthUserRepository(Protocol):
+
+    def update_brand_claims(self, user: Brand) -> None:
+        ...
+
+    def update_influencer_claims(self, user: Influencer) -> None:
+        ...
+
+
 class UserRepository(Protocol):
 
     def load_collection(self) -> list[User]:

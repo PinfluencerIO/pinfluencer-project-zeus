@@ -1,5 +1,6 @@
 import base64
 import io
+import os
 import uuid
 from typing import Callable, Union
 
@@ -7,7 +8,7 @@ import boto3
 from botocore.exceptions import ClientError
 from filetype import filetype
 
-from src.data.entities import BrandEntity, InfluencerEntity, create_mappings
+from src.data.entities import SqlAlchemyBrandEntity, SqlAlchemyInfluencerEntity, create_mappings
 from src.domain.models import Brand, Influencer
 from src.exceptions import AlreadyExistsException, ImageException, NotFoundException
 from src.types import DataManager, ImageRepository, Model, User, ObjectMapperAdapter
@@ -100,7 +101,7 @@ class SqlAlchemyBrandRepository(BaseSqlAlchemyUserRepository):
                  image_repository: ImageRepository,
                  object_mapper: Union[object, ObjectMapperAdapter]):
         super().__init__(data_manager=data_manager,
-                         resource_entity=BrandEntity,
+                         resource_entity=SqlAlchemyBrandEntity,
                          image_repository=image_repository,
                          object_mapper=object_mapper,
                          resource_dto=Brand)
@@ -147,7 +148,7 @@ class SqlAlchemyInfluencerRepository(BaseSqlAlchemyUserRepository):
                  image_repository: ImageRepository,
                  object_mapper: Union[object, ObjectMapperAdapter]):
         super().__init__(data_manager=data_manager,
-                         resource_entity=InfluencerEntity,
+                         resource_entity=SqlAlchemyInfluencerEntity,
                          image_repository=image_repository,
                          object_mapper=object_mapper,
                          resource_dto=Influencer)
@@ -187,3 +188,30 @@ class S3ImageRepository:
             return key
         except ClientError:
             raise ImageException
+
+
+class CognitoAuthService:
+
+    def update_user_claims(self, username: str, attributes: list[dict]) -> None:
+        client = boto3.client('cognito-idp')
+        client.admin_update_user_attributes(
+            UserPoolId=os.environ["USER_POOL_ID"],
+            Username=username,
+            UserAttributes=attributes
+        )
+
+
+class CognitoAuthUserRepository:
+
+    def __init__(self, auth_service: CognitoAuthService):
+        self.__auth_service = auth_service
+
+    def update_brand_claims(self, user: Brand):
+        ...
+
+    def update_influencer_claims(self, user: Influencer):
+        ...
+
+    @staticmethod
+    def __update_user_claims(user: User, type: str):
+        ...

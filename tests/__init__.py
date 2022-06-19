@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from src.data import Base
-from src.data.entities import BrandEntity, BaseEntity
+from src.data.entities import SqlAlchemyBrandEntity, SqlAlchemyBaseEntity
 from src.domain.models import Brand, Influencer, ValueEnum, CategoryEnum
 
 TEST_DEFAULT_BRAND_LOGO = "default_brand_logo.png"
@@ -12,14 +12,14 @@ TEST_DEFAULT_BRAND_HEADER_IMAGE = "default_brand_header_image.png"
 TEST_DEFAULT_INFLUENCER_PROFILE_IMAGE = "default_influencer_profile_image.png"
 
 
-def get_entity_dict(entity: BaseEntity) -> dict:
+def get_entity_dict(entity: SqlAlchemyBaseEntity) -> dict:
     dict = entity.__dict__
     dict.pop('_sa_instance_state')
     return dict
 
 
 def brand_generator(dto, mapper):
-    brand = mapper.map(dto, BrandEntity)
+    brand = mapper.map(dto, SqlAlchemyBrandEntity)
     return brand
 
 
@@ -136,4 +136,4 @@ def assert_brand_updatable_fields_are_equal_for_three(brand1, brand2, brand3):
 
 
 def brand_brand_updatable_fields():
-    return ['insta_handle', 'first_name', 'last_name', 'email', 'brand_name', 'brand_description', 'website']
+    return ['insta_handle', 'brand_name', 'brand_description', 'website']

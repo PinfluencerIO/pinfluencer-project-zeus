@@ -31,6 +31,7 @@ Globals:
     Timeout: 50
     Environment:
       Variables:
+        USER_POOL_ID: !Ref UserPoolId
         DB_USER: !Ref DatabaseUser
         DB_PASSWORD: !Ref DatabasePassword
         DB_URL: !Ref DatabaseUrl

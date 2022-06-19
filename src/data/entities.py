@@ -7,19 +7,16 @@ from src.domain.models import Brand, Influencer
 from src.types import ObjectMapperAdapter
 
 
-class BaseEntity:
+class SqlAlchemyBaseEntity:
     id = Column(String(length=36), primary_key=True, nullable=False)
     created = Column(DateTime, nullable=False)
 
 
-class BaseUserEntity(BaseEntity):
-    first_name = Column(type_=String(length=120), nullable=False)
-    last_name = Column(type_=String(length=120), nullable=False)
-    email = Column(type_=String(length=120), nullable=False)
+class SqlAlchemyBaseUserEntity(SqlAlchemyBaseEntity):
     auth_user_id = Column(type_=String(length=64), nullable=False, unique=True)
 
 
-class BrandEntity(Base, BaseUserEntity):
+class SqlAlchemyBrandEntity(Base, SqlAlchemyBaseUserEntity):
     __tablename__ = 'brand'
 
     brand_name = Column(type_=String(length=120), nullable=False)
@@ -32,7 +29,7 @@ class BrandEntity(Base, BaseUserEntity):
     logo = Column(type_=String(length=360), nullable=True)
 
 
-class InfluencerEntity(Base, BaseUserEntity):
+class SqlAlchemyInfluencerEntity(Base, SqlAlchemyBaseUserEntity):
     __tablename__ = 'influencer'
 
     website = Column(type_=String(length=120), nullable=False)
@@ -53,7 +50,7 @@ class InfluencerEntity(Base, BaseUserEntity):
 
 
 def create_mappings(mapper: Union[ObjectMapperAdapter, object]):
-    mapper.create_map(Brand, BrandEntity)
-    mapper.create_map(BrandEntity, Brand)
-    mapper.create_map(Influencer, InfluencerEntity)
-    mapper.create_map(InfluencerEntity, Influencer)
+    mapper.create_map(Brand, SqlAlchemyBrandEntity)
+    mapper.create_map(SqlAlchemyBrandEntity, Brand)
+    mapper.create_map(Influencer, SqlAlchemyInfluencerEntity)
+    mapper.create_map(SqlAlchemyInfluencerEntity, Influencer)
