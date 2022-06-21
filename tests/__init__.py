@@ -1,3 +1,4 @@
+from enum import Enum
 from unittest.mock import Mock
 
 from sqlalchemy import create_engine
@@ -35,7 +36,13 @@ def get_as_json(status_code: int,
     }
 
 
-def brand_dto_generator(num):
+class RepoEnum(Enum):
+    NO_REPO = 'NO_REPO',
+    STD_REPO = 'STD_REPO',
+    AUTH_REPO = 'AUTH_REPO'
+
+
+def brand_dto_generator(num, repo: RepoEnum=RepoEnum.NO_REPO):
     if num == 1:
         values = [ValueEnum.VALUE5, ValueEnum.VALUE6, ValueEnum.VALUE7]
         categories = [CategoryEnum.CATEGORY6, CategoryEnum.CATEGORY5, CategoryEnum.CATEGORY7]
@@ -46,21 +53,40 @@ def brand_dto_generator(num):
         values = [ValueEnum.VALUE5, ValueEnum.RECYCLED, ValueEnum.VALUE7, ValueEnum.SUSTAINABLE, ValueEnum.VEGAN]
         categories = [CategoryEnum.CATEGORY6, CategoryEnum.CATEGORY9, CategoryEnum.CATEGORY8, CategoryEnum.FASHION,
                       CategoryEnum.PET]
+    first_name = f"first_name{num}"
+    last_name = f"last_name{num}"
+    email = f"email{num}"
+    auth_user_id = f'1234brand{num}'
+    brand_name = f"name{num}"
+    brand_description = f"description{num}"
+    website = f"website{num}"
+    insta_handle = f"instahandle{num}"
+    if repo == RepoEnum.STD_REPO:
+        first_name = ''
+        last_name = ''
+        email = ''
+    if repo == RepoEnum.AUTH_REPO:
+        auth_user_id = ''
+        brand_name = ""
+        brand_description = ""
+        website = ""
+        insta_handle = ""
+        values = []
+        categories = []
     return Brand(
-        first_name=f"first_name{num}",
-        last_name=f"last_name{num}",
-        email=f"email{num}",
-        auth_user_id=f'1234brand{num}',
-        brand_name=f"name{num}",
-        brand_description=f"description{num}",
-        website=f"website{num}",
-        insta_handle=f"instahandle{num}",
+        first_name=first_name,
+        last_name=last_name,
+        email=email,
+        auth_user_id=auth_user_id,
+        brand_name=brand_name,
+        brand_description=brand_description,
+        website=website,
+        insta_handle=insta_handle,
         values=values,
         categories=categories
     )
 
-
-def influencer_dto_generator(num):
+def influencer_dto_generator(num, repo: RepoEnum=RepoEnum.NO_REPO):
     if num == 1:
         values = [ValueEnum.VALUE5, ValueEnum.VALUE6, ValueEnum.VALUE7]
         categories = [CategoryEnum.CATEGORY6, CategoryEnum.CATEGORY5, CategoryEnum.CATEGORY7]
@@ -71,25 +97,61 @@ def influencer_dto_generator(num):
         values = [ValueEnum.VALUE5, ValueEnum.RECYCLED, ValueEnum.VALUE7, ValueEnum.SUSTAINABLE, ValueEnum.VEGAN]
         categories = [CategoryEnum.CATEGORY6, CategoryEnum.CATEGORY9, CategoryEnum.CATEGORY8, CategoryEnum.FASHION,
                       CategoryEnum.PET]
+    first_name = f"first_name{num}"
+    last_name = f"last_name{num}"
+    email = f"email{num}"
+    auth_user_id = f'1234brand{num}'
+    bio = f"bio{num}"
+    website = f"website{num}"
+    insta_handle = f"instahandle{num}"
+    audience_age_13_to_17_split = 0.14
+    audience_age_18_to_24_split = 0.14
+    audience_age_25_to_34_split = 0.14
+    audience_age_35_to_44_split = 0.14
+    audience_age_45_to_54_split = 0.14
+    audience_age_55_to_64_split = 0.15
+    audience_age_65_plus_split = 0.15
+    audience_male_split = 0.75
+    audience_female_split = 0.25
+    if repo == RepoEnum.STD_REPO:
+        first_name = ''
+        last_name = ''
+        email = ''
+    if repo == RepoEnum.AUTH_REPO:
+        values = []
+        categories = []
+        auth_user_id = ''
+        bio = ""
+        website = ""
+        insta_handle = ""
+        audience_age_13_to_17_split = 0.0
+        audience_age_18_to_24_split = 0.0
+        audience_age_25_to_34_split = 0.0
+        audience_age_35_to_44_split = 0.0
+        audience_age_45_to_54_split = 0.0
+        audience_age_55_to_64_split = 0.0
+        audience_age_65_plus_split = 0.0
+        audience_male_split = 0.0
+        audience_female_split = 0.0
     return Influencer(
-        first_name=f"first_name{num}",
-        last_name=f"last_name{num}",
-        email=f"email{num}",
-        auth_user_id=f'1234brand{num}',
-        bio=f"bio{num}",
-        website=f"website{num}",
-        insta_handle=f"instahandle{num}",
+        first_name=first_name,
+        last_name=last_name,
+        email=email,
+        auth_user_id=auth_user_id,
+        bio=bio,
+        website=website,
+        insta_handle=insta_handle,
         values=values,
         categories=categories,
-        audience_age_13_to_17_split=0.14,
-        audience_age_18_to_24_split=0.14,
-        audience_age_25_to_34_split=0.14,
-        audience_age_35_to_44_split=0.14,
-        audience_age_45_to_54_split=0.14,
-        audience_age_55_to_64_split=0.15,
-        audience_age_65_plus_split=0.15,
-        audience_male_split=0.75,
-        audience_female_split=0.25
+        audience_age_13_to_17_split=audience_age_13_to_17_split,
+        audience_age_18_to_24_split=audience_age_18_to_24_split,
+        audience_age_25_to_34_split=audience_age_25_to_34_split,
+        audience_age_35_to_44_split=audience_age_35_to_44_split,
+        audience_age_45_to_54_split=audience_age_45_to_54_split,
+        audience_age_55_to_64_split=audience_age_55_to_64_split,
+        audience_age_65_plus_split=audience_age_65_plus_split,
+        audience_male_split=audience_male_split,
+        audience_female_split=audience_female_split
     )
 
 
