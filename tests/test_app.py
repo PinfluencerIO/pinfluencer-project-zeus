@@ -44,21 +44,21 @@ class TestRoutes(TestCase):
 
     def test_get_all_brands(self):
         self.__assert_service_endpoint_200(expected_body="""{"allBrands": "some_all_brands_value"}""",
-                                           brand_function="get_all",
+                                           service_function="get_all",
                                            actual_body={"all_brands": "some_all_brands_value"},
                                            route_key="GET /brands",
                                            service_name="get_new_brand_controller")
 
     def test_get_all_empty_list(self):
         self.__assert_service_endpoint_200(expected_body="""[]""",
-                                           brand_function="get_all",
+                                           service_function="get_all",
                                            actual_body=[],
                                            route_key="GET /brands",
                                            service_name="get_new_brand_controller")
 
     def test_get_brand_by_id(self):
         self.__assert_service_endpoint_200(expected_body="""{"brandById": "some_brand_by_id_value"}""",
-                                           brand_function="get_by_id",
+                                           service_function="get_by_id",
                                            actual_body={"brand_by_id": "some_brand_by_id_value"},
                                            route_key="GET /brands/{brand_id}",
                                            service_name="get_new_brand_controller")
@@ -70,42 +70,42 @@ class TestRoutes(TestCase):
 
     def test_get_influencer_by_id(self):
         self.__assert_service_endpoint_200(expected_body="""{"getInfluencerById": "some_influencer_by_id_value"}""",
-                                           brand_function="get",
+                                           service_function="get_by_id",
                                            actual_body={"get_influencer_by_id": "some_influencer_by_id_value"},
                                            route_key="GET /influencers/{influencer_id}",
                                            service_name="get_new_influencer_controller")
 
     def test_get_auth_brand(self):
         self.__assert_service_endpoint_200(expected_body="""{"getBrandMe": "some_brand_auth_value"}""",
-                                           brand_function="get",
+                                           service_function="get",
                                            actual_body={"get_brand_me": "some_brand_auth_value"},
                                            route_key="GET /brands/me",
                                            service_name="get_new_brand_controller")
 
     def test_create_auth_brand(self):
         self.__assert_service_endpoint_200(expected_body="""{"createBrandMe": "some_brand_auth_value"}""",
-                                           brand_function="create",
+                                           service_function="create",
                                            actual_body={"create_brand_me": "some_brand_auth_value"},
                                            route_key="POST /brands/me",
                                            service_name="get_new_brand_controller")
 
     def test_update_auth_brand(self):
         self.__assert_service_endpoint_200(expected_body="""{"updateBrandMe": "some_brand_auth_value"}""",
-                                           brand_function="update",
+                                           service_function="update",
                                            actual_body={"update_brand_me": "some_brand_auth_value"},
                                            route_key="PUT /brands/me",
                                            service_name="get_new_brand_controller")
 
     def test_create_or_replace_auth_brand_header_image(self):
         self.__assert_service_endpoint_200(expected_body="""{"updateBrandMeHeaderImage": "some_brand_auth_value"}""",
-                                           brand_function="update_header_image",
+                                           service_function="update_header_image",
                                            actual_body={"update_brand_me_header_image": "some_brand_auth_value"},
                                            route_key="POST /brands/me/header_image",
                                            service_name="get_new_brand_controller")
 
     def test_create_or_replace_auth_brand_logo(self):
         self.__assert_service_endpoint_200(expected_body="""{"updateBrandMeLogo": "some_brand_auth_value"}""",
-                                           brand_function="update_logo",
+                                           service_function="update_logo",
                                            actual_body={"update_brand_me_logo": "some_brand_auth_value"},
                                            route_key="POST /brands/me/logo",
                                            service_name="get_new_brand_controller")
@@ -172,10 +172,10 @@ class TestRoutes(TestCase):
                                       expected_body: str,
                                       actual_body: Union[dict, list],
                                       route_key: str,
-                                      brand_function: str,
+                                      service_function: str,
                                       service_name: str):
         service = Mock()
-        setattr(service, brand_function, MagicMock(return_value=PinfluencerResponse(body=actual_body)))
+        setattr(service, service_function, MagicMock(return_value=PinfluencerResponse(body=actual_body)))
         setattr(self.__mock_service_locator, service_name, MagicMock(return_value=service))
         response = bootstrap(event={"routeKey": route_key},
                              context={},
