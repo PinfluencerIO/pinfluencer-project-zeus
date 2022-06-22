@@ -29,7 +29,8 @@ class BaseSqlAlchemyRepository:
         create_mappings(mapper=self._object_mapper)
 
     def load_collection(self) -> list[Model]:
-        return list(map(lambda x: self._object_mapper.map(from_obj=x, to_type=self._resource_dto), self._data_manager.session.query(self._resource_entity).all()))
+        return list(map(lambda x: self._object_mapper.map(from_obj=x, to_type=self._resource_dto),
+                        self._data_manager.session.query(self._resource_entity).all()))
 
     def load_by_id(self, id_) -> Model:
         entity = self._data_manager.session.query(self._resource_entity).filter(self._resource_entity.id == id_).first()
@@ -86,10 +87,11 @@ class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):
             print(f'setting user {auth_user_id} image to {image}')
             field_setter(image, user)
             self._data_manager.session.commit()
-            print(f'Repository Event: user after image set \n{self._object_mapper.map(from_obj=user, to_type=self._resource_dto).__dict__}')
-            first = self._data_manager.session\
-                .query(self._resource_entity)\
-                .filter(self._resource_entity.auth_user_id == auth_user_id)\
+            print(
+                f'Repository Event: user after image set \n{self._object_mapper.map(from_obj=user, to_type=self._resource_dto).__dict__}')
+            first = self._data_manager.session \
+                .query(self._resource_entity) \
+                .filter(self._resource_entity.auth_user_id == auth_user_id) \
                 .first()
             return self._object_mapper.map(from_obj=first, to_type=self._resource_dto)
         else:
@@ -108,7 +110,8 @@ class SqlAlchemyBrandRepository(BaseSqlAlchemyUserRepository):
                          resource_dto=Brand)
 
     def update_for_auth_user(self, auth_user_id, payload: Brand) -> Brand:
-        entity = self._data_manager.session.query(self._resource_entity).filter(self._resource_entity.auth_user_id == auth_user_id).first()
+        entity = self._data_manager.session.query(self._resource_entity).filter(
+            self._resource_entity.auth_user_id == auth_user_id).first()
         if entity:
             entity.brand_name = payload.brand_name
             entity.brand_description = payload.brand_description
@@ -214,12 +217,18 @@ class CognitoAuthUserRepository:
 
     def get_by_id(self, _id: str) -> User:
         auth_user = self.__auth_service.get_user(username=_id)
-        first_name = next(map(lambda x: x['Value'], list(filter(lambda x: x['Name'] == 'given_name', auth_user['UserAttributes']))))
-        last_name = next(map(lambda x: x['Value'], list(filter(lambda x: x['Name'] == 'family_name', auth_user['UserAttributes']))))
-        email = next(map(lambda x: x['Value'], list(filter(lambda x: x['Name'] == 'email', auth_user['UserAttributes']))))
+        first_name = self.__get_cognito_attribute(user=auth_user,
+                                                  attribute_name='given_name')
+        last_name = self.__get_cognito_attribute(user=auth_user,
+                                                 attribute_name='family_name')
+        email = self.__get_cognito_attribute(user=auth_user,
+                                             attribute_name='email')
         return UserModel(first_name=first_name,
-                    last_name=last_name,
-                    email=email)
+                         last_name=last_name,
+                         email=email)
+
+    def __get_cognito_attribute(self, user: dict, attribute_name: str) -> str:
+        return next(filter(lambda x: x['Name'] == attribute_name, user['UserAttributes']))['Value']
 
     def update_brand_claims(self, user: Brand):
         self.__update_user_claims(user=user, type='brand')
