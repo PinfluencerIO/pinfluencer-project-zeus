@@ -10,6 +10,7 @@ from filetype import filetype
 
 from src.data.entities import SqlAlchemyBrandEntity, SqlAlchemyInfluencerEntity, create_mappings
 from src.domain.models import Brand, Influencer
+from src.domain.models import User as UserModel
 from src.exceptions import AlreadyExistsException, ImageException, NotFoundException
 from src.types import DataManager, ImageRepository, Model, User, ObjectMapperAdapter
 
@@ -212,7 +213,13 @@ class CognitoAuthUserRepository:
         self.__auth_service = auth_service
 
     def get_by_id(self, _id: str) -> User:
-        return User()
+        auth_user = self.__auth_service.get_user(username=_id)
+        first_name = next(map(lambda x: x['Value'], list(filter(lambda x: x['Name'] == 'given_name', auth_user['UserAttributes']))))
+        last_name = next(map(lambda x: x['Value'], list(filter(lambda x: x['Name'] == 'family_name', auth_user['UserAttributes']))))
+        email = next(map(lambda x: x['Value'], list(filter(lambda x: x['Name'] == 'email', auth_user['UserAttributes']))))
+        return UserModel(first_name=first_name,
+                    last_name=last_name,
+                    email=email)
 
     def update_brand_claims(self, user: Brand):
         self.__update_user_claims(user=user, type='brand')
