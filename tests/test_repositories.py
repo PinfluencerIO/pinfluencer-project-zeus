@@ -221,3 +221,27 @@ class TestAuthUserRepository(TestCase):
         actual_attributes = sorted(actual_attributes, key=lambda d: d['Name'])
         expected_attributes = sorted(expected_attributes, key=lambda d: d['Name'])
         self.assertListEqual(expected_attributes, actual_attributes)
+
+    def test_get_user_by_id(self):
+        expected_brand = brand_dto_generator(num=1)
+        self.__auth_user_service.get_user = MagicMock(return_value={
+            'Username': expected_brand.auth_user_id,
+            'UserAttributes': [
+                {
+                    'Name': 'given_name',
+                    'Value': expected_brand.first_name
+                },
+                {
+                    'Name': 'family_name',
+                    'Value': expected_brand.last_name
+                },
+                {
+                    'Name': 'email',
+                    'Value': expected_brand.email
+                }
+            ]
+        })
+        actual_brand = self.__sut.get_by_id(_id=expected_brand.auth_user_id)
+        assert actual_brand.first_name == expected_brand.first_name
+        assert actual_brand.last_name == expected_brand.last_name
+        assert actual_brand.email == expected_brand.email
