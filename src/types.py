@@ -11,7 +11,7 @@ class AuthUserRepository(Protocol):
     def update_influencer_claims(self, user: Influencer) -> None:
         ...
 
-    def get_user_claims_by_id(self, auth_user_id: str) -> User:
+    def get_by_id(self, _id: str) -> User:
         ...
 
 

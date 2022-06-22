@@ -211,7 +211,7 @@ class CognitoAuthUserRepository:
     def __init__(self, auth_service: CognitoAuthService):
         self.__auth_service = auth_service
 
-    def get_user_claims_by_id(self, auth_user_id: str) -> User:
+    def get_by_id(self, _id: str) -> User:
         return User()
 
     def update_brand_claims(self, user: Brand):
