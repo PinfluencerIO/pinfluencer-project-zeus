@@ -189,12 +189,20 @@ class S3ImageRepository:
 
 class CognitoAuthService:
 
+    def __init__(self):
+        self.__client = boto3.client('cognito-idp')
+
     def update_user_claims(self, username: str, attributes: list[dict]) -> None:
-        client = boto3.client('cognito-idp')
-        client.admin_update_user_attributes(
+        self.__client.admin_update_user_attributes(
             UserPoolId=os.environ["USER_POOL_ID"],
             Username=username,
             UserAttributes=attributes
+        )
+
+    def get_user(self, username: str) -> dict:
+        return self.__client.admin_get_user(
+            UserPoolId='string',
+            Username='string'
         )
 
 
@@ -202,6 +210,9 @@ class CognitoAuthUserRepository:
 
     def __init__(self, auth_service: CognitoAuthService):
         self.__auth_service = auth_service
+
+    def get_user_claims_by_id(self, auth_user_id: str) -> User:
+        return User()
 
     def update_brand_claims(self, user: Brand):
         self.__update_user_claims(user=user, type='brand')
