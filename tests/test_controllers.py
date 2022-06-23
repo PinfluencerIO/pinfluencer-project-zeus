@@ -38,7 +38,7 @@ def update_brand_payload():
     }
 
 
-def create_user_dto():
+def update_user_dto():
     return User(first_name="first_name",
                 last_name="last_name",
                 email="email@gmail.com")
@@ -64,6 +64,18 @@ def update_image_payload():
 
 
 def update_brand_return_dto():
+    return Brand(first_name="",
+                 last_name="",
+                 email="",
+                 brand_name="name",
+                 brand_description="description",
+                 website="https://website.com",
+                 insta_handle="instahandle",
+                 values=[ValueEnum.VALUE7, ValueEnum.VALUE8, ValueEnum.VALUE9],
+                 categories=[CategoryEnum.CATEGORY7, CategoryEnum.CATEGORY6, CategoryEnum.CATEGORY5])
+
+
+def update_brand_expected_dto():
     return Brand(first_name="first_name",
                  last_name="last_name",
                  email="email@gmail.com",
@@ -252,11 +264,16 @@ class TestBrandController(TestCase):
         assert response.body == {}
 
     def test_update(self):
+        auth_user = update_user_dto()
         expected_payload = update_brand_payload()
-        expected_payload_dto = update_brand_return_dto()
+        brand_in_db = update_brand_return_dto()
+        expected_dto = update_brand_expected_dto()
+        expected_dto.id = brand_in_db.id
+        expected_dto.created = brand_in_db.created
         auth_id = "12341"
         event = create_brand_for_auth_user_event(auth_id=auth_id, payload=update_brand_payload())
-        self.__brand_repository.update_for_auth_user = MagicMock(return_value=expected_payload_dto)
+        self.__brand_repository.update_for_auth_user = MagicMock(return_value=brand_in_db)
+        self.__auth_user_repo.get_by_id = MagicMock(return_value=auth_user)
         response = self.__sut.update(event=event)
         payload_captor = Captor()
         self.__brand_repository.update_for_auth_user.assert_called_once_with(auth_user_id=auth_id,
@@ -267,7 +284,7 @@ class TestBrandController(TestCase):
         assert list(map(lambda x: x.name, actual_payload.values)) == expected_payload['values']
         assert list(map(lambda x: x.name, actual_payload.categories)) == expected_payload['categories']
         assert response.status_code == 200
-        assert response.body == expected_payload_dto.__dict__
+        assert response.body == expected_dto.__dict__
 
     def test_update_when_invalid_payload(self):
         auth_id = "12341"
