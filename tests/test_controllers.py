@@ -12,7 +12,8 @@ from src.types import BrandRepository, InfluencerRepository, AuthUserRepository
 from src.web.controllers import BrandController, InfluencerController
 from src.web.validation import valid_uuid
 from tests import brand_dto_generator, assert_brand_updatable_fields_are_equal, TEST_DEFAULT_BRAND_LOGO, \
-    TEST_DEFAULT_BRAND_HEADER_IMAGE, influencer_dto_generator, RepoEnum, user_dto_generator
+    TEST_DEFAULT_BRAND_HEADER_IMAGE, influencer_dto_generator, RepoEnum, user_dto_generator, \
+    assert_brand_creatable_generated_fields_are_equal
 
 
 def get_brand_id_event(brand_id):
@@ -195,9 +196,7 @@ class TestBrandController(TestCase):
         assert valid_uuid(actual_payload.id)
         assert actual_payload.logo == TEST_DEFAULT_BRAND_LOGO
         assert actual_payload.header_image == TEST_DEFAULT_BRAND_HEADER_IMAGE
-        assert_brand_updatable_fields_are_equal(actual_payload.__dict__, expected_payload)
-        assert list(map(lambda x: x.name, actual_payload.values)) == expected_payload['values']
-        assert list(map(lambda x: x.name, actual_payload.categories)) == expected_payload['categories']
+        assert_brand_creatable_generated_fields_are_equal(expected_payload, actual_payload.__dict__)
         assert response.status_code == 201
         assert response.body == actual_payload.__dict__
 

@@ -191,6 +191,28 @@ class StubDataManager:
         return Mock()
 
 
+def assert_brand_user_generated_fields_are_equal(brand1, brand2):
+    brand1.pop("id")
+    brand2.pop("id")
+    brand1.pop("created")
+    brand2.pop("created")
+    assert brand1 == brand2
+
+
+def assert_brand_creatable_generated_fields_are_equal(brand1, brand2):
+    brand2.pop("id")
+    brand2.pop("created")
+    brand2.pop("auth_user_id")
+    brand2.pop("logo")
+    brand2.pop("header_image")
+    brand2["categories"] = list(map(lambda x: x.name, brand2["categories"]))
+    brand2["values"] = list(map(lambda x: x.name, brand2["values"]))
+    print("")
+    print(brand1)
+    print(brand2)
+    assert brand1 == brand2
+
+
 def assert_brand_updatable_fields_are_equal(brand1, brand2):
     for field in brand_brand_updatable_fields():
         assert brand1[field] == brand2[field]
