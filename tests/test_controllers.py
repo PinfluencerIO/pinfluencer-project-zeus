@@ -8,7 +8,7 @@ from src.crosscutting import JsonSnakeToCamelSerializer, JsonCamelToSnakeCaseDes
 from src.domain.models import Brand, ValueEnum, CategoryEnum
 from src.domain.validation import BrandValidator
 from src.exceptions import AlreadyExistsException, NotFoundException
-from src.types import BrandRepository, InfluencerRepository
+from src.types import BrandRepository, InfluencerRepository, AuthUserRepository
 from src.web.controllers import BrandController, InfluencerController
 from src.web.validation import valid_uuid
 from tests import brand_dto_generator, assert_brand_updatable_fields_are_equal, TEST_DEFAULT_BRAND_LOGO, \
@@ -66,8 +66,10 @@ class TestInfluencerController(TestCase):
 
     def setUp(self):
         self.__influencer_repository: InfluencerRepository = Mock()
+        self.__auth_user_repo: AuthUserRepository = Mock()
         self.__sut = InfluencerController(influencer_repository=self.__influencer_repository,
-                                          deserializer=JsonCamelToSnakeCaseDeserializer())
+                                          deserializer=JsonCamelToSnakeCaseDeserializer(),
+                                          auth_user_repository=self.__auth_user_repo)
 
     def test_get_by_id(self):
         influencer = influencer_dto_generator(num=1)
@@ -82,9 +84,11 @@ class TestBrandController(TestCase):
     def setUp(self):
         self.__brand_repository: BrandRepository = Mock()
         self.__brand_validator = BrandValidator()
+        self.__auth_user_repo = Mock()
         self.__sut = BrandController(brand_repository=self.__brand_repository,
                                      brand_validator=self.__brand_validator,
-                                     deserializer=JsonCamelToSnakeCaseDeserializer())
+                                     deserializer=JsonCamelToSnakeCaseDeserializer(),
+                                     auth_user_repository=self.__auth_user_repo)
 
     def test_get_by_id(self):
         brand = brand_dto_generator(num=1)

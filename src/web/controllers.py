@@ -5,7 +5,8 @@ from jsonschema.exceptions import ValidationError
 from src.crosscutting import print_exception
 from src.domain.models import ValueEnum, CategoryEnum, Brand
 from src.exceptions import AlreadyExistsException, NotFoundException
-from src.types import BrandRepository, Deserializer, BrandValidatable, UserRepository, InfluencerRepository
+from src.types import BrandRepository, Deserializer, BrandValidatable, UserRepository, InfluencerRepository, \
+    AuthUserRepository
 from src.web import PinfluencerResponse, get_cognito_user, BRAND_ID_PATH_KEY
 from src.web.validation import valid_path_resource_id
 
@@ -13,7 +14,9 @@ from src.web.validation import valid_path_resource_id
 class BaseUserController:
 
     def __init__(self, deserializer: Deserializer,
-                 user_repository: UserRepository):
+                 user_repository: UserRepository,
+                 auth_user_repository: AuthUserRepository):
+        self.__auth_user_repository = auth_user_repository
         self.__user_repository = user_repository
         self._deserializer = deserializer
 
@@ -58,8 +61,9 @@ class BaseUserController:
 class BrandController(BaseUserController):
     def __init__(self, brand_repository: BrandRepository,
                  brand_validator: BrandValidatable,
-                 deserializer: Deserializer):
-        super().__init__(deserializer, brand_repository)
+                 deserializer: Deserializer,
+                 auth_user_repository: AuthUserRepository):
+        super().__init__(deserializer, brand_repository, auth_user_repository)
         self.__brand_validator = brand_validator
         self.__brand_repository = brand_repository
 
@@ -123,8 +127,9 @@ class BrandController(BaseUserController):
 class InfluencerController(BaseUserController):
 
     def __init__(self, deserializer: Deserializer,
-                 influencer_repository: InfluencerRepository):
-        super().__init__(deserializer, influencer_repository)
+                 influencer_repository: InfluencerRepository,
+                 auth_user_repository: AuthUserRepository):
+        super().__init__(deserializer, influencer_repository, auth_user_repository)
 
     def create(self, event) -> PinfluencerResponse:
         ...
