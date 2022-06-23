@@ -117,6 +117,10 @@ class BrandController(BaseUserController):
                           values=list(map(lambda x: ValueEnum[x], payload_dict["values"])),
                           categories=list(map(lambda x: CategoryEnum[x], payload_dict["categories"])))
             brand_to_return = self._user_repository.update_for_auth_user(auth_user_id=auth_user_id, payload=brand)
+            auth_user = self._auth_user_repository.get_by_id(_id=brand.auth_user_id)
+            brand_to_return.first_name = auth_user.first_name
+            brand_to_return.last_name = auth_user.last_name
+            brand_to_return.email = auth_user.email
             return PinfluencerResponse(status_code=200, body=brand_to_return.__dict__)
         except ValidationError as e:
             print_exception(e)
