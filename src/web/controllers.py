@@ -33,8 +33,13 @@ class BaseUserController:
             return PinfluencerResponse(status_code=404, body={})
 
     def get_all(self, event) -> PinfluencerResponse:
-        return PinfluencerResponse(status_code=200, body=list(map(lambda x: x.__dict__,
-                                                                  self.__user_repository.load_collection())))
+        brands = self.__user_repository.load_collection()
+        for brand in brands:
+            user = self.__auth_user_repository.get_by_id(_id=brand.auth_user_id)
+            brand.first_name = user.first_name
+            brand.last_name = user.last_name
+            brand.email = user.email
+        return PinfluencerResponse(status_code=200, body=list(map(lambda x: x.__dict__, brands)))
 
     def get_by_id(self, event) -> PinfluencerResponse:
         id_ = valid_path_resource_id(event, BRAND_ID_PATH_KEY)
