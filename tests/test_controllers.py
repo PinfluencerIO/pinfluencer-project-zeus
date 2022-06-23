@@ -162,10 +162,15 @@ class TestBrandController(TestCase):
 
     def test_get(self):
         expected_brand = brand_dto_generator(num=1)
-        self.__brand_repository.load_for_auth_user = MagicMock(return_value=expected_brand)
+        db_brand = brand_dto_generator(num=1, repo=RepoEnum.STD_REPO)
+        expected_brand.id = db_brand.id
+        auth_user = user_dto_generator(num=1)
+        self.__brand_repository.load_for_auth_user = MagicMock(return_value=db_brand)
+        self.__auth_user_repo.get_by_id = MagicMock(return_value=auth_user)
         auth_id = "12341"
         response = self.__sut.get(get_auth_user_event(auth_id))
         self.__brand_repository.load_for_auth_user.assert_called_once_with(auth_user_id=auth_id)
+        self.__auth_user_repo.get_by_id.assert_called_once_with(_id=auth_id)
         assert response.body == expected_brand.__dict__
         assert response.status_code == 200
 
