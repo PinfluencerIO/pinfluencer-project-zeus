@@ -165,12 +165,16 @@ class TestBrandController(TestCase):
 
         expected_brand1 = brand_dto_generator(num=1)
         expected_brand1.id = brands_from_db[0].id
+        expected_brand1.created = brands_from_db[0].created
         expected_brand2 = brand_dto_generator(num=2)
         expected_brand2.id = brands_from_db[1].id
+        expected_brand2.created = brands_from_db[1].created
         expected_brand3 = brand_dto_generator(num=3)
         expected_brand3.id = brands_from_db[2].id
+        expected_brand3.created = brands_from_db[2].created
         expected_brand4 = brand_dto_generator(num=4)
         expected_brand4.id = brands_from_db[3].id
+        expected_brand4.created = brands_from_db[3].created
         expected_brands = [
             expected_brand1,
             expected_brand2,
