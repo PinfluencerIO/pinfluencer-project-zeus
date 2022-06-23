@@ -60,7 +60,7 @@ class TestUserRepository(BrandRepositoryTestCase):
 
     def test_write_new_for_auth_user(self):
         expected = brand_dto_generator(num=1)
-        returned_user = self._sut.write_new_for_auth_user(auth_user_id="1234brand1",
+        returned_user = self._sut.write_new_for_auth_user(auth_user_id="12341",
                                           payload=expected)
         actual = self._sut.load_by_id(id_=expected.id)
         assert_brand_db_fields_are_equal_for_three(brand1=actual.__dict__, brand2=expected.__dict__, brand3=returned_user.__dict__)
@@ -80,7 +80,7 @@ class TestBrandRepository(BrandRepositoryTestCase):
 
     def test_write_new_for_auth_user(self):
         expected = brand_dto_generator(num=1)
-        self._sut.write_new_for_auth_user(auth_user_id="1234brand1",
+        self._sut.write_new_for_auth_user(auth_user_id="12341",
                                           payload=expected)
         actual = self._sut.load_by_id(id_=expected.id)
         assert actual.logo == TEST_DEFAULT_BRAND_LOGO
