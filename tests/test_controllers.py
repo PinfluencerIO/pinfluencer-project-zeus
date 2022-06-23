@@ -5,7 +5,7 @@ from unittest.mock import Mock, MagicMock, call
 from callee import Captor
 
 from src.crosscutting import JsonSnakeToCamelSerializer, JsonCamelToSnakeCaseDeserializer
-from src.domain.models import Brand, ValueEnum, CategoryEnum
+from src.domain.models import Brand, ValueEnum, CategoryEnum, User
 from src.domain.validation import BrandValidator
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.types import BrandRepository, InfluencerRepository, AuthUserRepository
@@ -36,6 +36,23 @@ def update_brand_payload():
         "values": ["VALUE7", "VALUE8", "VALUE9"],
         "categories": ["CATEGORY7", "CATEGORY6", "CATEGORY5"]
     }
+
+def create_user_dto():
+    return User(first_name="first_name",
+                 last_name="last_name",
+                 email="email@gmail.com")
+
+def create_brand_dto():
+    return Brand(first_name="",
+                 last_name="",
+                 email="",
+                 brand_name="name",
+                 brand_description="description",
+                 website="https://website.com",
+                 insta_handle="instahandle",
+                 values=[ValueEnum.VALUE7, ValueEnum.VALUE8, ValueEnum.VALUE9],
+                 categories=[CategoryEnum.CATEGORY7, CategoryEnum.CATEGORY6, CategoryEnum.CATEGORY5],
+                 auth_user_id="1234")
 
 
 def update_image_payload():
@@ -79,6 +96,8 @@ class TestInfluencerController(TestCase):
         self.__influencer_repository.load_by_id.assert_called_once_with(id_=influencer.id)
         assert pinfluencer_response.body == influencer.__dict__
         assert pinfluencer_response.is_ok() is True
+
+
 
 class TestBrandController(TestCase):
 
@@ -184,12 +203,23 @@ class TestBrandController(TestCase):
         assert response.status_code == 404
 
     def test_create(self):
+        brand_db = create_brand_dto()
         expected_payload = update_brand_payload()
+        expected_brand = brand_dto_generator(num=1)
+        expected_brand.id = brand_db.id
+        expected_brand.created = brand_db.created
         auth_id = "12341"
         event = create_brand_for_auth_user_event(auth_id=auth_id, payload=update_brand_payload())
-        self.__brand_repository.write_new_for_auth_user = MagicMock()
+        self.__brand_repository.write_new_for_auth_user = MagicMock(return_value=brand_db)
+        self.__auth_user_repo.update_brand_claims = MagicMock()
         response = self.__sut.create(event=event)
         payload_captor = Captor()
+        auth_payload_captor = Captor()
+        self.__auth_user_repo.update_brand_claims.assert_called_once_with(user=auth_payload_captor)
+        auth_payload = auth_payload_captor.arg
+        assert auth_payload.first_name == update_brand_payload()['first_name']
+        assert auth_payload.last_name == update_brand_payload()['last_name']
+        assert auth_payload.email == update_brand_payload()['email']
         self.__brand_repository.write_new_for_auth_user.assert_called_once_with(auth_user_id=auth_id,
                                                                                 payload=payload_captor)
         actual_payload = payload_captor.arg
@@ -199,6 +229,7 @@ class TestBrandController(TestCase):
         assert_brand_creatable_generated_fields_are_equal(expected_payload, actual_payload.__dict__)
         assert response.status_code == 201
         assert response.body == actual_payload.__dict__
+        print(response.body)
 
     def test_create_when_exists(self):
         auth_id = "12341"
