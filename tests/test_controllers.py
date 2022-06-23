@@ -1,6 +1,6 @@
 import uuid
 from unittest import TestCase
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock, MagicMock, call
 
 from callee import Captor
 
@@ -121,15 +121,42 @@ class TestBrandController(TestCase):
         assert pinfluencer_response.status_code == 400
 
     def test_get_all(self):
-        expected_brands = [
-            brand_dto_generator(num=1),
-            brand_dto_generator(num=2),
-            brand_dto_generator(num=3),
-            brand_dto_generator(num=4)
+        brands_from_db = [
+            brand_dto_generator(num=1, repo=RepoEnum.STD_REPO),
+            brand_dto_generator(num=2, repo=RepoEnum.STD_REPO),
+            brand_dto_generator(num=3, repo=RepoEnum.STD_REPO),
+            brand_dto_generator(num=4, repo=RepoEnum.STD_REPO)
         ]
-        self.__brand_repository.load_collection = MagicMock(return_value=expected_brands)
+
+        expected_brand1 = brand_dto_generator(num=1)
+        expected_brand1.id = brands_from_db[0].id
+        expected_brand2 = brand_dto_generator(num=2)
+        expected_brand2.id = brands_from_db[1].id
+        expected_brand3 = brand_dto_generator(num=3)
+        expected_brand3.id = brands_from_db[2].id
+        expected_brand4 = brand_dto_generator(num=4)
+        expected_brand4.id = brands_from_db[3].id
+        expected_brands = [
+            expected_brand1,
+            expected_brand2,
+            expected_brand3,
+            expected_brand4
+        ]
+        self.__brand_repository.load_collection = MagicMock(return_value=brands_from_db)
+        self.__auth_user_repo.get_by_id = MagicMock(side_effect=[
+            user_dto_generator(num=1),
+            user_dto_generator(num=2),
+            user_dto_generator(num=3),
+            user_dto_generator(num=4)
+        ])
         pinfluencer_response = self.__sut.get_all({})
         self.__brand_repository.load_collection.assert_called_once()
+        self.__auth_user_repo.get_by_id.assert_has_calls(calls=[
+            call(_id=expected_brand1.auth_user_id),
+            call(_id=expected_brand2.auth_user_id),
+            call(_id=expected_brand3.auth_user_id),
+            call(_id=expected_brand4.auth_user_id)
+        ], any_order=True)
         assert pinfluencer_response.body == list(map(lambda x: x.__dict__, expected_brands))
         assert pinfluencer_response.status_code == 200
 
