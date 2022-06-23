@@ -1,3 +1,9 @@
+COGNITO-USER:
+    firstName:                  str
+    lastName:                   str
+    email:                      str
+    onboarded:                  string allowed-values{null, "influencer", "brand"}
+
 ONBOARDING-BRAND:
 
     -- shared --
