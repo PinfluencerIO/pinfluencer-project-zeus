@@ -92,12 +92,14 @@ class TestInfluencerController(TestCase):
                                           auth_user_repository=self.__auth_user_repo)
 
     def test_get_by_id(self):
+        auth_user = user_dto_generator(num=1)
+        influencer_in_db = influencer_dto_generator(num=1, repo=RepoEnum.STD_REPO)
         influencer = influencer_dto_generator(num=1)
-        self.__influencer_repository.load_by_id = MagicMock(return_value=influencer)
+        influencer.id = influencer_in_db.id
+        self.__influencer_repository.load_by_id = MagicMock(return_value=influencer_in_db)
+        self.__auth_user_repo.get_by_id = MagicMock(return_value=auth_user)
         pinfluencer_response = self.__sut.get_by_id(get_brand_id_event(influencer.id))
-        self.__influencer_repository.load_by_id.assert_called_once_with(id_=influencer.id)
         assert pinfluencer_response.body == influencer.__dict__
-        assert pinfluencer_response.is_ok() is True
 
 
 class TestBrandController(TestCase):
