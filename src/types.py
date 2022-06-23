@@ -15,21 +15,6 @@ class AuthUserRepository(Protocol):
         ...
 
 
-class UserRepository(Protocol):
-
-    def load_collection(self) -> list[User]:
-        ...
-
-    def load_by_id(self, id_: str) -> User:
-        ...
-
-    def write_new_for_auth_user(self, auth_user_id: str, payload: User) -> User:
-        ...
-
-    def load_for_auth_user(self, auth_user_id: str) -> User:
-        ...
-
-
 class BrandRepository(Protocol):
 
     def load_collection(self) -> list[Brand]:
@@ -73,6 +58,9 @@ class InfluencerRepository(Protocol):
 
     def update_image_for_auth_user(self, auth_user_id: str, image_bytes: str) -> Influencer:
         ...
+
+
+UserRepository = Union[BrandRepository, InfluencerRepository]
 
 
 class InfluencerValidatable(Protocol):
