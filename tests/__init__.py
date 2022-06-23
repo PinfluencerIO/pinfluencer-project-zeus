@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 
 from src.data import Base
 from src.data.entities import SqlAlchemyBrandEntity, SqlAlchemyBaseEntity
-from src.domain.models import Brand, Influencer, ValueEnum, CategoryEnum
+from src.domain.models import Brand, Influencer, ValueEnum, CategoryEnum, User
 
 TEST_DEFAULT_BRAND_LOGO = "default_brand_logo.png"
 TEST_DEFAULT_BRAND_HEADER_IMAGE = "default_brand_header_image.png"
@@ -42,6 +42,12 @@ class RepoEnum(Enum):
     AUTH_REPO = 'AUTH_REPO'
 
 
+def user_dto_generator(num: int) -> User:
+    return User(first_name=f"first_name{num}",
+                last_name=f"first_name{num}",
+                email=f"email{num}",
+                auth_user_id=f"1234{num}")
+
 def brand_dto_generator(num, repo: RepoEnum=RepoEnum.NO_REPO):
     if num == 1:
         values = [ValueEnum.VALUE5, ValueEnum.VALUE6, ValueEnum.VALUE7]
@@ -56,7 +62,7 @@ def brand_dto_generator(num, repo: RepoEnum=RepoEnum.NO_REPO):
     first_name = f"first_name{num}"
     last_name = f"last_name{num}"
     email = f"email{num}"
-    auth_user_id = f'1234brand{num}'
+    auth_user_id = f'1234{num}'
     brand_name = f"name{num}"
     brand_description = f"description{num}"
     website = f"website{num}"
@@ -100,7 +106,7 @@ def influencer_dto_generator(num, repo: RepoEnum=RepoEnum.NO_REPO):
     first_name = f"first_name{num}"
     last_name = f"last_name{num}"
     email = f"email{num}"
-    auth_user_id = f'1234brand{num}'
+    auth_user_id = f'1234{num}'
     bio = f"bio{num}"
     website = f"website{num}"
     insta_handle = f"instahandle{num}"

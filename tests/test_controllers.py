@@ -12,7 +12,7 @@ from src.types import BrandRepository, InfluencerRepository, AuthUserRepository
 from src.web.controllers import BrandController, InfluencerController
 from src.web.validation import valid_uuid
 from tests import brand_dto_generator, assert_brand_updatable_fields_are_equal, TEST_DEFAULT_BRAND_LOGO, \
-    TEST_DEFAULT_BRAND_HEADER_IMAGE, influencer_dto_generator
+    TEST_DEFAULT_BRAND_HEADER_IMAGE, influencer_dto_generator, RepoEnum, user_dto_generator
 
 
 def get_brand_id_event(brand_id):
@@ -84,18 +84,22 @@ class TestBrandController(TestCase):
     def setUp(self):
         self.__brand_repository: BrandRepository = Mock()
         self.__brand_validator = BrandValidator()
-        self.__auth_user_repo = Mock()
+        self.__auth_user_repo: AuthUserRepository = Mock()
         self.__sut = BrandController(brand_repository=self.__brand_repository,
                                      brand_validator=self.__brand_validator,
                                      deserializer=JsonCamelToSnakeCaseDeserializer(),
                                      auth_user_repository=self.__auth_user_repo)
 
     def test_get_by_id(self):
-        brand = brand_dto_generator(num=1)
-        self.__brand_repository.load_by_id = MagicMock(return_value=brand)
-        pinfluencer_response = self.__sut.get_by_id(get_brand_id_event(brand.id))
-        self.__brand_repository.load_by_id.assert_called_once_with(id_=brand.id)
-        assert pinfluencer_response.body == brand.__dict__
+        expected_brand = brand_dto_generator(num=1)
+        brand_from_db = brand_dto_generator(num=1, repo=RepoEnum.STD_REPO)
+        user_from_auth_db = user_dto_generator(num=1)
+        self.__brand_repository.load_by_id = MagicMock(return_value=brand_from_db)
+        self.__auth_user_repo.get_by_id = MagicMock(return_value=user_from_auth_db)
+        pinfluencer_response = self.__sut.get_by_id(get_brand_id_event(brand_from_db.id))
+        self.__auth_user_repo.get_by_id.assert_called_once_with(_id=brand_from_db.auth_user_id)
+        self.__brand_repository.load_by_id.assert_called_once_with(id_=brand_from_db.id)
+        assert pinfluencer_response.body == expected_brand.__dict__
         assert pinfluencer_response.is_ok() is True
 
     def test_get_by_id_when_not_found(self):
