@@ -52,11 +52,11 @@ class TestUserRepository(BrandRepositoryTestCase):
     def test_load_for_auth_user(self):
         expected = brand_dto_generator(num=1)
         self._data_manager.create_fake_data([brand_generator(expected, mapper=self._object_mapper)])
-        actual = self._sut.load_for_auth_user(auth_user_id="1234brand1")
+        actual = self._sut.load_for_auth_user(auth_user_id="12341")
         assert_brand_db_fields_are_equal(brand1=expected.__dict__, brand2=actual.__dict__)
 
     def test_load_for_auth_user_when_brand_not_found(self):
-        self.assertRaises(NotFoundException, lambda: self._sut.load_for_auth_user(auth_user_id="1234brand1"))
+        self.assertRaises(NotFoundException, lambda: self._sut.load_for_auth_user(auth_user_id="12341"))
 
     def test_write_new_for_auth_user(self):
         expected = brand_dto_generator(num=1)
@@ -70,7 +70,7 @@ class TestUserRepository(BrandRepositoryTestCase):
         brand_to_create = brand_dto_generator(num=2)
         brand_to_create.auth_user_id = expected.auth_user_id
         self._data_manager.create_fake_data([brand_generator(expected, mapper=self._object_mapper)])
-        self.assertRaises(AlreadyExistsException, lambda: self._sut.write_new_for_auth_user(auth_user_id="1234brand1",
+        self.assertRaises(AlreadyExistsException, lambda: self._sut.write_new_for_auth_user(auth_user_id="12341",
                                                                                             payload=brand_to_create))
         actual = self._sut.load_for_auth_user(auth_user_id=brand_to_create.auth_user_id)
         assert actual.__dict__ != brand_to_create.__dict__
