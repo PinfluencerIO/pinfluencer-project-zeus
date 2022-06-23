@@ -37,10 +37,12 @@ def update_brand_payload():
         "categories": ["CATEGORY7", "CATEGORY6", "CATEGORY5"]
     }
 
+
 def create_user_dto():
     return User(first_name="first_name",
-                 last_name="last_name",
-                 email="email@gmail.com")
+                last_name="last_name",
+                email="email@gmail.com")
+
 
 def create_brand_dto():
     return Brand(first_name="",
@@ -96,7 +98,6 @@ class TestInfluencerController(TestCase):
         self.__influencer_repository.load_by_id.assert_called_once_with(id_=influencer.id)
         assert pinfluencer_response.body == influencer.__dict__
         assert pinfluencer_response.is_ok() is True
-
 
 
 class TestBrandController(TestCase):
