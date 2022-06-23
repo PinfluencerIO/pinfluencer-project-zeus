@@ -40,8 +40,12 @@ class BaseUserController:
         id_ = valid_path_resource_id(event, BRAND_ID_PATH_KEY)
         if id_:
             try:
-                brand = self.__user_repository.load_by_id(id_=id_)
-                return PinfluencerResponse(status_code=200, body=brand.__dict__)
+                user = self.__user_repository.load_by_id(id_=id_)
+                auth_user = self.__auth_user_repository.get_by_id(_id=user.auth_user_id)
+                user.first_name = auth_user.first_name
+                user.last_name = auth_user.last_name
+                user.email = auth_user.email
+                return PinfluencerResponse(status_code=200, body=user.__dict__)
             except NotFoundException as e:
                 print_exception(e)
                 return PinfluencerResponse(status_code=404, body={})

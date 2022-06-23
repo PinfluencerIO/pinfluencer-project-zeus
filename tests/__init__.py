@@ -44,7 +44,7 @@ class RepoEnum(Enum):
 
 def user_dto_generator(num: int) -> User:
     return User(first_name=f"first_name{num}",
-                last_name=f"first_name{num}",
+                last_name=f"last_name{num}",
                 email=f"email{num}",
                 auth_user_id=f"1234{num}")
 

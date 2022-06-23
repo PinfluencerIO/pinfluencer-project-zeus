@@ -91,9 +91,11 @@ class TestBrandController(TestCase):
                                      auth_user_repository=self.__auth_user_repo)
 
     def test_get_by_id(self):
-        expected_brand = brand_dto_generator(num=1)
         brand_from_db = brand_dto_generator(num=1, repo=RepoEnum.STD_REPO)
         user_from_auth_db = user_dto_generator(num=1)
+        expected_brand = brand_dto_generator(num=1)
+        expected_brand.id = brand_from_db.id
+        expected_brand.created = brand_from_db.created
         self.__brand_repository.load_by_id = MagicMock(return_value=brand_from_db)
         self.__auth_user_repo.get_by_id = MagicMock(return_value=user_from_auth_db)
         pinfluencer_response = self.__sut.get_by_id(get_brand_id_event(brand_from_db.id))
