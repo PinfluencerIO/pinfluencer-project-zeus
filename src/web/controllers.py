@@ -61,6 +61,10 @@ class BaseUserController:
         if auth_user_id:
             try:
                 brand = self.__user_repository.load_for_auth_user(auth_user_id=auth_user_id)
+                user = self.__auth_user_repository.get_by_id(_id=auth_user_id)
+                brand.first_name = user.first_name
+                brand.last_name = user.last_name
+                brand.email = user.email
                 return PinfluencerResponse(status_code=200, body=brand.__dict__)
             except NotFoundException as e:
                 print_exception(e)
