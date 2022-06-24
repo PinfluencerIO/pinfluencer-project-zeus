@@ -3,7 +3,8 @@ from typing import Callable
 from jsonschema.exceptions import ValidationError
 
 from src.crosscutting import print_exception
-from src.domain.models import ValueEnum, CategoryEnum, Brand
+from src.domain.models import ValueEnum, CategoryEnum, Brand, Influencer
+from src.domain.validation import InfluencerValidator
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.types import BrandRepository, Deserializer, BrandValidatable, UserRepository, InfluencerRepository, \
     AuthUserRepository
@@ -147,11 +148,41 @@ class InfluencerController(BaseUserController):
 
     def __init__(self, deserializer: Deserializer,
                  influencer_repository: InfluencerRepository,
-                 auth_user_repository: AuthUserRepository):
+                 auth_user_repository: AuthUserRepository,
+                 influencer_validator: InfluencerValidator):
         super().__init__(deserializer, influencer_repository, auth_user_repository)
+        self.__influencer_validator = influencer_validator
 
     def create(self, event: dict) -> PinfluencerResponse:
-        ...
+        auth_user_id = get_cognito_user(event)
+        payload_json_string = event['body']
+        payload_dict = self._deserializer.deserialize(payload_json_string)
+        try:
+            self.__influencer_validator.validate_influencer(payload=payload_dict)
+            influencer = Influencer(first_name=payload_dict["first_name"],
+                                    last_name=payload_dict["last_name"],
+                                    email=payload_dict["email"],
+                                    bio=payload_dict["bio"],
+                                    website=payload_dict["website"],
+                                    insta_handle=payload_dict["insta_handle"],
+                                    values=list(map(lambda x: ValueEnum[x], payload_dict["values"])),
+                                    categories=list(map(lambda x: CategoryEnum[x], payload_dict["categories"])),
+                                    auth_user_id=auth_user_id,
+                                    audience_male_split=payload_dict["audience_male_split"],
+                                    audience_female_split=payload_dict["audience_female_split"],
+                                    audience_age_13_to_17_split=payload_dict["audience_age_13_to_17_split"],
+                                    audience_age_18_to_24_split=payload_dict["audience_age_18_to_24_split"],
+                                    audience_age_25_to_34_split=payload_dict["audience_age_25_to_34_split"],
+                                    audience_age_35_to_44_split=payload_dict["audience_age_35_to_44_split"],
+                                    audience_age_45_to_54_split=payload_dict["audience_age_45_to_54_split"],
+                                    audience_age_55_to_64_split=payload_dict["audience_age_55_to_64_split"],
+                                    audience_age_65_plus_split=payload_dict["audience_age_65_plus_split"])
+            self._user_repository.write_new_for_auth_user(auth_user_id=auth_user_id, payload=influencer)
+            self._auth_user_repository.update_influencer_claims(user=influencer)
+        except (AlreadyExistsException, ValidationError) as e:
+            print_exception(e)
+            return PinfluencerResponse(status_code=400, body={})
+        return PinfluencerResponse(status_code=201, body=influencer.__dict__)
 
     def update(self, event: dict) -> PinfluencerResponse:
         ...

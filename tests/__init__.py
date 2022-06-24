@@ -202,10 +202,10 @@ def assert_brand_user_generated_fields_are_equal(brand1, brand2):
 def assert_influencer_creatable_generated_fields_are_equal(influencer1, influencer2):
     influencer2.pop("id")
     influencer2.pop("created")
-    influencer2.pop("auth_user_id")
     influencer2.pop("image")
     influencer2["categories"] = list(map(lambda x: x.name, influencer2["categories"]))
     influencer2["values"] = list(map(lambda x: x.name, influencer2["values"]))
+    print("")
     print(influencer1)
     print(influencer2)
     assert influencer1 == influencer2

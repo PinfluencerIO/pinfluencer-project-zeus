@@ -6,7 +6,7 @@ from callee import Captor
 
 from src.crosscutting import JsonSnakeToCamelSerializer, JsonCamelToSnakeCaseDeserializer
 from src.domain.models import Brand, ValueEnum, CategoryEnum, User, Influencer
-from src.domain.validation import BrandValidator
+from src.domain.validation import BrandValidator, InfluencerValidator
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.types import BrandRepository, InfluencerRepository, AuthUserRepository
 from src.web.controllers import BrandController, InfluencerController
@@ -146,7 +146,8 @@ class TestInfluencerController(TestCase):
         self.__auth_user_repo: AuthUserRepository = Mock()
         self.__sut = InfluencerController(influencer_repository=self.__influencer_repository,
                                           deserializer=JsonCamelToSnakeCaseDeserializer(),
-                                          auth_user_repository=self.__auth_user_repo)
+                                          auth_user_repository=self.__auth_user_repo,
+                                          influencer_validator=InfluencerValidator())
 
     def test_get_by_id(self):
         auth_user = user_dto_generator(num=1)
@@ -212,7 +213,7 @@ class TestInfluencerController(TestCase):
     def test_create(self):
         influencer_db = create_influencer_dto()
         expected_payload = update_influencer_payload()
-        auth_id = "12341"
+        auth_id = "1234"
         event = create_for_auth_user_event(auth_id=auth_id, payload=expected_payload)
         self.__influencer_repository.write_new_for_auth_user = MagicMock(return_value=influencer_db)
         self.__auth_user_repo.update_influencer_claims = MagicMock()

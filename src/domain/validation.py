@@ -29,7 +29,38 @@ brand_payload_schema = {
 }
 
 
+influencer_payload_schema = {
+    "type": "object",
+    "properties":
+        {
+            "bio": {
+                "type": "string",
+                "pattern": "^.{1,500}$"
+            },
+            "website": {
+                "type": "string",
+                "pattern": r"^(https?\:\/\/)?([\da-zA-Z\.-]+)\.([a-z\.]{2,6})(\/[\w]*)*$"
+            },
+            "email": {
+                "type": "string",
+                "pattern": r"^[a-zA-Z0-9\._-]+[@]{1}[a-zA-Z0-9\._-]+[\.]+[a-zA-Z0-9]+$"
+            },
+            "insta_handle": {
+                "type": "string",
+                "pattern": "^.{1,30}$"
+            }
+        },
+    "required": ["bio", "website", "email"]
+}
+
+
 class BrandValidator:
 
     def validate_brand(self, payload):
         validate(instance=payload, schema=brand_payload_schema)
+
+
+class InfluencerValidator:
+
+    def validate_influencer(self, payload):
+        validate(instance=payload, schema=influencer_payload_schema)
