@@ -236,7 +236,7 @@ class CognitoAuthUserRepository:
         self.__update_user_claims(user=user, type='brand')
 
     def update_influencer_claims(self, user: Influencer):
-        self.__update_user_claims(user=user, type='influencer')
+        self.__update_user_claims(user=user, type='inflncr')
 
     def __update_user_claims(self, user: User, type: str):
         self.__auth_service.update_user_claims(username=user.auth_user_id, attributes=[
