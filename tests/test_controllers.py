@@ -114,6 +114,42 @@ class TestInfluencerController(TestCase):
         pinfluencer_response = self.__sut.get_by_id(get_brand_id_event(influencer.id))
         assert pinfluencer_response.body == influencer.__dict__
 
+    def test_get_all(self):
+        influencers_from_db = [
+            influencer_dto_generator(num=1, repo=RepoEnum.STD_REPO),
+            influencer_dto_generator(num=2, repo=RepoEnum.STD_REPO),
+            influencer_dto_generator(num=3, repo=RepoEnum.STD_REPO),
+            influencer_dto_generator(num=4, repo=RepoEnum.STD_REPO)
+        ]
+
+        expected_influencer1 = influencer_dto_generator(num=1)
+        expected_influencer1.id = influencers_from_db[0].id
+        expected_influencer1.created = influencers_from_db[0].created
+        expected_influencer2 = influencer_dto_generator(num=2)
+        expected_influencer2.id = influencers_from_db[1].id
+        expected_influencer2.created = influencers_from_db[1].created
+        expected_influencer3 = influencer_dto_generator(num=3)
+        expected_influencer3.id = influencers_from_db[2].id
+        expected_influencer3.created = influencers_from_db[2].created
+        expected_influencer4 = influencer_dto_generator(num=4)
+        expected_influencer4.id = influencers_from_db[3].id
+        expected_influencer4.created = influencers_from_db[3].created
+        expected_influencers = [
+            expected_influencer1,
+            expected_influencer2,
+            expected_influencer3,
+            expected_influencer4
+        ]
+        self.__influencer_repository.load_collection = MagicMock(return_value=influencers_from_db)
+        self.__auth_user_repo.get_by_id = MagicMock(side_effect=[
+            user_dto_generator(num=1),
+            user_dto_generator(num=2),
+            user_dto_generator(num=3),
+            user_dto_generator(num=4)
+        ])
+        pinfluencer_response = self.__sut.get_all({})
+        assert pinfluencer_response.body == list(map(lambda x: x.__dict__, expected_influencers))
+        assert pinfluencer_response.status_code == 200
 
 class TestBrandController(TestCase):
 
