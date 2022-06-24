@@ -17,6 +17,10 @@ from tests import brand_dto_generator, assert_brand_updatable_fields_are_equal, 
     assert_influencer_creatable_generated_fields_are_equal
 
 
+def get_influencer_id_event(id):
+    return {'pathParameters': {'influencer_id': id}}
+
+
 def get_brand_id_event(brand_id):
     return {'pathParameters': {'brand_id': brand_id}}
 
@@ -157,7 +161,7 @@ class TestInfluencerController(TestCase):
         influencer.created = influencer_in_db.created
         self.__influencer_repository.load_by_id = MagicMock(return_value=influencer_in_db)
         self.__auth_user_repo.get_by_id = MagicMock(return_value=auth_user)
-        pinfluencer_response = self.__sut.get_by_id(get_brand_id_event(influencer.id))
+        pinfluencer_response = self.__sut.get_by_id(get_influencer_id_event(influencer.id))
         assert pinfluencer_response.body == influencer.__dict__
 
     def test_get(self):
