@@ -53,6 +53,7 @@ class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):
         self.__image_repository = image_repository
 
     def load_for_auth_user(self, auth_user_id) -> User:
+        print(f"QUERY: <load for auth user> ENTITY: {self._resource_entity.__name__}")
         first = self._data_manager.session \
             .query(self._resource_entity) \
             .filter(self._resource_entity.auth_user_id == auth_user_id) \

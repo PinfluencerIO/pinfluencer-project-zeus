@@ -214,7 +214,7 @@ class TestAuthUserRepository(TestCase):
             },
             {
                 "Name": "custom:type",
-                "Value": "influencer"
+                "Value": "inflncr"
             }
         ]
         actual_attributes = payload_captor.arg
