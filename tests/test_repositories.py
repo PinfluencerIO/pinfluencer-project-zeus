@@ -164,12 +164,12 @@ class TestInfluencerRepository(TestCase):
         expected_profile_image = "test.png"
         self.__image_repository.upload = MagicMock(return_value=expected_profile_image)
         self.__data_manager.create_fake_data([brand_generator(influencer, mapper=self._object_mapper)])
-        returned_brand = self.__sut.update_image_for_auth_user(auth_user_id=influencer.auth_user_id,
-                                                               image_bytes=image_bytes)
+        returned_influencer = self.__sut.update_image_for_auth_user(auth_user_id=influencer.auth_user_id,
+                                                                    image_bytes=image_bytes)
         self.__image_repository.upload.assert_called_once_with(path=influencer.id,
                                                                image_base64_encoded=image_bytes)
         actual_image = self.__sut.load_by_id(id_=influencer.id).image
-        assert returned_brand.image == expected_profile_image == actual_image
+        assert returned_influencer.image == expected_profile_image == actual_image
 
 
 class TestAuthUserRepository(TestCase):
