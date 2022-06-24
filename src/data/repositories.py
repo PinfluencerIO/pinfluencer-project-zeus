@@ -194,6 +194,7 @@ class S3ImageRepository:
 class CognitoAuthService:
 
     def __init__(self):
+        print(f"user pool id: {os.environ['USER_POOL_ID']}")
         self.__client = boto3.client('cognito-idp')
 
     def update_user_claims(self, username: str, attributes: list[dict]) -> None:
