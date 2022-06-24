@@ -20,7 +20,7 @@ class BaseUserController:
         self._user_repository = user_repository
         self._deserializer = deserializer
 
-    def _update_image(self, event, updater: Callable[[str, str], dict]) -> PinfluencerResponse:
+    def _update_image(self, event: dict, updater: Callable[[str, str], dict]) -> PinfluencerResponse:
         auth_user_id = get_cognito_user(event)
         payload_json_string = event['body']
         payload_dict = self._deserializer.deserialize(payload_json_string)
@@ -32,7 +32,7 @@ class BaseUserController:
             print_exception(e)
             return PinfluencerResponse(status_code=404, body={})
 
-    def get_all(self, event) -> PinfluencerResponse:
+    def get_all(self, event: dict) -> PinfluencerResponse:
         brands = self._user_repository.load_collection()
         for brand in brands:
             user = self._auth_user_repository.get_by_id(_id=brand.auth_user_id)
@@ -41,7 +41,7 @@ class BaseUserController:
             brand.email = user.email
         return PinfluencerResponse(status_code=200, body=list(map(lambda x: x.__dict__, brands)))
 
-    def get_by_id(self, event) -> PinfluencerResponse:
+    def get_by_id(self, event: dict) -> PinfluencerResponse:
         id_ = valid_path_resource_id(event, BRAND_ID_PATH_KEY)
         if id_:
             try:
@@ -56,7 +56,7 @@ class BaseUserController:
                 return PinfluencerResponse(status_code=404, body={})
         return PinfluencerResponse(status_code=400, body={})
 
-    def get(self, event) -> PinfluencerResponse:
+    def get(self, event: dict) -> PinfluencerResponse:
         auth_user_id = get_cognito_user(event)
         if auth_user_id:
             try:
@@ -79,7 +79,7 @@ class BrandController(BaseUserController):
         super().__init__(deserializer, brand_repository, auth_user_repository)
         self.__brand_validator = brand_validator
 
-    def create(self, event) -> PinfluencerResponse:
+    def create(self, event: dict) -> PinfluencerResponse:
         auth_user_id = get_cognito_user(event)
         payload_json_string = event['body']
         payload_dict = self._deserializer.deserialize(payload_json_string)
@@ -101,7 +101,7 @@ class BrandController(BaseUserController):
             return PinfluencerResponse(status_code=400, body={})
         return PinfluencerResponse(status_code=201, body=brand.__dict__)
 
-    def update(self, event) -> PinfluencerResponse:
+    def update(self, event: dict) -> PinfluencerResponse:
         auth_user_id = get_cognito_user(event)
         payload_json_string = event['body']
         payload_dict = self._deserializer.deserialize(payload_json_string)
@@ -129,17 +129,19 @@ class BrandController(BaseUserController):
             print_exception(e)
             return PinfluencerResponse(status_code=404, body={})
 
-    def update_logo(self, event) -> PinfluencerResponse:
+    def update_logo(self, event: dict) -> PinfluencerResponse:
         return self._update_image(event=event,
                                   updater=lambda auth_id, bytes: self._user_repository.update_logo_for_auth_user(
-                                                 auth_id,
-                                                 bytes).__dict__)
+                                      auth_id,
+                                      bytes).__dict__)
 
     def update_header_image(self, event) -> PinfluencerResponse:
         return self._update_image(event=event,
-                                  updater=lambda auth_id, bytes: self._user_repository.update_header_image_for_auth_user(
-                                                 auth_id,
-                                                 bytes).__dict__)
+                                  updater=lambda auth_id,
+                                                 bytes: self._user_repository.update_header_image_for_auth_user(
+                                      auth_id,
+                                      bytes).__dict__)
+
 
 class InfluencerController(BaseUserController):
 
@@ -148,5 +150,8 @@ class InfluencerController(BaseUserController):
                  auth_user_repository: AuthUserRepository):
         super().__init__(deserializer, influencer_repository, auth_user_repository)
 
-    def create(self, event) -> PinfluencerResponse:
+    def create(self, event: dict) -> PinfluencerResponse:
+        ...
+
+    def update(self, event: dict) -> PinfluencerResponse:
         ...
