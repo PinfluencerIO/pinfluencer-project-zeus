@@ -2,10 +2,11 @@ from mapper.object_mapper import ObjectMapper
 
 from src.crosscutting import JsonCamelToSnakeCaseDeserializer, JsonSnakeToCamelSerializer
 from src.data import SqlAlchemyDataManager
-from src.data.repositories import SqlAlchemyBrandRepository, S3ImageRepository, SqlAlchemyInfluencerRepository
+from src.data.repositories import SqlAlchemyBrandRepository, S3ImageRepository, SqlAlchemyInfluencerRepository, \
+    CognitoAuthUserRepository, CognitoAuthService
 from src.domain.validation import BrandValidator
 from src.types import DataManager, BrandRepository, BrandValidatable, Deserializer, ObjectMapperAdapter, \
-    ImageRepository, Serializer, InfluencerRepository
+    ImageRepository, Serializer, InfluencerRepository, AuthUserRepository
 from src.web.controllers import BrandController, InfluencerController
 
 
@@ -40,11 +41,16 @@ class ServiceLocator:
         return BrandController(
             brand_repository=self.get_new_brand_repository(),
             brand_validator=self.get_new_brand_validator(),
-            deserializer=self.get_new_deserializer())
+            deserializer=self.get_new_deserializer(),
+            auth_user_repository=self.get_new_auth_user_repository())
 
     def get_new_influencer_controller(self) -> InfluencerController:
         return InfluencerController(influencer_repository=self.get_new_influencer_repository(),
-                                    deserializer=self.get_new_deserializer())
+                                    deserializer=self.get_new_deserializer(),
+                                    auth_user_repository=self.get_new_auth_user_repository())
 
     def get_new_serializer(self) -> Serializer:
         return JsonSnakeToCamelSerializer()
+
+    def get_new_auth_user_repository(self) -> AuthUserRepository:
+        return CognitoAuthUserRepository(auth_service=CognitoAuthService())
