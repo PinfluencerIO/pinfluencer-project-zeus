@@ -159,7 +159,13 @@ class SqlAlchemyInfluencerRepository(BaseSqlAlchemyUserRepository):
         ...
 
     def update_image_for_auth_user(self, auth_user_id: str, image_bytes: str) -> Influencer:
-        ...
+        return self._update_image(auth_user_id=auth_user_id,
+                                  image_bytes=image_bytes,
+                                  field_setter=self.__header_image_setter)
+
+    @staticmethod
+    def __header_image_setter(profile_image, influencer):
+        influencer.image = profile_image
 
 
 class S3ImageRepository:

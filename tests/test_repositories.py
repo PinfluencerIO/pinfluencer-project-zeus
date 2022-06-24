@@ -11,7 +11,7 @@ from src.types import ImageRepository
 from tests import InMemorySqliteDataManager, brand_generator, brand_dto_generator, TEST_DEFAULT_BRAND_LOGO, \
     TEST_DEFAULT_BRAND_HEADER_IMAGE, TEST_DEFAULT_INFLUENCER_PROFILE_IMAGE, influencer_dto_generator, \
     assert_brand_updatable_fields_are_equal_for_three, assert_brand_db_fields_are_equal, \
-    assert_collection_brand_db_fields_are_equal, assert_brand_db_fields_are_equal_for_three
+    assert_collection_brand_db_fields_are_equal, assert_brand_db_fields_are_equal_for_three, influencer_generator
 
 
 class BrandRepositoryTestCase(TestCase):
@@ -163,7 +163,7 @@ class TestInfluencerRepository(TestCase):
         influencer = influencer_dto_generator(num=1)
         expected_profile_image = "test.png"
         self.__image_repository.upload = MagicMock(return_value=expected_profile_image)
-        self.__data_manager.create_fake_data([brand_generator(influencer, mapper=self._object_mapper)])
+        self.__data_manager.create_fake_data([influencer_generator(influencer, mapper=self._object_mapper)])
         returned_influencer = self.__sut.update_image_for_auth_user(auth_user_id=influencer.auth_user_id,
                                                                     image_bytes=image_bytes)
         self.__image_repository.upload.assert_called_once_with(path=influencer.id,
