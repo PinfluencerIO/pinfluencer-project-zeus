@@ -64,9 +64,11 @@ class TestRoutes(TestCase):
                                            service_name="get_new_brand_controller")
 
     def test_get_all_influencers(self):
-        self.__assert_non_service_layer_route(route_key="GET /influencers",
-                                              expected_body="""{"message": "GET /influencers is not implemented"}""",
-                                              expected_status_code=405)
+        self.__assert_service_endpoint_200(expected_body="""{"getAllInfluencers": "some_influencer_value"}""",
+                                           service_function="get_all",
+                                           actual_body={"get_all_influencers": "some_influencer_value"},
+                                           route_key="GET /influencers",
+                                           service_name="get_new_influencer_controller")
 
     def test_get_influencer_by_id(self):
         self.__assert_service_endpoint_200(expected_body="""{"getInfluencerById": "some_influencer_by_id_value"}""",
@@ -111,15 +113,18 @@ class TestRoutes(TestCase):
                                            service_name="get_new_brand_controller")
 
     def test_get_auth_influencer(self):
-        self.__assert_non_service_layer_route(expected_body="""{"message": "GET /influencers/me is not implemented"}""",
-                                              expected_status_code=405,
-                                              route_key="GET /influencers/me")
+        self.__assert_service_endpoint_200(expected_body="""{"getAuthInfluencer": "some_influencer_value"}""",
+                                           service_function="get",
+                                           actual_body={"get_auth_influencer": "some_influencer_value"},
+                                           route_key="GET /influencers/me",
+                                           service_name="get_new_influencer_controller")
 
     def test_create_auth_influencer(self):
-        self.__assert_non_service_layer_route(
-            expected_body="""{"message": "POST /influencers/me is not implemented"}""",
-            expected_status_code=405,
-            route_key="POST /influencers/me")
+        self.__assert_service_endpoint_200(expected_body="""{"createAuthInfluencer": "some_influencer_value"}""",
+                                           service_function="create",
+                                           actual_body={"create_auth_influencer": "some_influencer_value"},
+                                           route_key="POST /influencers/me",
+                                           service_name="get_new_influencer_controller")
 
     def test_update_auth_influencer(self):
         self.__assert_non_service_layer_route(
