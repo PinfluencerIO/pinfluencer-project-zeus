@@ -206,8 +206,8 @@ class CognitoAuthService:
 
     def get_user(self, username: str) -> dict:
         return self.__client.admin_get_user(
-            UserPoolId='string',
-            Username='string'
+            UserPoolId=os.environ["USER_POOL_ID"],
+            Username=username
         )
 
 
