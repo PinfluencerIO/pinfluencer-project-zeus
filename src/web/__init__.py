@@ -3,6 +3,7 @@ from typing import Union
 from src.types import Serializer
 
 BRAND_ID_PATH_KEY = 'brand_id'
+INFLUENCER_ID_PATH_KEY = 'influencer_id'
 
 
 class PinfluencerResponse:

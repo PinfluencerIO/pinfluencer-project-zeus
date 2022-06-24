@@ -8,7 +8,7 @@ from src.domain.validation import InfluencerValidator
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.types import BrandRepository, Deserializer, BrandValidatable, UserRepository, InfluencerRepository, \
     AuthUserRepository
-from src.web import PinfluencerResponse, get_cognito_user, BRAND_ID_PATH_KEY
+from src.web import PinfluencerResponse, get_cognito_user, BRAND_ID_PATH_KEY, INFLUENCER_ID_PATH_KEY
 from src.web.validation import valid_path_resource_id
 
 
@@ -16,7 +16,9 @@ class BaseUserController:
 
     def __init__(self, deserializer: Deserializer,
                  user_repository: UserRepository,
-                 auth_user_repository: AuthUserRepository):
+                 auth_user_repository: AuthUserRepository,
+                 resource_id: str):
+        self._resource_id = resource_id
         self._auth_user_repository = auth_user_repository
         self._user_repository = user_repository
         self._deserializer = deserializer
@@ -43,7 +45,7 @@ class BaseUserController:
         return PinfluencerResponse(status_code=200, body=list(map(lambda x: x.__dict__, brands)))
 
     def get_by_id(self, event: dict) -> PinfluencerResponse:
-        id_ = valid_path_resource_id(event, BRAND_ID_PATH_KEY)
+        id_ = valid_path_resource_id(event, self._resource_id)
         if id_:
             try:
                 user = self._user_repository.load_by_id(id_=id_)
@@ -77,7 +79,7 @@ class BrandController(BaseUserController):
                  brand_validator: BrandValidatable,
                  deserializer: Deserializer,
                  auth_user_repository: AuthUserRepository):
-        super().__init__(deserializer, brand_repository, auth_user_repository)
+        super().__init__(deserializer, brand_repository, auth_user_repository, BRAND_ID_PATH_KEY)
         self.__brand_validator = brand_validator
 
     def create(self, event: dict) -> PinfluencerResponse:
@@ -150,7 +152,7 @@ class InfluencerController(BaseUserController):
                  influencer_repository: InfluencerRepository,
                  auth_user_repository: AuthUserRepository,
                  influencer_validator: InfluencerValidator):
-        super().__init__(deserializer, influencer_repository, auth_user_repository)
+        super().__init__(deserializer, influencer_repository, auth_user_repository, INFLUENCER_ID_PATH_KEY)
         self.__influencer_validator = influencer_validator
 
     def create(self, event: dict) -> PinfluencerResponse:
