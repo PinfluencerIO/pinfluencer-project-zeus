@@ -114,6 +114,19 @@ class TestInfluencerController(TestCase):
         pinfluencer_response = self.__sut.get_by_id(get_brand_id_event(influencer.id))
         assert pinfluencer_response.body == influencer.__dict__
 
+    def test_get(self):
+        expected_influencer = influencer_dto_generator(num=1)
+        db_influencer = influencer_dto_generator(num=1, repo=RepoEnum.STD_REPO)
+        expected_influencer.id = db_influencer.id
+        expected_influencer.created = db_influencer.created
+        auth_user = user_dto_generator(num=1)
+        self.__influencer_repository.load_for_auth_user = MagicMock(return_value=db_influencer)
+        self.__auth_user_repo.get_by_id = MagicMock(return_value=auth_user)
+        auth_id = "12341"
+        response = self.__sut.get(get_auth_user_event(auth_id))
+        assert response.body == expected_influencer.__dict__
+        assert response.status_code == 200
+
     def test_get_all(self):
         influencers_from_db = [
             influencer_dto_generator(num=1, repo=RepoEnum.STD_REPO),
