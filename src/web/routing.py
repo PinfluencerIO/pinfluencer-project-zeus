@@ -24,7 +24,7 @@ class Dispatcher:
             {
                 'GET /brands': self.__brand_ctr.get_all,
 
-                'GET /influencers': self.__get_not_implemented_method('GET /influencers'),
+                'GET /influencers': self.__influencer_ctr.get_all,
 
                 'GET /brands/{brand_id}': self.__brand_ctr.get_by_id,
 
@@ -42,9 +42,9 @@ class Dispatcher:
                 'POST /brands/me/logo': self.__brand_ctr.update_logo,
 
                 # authenticated influencer endpoints
-                'GET /influencers/me': self.__get_not_implemented_method('GET /influencers/me'),
+                'GET /influencers/me': self.__influencer_ctr.get,
 
-                'POST /influencers/me': self.__get_not_implemented_method('POST /influencers/me'),
+                'POST /influencers/me': self.__influencer_ctr.create,
 
                 'PUT /influencers/me': self.__get_not_implemented_method('PUT /influencers/me'),
 
