@@ -102,7 +102,7 @@ class TestRoutes(TestCase):
         self.__assert_service_endpoint_200(expected_body="""{"updateBrandMeHeaderImage": "some_brand_auth_value"}""",
                                            service_function="update_header_image",
                                            actual_body={"update_brand_me_header_image": "some_brand_auth_value"},
-                                           route_key="POST /brands/me/header_image",
+                                           route_key="POST /brands/me/header-image",
                                            service_name="get_new_brand_controller")
 
     def test_create_or_replace_auth_brand_logo(self):
