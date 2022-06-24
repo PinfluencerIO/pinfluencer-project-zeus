@@ -38,9 +38,11 @@ class TestBaseRepository(BrandRepositoryTestCase):
 
     def test_load_collection(self):
         expected_brands = [brand_dto_generator(1), brand_dto_generator(2), brand_dto_generator(3)]
-        self._data_manager.create_fake_data(list(map(lambda x: brand_generator(x, mapper=self._object_mapper), expected_brands)))
+        self._data_manager.create_fake_data(
+            list(map(lambda x: brand_generator(x, mapper=self._object_mapper), expected_brands)))
         actual_brands = self._sut.load_collection()
-        assert_collection_brand_db_fields_are_equal(list(map(lambda x: x.__dict__, expected_brands)), list(map(lambda x: x.__dict__, actual_brands)))
+        assert_collection_brand_db_fields_are_equal(list(map(lambda x: x.__dict__, expected_brands)),
+                                                    list(map(lambda x: x.__dict__, actual_brands)))
 
     def test_load_collection_when_no_brands_exist(self):
         actual_brands = self._sut.load_collection()
@@ -61,9 +63,10 @@ class TestUserRepository(BrandRepositoryTestCase):
     def test_write_new_for_auth_user(self):
         expected = brand_dto_generator(num=1)
         returned_user = self._sut.write_new_for_auth_user(auth_user_id="12341",
-                                          payload=expected)
+                                                          payload=expected)
         actual = self._sut.load_by_id(id_=expected.id)
-        assert_brand_db_fields_are_equal_for_three(brand1=actual.__dict__, brand2=expected.__dict__, brand3=returned_user.__dict__)
+        assert_brand_db_fields_are_equal_for_three(brand1=actual.__dict__, brand2=expected.__dict__,
+                                                   brand3=returned_user.__dict__)
 
     def test_write_new_for_auth_user_when_already_exists(self):
         expected = brand_dto_generator(num=1)
@@ -92,7 +95,7 @@ class TestBrandRepository(BrandRepositoryTestCase):
         expected.auth_user_id = existing_brand.auth_user_id
         self._data_manager.create_fake_data([brand_generator(existing_brand, mapper=self._object_mapper)])
         returned_brand = self._sut.update_for_auth_user(auth_user_id=existing_brand.auth_user_id,
-                                       payload=expected)
+                                                        payload=expected)
         actual = self._sut.load_by_id(id_=existing_brand.id)
         assert_brand_updatable_fields_are_equal_for_three(actual.__dict__, expected.__dict__, returned_brand.__dict__)
         assert actual.values == expected.values
@@ -155,6 +158,19 @@ class TestInfluencerRepository(TestCase):
         actual = self.__sut.load_by_id(id_=expected.id)
         assert actual.image == TEST_DEFAULT_INFLUENCER_PROFILE_IMAGE == returned_influencer.image
 
+    def test_update_profile_image(self):
+        image_bytes = "bytes"
+        influencer = influencer_dto_generator(num=1)
+        expected_profile_image = "test.png"
+        self.__image_repository.upload = MagicMock(return_value=expected_profile_image)
+        self.__data_manager.create_fake_data([brand_generator(influencer, mapper=self._object_mapper)])
+        returned_brand = self.__sut.update_image_for_auth_user(auth_user_id=influencer.auth_user_id,
+                                                               image_bytes=image_bytes)
+        self.__image_repository.upload.assert_called_once_with(path=influencer.id,
+                                                               image_base64_encoded=image_bytes)
+        actual_image = self.__sut.load_by_id(id_=influencer.id).image
+        assert returned_brand.image == expected_profile_image == actual_image
+
 
 class TestAuthUserRepository(TestCase):
 
@@ -170,23 +186,23 @@ class TestAuthUserRepository(TestCase):
         self.__auth_user_service.update_user_claims.assert_called_once_with(username=expected_brand.auth_user_id,
                                                                             attributes=payload_captor)
         expected_attributes = [
-                                {
-                                    "Name": "family_name",
-                                    "Value": expected_brand.last_name
-                                },
-                                {
-                                    "Name": "given_name",
-                                    "Value": expected_brand.first_name
-                                },
-                                {
-                                    "Name": "email",
-                                    "Value": expected_brand.email
-                                },
-                                {
-                                    "Name": "custom:type",
-                                    "Value": "brand"
-                                }
-                            ]
+            {
+                "Name": "family_name",
+                "Value": expected_brand.last_name
+            },
+            {
+                "Name": "given_name",
+                "Value": expected_brand.first_name
+            },
+            {
+                "Name": "email",
+                "Value": expected_brand.email
+            },
+            {
+                "Name": "custom:type",
+                "Value": "brand"
+            }
+        ]
         actual_attributes = payload_captor.arg
         actual_attributes = sorted(actual_attributes, key=lambda d: d['Name'])
         expected_attributes = sorted(expected_attributes, key=lambda d: d['Name'])
