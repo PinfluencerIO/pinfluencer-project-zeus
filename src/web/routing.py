@@ -37,7 +37,7 @@ class Dispatcher:
 
                 'PUT /brands/me': self.__brand_ctr.update,
 
-                'POST /brands/me/header_image': self.__brand_ctr.update_header_image,
+                'POST /brands/me/header-image': self.__brand_ctr.update_header_image,
 
                 'POST /brands/me/logo': self.__brand_ctr.update_logo,
 
