@@ -178,7 +178,7 @@ Resources:
           Properties:
             Auth:
               Authorizer: UserAuth
-            Path: /brands/me/header_image
+            Path: /brands/me/header-image
             Method: post
             ApiId: !Ref PinfluencerHttpApi
         UpdateMyBrand:
