@@ -216,6 +216,10 @@ class InfluencerController(BaseUserController):
                                                            values=list(map(lambda x: ValueEnum[x], payload_dict["values"])),
                                                            categories=list(map(lambda x: CategoryEnum[x], payload_dict["categories"]))
                                                        ))
+            auth_user = self._auth_user_repository.get_by_id(_id=auth_user_id)
+            influencer_from_db.first_name = auth_user.first_name
+            influencer_from_db.last_name = auth_user.last_name
+            influencer_from_db.email = auth_user.email
             return PinfluencerResponse(status_code=200, body=influencer_from_db.__dict__)
         except NotFoundException as e:
             print_exception(e)
