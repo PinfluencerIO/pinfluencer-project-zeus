@@ -273,8 +273,10 @@ class TestInfluencerController(TestCase):
         response = self.__sut.update(event=create_for_auth_user_event(auth_id=auth_id, payload=update_influencer_payload()))
         arg_captor = Captor()
         self.__influencer_repository.update_for_auth_user.assert_called_once_with(auth_user_id=auth_id, payload=arg_captor)
-        update_for_auth_user_repo_payload = arg_captor.arg
+        update_for_auth_user_repo_payload: Influencer = arg_captor.arg
         assert_influencer_db_fields_are_equal(influencer1=update_influencer_payload(), influencer2=update_for_auth_user_repo_payload.__dict__)
+        assert list(map(lambda x: x.name, update_for_auth_user_repo_payload.values)) == update_influencer_payload()["values"]
+        assert list(map(lambda x: x.name, update_for_auth_user_repo_payload.categories)) == update_influencer_payload()["categories"]
         assert response.body == influencer_in_db.__dict__
         assert response.status_code == 200
 
