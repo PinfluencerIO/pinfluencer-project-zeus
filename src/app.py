@@ -22,7 +22,7 @@ def bootstrap(event: dict,
         if route not in routes:
             response = PinfluencerResponse(status_code=404, body={"message": f"route: {route} not found"})
         else:
-            response = route.action(event)
+            response = routes[route].action(event)
     except Exception as e:
         print_exception(e)
         response = PinfluencerResponse.as_500_error()
