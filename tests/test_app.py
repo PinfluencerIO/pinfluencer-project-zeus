@@ -132,10 +132,6 @@ class TestRoutes(TestCase):
                                            actual_body={"update_influencer_profile_image": "some_influencer_value"},
                                            route_key="POST /influencers/me/image",
                                            service_name="get_new_influencer_controller")
-        self.__assert_non_service_layer_route(
-            expected_body="""{"message": "POST /influencers/me/image is not implemented"}""",
-            expected_status_code=405,
-            route_key="POST /influencers/me/image")
 
     def test_update_auth_influencer(self):
         self.__assert_non_service_layer_route(

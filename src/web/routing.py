@@ -48,7 +48,7 @@ class Dispatcher:
 
                 'PUT /influencers/me': self.__get_not_implemented_method('PUT /influencers/me'),
 
-                'POST /influencers/me/image': self.__get_not_implemented_method('POST /influencers/me/image'),
+                'POST /influencers/me/image': self.__influencer_ctr.update_profile_image,
             }
         )
 
