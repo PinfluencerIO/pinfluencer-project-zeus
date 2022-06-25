@@ -110,10 +110,7 @@ class BrandController(BaseUserController):
         payload_dict = self._deserializer.deserialize(payload_json_string)
         try:
             self.__brand_validator.validate_brand(payload_dict)
-            brand = Brand(first_name=payload_dict["first_name"],
-                          last_name=payload_dict["last_name"],
-                          email=payload_dict["email"],
-                          brand_name=payload_dict["brand_name"],
+            brand = Brand(brand_name=payload_dict["brand_name"],
                           brand_description=payload_dict["brand_description"],
                           website=payload_dict["website"],
                           insta_handle=payload_dict["insta_handle"],
@@ -199,23 +196,43 @@ class InfluencerController(BaseUserController):
         try:
             self.__influencer_validator.validate_influencer(payload_dict)
             influencer_from_db = self._user_repository.update_for_auth_user(auth_user_id=auth_user_id,
-                                                       payload=Influencer(
-                                                           auth_user_id=auth_user_id,
-                                                           insta_handle=payload_dict['insta_handle'],
-                                                           website=payload_dict["website"],
-                                                           bio=payload_dict["bio"],
-                                                           audience_male_split=payload_dict["audience_male_split"],
-                                                           audience_female_split=payload_dict["audience_female_split"],
-                                                           audience_age_13_to_17_split=payload_dict["audience_age_13_to_17_split"],
-                                                           audience_age_18_to_24_split=payload_dict["audience_age_18_to_24_split"],
-                                                           audience_age_25_to_34_split=payload_dict["audience_age_25_to_34_split"],
-                                                           audience_age_35_to_44_split=payload_dict["audience_age_35_to_44_split"],
-                                                           audience_age_45_to_54_split=payload_dict["audience_age_45_to_54_split"],
-                                                           audience_age_55_to_64_split=payload_dict["audience_age_55_to_64_split"],
-                                                           audience_age_65_plus_split=payload_dict["audience_age_65_plus_split"],
-                                                           values=list(map(lambda x: ValueEnum[x], payload_dict["values"])),
-                                                           categories=list(map(lambda x: CategoryEnum[x], payload_dict["categories"]))
-                                                       ))
+                                                                            payload=Influencer(
+                                                                                auth_user_id=auth_user_id,
+                                                                                insta_handle=payload_dict[
+                                                                                    'insta_handle'],
+                                                                                website=payload_dict["website"],
+                                                                                bio=payload_dict["bio"],
+                                                                                audience_male_split=payload_dict[
+                                                                                    "audience_male_split"],
+                                                                                audience_female_split=payload_dict[
+                                                                                    "audience_female_split"],
+                                                                                audience_age_13_to_17_split=
+                                                                                payload_dict[
+                                                                                    "audience_age_13_to_17_split"],
+                                                                                audience_age_18_to_24_split=
+                                                                                payload_dict[
+                                                                                    "audience_age_18_to_24_split"],
+                                                                                audience_age_25_to_34_split=
+                                                                                payload_dict[
+                                                                                    "audience_age_25_to_34_split"],
+                                                                                audience_age_35_to_44_split=
+                                                                                payload_dict[
+                                                                                    "audience_age_35_to_44_split"],
+                                                                                audience_age_45_to_54_split=
+                                                                                payload_dict[
+                                                                                    "audience_age_45_to_54_split"],
+                                                                                audience_age_55_to_64_split=
+                                                                                payload_dict[
+                                                                                    "audience_age_55_to_64_split"],
+                                                                                audience_age_65_plus_split=payload_dict[
+                                                                                    "audience_age_65_plus_split"],
+                                                                                values=list(map(lambda x: ValueEnum[x],
+                                                                                                payload_dict[
+                                                                                                    "values"])),
+                                                                                categories=list(
+                                                                                    map(lambda x: CategoryEnum[x],
+                                                                                        payload_dict["categories"]))
+                                                                            ))
             auth_user = self._auth_user_repository.get_by_id(_id=auth_user_id)
             influencer_from_db.first_name = auth_user.first_name
             influencer_from_db.last_name = auth_user.last_name
