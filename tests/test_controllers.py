@@ -280,6 +280,12 @@ class TestInfluencerController(TestCase):
         assert response.body == influencer_in_db.__dict__
         assert response.status_code == 200
 
+    def test_update_when_not_found(self):
+        self.__influencer_repository.update_for_auth_user = MagicMock(side_effect=NotFoundException("influencer not found"))
+        return_value = self.__sut.update(event=create_for_auth_user_event(auth_id="12341", payload=update_influencer_payload()))
+        assert return_value.body == {}
+        assert return_value.status_code == 404
+
 
 class TestBrandController(TestCase):
 
