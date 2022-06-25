@@ -193,4 +193,25 @@ class InfluencerController(BaseUserController):
                                       bytes).__dict__)
 
     def update(self, event: dict) -> PinfluencerResponse:
-        return PinfluencerResponse(status_code=400, body={})
+        auth_user_id = get_cognito_user(event)
+        payload_json_string = event['body']
+        payload_dict = self._deserializer.deserialize(payload_json_string)
+        influencer_from_db = self._user_repository.update_for_auth_user(auth_user_id=auth_user_id,
+                                                   payload=Influencer(
+                                                       auth_user_id=auth_user_id,
+                                                       insta_handle=payload_dict['insta_handle'],
+                                                       website=payload_dict["website"],
+                                                       bio=payload_dict["bio"],
+                                                       audience_male_split=payload_dict["audience_male_split"],
+                                                       audience_female_split=payload_dict["audience_female_split"],
+                                                       audience_age_13_to_17_split=payload_dict["audience_age_13_to_17_split"],
+                                                       audience_age_18_to_24_split=payload_dict["audience_age_18_to_24_split"],
+                                                       audience_age_25_to_34_split=payload_dict["audience_age_25_to_34_split"],
+                                                       audience_age_35_to_44_split=payload_dict["audience_age_35_to_44_split"],
+                                                       audience_age_45_to_54_split=payload_dict["audience_age_45_to_54_split"],
+                                                       audience_age_55_to_64_split=payload_dict["audience_age_55_to_64_split"],
+                                                       audience_age_65_plus_split=payload_dict["audience_age_65_plus_split"],
+                                                       values=list(map(lambda x: ValueEnum[x], payload_dict["values"])),
+                                                       categories=list(map(lambda x: CategoryEnum[x], payload_dict["categories"]))
+                                                   ))
+        return PinfluencerResponse(status_code=200, body=influencer_from_db.__dict__)
