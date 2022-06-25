@@ -134,10 +134,12 @@ class TestRoutes(TestCase):
                                            service_name="get_new_influencer_controller")
 
     def test_update_auth_influencer(self):
-        self.__assert_non_service_layer_route(
-            expected_body="""{"message": "PUT /influencers/me is not implemented"}""",
-            expected_status_code=405,
-            route_key="PUT /influencers/me")
+        self.__assert_service_endpoint_200(
+            expected_body="""{"updateInfluencer": "some_influencer_value"}""",
+            service_function="update_for_auth_user",
+            actual_body={"update_influencer": "some_influencer_value"},
+            route_key="PUT /influencers/me",
+            service_name="get_new_influencer_controller")
 
     def test_get_auth_campaigns(self):
         self.__assert_non_service_layer_route(
