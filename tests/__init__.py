@@ -284,6 +284,12 @@ def assert_influencer_db_fields_are_equal(influencer1: dict, influencer2: dict):
         print(f'asserted {field} is valid')
 
 
+def assert_influencer_db_fields_are_equal_for_three(influencer1: dict, influencer2: dict, influencer3: dict):
+    for field in influencer_db_fields():
+        assert influencer1[field] == influencer2[field] == influencer3[field]
+        print(f'asserted {field} is valid')
+
+
 def assert_brand_db_fields_are_equal_for_three(brand1: dict, brand2: dict, brand3: dict):
     for field in brand_db_fields():
         assert brand1[field] == brand2[field] == brand3[field]

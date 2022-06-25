@@ -156,7 +156,7 @@ class SqlAlchemyInfluencerRepository(BaseSqlAlchemyUserRepository):
                          resource_dto=Influencer)
 
     def update_for_auth_user(self, auth_user_id: str, payload: Influencer) -> Influencer:
-        ...
+        return Influencer()
 
     def update_image_for_auth_user(self, auth_user_id: str, image_bytes: str) -> Influencer:
         return self._update_image(auth_user_id=auth_user_id,

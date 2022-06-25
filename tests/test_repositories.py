@@ -11,7 +11,8 @@ from src.types import ImageRepository
 from tests import InMemorySqliteDataManager, brand_generator, brand_dto_generator, TEST_DEFAULT_BRAND_LOGO, \
     TEST_DEFAULT_BRAND_HEADER_IMAGE, TEST_DEFAULT_INFLUENCER_PROFILE_IMAGE, influencer_dto_generator, \
     assert_brand_updatable_fields_are_equal_for_three, assert_brand_db_fields_are_equal, \
-    assert_collection_brand_db_fields_are_equal, assert_brand_db_fields_are_equal_for_three, influencer_generator
+    assert_collection_brand_db_fields_are_equal, assert_brand_db_fields_are_equal_for_three, influencer_generator, \
+    assert_influencer_db_fields_are_equal_for_three
 
 
 class BrandRepositoryTestCase(TestCase):
@@ -170,6 +171,16 @@ class TestInfluencerRepository(TestCase):
                                                                image_base64_encoded=image_bytes)
         actual_image = self.__sut.load_by_id(id_=influencer.id).image
         assert returned_influencer.image == expected_profile_image == actual_image
+
+    def test_update_influencer(self):
+        influencer_already_in_db = influencer_dto_generator(num=1)
+        influencer_from_payload = influencer_dto_generator(num=2)
+        self.__data_manager.create_fake_data([influencer_already_in_db])
+        returned_influencer = self.__sut.update_for_auth_user(auth_user_id="1234", payload=influencer_from_payload)
+        queried_influencer = self.__sut.load_by_id(id_=influencer_already_in_db.id)
+        assert_influencer_db_fields_are_equal_for_three(influencer1=returned_influencer.__dict__,
+                                                        influencer2=queried_influencer.__dict__,
+                                                        influencer3=influencer_from_payload.__dict__)
 
 
 class TestAuthUserRepository(TestCase):
