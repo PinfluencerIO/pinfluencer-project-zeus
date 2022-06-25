@@ -14,7 +14,7 @@ from src.web.validation import valid_uuid
 from tests import brand_dto_generator, assert_brand_updatable_fields_are_equal, TEST_DEFAULT_BRAND_LOGO, \
     TEST_DEFAULT_BRAND_HEADER_IMAGE, influencer_dto_generator, RepoEnum, user_dto_generator, \
     assert_brand_creatable_generated_fields_are_equal, TEST_DEFAULT_INFLUENCER_PROFILE_IMAGE, \
-    assert_influencer_creatable_generated_fields_are_equal, assert_influencer_db_fields_are_equal
+    assert_influencer_creatable_generated_fields_are_equal, assert_influencer_update_fields_are_equal
 
 
 def get_influencer_id_event(id):
@@ -274,7 +274,7 @@ class TestInfluencerController(TestCase):
         arg_captor = Captor()
         self.__influencer_repository.update_for_auth_user.assert_called_once_with(auth_user_id=auth_id, payload=arg_captor)
         update_for_auth_user_repo_payload: Influencer = arg_captor.arg
-        assert_influencer_db_fields_are_equal(influencer1=update_influencer_payload(), influencer2=update_for_auth_user_repo_payload.__dict__)
+        assert_influencer_update_fields_are_equal(influencer1=update_influencer_payload(), influencer2=update_for_auth_user_repo_payload.__dict__)
         assert list(map(lambda x: x.name, update_for_auth_user_repo_payload.values)) == update_influencer_payload()["values"]
         assert list(map(lambda x: x.name, update_for_auth_user_repo_payload.categories)) == update_influencer_payload()["categories"]
         assert response.body == influencer_in_db.__dict__

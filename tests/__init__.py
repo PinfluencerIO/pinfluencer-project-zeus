@@ -272,6 +272,21 @@ def influencer_db_fields():
             'categories']
 
 
+def influencer_update_db_fields():
+    return ['website',
+            'bio',
+            'audience_age_13_to_17_split',
+            'audience_age_18_to_24_split',
+            'audience_age_25_to_34_split',
+            'audience_age_35_to_44_split',
+            'audience_age_45_to_54_split',
+            'audience_age_55_to_64_split',
+            'audience_age_65_plus_split',
+            'audience_male_split',
+            'audience_female_split',
+            'insta_handle']
+
+
 def assert_brand_db_fields_are_equal(brand1: dict, brand2: dict):
     for field in brand_db_fields():
         assert brand1[field] == brand2[field]
@@ -280,6 +295,12 @@ def assert_brand_db_fields_are_equal(brand1: dict, brand2: dict):
 
 def assert_influencer_db_fields_are_equal(influencer1: dict, influencer2: dict):
     for field in influencer_db_fields():
+        assert influencer1[field] == influencer2[field]
+        print(f'asserted {field} is valid')
+
+
+def assert_influencer_update_fields_are_equal(influencer1: dict, influencer2: dict):
+    for field in influencer_update_db_fields():
         assert influencer1[field] == influencer2[field]
         print(f'asserted {field} is valid')
 
