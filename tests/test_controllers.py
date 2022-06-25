@@ -467,6 +467,7 @@ class TestBrandController(TestCase):
         assert list(map(lambda x: x.name, actual_payload.categories)) == expected_payload['categories']
         assert response.status_code == 200
         assert response.body == expected_dto.__dict__
+        self.__auth_user_repo.get_by_id.assert_called_once_with(_id=auth_id)
 
     def test_update_when_invalid_payload(self):
         auth_id = "12341"
