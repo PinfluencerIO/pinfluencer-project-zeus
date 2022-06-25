@@ -197,6 +197,7 @@ class InfluencerController(BaseUserController):
         payload_json_string = event['body']
         payload_dict = self._deserializer.deserialize(payload_json_string)
         try:
+            self.__influencer_validator.validate_influencer(payload_dict)
             influencer_from_db = self._user_repository.update_for_auth_user(auth_user_id=auth_user_id,
                                                        payload=Influencer(
                                                            auth_user_id=auth_user_id,
@@ -216,5 +217,9 @@ class InfluencerController(BaseUserController):
                                                            categories=list(map(lambda x: CategoryEnum[x], payload_dict["categories"]))
                                                        ))
             return PinfluencerResponse(status_code=200, body=influencer_from_db.__dict__)
-        except NotFoundException:
+        except NotFoundException as e:
+            print_exception(e)
             return PinfluencerResponse(status_code=404, body={})
+        except ValidationError as e:
+            print_exception(e)
+            return PinfluencerResponse(status_code=400, body={})
