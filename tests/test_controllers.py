@@ -14,7 +14,7 @@ from src.web.validation import valid_uuid
 from tests import brand_dto_generator, assert_brand_updatable_fields_are_equal, TEST_DEFAULT_BRAND_LOGO, \
     TEST_DEFAULT_BRAND_HEADER_IMAGE, influencer_dto_generator, RepoEnum, user_dto_generator, \
     assert_brand_creatable_generated_fields_are_equal, TEST_DEFAULT_INFLUENCER_PROFILE_IMAGE, \
-    assert_influencer_creatable_generated_fields_are_equal
+    assert_influencer_creatable_generated_fields_are_equal, assert_influencer_db_fields_are_equal
 
 
 def get_influencer_id_event(id):
@@ -265,6 +265,18 @@ class TestInfluencerController(TestCase):
         response = self.__sut.update_profile_image(event=event)
         assert response.status_code == 200
         assert response.body == expected_influencer.__dict__
+
+    def test_update(self):
+        influencer_in_db = create_influencer_dto()
+        self.__influencer_repository.update_for_auth_user = MagicMock(return_value=influencer_in_db)
+        auth_id = "12341"
+        response = self.__sut.update(event=create_for_auth_user_event(auth_id=auth_id, payload=update_influencer_payload()))
+        arg_captor = Captor()
+        self.__influencer_repository.update_for_auth_user.assert_called_once_with(auth_user_id=auth_id, payload=arg_captor)
+        update_for_auth_user_repo_payload = arg_captor.arg
+        assert_influencer_db_fields_are_equal(influencer1=update_influencer_payload(), influencer2=update_for_auth_user_repo_payload.__dict__)
+        assert response.body == influencer_in_db.__dict__
+        assert response.status_code == 200
 
 
 class TestBrandController(TestCase):

@@ -193,4 +193,4 @@ class InfluencerController(BaseUserController):
                                       bytes).__dict__)
 
     def update(self, event: dict) -> PinfluencerResponse:
-        ...
+        return PinfluencerResponse(status_code=400, body={})
