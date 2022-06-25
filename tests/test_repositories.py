@@ -184,7 +184,7 @@ class TestInfluencerRepository(TestCase):
                                                         influencer3=influencer_from_payload.__dict__)
 
     def test_update_influencer_when_not_found(self):
-        self.assertRaises(self.__sut.update_for_auth_user(auth_user_id="1234", payload=influencer_dto_generator(num=1)), expected_exception=NotFoundException)
+        self.assertRaises(NotFoundException, lambda: self.__sut.update_for_auth_user(auth_user_id="1234", payload=influencer_dto_generator(num=1)))
 
 
 class TestAuthUserRepository(TestCase):
