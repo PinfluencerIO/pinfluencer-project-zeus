@@ -156,7 +156,26 @@ class SqlAlchemyInfluencerRepository(BaseSqlAlchemyUserRepository):
                          resource_dto=Influencer)
 
     def update_for_auth_user(self, auth_user_id: str, payload: Influencer) -> Influencer:
-        return Influencer()
+        entity: SqlAlchemyInfluencerEntity = self._data_manager.session\
+            .query(self._resource_entity)\
+            .filter(self._resource_entity.auth_user_id == auth_user_id)\
+            .first()
+        entity.values = payload.values
+        entity.categories = payload.categories
+        entity.bio = payload.bio
+        entity.website = payload.website
+        entity.insta_handle = payload.insta_handle
+        entity.audience_male_split = payload.audience_male_split
+        entity.audience_female_split = payload.audience_female_split
+        entity.audience_age_13_to_17_split = payload.audience_age_13_to_17_split
+        entity.audience_age_18_to_24_split = payload.audience_age_18_to_24_split
+        entity.audience_age_25_to_34_split = payload.audience_age_25_to_34_split
+        entity.audience_age_35_to_44_split = payload.audience_age_35_to_44_split
+        entity.audience_age_45_to_54_split = payload.audience_age_45_to_54_split
+        entity.audience_age_55_to_64_split = payload.audience_age_55_to_64_split
+        entity.audience_age_65_plus_split = payload.audience_age_65_plus_split
+        self._data_manager.session.commit()
+        return payload
 
     def update_image_for_auth_user(self, auth_user_id: str, image_bytes: str) -> Influencer:
         return self._update_image(auth_user_id=auth_user_id,

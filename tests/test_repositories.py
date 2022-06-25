@@ -177,7 +177,7 @@ class TestInfluencerRepository(TestCase):
         influencer_from_payload = influencer_dto_generator(num=2)
         influencer_from_payload.auth_user_id = influencer_already_in_db.auth_user_id
         self.__data_manager.create_fake_data([influencer_generator(dto=influencer_already_in_db, mapper=self._object_mapper)])
-        returned_influencer = self.__sut.update_for_auth_user(auth_user_id="1234", payload=influencer_from_payload)
+        returned_influencer = self.__sut.update_for_auth_user(auth_user_id="12341", payload=influencer_from_payload)
         queried_influencer = self.__sut.load_by_id(id_=influencer_already_in_db.id)
         assert_influencer_db_fields_are_equal_for_three(influencer1=returned_influencer.__dict__,
                                                         influencer2=queried_influencer.__dict__,
