@@ -286,6 +286,13 @@ class TestInfluencerController(TestCase):
         assert return_value.body == {}
         assert return_value.status_code == 404
 
+    def test_update_when_payload_not_valid(self):
+        payload = update_influencer_payload()
+        payload['bio'] = 120
+        return_value = self.__sut.update(event=create_for_auth_user_event(auth_id="12341", payload=payload))
+        assert return_value.body == {}
+        assert return_value.status_code == 400
+
 
 class TestBrandController(TestCase):
 
