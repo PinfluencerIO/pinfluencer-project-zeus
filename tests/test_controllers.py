@@ -268,6 +268,8 @@ class TestInfluencerController(TestCase):
 
     def test_update(self):
         influencer_in_db = create_influencer_dto()
+        auth_user = update_user_dto()
+        self.__auth_user_repo.get_by_id = MagicMock(return_value=auth_user)
         self.__influencer_repository.update_for_auth_user = MagicMock(return_value=influencer_in_db)
         auth_id = "12341"
         response = self.__sut.update(event=create_for_auth_user_event(auth_id=auth_id, payload=update_influencer_payload()))
@@ -279,6 +281,10 @@ class TestInfluencerController(TestCase):
         assert list(map(lambda x: x.name, update_for_auth_user_repo_payload.categories)) == update_influencer_payload()["categories"]
         assert response.body == influencer_in_db.__dict__
         assert response.status_code == 200
+        assert auth_user.first_name == response.body["first_name"]
+        assert auth_user.last_name == response.body["last_name"]
+        assert auth_user.email == response.body["email"]
+        self.__auth_user_repo.get_by_id.assert_called_once_with(_id=auth_id)
 
     def test_update_when_not_found(self):
         self.__influencer_repository.update_for_auth_user = MagicMock(side_effect=NotFoundException("influencer not found"))
@@ -467,6 +473,9 @@ class TestBrandController(TestCase):
         assert list(map(lambda x: x.name, actual_payload.categories)) == expected_payload['categories']
         assert response.status_code == 200
         assert response.body == expected_dto.__dict__
+        assert response.body["first_name"] == auth_user.first_name
+        assert response.body["email"] == auth_user.email
+        assert response.body["last_name"] == auth_user.last_name
         self.__auth_user_repo.get_by_id.assert_called_once_with(_id=auth_id)
 
     def test_update_when_invalid_payload(self):
