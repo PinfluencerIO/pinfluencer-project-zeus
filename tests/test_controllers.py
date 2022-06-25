@@ -256,6 +256,16 @@ class TestInfluencerController(TestCase):
         assert response.status_code == 400
         assert response.body == {}
 
+    def test_update_profile_image(self):
+        auth_id = "12341"
+        payload = update_image_payload()
+        expected_influencer = influencer_dto_generator(num=1)
+        event = create_for_auth_user_event(auth_id=auth_id, payload=payload)
+        self.__influencer_repository.update_image_for_auth_user = MagicMock(return_value=expected_influencer)
+        response = self.__sut.update_profile_image(event=event)
+        assert response.status_code == 200
+        assert response.body == expected_influencer.__dict__
+
 
 class TestBrandController(TestCase):
 
