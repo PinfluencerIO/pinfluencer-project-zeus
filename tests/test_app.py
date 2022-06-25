@@ -136,7 +136,7 @@ class TestRoutes(TestCase):
     def test_update_auth_influencer(self):
         self.__assert_service_endpoint_200(
             expected_body="""{"updateInfluencer": "some_influencer_value"}""",
-            service_function="update_for_auth_user",
+            service_function="update",
             actual_body={"update_influencer": "some_influencer_value"},
             route_key="PUT /influencers/me",
             service_name="get_new_influencer_controller")
