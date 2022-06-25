@@ -186,5 +186,8 @@ class InfluencerController(BaseUserController):
             return PinfluencerResponse(status_code=400, body={})
         return PinfluencerResponse(status_code=201, body=influencer.__dict__)
 
+    def update_profile_image(self, event: dict) -> PinfluencerResponse:
+        return PinfluencerResponse(body={}, status_code=400)
+
     def update(self, event: dict) -> PinfluencerResponse:
         ...
