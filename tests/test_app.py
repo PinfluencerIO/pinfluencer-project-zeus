@@ -23,12 +23,18 @@ class TestRoutes(TestCase):
         self.__mock_service_locator.get_new_serializer = MagicMock(return_value=self.__serializer)
 
     def test_server_error(self):
+
+        # arrange
         brand_controller: BrandController = Mock()
         setattr(brand_controller, 'get_by_id', MagicMock(side_effect=Exception("some exception is thrown")))
         self.__mock_service_locator.get_new_brand_controller = MagicMock(return_value=brand_controller)
+
+        # act
         response = bootstrap(event={"routeKey": "GET /brands/{brand_id}"},
                              context={},
                              service_locator=self.__mock_service_locator)
+
+        # assert
         assert response == get_as_json(status_code=500,
                                        body="""{"message": "unexpected server error, please try later :("}""")
 
@@ -188,12 +194,18 @@ class TestRoutes(TestCase):
                                       route_key: str,
                                       service_function: str,
                                       service_name: str):
+
+        # arrange
         service = Mock()
         setattr(service, service_function, MagicMock(side_effect=lambda x: self.__service_side_effect(context=x, actual_body=actual_body)))
         setattr(self.__mock_service_locator, service_name, MagicMock(return_value=service))
+
+        # act
         response = bootstrap(event={"routeKey": route_key},
                              context={},
                              service_locator=self.__mock_service_locator)
+
+        # assert
         assert response == get_as_json(status_code=200, body=expected_body)
 
     def __service_side_effect(self, context: PinfluencerContext, actual_body: dict):
@@ -206,7 +218,11 @@ class TestRoutes(TestCase):
         """
         any routes that do not access services from IOC container, like not found or not implemented routes
         """
+
+        # arrange/act
         response = bootstrap(event={"routeKey": route_key},
                              context={},
                              service_locator=self.__mock_service_locator)
+
+        # assert
         assert response == get_as_json(status_code=expected_status_code, body=expected_body)

@@ -59,38 +59,50 @@ class TestJsonSnakeToCamelSerializer(TestCase):
 
     def test_serialize(self):
 
+        # arrange
         input_data = TEST_DICT
         expected = TEST_DICT_JSON
 
+        # act
         actual = self.__json_snake_to_camel_serializer.serialize(input_data)
 
+        # assert
         assert expected == actual
 
     def test_serialize_nested(self):
 
+        # arrange
         input_data = TEST_NESTED_DICT
         expected = TEST_DICT_NESTED_JSON
 
+        # act
         actual = self.__json_snake_to_camel_serializer.serialize(input_data)
 
+        # assert
         assert expected == actual
 
     def test_serialize_collection(self):
 
+        # arrange
         input_data = TEST_LIST_SERIALIZATION
         expected = TEST_LIST_SERIALIZATION_JSON
 
+        # act
         actual = self.__json_snake_to_camel_serializer.serialize(input_data)
 
+        # assert
         assert expected == actual
 
     def test_serialize_collection_empty(self):
 
+        # arrange
         input_data = TEST_LIST_SERIALIZATION_EMPTY
         expected = TEST_LIST_SERIALIZATION_EMPTY_JSON
 
+        # act
         actual = self.__json_snake_to_camel_serializer.serialize(input_data)
 
+        # assert
         assert expected == actual
 
 class TestJsonCamelToSnakeCaseDeserializer(TestCase):
@@ -100,36 +112,48 @@ class TestJsonCamelToSnakeCaseDeserializer(TestCase):
 
     def test_deserialize(self):
 
+        # arrange
         expected = TEST_DICT_WITH_CAPS_KEY
         input_data = TEST_DICT_JSON_WITH_CAPS_KEY
 
+        # act
         actual = self.__json_camel_to_snake_case_deserializer.deserialize(input_data)
 
+        # assert
         assert expected == actual
 
     def test_deserialize_nested(self):
 
+        # arrange
         expected = TEST_NESTED_DICT
         input_data = TEST_DICT_NESTED_JSON
 
+        # act
         actual = self.__json_camel_to_snake_case_deserializer.deserialize(input_data)
 
+        # assert
         assert expected == actual
 
     def test_deserialize_collection(self):
 
+        # arrange
         expected = TEST_LIST_SERIALIZATION
         input_data = TEST_LIST_SERIALIZATION_JSON
 
+        # act
         actual = self.__json_camel_to_snake_case_deserializer.deserialize(input_data)
 
+        # assert
         assert expected == actual
 
     def test_serialize_collection_empty(self):
 
+        # arrange
         expected = TEST_LIST_SERIALIZATION_EMPTY
         input_data = TEST_LIST_SERIALIZATION_EMPTY_JSON
 
+        # act
         actual = self.__json_camel_to_snake_case_deserializer.deserialize(input_data)
 
+        # assert
         assert expected == actual
