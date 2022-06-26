@@ -1,6 +1,6 @@
 from src.crosscutting import print_exception
 from src.service import ServiceLocator
-from src.web import PinfluencerResponse
+from src.web import PinfluencerResponse, PinfluencerContext
 from src.web.routing import Dispatcher
 
 
@@ -19,10 +19,13 @@ def bootstrap(event: dict,
         print(f'Route: {route}')
         print(f'Event: {event}')
         routes = dispatcher.dispatch_route_to_ctr
+        response = PinfluencerResponse()
         if route not in routes:
             response = PinfluencerResponse(status_code=404, body={"message": f"route: {route} not found"})
         else:
-            response = routes[route].action(event)
+            routes[route].action(PinfluencerContext(response=response,
+                                                    short_circuit=False,
+                                                    event=event))
     except Exception as e:
         print_exception(e)
         response = PinfluencerResponse.as_500_error()

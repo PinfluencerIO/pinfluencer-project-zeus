@@ -1,15 +1,7 @@
 from collections import OrderedDict
-from dataclasses import dataclass, field
-from typing import Callable
 
 from src.service import ServiceLocator
-from src.web import PinfluencerResponse
-
-
-@dataclass
-class Route:
-    action: Callable[[dict], PinfluencerResponse]
-    after_hooks: list[Callable[[PinfluencerResponse], None]] = field(default_factory=list)
+from src.web import Route, PinfluencerContext
 
 
 class Dispatcher:
@@ -17,9 +9,14 @@ class Dispatcher:
         self.__brand_ctr = service_locator.get_new_brand_controller()
         self.__influencer_ctr = service_locator.get_new_influencer_controller()
 
+    def __get_not_implemented_method(self, route: str) -> Route:
+        return Route(action=lambda context: self.__not_implemented(context=context,
+                                                                   route=route))
+
     @staticmethod
-    def __get_not_implemented_method(route: str) -> Route:
-        return Route(action=lambda event: PinfluencerResponse(status_code=405, body={"message": f"{route} is not implemented"}))
+    def __not_implemented(context: PinfluencerContext, route: str):
+        context.response.status_code = 405
+        context.response.body={"message": f"{route} is not implemented"}
 
     @property
     def dispatch_route_to_ctr(self) -> dict[dict[str, Route]]:

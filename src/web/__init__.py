@@ -1,4 +1,5 @@
-from typing import Union
+from dataclasses import dataclass, field
+from typing import Union, Callable
 
 from src.types import Serializer
 
@@ -35,3 +36,19 @@ class PinfluencerResponse:
 
 def get_cognito_user(event):
     return event['requestContext']['authorizer']['jwt']['claims']['cognito:username']
+
+
+@dataclass
+class PinfluencerContext:
+    response: PinfluencerResponse = None,
+    short_circuit: bool = False,
+    event: Union[list, dict] = field(default_factory=dict)
+
+
+PinfluencerAction = Callable[[PinfluencerContext], None]
+
+
+@dataclass
+class Route:
+    action: PinfluencerAction
+    after_hooks: list[PinfluencerAction] = field(default_factory=list)

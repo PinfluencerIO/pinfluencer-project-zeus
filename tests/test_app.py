@@ -9,7 +9,7 @@ from src.app import bootstrap
 from src.crosscutting import JsonSnakeToCamelSerializer
 from src.service import ServiceLocator
 from src.types import Serializer
-from src.web import PinfluencerResponse
+from src.web import PinfluencerContext
 from src.web.controllers import BrandController
 from src.web.routing import Dispatcher
 from tests import get_as_json
@@ -189,12 +189,15 @@ class TestRoutes(TestCase):
                                       service_function: str,
                                       service_name: str):
         service = Mock()
-        setattr(service, service_function, MagicMock(return_value=PinfluencerResponse(body=actual_body)))
+        setattr(service, service_function, MagicMock(side_effect=lambda x: self.__service_side_effect(context=x, actual_body=actual_body)))
         setattr(self.__mock_service_locator, service_name, MagicMock(return_value=service))
         response = bootstrap(event={"routeKey": route_key},
                              context={},
                              service_locator=self.__mock_service_locator)
         assert response == get_as_json(status_code=200, body=expected_body)
+
+    def __service_side_effect(self, context: PinfluencerContext, actual_body: dict):
+        context.response.body = actual_body
 
     def __assert_non_service_layer_route(self,
                                          route_key: str,

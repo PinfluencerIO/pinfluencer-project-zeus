@@ -9,6 +9,7 @@ from src.domain.models import Brand, ValueEnum, CategoryEnum, User, Influencer
 from src.domain.validation import BrandValidator, InfluencerValidator
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.types import BrandRepository, InfluencerRepository, AuthUserRepository
+from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.controllers import BrandController, InfluencerController
 from src.web.validation import valid_uuid
 from tests import brand_dto_generator, assert_brand_updatable_fields_are_equal, TEST_DEFAULT_BRAND_LOGO, \
@@ -161,7 +162,9 @@ class TestInfluencerController(TestCase):
         influencer.created = influencer_in_db.created
         self.__influencer_repository.load_by_id = MagicMock(return_value=influencer_in_db)
         self.__auth_user_repo.get_by_id = MagicMock(return_value=auth_user)
-        pinfluencer_response = self.__sut.get_by_id(get_influencer_id_event(influencer.id))
+        pinfluencer_response = PinfluencerResponse()
+        self.__sut.get_by_id(PinfluencerContext(response=pinfluencer_response,
+                                                event=get_influencer_id_event(influencer.id)))
         assert pinfluencer_response.body == influencer.__dict__
 
     def test_get(self):
@@ -173,7 +176,9 @@ class TestInfluencerController(TestCase):
         self.__influencer_repository.load_for_auth_user = MagicMock(return_value=db_influencer)
         self.__auth_user_repo.get_by_id = MagicMock(return_value=auth_user)
         auth_id = "12341"
-        response = self.__sut.get(get_auth_user_event(auth_id))
+        response = PinfluencerResponse()
+        self.__sut.get(PinfluencerContext(response=response,
+                                          event=get_auth_user_event(auth_id)))
         assert response.body == expected_influencer.__dict__
         assert response.status_code == 200
 
@@ -210,7 +215,9 @@ class TestInfluencerController(TestCase):
             user_dto_generator(num=3),
             user_dto_generator(num=4)
         ])
-        pinfluencer_response = self.__sut.get_all({})
+        pinfluencer_response = PinfluencerResponse()
+        self.__sut.get_all(PinfluencerContext(response=pinfluencer_response,
+                                              event={}))
         assert pinfluencer_response.body == list(map(lambda x: x.__dict__, expected_influencers))
         assert pinfluencer_response.status_code == 200
 
@@ -221,7 +228,9 @@ class TestInfluencerController(TestCase):
         event = create_for_auth_user_event(auth_id=auth_id, payload=expected_payload)
         self.__influencer_repository.write_new_for_auth_user = MagicMock(return_value=influencer_db)
         self.__auth_user_repo.update_influencer_claims = MagicMock()
-        response = self.__sut.create(event=event)
+        response = PinfluencerResponse()
+        self.__sut.create(PinfluencerContext(response=response,
+                                             event=event))
         payload_captor = Captor()
         auth_payload_captor = Captor()
         self.__auth_user_repo.update_influencer_claims.assert_called_once_with(user=auth_payload_captor)
@@ -243,7 +252,9 @@ class TestInfluencerController(TestCase):
         auth_id = "12341"
         event = create_for_auth_user_event(auth_id=auth_id, payload=update_influencer_payload())
         self.__influencer_repository.write_new_for_auth_user = MagicMock(side_effect=AlreadyExistsException())
-        response = self.__sut.create(event=event)
+        response = PinfluencerResponse()
+        self.__sut.create(PinfluencerContext(event=event,
+                                             response=response))
         assert response.status_code == 400
         assert response.body == {}
 
@@ -252,7 +263,9 @@ class TestInfluencerController(TestCase):
         payload = update_influencer_payload()
         payload['bio'] = 120
         event = create_for_auth_user_event(auth_id=auth_id, payload=payload)
-        response = self.__sut.create(event=event)
+        response = PinfluencerResponse()
+        self.__sut.create(PinfluencerContext(event=event,
+                                             response=response))
         assert response.status_code == 400
         assert response.body == {}
 
@@ -262,7 +275,9 @@ class TestInfluencerController(TestCase):
         expected_influencer = influencer_dto_generator(num=1)
         event = create_for_auth_user_event(auth_id=auth_id, payload=payload)
         self.__influencer_repository.update_image_for_auth_user = MagicMock(return_value=expected_influencer)
-        response = self.__sut.update_profile_image(event=event)
+        response = PinfluencerResponse()
+        self.__sut.update_profile_image(PinfluencerContext(event=event,
+                                                           response=response))
         assert response.status_code == 200
         assert response.body == expected_influencer.__dict__
 
@@ -272,13 +287,20 @@ class TestInfluencerController(TestCase):
         self.__auth_user_repo.get_by_id = MagicMock(return_value=auth_user)
         self.__influencer_repository.update_for_auth_user = MagicMock(return_value=influencer_in_db)
         auth_id = "12341"
-        response = self.__sut.update(event=create_for_auth_user_event(auth_id=auth_id, payload=update_influencer_payload()))
+        response = PinfluencerResponse()
+        self.__sut.update(PinfluencerContext(
+            event=create_for_auth_user_event(auth_id=auth_id, payload=update_influencer_payload()),
+            response=response))
         arg_captor = Captor()
-        self.__influencer_repository.update_for_auth_user.assert_called_once_with(auth_user_id=auth_id, payload=arg_captor)
+        self.__influencer_repository.update_for_auth_user.assert_called_once_with(auth_user_id=auth_id,
+                                                                                  payload=arg_captor)
         update_for_auth_user_repo_payload: Influencer = arg_captor.arg
-        assert_influencer_update_fields_are_equal(influencer1=update_influencer_payload(), influencer2=update_for_auth_user_repo_payload.__dict__)
-        assert list(map(lambda x: x.name, update_for_auth_user_repo_payload.values)) == update_influencer_payload()["values"]
-        assert list(map(lambda x: x.name, update_for_auth_user_repo_payload.categories)) == update_influencer_payload()["categories"]
+        assert_influencer_update_fields_are_equal(influencer1=update_influencer_payload(),
+                                                  influencer2=update_for_auth_user_repo_payload.__dict__)
+        assert list(map(lambda x: x.name, update_for_auth_user_repo_payload.values)) == update_influencer_payload()[
+            "values"]
+        assert list(map(lambda x: x.name, update_for_auth_user_repo_payload.categories)) == update_influencer_payload()[
+            "categories"]
         assert response.body == influencer_in_db.__dict__
         assert response.status_code == 200
         assert auth_user.first_name == response.body["first_name"]
@@ -287,15 +309,21 @@ class TestInfluencerController(TestCase):
         self.__auth_user_repo.get_by_id.assert_called_once_with(_id=auth_id)
 
     def test_update_when_not_found(self):
-        self.__influencer_repository.update_for_auth_user = MagicMock(side_effect=NotFoundException("influencer not found"))
-        return_value = self.__sut.update(event=create_for_auth_user_event(auth_id="12341", payload=update_influencer_payload()))
+        self.__influencer_repository.update_for_auth_user = MagicMock(
+            side_effect=NotFoundException("influencer not found"))
+        return_value = PinfluencerResponse()
+        self.__sut.update(PinfluencerContext(
+            event=create_for_auth_user_event(auth_id="12341", payload=update_influencer_payload()),
+            response=return_value))
         assert return_value.body == {}
         assert return_value.status_code == 404
 
     def test_update_when_payload_not_valid(self):
         payload = update_influencer_payload()
         payload['bio'] = 120
-        return_value = self.__sut.update(event=create_for_auth_user_event(auth_id="12341", payload=payload))
+        return_value = PinfluencerResponse()
+        self.__sut.update(PinfluencerContext(event=create_for_auth_user_event(auth_id="12341", payload=payload),
+                                             response=return_value))
         assert return_value.body == {}
         assert return_value.status_code == 400
 
@@ -319,7 +347,9 @@ class TestBrandController(TestCase):
         expected_brand.created = brand_from_db.created
         self.__brand_repository.load_by_id = MagicMock(return_value=brand_from_db)
         self.__auth_user_repo.get_by_id = MagicMock(return_value=user_from_auth_db)
-        pinfluencer_response = self.__sut.get_by_id(get_brand_id_event(brand_from_db.id))
+        pinfluencer_response = PinfluencerResponse()
+        self.__sut.get_by_id(PinfluencerContext(event=get_brand_id_event(brand_from_db.id),
+                                                response=pinfluencer_response))
         self.__auth_user_repo.get_by_id.assert_called_once_with(_id=brand_from_db.auth_user_id)
         self.__brand_repository.load_by_id.assert_called_once_with(id_=brand_from_db.id)
         assert pinfluencer_response.body == expected_brand.__dict__
@@ -328,7 +358,9 @@ class TestBrandController(TestCase):
     def test_get_by_id_when_not_found(self):
         self.__brand_repository.load_by_id = MagicMock(side_effect=NotFoundException())
         field = str(uuid.uuid4())
-        pinfluencer_response = self.__sut.get_by_id(get_brand_id_event(field))
+        pinfluencer_response = PinfluencerResponse()
+        self.__sut.get_by_id(PinfluencerContext(event=get_brand_id_event(field),
+                                                response=pinfluencer_response))
         self.__brand_repository.load_by_id.assert_called_once_with(id_=field)
         assert pinfluencer_response.body == {}
         assert pinfluencer_response.status_code == 404
@@ -336,7 +368,9 @@ class TestBrandController(TestCase):
     def test_get_by_id_when_invalid_uuid(self):
         self.__brand_repository.load_by_id = MagicMock(return_value=None)
         field = "12345"
-        pinfluencer_response = self.__sut.get_by_id(get_brand_id_event(field))
+        pinfluencer_response = PinfluencerResponse()
+        self.__sut.get_by_id(PinfluencerContext(event=get_brand_id_event(field),
+                                                response=pinfluencer_response))
         self.__brand_repository.load_by_id.assert_not_called()
         assert pinfluencer_response.body == {}
         assert pinfluencer_response.status_code == 400
@@ -374,7 +408,9 @@ class TestBrandController(TestCase):
             user_dto_generator(num=3),
             user_dto_generator(num=4)
         ])
-        pinfluencer_response = self.__sut.get_all({})
+        pinfluencer_response = PinfluencerResponse()
+        self.__sut.get_all(PinfluencerContext(event={},
+                                              response=pinfluencer_response))
         self.__brand_repository.load_collection.assert_called_once()
         self.__auth_user_repo.get_by_id.assert_has_calls(calls=[
             call(_id=expected_brand1.auth_user_id),
@@ -394,7 +430,9 @@ class TestBrandController(TestCase):
         self.__brand_repository.load_for_auth_user = MagicMock(return_value=db_brand)
         self.__auth_user_repo.get_by_id = MagicMock(return_value=auth_user)
         auth_id = "12341"
-        response = self.__sut.get(get_auth_user_event(auth_id))
+        response = PinfluencerResponse()
+        self.__sut.get(PinfluencerContext(event=get_auth_user_event(auth_id),
+                                          response=response))
         self.__brand_repository.load_for_auth_user.assert_called_once_with(auth_user_id=auth_id)
         self.__auth_user_repo.get_by_id.assert_called_once_with(_id=auth_id)
         assert response.body == expected_brand.__dict__
@@ -403,7 +441,9 @@ class TestBrandController(TestCase):
     def test_get_when_not_found(self):
         self.__brand_repository.load_for_auth_user = MagicMock(side_effect=NotFoundException())
         auth_id = "12341"
-        response = self.__sut.get(get_auth_user_event(auth_id))
+        response = PinfluencerResponse()
+        self.__sut.get(PinfluencerContext(event=get_auth_user_event(auth_id),
+                                          response=response))
         self.__brand_repository.load_for_auth_user.assert_called_once_with(auth_user_id=auth_id)
         assert response.body == {}
         assert response.status_code == 404
@@ -415,7 +455,9 @@ class TestBrandController(TestCase):
         event = create_for_auth_user_event(auth_id=auth_id, payload=expected_payload)
         self.__brand_repository.write_new_for_auth_user = MagicMock(return_value=brand_db)
         self.__auth_user_repo.update_brand_claims = MagicMock()
-        response = self.__sut.create(event=event)
+        response = PinfluencerResponse()
+        self.__sut.create(PinfluencerContext(event=event,
+                                             response=response))
         payload_captor = Captor()
         auth_payload_captor = Captor()
         self.__auth_user_repo.update_brand_claims.assert_called_once_with(user=auth_payload_captor)
@@ -438,7 +480,9 @@ class TestBrandController(TestCase):
         auth_id = "12341"
         event = create_for_auth_user_event(auth_id=auth_id, payload=update_brand_payload())
         self.__brand_repository.write_new_for_auth_user = MagicMock(side_effect=AlreadyExistsException())
-        response = self.__sut.create(event=event)
+        response = PinfluencerResponse()
+        self.__sut.create(PinfluencerContext(event=event,
+                                             response=response))
         assert response.status_code == 400
         assert response.body == {}
 
@@ -447,7 +491,9 @@ class TestBrandController(TestCase):
         payload = update_brand_payload()
         payload['brand_name'] = 120
         event = create_for_auth_user_event(auth_id=auth_id, payload=payload)
-        response = self.__sut.create(event=event)
+        response = PinfluencerResponse()
+        self.__sut.create(PinfluencerContext(event=event,
+                                             response=response))
         assert response.status_code == 400
         assert response.body == {}
 
@@ -462,7 +508,9 @@ class TestBrandController(TestCase):
         event = create_for_auth_user_event(auth_id=auth_id, payload=update_brand_payload())
         self.__brand_repository.update_for_auth_user = MagicMock(return_value=brand_in_db)
         self.__auth_user_repo.get_by_id = MagicMock(return_value=auth_user)
-        response = self.__sut.update(event=event)
+        response = PinfluencerResponse()
+        self.__sut.update(PinfluencerContext(event=event,
+                                             response=response))
         payload_captor = Captor()
         self.__brand_repository.update_for_auth_user.assert_called_once_with(auth_user_id=auth_id,
                                                                              payload=payload_captor)
@@ -484,7 +532,9 @@ class TestBrandController(TestCase):
         payload['brand_name'] = 120
         event = create_for_auth_user_event(auth_id=auth_id, payload=payload)
 
-        response = self.__sut.update(event=event)
+        response = PinfluencerResponse()
+        self.__sut.update(PinfluencerContext(event=event,
+                                             response=response))
         assert response.status_code == 400
         assert response.body == {}
 
@@ -493,7 +543,9 @@ class TestBrandController(TestCase):
         payload = update_brand_payload()
         event = create_for_auth_user_event(auth_id=auth_id, payload=payload)
         self.__brand_repository.update_for_auth_user = MagicMock(side_effect=NotFoundException())
-        response = self.__sut.update(event=event)
+        response = PinfluencerResponse()
+        self.__sut.update(PinfluencerContext(event=event,
+                                             response=response))
         assert response.status_code == 404
         assert response.body == {}
 
@@ -503,7 +555,9 @@ class TestBrandController(TestCase):
         expected_brand = brand_dto_generator(num=1)
         event = create_for_auth_user_event(auth_id=auth_id, payload=payload)
         self.__brand_repository.update_logo_for_auth_user = MagicMock(return_value=expected_brand)
-        response = self.__sut.update_logo(event=event)
+        response = PinfluencerResponse()
+        self.__sut.update_logo(PinfluencerContext(event=event,
+                                                  response=response))
         assert response.status_code == 200
         assert response.body == expected_brand.__dict__
 
@@ -512,7 +566,9 @@ class TestBrandController(TestCase):
         payload = update_image_payload()
         event = create_for_auth_user_event(auth_id=auth_id, payload=payload)
         self.__brand_repository.update_logo_for_auth_user = MagicMock(side_effect=NotFoundException())
-        response = self.__sut.update_logo(event=event)
+        response = PinfluencerResponse()
+        self.__sut.update_logo(PinfluencerContext(event=event,
+                                                  response=response))
         assert response.status_code == 404
         assert response.body == {}
 
@@ -522,7 +578,9 @@ class TestBrandController(TestCase):
         expected_brand = brand_dto_generator(num=1)
         event = create_for_auth_user_event(auth_id=auth_id, payload=payload)
         self.__brand_repository.update_header_image_for_auth_user = MagicMock(return_value=expected_brand)
-        response = self.__sut.update_header_image(event=event)
+        response = PinfluencerResponse()
+        self.__sut.update_header_image(PinfluencerContext(event=event,
+                                                          response=response))
         assert response.status_code == 200
         assert response.body == expected_brand.__dict__
 
@@ -531,6 +589,8 @@ class TestBrandController(TestCase):
         payload = update_image_payload()
         event = create_for_auth_user_event(auth_id=auth_id, payload=payload)
         self.__brand_repository.update_header_image_for_auth_user = MagicMock(side_effect=NotFoundException())
-        response = self.__sut.update_header_image(event=event)
+        response = PinfluencerResponse()
+        self.__sut.update_header_image(PinfluencerContext(event=event,
+                                                          response=response))
         assert response.status_code == 404
         assert response.body == {}
