@@ -7,27 +7,26 @@ from src.domain.models import ValueEnum, CategoryEnum, Brand, Influencer
 from src.domain.validation import InfluencerValidator
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.types import BrandRepository, Deserializer, BrandValidatable, UserRepository, InfluencerRepository
-from src.web import PinfluencerResponse, get_cognito_user, BRAND_ID_PATH_KEY, INFLUENCER_ID_PATH_KEY, PinfluencerContext
+from src.web import PinfluencerResponse, BRAND_ID_PATH_KEY, INFLUENCER_ID_PATH_KEY, PinfluencerContext
 from src.web.validation import valid_path_resource_id
 
 
 class BaseUserController:
 
-    def __init__(self, deserializer: Deserializer,
+    def __init__(self,
                  user_repository: UserRepository,
                  resource_id: str):
         self._resource_id = resource_id
         self._user_repository = user_repository
-        self._deserializer = deserializer
 
-    def _update_image(self, event: dict, updater: Callable[[str, str], dict]) -> [PinfluencerResponse, bool]:
-        auth_user_id = get_cognito_user(event)
-        payload_json_string = event['body']
-        payload_dict = self._deserializer.deserialize(payload_json_string)
+    def _update_image(self, context: PinfluencerContext, updater: Callable[[str, str], dict]) -> [PinfluencerResponse,
+                                                                                                  bool]:
+        auth_user_id = context.auth_user_id
+        payload_dict = context.body
         try:
             user = updater(auth_user_id, payload_dict['image_bytes'])
             return [PinfluencerResponse(status_code=200,
-                                       body=user), False]
+                                        body=user), False]
         except NotFoundException as e:
             print_exception(e)
             return [PinfluencerResponse(status_code=404, body={}), True]
@@ -56,7 +55,7 @@ class BaseUserController:
         context.response.body = {}
 
     def get(self, context: PinfluencerContext) -> None:
-        auth_user_id = get_cognito_user(context.event)
+        auth_user_id = context.auth_user_id
         if auth_user_id:
             try:
                 brand = self._user_repository.load_for_auth_user(auth_user_id=auth_user_id)
@@ -74,13 +73,12 @@ class BrandController(BaseUserController):
     def __init__(self, brand_repository: BrandRepository,
                  brand_validator: BrandValidatable,
                  deserializer: Deserializer):
-        super().__init__(deserializer, brand_repository, BRAND_ID_PATH_KEY)
+        super().__init__(brand_repository, BRAND_ID_PATH_KEY)
         self.__brand_validator = brand_validator
 
     def create(self, context: PinfluencerContext) -> None:
-        auth_user_id = get_cognito_user(context.event)
-        payload_json_string = context.event['body']
-        payload_dict = self._deserializer.deserialize(payload_json_string)
+        auth_user_id = context.auth_user_id
+        payload_dict = context.body
         try:
             self.__brand_validator.validate_brand(payload=payload_dict)
             brand = Brand(first_name=payload_dict["first_name"],
@@ -103,9 +101,8 @@ class BrandController(BaseUserController):
         context.response.status_code = 201
 
     def update(self, context: PinfluencerContext) -> None:
-        auth_user_id = get_cognito_user(context.event)
-        payload_json_string = context.event['body']
-        payload_dict = self._deserializer.deserialize(payload_json_string)
+        auth_user_id = context.auth_user_id
+        payload_dict = context.body
         try:
             self.__brand_validator.validate_brand(payload_dict)
             brand = Brand(brand_name=payload_dict["brand_name"],
@@ -131,20 +128,21 @@ class BrandController(BaseUserController):
             context.response.status_code = 404
 
     def update_logo(self, context: PinfluencerContext) -> None:
-        [response, short_circuit] = self._update_image(event=context.event,
-                                      updater=lambda auth_id, bytes: self._user_repository.update_logo_for_auth_user(
-                                          auth_id,
-                                          bytes).__dict__)
+        [response, short_circuit] = self._update_image(context=context,
+                                                       updater=lambda auth_id,
+                                                                      bytes: self._user_repository.update_logo_for_auth_user(
+                                                           auth_id,
+                                                           bytes).__dict__)
         context.short_circuit = short_circuit
         context.response.body = response.body
         context.response.status_code = response.status_code
 
     def update_header_image(self, context: PinfluencerContext) -> None:
-        [response, short_circuit] = self._update_image(event=context.event,
-                                      updater=lambda auth_id,
-                                                     bytes: self._user_repository.update_header_image_for_auth_user(
-                                          auth_id,
-                                          bytes).__dict__)
+        [response, short_circuit] = self._update_image(context=context,
+                                                       updater=lambda auth_id,
+                                                                      bytes: self._user_repository.update_header_image_for_auth_user(
+                                                           auth_id,
+                                                           bytes).__dict__)
         context.short_circuit = short_circuit
         context.response.status_code = response.status_code
         context.response.body = response.body
@@ -155,13 +153,12 @@ class InfluencerController(BaseUserController):
     def __init__(self, deserializer: Deserializer,
                  influencer_repository: InfluencerRepository,
                  influencer_validator: InfluencerValidator):
-        super().__init__(deserializer, influencer_repository, INFLUENCER_ID_PATH_KEY)
+        super().__init__(influencer_repository, INFLUENCER_ID_PATH_KEY)
         self.__influencer_validator = influencer_validator
 
     def create(self, context: PinfluencerContext) -> None:
-        auth_user_id = get_cognito_user(context.event)
-        payload_json_string = context.event['body']
-        payload_dict = self._deserializer.deserialize(payload_json_string)
+        auth_user_id = context.auth_user_id
+        payload_dict = context.body
         try:
             self.__influencer_validator.validate_influencer(payload=payload_dict)
             influencer = Influencer(first_name=payload_dict["first_name"],
@@ -193,18 +190,18 @@ class InfluencerController(BaseUserController):
         context.response.status_code = 201
 
     def update_profile_image(self, context: PinfluencerContext) -> None:
-        [response, short_circuit] = self._update_image(event=context.event,
-                                  updater=lambda auth_id, bytes: self._user_repository.update_image_for_auth_user(
-                                      auth_id,
-                                      bytes).__dict__)
+        [response, short_circuit] = self._update_image(context=context,
+                                                       updater=lambda auth_id,
+                                                                      bytes: self._user_repository.update_image_for_auth_user(
+                                                           auth_id,
+                                                           bytes).__dict__)
         context.short_circuit = short_circuit
         context.response.status_code = response.status_code
         context.response.body = response.body
 
     def update(self, context: PinfluencerContext) -> None:
-        auth_user_id = get_cognito_user(context.event)
-        payload_json_string = context.event['body']
-        payload_dict = self._deserializer.deserialize(payload_json_string)
+        auth_user_id = context.auth_user_id
+        payload_dict = context.body
         try:
             self.__influencer_validator.validate_influencer(payload_dict)
             influencer_from_db = self._user_repository.update_for_auth_user(auth_user_id=auth_user_id,
