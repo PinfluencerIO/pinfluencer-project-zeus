@@ -2,6 +2,24 @@ from src.types import AuthUserRepository
 from src.web import PinfluencerContext
 
 
+class BrandAfterHooks:
+
+    def __init__(self, auth_user_repository: AuthUserRepository):
+        self.__auth_user_repository = auth_user_repository
+
+    def set_brand_claims(self, context: PinfluencerContext):
+        ...
+
+
+class InfluencerAfterHooks:
+
+    def __init__(self, auth_user_repository: AuthUserRepository):
+        self.__auth_user_repository = auth_user_repository
+
+    def set_influencer_claims(self, context: PinfluencerContext):
+        ...
+
+
 class UserBeforeHooks:
 
     def set_auth_user_id(self, context: PinfluencerContext):

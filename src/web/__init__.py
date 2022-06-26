@@ -43,7 +43,8 @@ class PinfluencerContext:
     response: PinfluencerResponse = None,
     short_circuit: bool = False,
     event: Union[list, dict] = field(default_factory=dict),
-    auth_user_id: str = ""
+    auth_user_id: str = "",
+    body: dict = field(default_factory=dict)
 
 
 PinfluencerAction = Callable[[PinfluencerContext], None]

@@ -1,11 +1,47 @@
 from unittest import TestCase
 from unittest.mock import Mock, MagicMock, call
 
+from callee import Captor
+
 from src.domain.models import User
 from src.types import AuthUserRepository
 from src.web import PinfluencerContext, PinfluencerResponse
-from src.web.hooks import UserAfterHooks, UserBeforeHooks
+from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks
 from tests import brand_dto_generator, RepoEnum, get_auth_user_event
+
+
+class TestBrandAfterHooks(TestCase):
+
+    def setUp(self) -> None:
+        self.__auth_user_repository: AuthUserRepository = Mock()
+        self.__sut = BrandAfterHooks(auth_user_repository=self.__auth_user_repository)
+
+    def test_set_brand_claims(self):
+
+        # arrange
+        self.__auth_user_repository.update_brand_claims = MagicMock()
+        auth_user_id = "12341"
+        first_name = "aidan"
+        last_name = "gannon"
+        email = "aidanwilliamgannon@gmail.com"
+        context = PinfluencerContext(response=PinfluencerResponse(),
+                                     auth_user_id=auth_user_id,
+                                     body={
+                                         "first_name": first_name,
+                                         "last_name": last_name,
+                                         "email": email
+                                     })
+
+        # act
+        self.__sut.set_brand_claims(context=context)
+
+        # assert
+        captor = Captor()
+        self.__auth_user_repository.update_brand_claims.assert_called_once_with(user=captor)
+        user_payload_arg: User = captor.arg
+        assert user_payload_arg.first_name == first_name
+        assert user_payload_arg.last_name == last_name
+        assert user_payload_arg.email == email
 
 
 class TestUserBeforeHooks(TestCase):
@@ -14,7 +50,6 @@ class TestUserBeforeHooks(TestCase):
         self.__sut = UserBeforeHooks()
 
     def test_set_auth_user_id(self):
-
         # arrange
         response = PinfluencerResponse()
         auth_id = "12341"
@@ -25,6 +60,7 @@ class TestUserBeforeHooks(TestCase):
 
         # assert
         assert context.auth_user_id == auth_id
+
 
 class TestUserAfterHooks(TestCase):
 
@@ -52,7 +88,6 @@ class TestUserAfterHooks(TestCase):
         self.__auth_user_repository.get_by_id.assert_called_once_with(_id=brand.auth_user_id)
 
     def test_tag_auth_user_claims_to_response_collection(self):
-
         # arrange
         users = [
             User(first_name="cognito_first_name1",
