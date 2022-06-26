@@ -12,3 +12,6 @@ class UserAfterHooks:
         context.response.body["first_name"] = auth_user.first_name
         context.response.body["last_name"] = auth_user.last_name
         context.response.body["email"] = auth_user.email
+
+    def tag_auth_user_claims_to_response_collection(self, context: PinfluencerContext):
+        ...

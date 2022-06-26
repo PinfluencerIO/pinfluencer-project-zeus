@@ -1,5 +1,5 @@
 from unittest import TestCase
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock, MagicMock, call
 
 from src.domain.models import User
 from src.types import AuthUserRepository
@@ -15,7 +15,6 @@ class TestUserAfterHooks(TestCase):
         self.__sut = UserAfterHooks(auth_user_repository=self.__auth_user_repository)
 
     def test_tag_auth_user_claims_to_response(self):
-
         # arrange
         brand = brand_dto_generator(num=1, repo=RepoEnum.STD_REPO)
         response = PinfluencerResponse(body=brand.__dict__)
@@ -35,3 +34,48 @@ class TestUserAfterHooks(TestCase):
         assert response.body["last_name"] == auth_user.last_name
         assert response.body["email"] == auth_user.email
         self.__auth_user_repository.get_by_id.assert_called_once_with(_id=auth_user_id)
+
+    def test_tag_auth_user_claims_to_response_collection(self):
+
+        # arrange
+        users = [
+            User(first_name="cognito_first_name1",
+                 last_name="cognito_last_name1",
+                 email="cognito_email1"),
+            User(first_name="cognito_first_name2",
+                 last_name="cognito_last_name2",
+                 email="cognito_email2"),
+            User(first_name="cognito_first_name3",
+                 last_name="cognito_last_name3",
+                 email="cognito_email3")
+        ]
+        brands = [
+            brand_dto_generator(num=1).__dict__,
+            brand_dto_generator(num=2).__dict__,
+            brand_dto_generator(num=3).__dict__
+        ]
+        self.__auth_user_repository.get_by_id = MagicMock(side_effect=users)
+        response = PinfluencerResponse(body=brands)
+
+        # act
+        self.__sut.tag_auth_user_claims_to_response_collection(context=PinfluencerContext(response=response,
+                                                                                          event={}))
+
+        # assert
+        assert response.body[0]["first_name"] == users[0].first_name
+        assert response.body[0]["last_name"] == users[0].last_name
+        assert response.body[0]["email"] == users[0].email
+
+        assert response.body[1]["first_name"] == users[1].first_name
+        assert response.body[1]["last_name"] == users[1].last_name
+        assert response.body[1]["email"] == users[1].email
+
+        assert response.body[2]["first_name"] == users[2].first_name
+        assert response.body[2]["last_name"] == users[2].last_name
+        assert response.body[2]["email"] == users[2].email
+
+        self.__auth_user_repository.get_by_id.assert_has_calls(calls=[
+            call(_id=users[0].auth_user_id),
+            call(_id=users[1].auth_user_id),
+            call(_id=users[2].auth_user_id)
+        ])
