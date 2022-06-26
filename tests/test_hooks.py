@@ -19,21 +19,19 @@ class TestBrandBeforeHooks(TestCase):
         self.__brand_validator = BrandValidator()
         self.__sut = BrandBeforeHooks(brand_validator=self.__brand_validator)
 
-
     def test_validate_brand_when_valid(self):
-
         # arrange
         context = PinfluencerContext(body={
             "brand_name": "my brand",
             "brand_description": "this is my brand",
             "website": "https://brand.com"
-        })
+        }, response=PinfluencerResponse(), short_circuit=False)
 
         # act
         self.__sut.validate_brand(context=context)
 
         # assert
-        assert context.short_circuit == False
+        assert not context.short_circuit
 
     def test_validate_brand_when_not_valid(self):
         # arrange
@@ -41,7 +39,7 @@ class TestBrandBeforeHooks(TestCase):
             "brand_name": "my brand",
             "brand_description": "this is my brand",
             "website": "invalid website"
-        })
+        }, response=PinfluencerResponse(), short_circuit=False)
 
         # act
         self.__sut.validate_brand(context=context)
@@ -63,20 +61,20 @@ class TestInfluencerBeforeHooks(TestCase):
         context = PinfluencerContext(body={
             "bio": "my brand",
             "website": "https://brand.com"
-        })
+        }, response=PinfluencerResponse(), short_circuit=False)
 
         # act
         self.__sut.validate_influencer(context=context)
 
         # assert
-        assert context.short_circuit == False
+        assert not context.short_circuit
 
     def test_validate_influencer_when_not_valid(self):
         # arrange
         context = PinfluencerContext(body={
             "bio": "this is my brand",
             "website": "invalid website"
-        })
+        }, response=PinfluencerResponse(), short_circuit=False)
 
         # act
         self.__sut.validate_influencer(context=context)
@@ -94,7 +92,6 @@ class TestCommonHooks(TestCase):
         self.__sut = CommonHooks(deserializer=self.__deserializer)
 
     def test_set_body(self):
-
         # arrange
         body = {
             "first_name": "aidan",
@@ -118,7 +115,6 @@ class TestBrandAfterHooks(TestCase):
         self.__sut = BrandAfterHooks(auth_user_repository=self.__auth_user_repository)
 
     def test_set_brand_claims(self):
-
         # arrange
         self.__auth_user_repository.update_brand_claims = MagicMock()
         auth_user_id = "12341"
@@ -153,7 +149,6 @@ class TestInfluencerAfterHooks(TestCase):
         self.__sut = InfluencerAfterHooks(auth_user_repository=self.__auth_user_repository)
 
     def test_set_brand_claims(self):
-
         # arrange
         self.__auth_user_repository.update_influencer_claims = MagicMock()
         auth_user_id = "12341"

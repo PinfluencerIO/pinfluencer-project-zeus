@@ -1,3 +1,6 @@
+from jsonschema.exceptions import ValidationError
+
+from src.crosscutting import print_exception
 from src.domain.models import Brand, Influencer
 from src.domain.validation import BrandValidator, InfluencerValidator
 from src.types import AuthUserRepository, Deserializer
@@ -19,7 +22,13 @@ class InfluencerBeforeHooks:
         self.__influencer_validator = influencer_validator
 
     def validate_influencer(self, context: PinfluencerContext):
-        ...
+        try:
+            self.__influencer_validator.validate_influencer(payload=context.body)
+        except ValidationError as e:
+            print_exception(e)
+            context.short_circuit = True
+            context.response.body = {}
+            context.response.status_code = 400
 
 
 class BrandBeforeHooks:
@@ -28,7 +37,13 @@ class BrandBeforeHooks:
         self.__brand_validator = brand_validator
 
     def validate_brand(self, context: PinfluencerContext):
-        ...
+        try:
+            self.__brand_validator.validate_brand(payload=context.body)
+        except ValidationError as e:
+            print_exception(e)
+            context.short_circuit = True
+            context.response.body = {}
+            context.response.status_code = 400
 
 
 class BrandAfterHooks:
