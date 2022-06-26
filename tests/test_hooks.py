@@ -5,10 +5,86 @@ from callee import Captor
 
 from src.crosscutting import JsonCamelToSnakeCaseDeserializer
 from src.domain.models import User, Brand, Influencer
+from src.domain.validation import InfluencerValidator, BrandValidator
 from src.types import AuthUserRepository
 from src.web import PinfluencerContext, PinfluencerResponse
-from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, CommonHooks
+from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, CommonHooks, \
+    InfluencerBeforeHooks, BrandBeforeHooks
 from tests import brand_dto_generator, RepoEnum, get_auth_user_event, create_for_auth_user_event
+
+
+class TestBrandBeforeHooks(TestCase):
+
+    def setUp(self) -> None:
+        self.__brand_validator = BrandValidator()
+        self.__sut = BrandBeforeHooks(brand_validator=self.__brand_validator)
+
+
+    def test_validate_brand_when_valid(self):
+
+        # arrange
+        context = PinfluencerContext(body={
+            "brand_name": "my brand",
+            "brand_description": "this is my brand",
+            "website": "https://brand.com"
+        })
+
+        # act
+        self.__sut.validate_brand(context=context)
+
+        # assert
+        assert context.short_circuit == False
+
+    def test_validate_brand_when_not_valid(self):
+        # arrange
+        context = PinfluencerContext(body={
+            "brand_name": "my brand",
+            "brand_description": "this is my brand",
+            "website": "invalid website"
+        })
+
+        # act
+        self.__sut.validate_brand(context=context)
+
+        # assert
+        assert context.short_circuit == True
+        assert context.response.status_code == 400
+        assert context.response.body == {}
+
+
+class TestInfluencerBeforeHooks(TestCase):
+
+    def setUp(self) -> None:
+        self.__influencer_validator = InfluencerValidator()
+        self.__sut = InfluencerBeforeHooks(influencer_validator=self.__influencer_validator)
+
+    def test_validate_influencer_when_valid(self):
+        # arrange
+        context = PinfluencerContext(body={
+            "bio": "my brand",
+            "website": "https://brand.com"
+        })
+
+        # act
+        self.__sut.validate_influencer(context=context)
+
+        # assert
+        assert context.short_circuit == False
+
+    def test_validate_influencer_when_not_valid(self):
+        # arrange
+        context = PinfluencerContext(body={
+            "bio": "this is my brand",
+            "website": "invalid website"
+        })
+
+        # act
+        self.__sut.validate_influencer(context=context)
+
+        # assert
+        assert context.short_circuit == True
+        assert context.response.status_code == 400
+        assert context.response.body == {}
 
 
 class TestCommonHooks(TestCase):
