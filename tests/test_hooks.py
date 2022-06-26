@@ -75,7 +75,7 @@ class TestUserAfterHooks(TestCase):
         assert response.body[2]["email"] == users[2].email
 
         self.__auth_user_repository.get_by_id.assert_has_calls(calls=[
-            call(_id=users[0].auth_user_id),
-            call(_id=users[1].auth_user_id),
-            call(_id=users[2].auth_user_id)
+            call(_id=brands[0]["auth_user_id"]),
+            call(_id=brands[1]["auth_user_id"]),
+            call(_id=brands[2]["auth_user_id"])
         ])
