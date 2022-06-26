@@ -53,4 +53,5 @@ PinfluencerAction = Callable[[PinfluencerContext], None]
 @dataclass
 class Route:
     action: PinfluencerAction
+    before_hooks: list[PinfluencerAction] = field(default_factory=list)
     after_hooks: list[PinfluencerAction] = field(default_factory=list)
