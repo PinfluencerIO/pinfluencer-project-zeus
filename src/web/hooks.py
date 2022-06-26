@@ -1,4 +1,5 @@
 from src.domain.models import Brand, Influencer
+from src.domain.validation import BrandValidator, InfluencerValidator
 from src.types import AuthUserRepository, Deserializer
 from src.web import PinfluencerContext
 
@@ -10,6 +11,24 @@ class CommonHooks:
 
     def set_body(self, context: PinfluencerContext):
         context.body = self.__deserializer.deserialize(data=context.event["body"])
+
+
+class InfluencerBeforeHooks:
+
+    def __init__(self, influencer_validator: InfluencerValidator):
+        self.__influencer_validator = influencer_validator
+
+    def validate_influencer(self, context: PinfluencerContext):
+        ...
+
+
+class BrandBeforeHooks:
+
+    def __init__(self, brand_validator: BrandValidator):
+        self.__brand_validator = brand_validator
+
+    def validate_brand(self, context: PinfluencerContext):
+        ...
 
 
 class BrandAfterHooks:
@@ -69,12 +88,24 @@ class HooksFacade:
                  brand_after_hooks: BrandAfterHooks,
                  influencer_after_hooks: InfluencerAfterHooks,
                  user_before_hooks: UserBeforeHooks,
-                 user_after_hooks: UserAfterHooks):
+                 user_after_hooks: UserAfterHooks,
+                 influencer_before_hooks: InfluencerBeforeHooks,
+                 brand_before_hooks: BrandBeforeHooks):
+        self.__brand_before_hooks = brand_before_hooks
+        self.__influencer_before_hooks = influencer_before_hooks
         self.__user_after_hooks = user_after_hooks
         self.__influencer_after_hooks = influencer_after_hooks
         self.__user_before_hooks = user_before_hooks
         self.__brand_after_hooks = brand_after_hooks
         self.__common_hooks = common_hooks
+
+    @property
+    def brand_before_hooks(self) -> BrandBeforeHooks:
+        return self.__brand_before_hooks
+
+    @property
+    def influencer_before_hooks(self) -> InfluencerBeforeHooks:
+        return self.__influencer_before_hooks
 
     @property
     def user_after_hooks(self) -> UserAfterHooks:
