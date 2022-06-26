@@ -4,6 +4,7 @@ from unittest.mock import Mock
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from src.crosscutting import JsonSnakeToCamelSerializer
 from src.data import Base
 from src.data.entities import SqlAlchemyBrandEntity, SqlAlchemyBaseEntity, SqlAlchemyInfluencerEntity
 from src.domain.models import Brand, Influencer, ValueEnum, CategoryEnum, User
@@ -332,3 +333,129 @@ def get_db_brand(brand: dict) -> dict:
 
 def brand_brand_updatable_fields():
     return ['insta_handle', 'brand_name', 'brand_description', 'website']
+
+
+def get_influencer_id_event(id):
+    return {'pathParameters': {'influencer_id': id}}
+
+
+def get_brand_id_event(brand_id):
+    return {'pathParameters': {'brand_id': brand_id}}
+
+
+def get_auth_user_event(auth_id):
+    return {"requestContext": {"authorizer": {"jwt": {"claims": {"cognito:username": auth_id}}}}}
+
+
+def update_brand_payload():
+    return {
+        "first_name": "first_name",
+        "last_name": "last_name",
+        "email": "email@gmail.com",
+        "brand_name": "name",
+        "brand_description": "description",
+        "website": "https://website.com",
+        "insta_handle": "instahandle",
+        "values": ["VALUE7", "VALUE8", "VALUE9"],
+        "categories": ["CATEGORY7", "CATEGORY6", "CATEGORY5"]
+    }
+
+
+def update_user_dto():
+    return User(first_name="first_name",
+                last_name="last_name",
+                email="email@gmail.com")
+
+
+def create_brand_dto():
+    return Brand(first_name="",
+                 last_name="",
+                 email="",
+                 brand_name="name",
+                 brand_description="description",
+                 website="https://website.com",
+                 insta_handle="instahandle",
+                 values=[ValueEnum.VALUE7, ValueEnum.VALUE8, ValueEnum.VALUE9],
+                 categories=[CategoryEnum.CATEGORY7, CategoryEnum.CATEGORY6, CategoryEnum.CATEGORY5],
+                 auth_user_id="1234")
+
+
+def update_image_payload():
+    return {
+        "image_bytes": "random_bytes"
+    }
+
+
+def update_brand_return_dto():
+    return Brand(first_name="",
+                 last_name="",
+                 email="",
+                 brand_name="name",
+                 brand_description="description",
+                 website="https://website.com",
+                 insta_handle="instahandle",
+                 values=[ValueEnum.VALUE7, ValueEnum.VALUE8, ValueEnum.VALUE9],
+                 categories=[CategoryEnum.CATEGORY7, CategoryEnum.CATEGORY6, CategoryEnum.CATEGORY5])
+
+
+def update_brand_expected_dto():
+    return Brand(first_name="first_name",
+                 last_name="last_name",
+                 email="email@gmail.com",
+                 brand_name="name",
+                 brand_description="description",
+                 website="https://website.com",
+                 insta_handle="instahandle",
+                 values=[ValueEnum.VALUE7, ValueEnum.VALUE8, ValueEnum.VALUE9],
+                 categories=[CategoryEnum.CATEGORY7, CategoryEnum.CATEGORY6, CategoryEnum.CATEGORY5])
+
+
+def create_for_auth_user_event(auth_id, payload):
+    return {
+        "requestContext": {"authorizer": {"jwt": {"claims": {"cognito:username": auth_id}}}},
+        "body": JsonSnakeToCamelSerializer().serialize(payload)
+    }
+
+
+def create_influencer_dto():
+    return Influencer(first_name="",
+                      last_name="",
+                      email="",
+                      bio="bio",
+                      website="https://website.com",
+                      insta_handle="instahandle",
+                      values=[ValueEnum.VALUE7, ValueEnum.VALUE8, ValueEnum.VALUE9],
+                      categories=[CategoryEnum.CATEGORY7, CategoryEnum.CATEGORY6, CategoryEnum.CATEGORY5],
+                      auth_user_id="1234",
+                      audience_male_split=0.5,
+                      audience_female_split=0.5,
+                      audience_age_13_to_17_split=0.142,
+                      audience_age_18_to_24_split=0.142,
+                      audience_age_25_to_34_split=0.142,
+                      audience_age_35_to_44_split=0.142,
+                      audience_age_45_to_54_split=0.142,
+                      audience_age_55_to_64_split=0.142,
+                      audience_age_65_plus_split=0.143)
+
+
+def update_influencer_payload():
+    return {
+        "first_name": "first_name",
+        "last_name": "first_name",
+        "email": "email@gmail.com",
+        "bio": "bio",
+        "website": "https://website.com",
+        "insta_handle": "instahandle",
+        "values": ["VALUE7", "VALUE8", "VALUE9"],
+        "categories": ["CATEGORY7", "CATEGORY6", "CATEGORY5"],
+        "auth_user_id": "1234",
+        "audience_male_split": 0.5,
+        "audience_female_split": 0.5,
+        "audience_age_13_to_17_split": 0.142,
+        "audience_age_18_to_24_split": 0.142,
+        "audience_age_25_to_34_split": 0.142,
+        "audience_age_35_to_44_split": 0.142,
+        "audience_age_45_to_54_split": 0.142,
+        "audience_age_55_to_64_split": 0.142,
+        "audience_age_65_plus_split": 0.143
+    }

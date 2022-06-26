@@ -42,7 +42,8 @@ def get_cognito_user(event):
 class PinfluencerContext:
     response: PinfluencerResponse = None,
     short_circuit: bool = False,
-    event: Union[list, dict] = field(default_factory=dict)
+    event: Union[list, dict] = field(default_factory=dict),
+    auth_user_id: str = ""
 
 
 PinfluencerAction = Callable[[PinfluencerContext], None]
