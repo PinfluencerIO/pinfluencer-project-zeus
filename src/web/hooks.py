@@ -6,10 +6,10 @@ from src.web import PinfluencerContext
 class CommonHooks:
 
     def __init__(self, deserializer: Deserializer):
-        self.__serializer = deserializer
+        self.__deserializer = deserializer
 
     def set_body(self, context: PinfluencerContext):
-        ...
+        context.body = self.__deserializer.deserialize(data=context.event["body"])
 
 
 class BrandAfterHooks:
