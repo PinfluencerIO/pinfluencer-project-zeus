@@ -3,10 +3,10 @@ from unittest.mock import Mock, MagicMock, call
 
 from callee import Captor
 
-from src.domain.models import User
+from src.domain.models import User, Brand, Influencer
 from src.types import AuthUserRepository
 from src.web import PinfluencerContext, PinfluencerResponse
-from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks
+from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks, InfluencerAfterHooks
 from tests import brand_dto_generator, RepoEnum, get_auth_user_event
 
 
@@ -38,7 +38,42 @@ class TestBrandAfterHooks(TestCase):
         # assert
         captor = Captor()
         self.__auth_user_repository.update_brand_claims.assert_called_once_with(user=captor)
-        user_payload_arg: User = captor.arg
+        user_payload_arg: Brand = captor.arg
+        assert user_payload_arg.first_name == first_name
+        assert user_payload_arg.last_name == last_name
+        assert user_payload_arg.email == email
+        assert user_payload_arg.auth_user_id == auth_user_id
+
+
+class TestInfluencerAfterHooks(TestCase):
+
+    def setUp(self) -> None:
+        self.__auth_user_repository: AuthUserRepository = Mock()
+        self.__sut = InfluencerAfterHooks(auth_user_repository=self.__auth_user_repository)
+
+    def test_set_brand_claims(self):
+
+        # arrange
+        self.__auth_user_repository.update_influencer_claims = MagicMock()
+        auth_user_id = "12341"
+        first_name = "aidan"
+        last_name = "gannon"
+        email = "aidanwilliamgannon@gmail.com"
+        context = PinfluencerContext(response=PinfluencerResponse(),
+                                     auth_user_id=auth_user_id,
+                                     body={
+                                         "first_name": first_name,
+                                         "last_name": last_name,
+                                         "email": email
+                                     })
+
+        # act
+        self.__sut.set_influencer_claims(context=context)
+
+        # assert
+        captor = Captor()
+        self.__auth_user_repository.update_influencer_claims.assert_called_once_with(user=captor)
+        user_payload_arg: Influencer = captor.arg
         assert user_payload_arg.first_name == first_name
         assert user_payload_arg.last_name == last_name
         assert user_payload_arg.email == email
