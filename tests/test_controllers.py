@@ -114,12 +114,13 @@ class TestInfluencerController(TestCase):
         response = PinfluencerResponse()
 
         # act
-        self.__sut.create(PinfluencerContext(event=event,
-                                             response=response))
+        context = PinfluencerContext(event=event, response=response)
+        self.__sut.create(context)
 
         # assert
         assert response.status_code == 400
         assert response.body == {}
+        assert context.short_circuit == True
 
     def test_create_when_invalid_payload(self):
 
@@ -131,12 +132,13 @@ class TestInfluencerController(TestCase):
         response = PinfluencerResponse()
 
         # act
-        self.__sut.create(PinfluencerContext(event=event,
-                                             response=response))
+        context = PinfluencerContext(event=event, response=response)
+        self.__sut.create(context)
 
         # assert
         assert response.status_code == 400
         assert response.body == {}
+        assert context.short_circuit == True
 
     def test_update_profile_image(self):
 
@@ -191,13 +193,15 @@ class TestInfluencerController(TestCase):
         return_value = PinfluencerResponse()
 
         # act
-        self.__sut.update(PinfluencerContext(
+        context = PinfluencerContext(
             event=create_for_auth_user_event(auth_id="12341", payload=update_influencer_payload()),
-            response=return_value))
+            response=return_value)
+        self.__sut.update(context)
 
         # assert
         assert return_value.body == {}
         assert return_value.status_code == 404
+        assert context.short_circuit == True
 
     def test_update_when_payload_not_valid(self):
 
@@ -207,12 +211,14 @@ class TestInfluencerController(TestCase):
         return_value = PinfluencerResponse()
 
         # act
-        self.__sut.update(PinfluencerContext(event=create_for_auth_user_event(auth_id="12341", payload=payload),
-                                             response=return_value))
+        context = PinfluencerContext(event=create_for_auth_user_event(auth_id="12341", payload=payload),
+                                     response=return_value)
+        self.__sut.update(context)
 
         # assert
         assert return_value.body == {}
         assert return_value.status_code == 400
+        assert context.short_circuit == True
 
 
 class TestBrandController(TestCase):
@@ -248,13 +254,14 @@ class TestBrandController(TestCase):
         pinfluencer_response = PinfluencerResponse()
 
         # act
-        self.__sut.get_by_id(PinfluencerContext(event=get_brand_id_event(field),
-                                                response=pinfluencer_response))
+        context = PinfluencerContext(event=get_brand_id_event(field), response=pinfluencer_response)
+        self.__sut.get_by_id(context)
 
         # assert
         self.__brand_repository.load_by_id.assert_called_once_with(id_=field)
         assert pinfluencer_response.body == {}
         assert pinfluencer_response.status_code == 404
+        assert context.short_circuit == True
 
     def test_get_by_id_when_invalid_uuid(self):
 
@@ -264,13 +271,14 @@ class TestBrandController(TestCase):
         pinfluencer_response = PinfluencerResponse()
 
         # act
-        self.__sut.get_by_id(PinfluencerContext(event=get_brand_id_event(field),
-                                                response=pinfluencer_response))
+        context = PinfluencerContext(event=get_brand_id_event(field), response=pinfluencer_response)
+        self.__sut.get_by_id(context)
 
         # assert
         self.__brand_repository.load_by_id.assert_not_called()
         assert pinfluencer_response.body == {}
         assert pinfluencer_response.status_code == 400
+        assert context.short_circuit == True
 
     def test_get_all(self):
 
@@ -318,13 +326,14 @@ class TestBrandController(TestCase):
         response = PinfluencerResponse()
 
         # act
-        self.__sut.get(PinfluencerContext(event=get_auth_user_event(auth_id),
-                                          response=response))
+        context = PinfluencerContext(event=get_auth_user_event(auth_id), response=response)
+        self.__sut.get(context)
 
         # assert
         self.__brand_repository.load_for_auth_user.assert_called_once_with(auth_user_id=auth_id)
         assert response.body == {}
         assert response.status_code == 404
+        assert context.short_circuit == True
 
     def test_create(self):
 
@@ -362,12 +371,13 @@ class TestBrandController(TestCase):
         response = PinfluencerResponse()
 
         # act
-        self.__sut.create(PinfluencerContext(event=event,
-                                             response=response))
+        context = PinfluencerContext(event=event, response=response)
+        self.__sut.create(context)
 
         # assert
         assert response.status_code == 400
         assert response.body == {}
+        assert context.short_circuit == True
 
     def test_create_when_invalid_payload(self):
 
@@ -379,12 +389,13 @@ class TestBrandController(TestCase):
         response = PinfluencerResponse()
 
         # act
-        self.__sut.create(PinfluencerContext(event=event,
-                                             response=response))
+        context = PinfluencerContext(event=event, response=response)
+        self.__sut.create(context)
 
         # assert
         assert response.status_code == 400
         assert response.body == {}
+        assert context.short_circuit == True
 
     def test_update(self):
 
@@ -423,12 +434,13 @@ class TestBrandController(TestCase):
         response = PinfluencerResponse()
 
         # act
-        self.__sut.update(PinfluencerContext(event=event,
-                                             response=response))
+        context = PinfluencerContext(event=event, response=response)
+        self.__sut.update(context)
 
         # assert
         assert response.status_code == 400
         assert response.body == {}
+        assert context.short_circuit == True
 
     def test_update_when_not_found(self):
 
@@ -440,12 +452,13 @@ class TestBrandController(TestCase):
         response = PinfluencerResponse()
 
         # act
-        self.__sut.update(PinfluencerContext(event=event,
-                                             response=response))
+        context = PinfluencerContext(event=event, response=response)
+        self.__sut.update(context)
 
         # assert
         assert response.status_code == 404
         assert response.body == {}
+        assert context.short_circuit == True
 
     def test_update_logo(self):
 
@@ -475,12 +488,13 @@ class TestBrandController(TestCase):
         response = PinfluencerResponse()
 
         # act
-        self.__sut.update_logo(PinfluencerContext(event=event,
-                                                  response=response))
+        context = PinfluencerContext(event=event, response=response)
+        self.__sut.update_logo(context)
 
         # assert
         assert response.status_code == 404
         assert response.body == {}
+        assert context.short_circuit == True
 
     def test_update_header_image(self):
 
@@ -510,9 +524,10 @@ class TestBrandController(TestCase):
         response = PinfluencerResponse()
 
         # act
-        self.__sut.update_header_image(PinfluencerContext(event=event,
-                                                          response=response))
+        context = PinfluencerContext(event=event, response=response)
+        self.__sut.update_header_image(context)
 
         # assert
         assert response.status_code == 404
         assert response.body == {}
+        assert context.short_circuit == True
