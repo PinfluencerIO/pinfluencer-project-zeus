@@ -6,8 +6,7 @@ from src.crosscutting import print_exception
 from src.domain.models import ValueEnum, CategoryEnum, Brand, Influencer
 from src.domain.validation import InfluencerValidator
 from src.exceptions import AlreadyExistsException, NotFoundException
-from src.types import BrandRepository, Deserializer, BrandValidatable, UserRepository, InfluencerRepository, \
-    AuthUserRepository
+from src.types import BrandRepository, Deserializer, BrandValidatable, UserRepository, InfluencerRepository
 from src.web import PinfluencerResponse, get_cognito_user, BRAND_ID_PATH_KEY, INFLUENCER_ID_PATH_KEY, PinfluencerContext
 from src.web.validation import valid_path_resource_id
 
@@ -16,10 +15,8 @@ class BaseUserController:
 
     def __init__(self, deserializer: Deserializer,
                  user_repository: UserRepository,
-                 auth_user_repository: AuthUserRepository,
                  resource_id: str):
         self._resource_id = resource_id
-        self._auth_user_repository = auth_user_repository
         self._user_repository = user_repository
         self._deserializer = deserializer
 
@@ -37,11 +34,6 @@ class BaseUserController:
 
     def get_all(self, context: PinfluencerContext) -> None:
         users = self._user_repository.load_collection()
-        for brand in users:
-            user = self._auth_user_repository.get_by_id(_id=brand.auth_user_id)
-            brand.first_name = user.first_name
-            brand.last_name = user.last_name
-            brand.email = user.email
         context.response.status_code = 200
         context.response.body = list(map(lambda x: x.__dict__, users))
 
@@ -50,10 +42,6 @@ class BaseUserController:
         if id_:
             try:
                 user = self._user_repository.load_by_id(id_=id_)
-                auth_user = self._auth_user_repository.get_by_id(_id=user.auth_user_id)
-                user.first_name = auth_user.first_name
-                user.last_name = auth_user.last_name
-                user.email = auth_user.email
                 context.response.status_code = 200
                 context.response.body = user.__dict__
                 return
@@ -70,10 +58,6 @@ class BaseUserController:
         if auth_user_id:
             try:
                 brand = self._user_repository.load_for_auth_user(auth_user_id=auth_user_id)
-                user = self._auth_user_repository.get_by_id(_id=auth_user_id)
-                brand.first_name = user.first_name
-                brand.last_name = user.last_name
-                brand.email = user.email
                 context.response.status_code = 200
                 context.response.body = brand.__dict__
                 return
@@ -86,9 +70,8 @@ class BaseUserController:
 class BrandController(BaseUserController):
     def __init__(self, brand_repository: BrandRepository,
                  brand_validator: BrandValidatable,
-                 deserializer: Deserializer,
-                 auth_user_repository: AuthUserRepository):
-        super().__init__(deserializer, brand_repository, auth_user_repository, BRAND_ID_PATH_KEY)
+                 deserializer: Deserializer):
+        super().__init__(deserializer, brand_repository, BRAND_ID_PATH_KEY)
         self.__brand_validator = brand_validator
 
     def create(self, context: PinfluencerContext) -> None:
@@ -107,7 +90,6 @@ class BrandController(BaseUserController):
                           values=list(map(lambda x: ValueEnum[x], payload_dict["values"])),
                           categories=list(map(lambda x: CategoryEnum[x], payload_dict["categories"])))
             self._user_repository.write_new_for_auth_user(auth_user_id=auth_user_id, payload=brand)
-            self._auth_user_repository.update_brand_claims(user=brand)
         except (AlreadyExistsException, ValidationError) as e:
             print_exception(e)
             context.response.body = {}
@@ -129,10 +111,6 @@ class BrandController(BaseUserController):
                           values=list(map(lambda x: ValueEnum[x], payload_dict["values"])),
                           categories=list(map(lambda x: CategoryEnum[x], payload_dict["categories"])))
             brand_to_return = self._user_repository.update_for_auth_user(auth_user_id=auth_user_id, payload=brand)
-            auth_user = self._auth_user_repository.get_by_id(_id=auth_user_id)
-            brand_to_return.first_name = auth_user.first_name
-            brand_to_return.last_name = auth_user.last_name
-            brand_to_return.email = auth_user.email
             context.response.body = brand_to_return.__dict__
             context.response.status_code = 200
             return
@@ -168,9 +146,8 @@ class InfluencerController(BaseUserController):
 
     def __init__(self, deserializer: Deserializer,
                  influencer_repository: InfluencerRepository,
-                 auth_user_repository: AuthUserRepository,
                  influencer_validator: InfluencerValidator):
-        super().__init__(deserializer, influencer_repository, auth_user_repository, INFLUENCER_ID_PATH_KEY)
+        super().__init__(deserializer, influencer_repository, INFLUENCER_ID_PATH_KEY)
         self.__influencer_validator = influencer_validator
 
     def create(self, context: PinfluencerContext) -> None:
@@ -198,7 +175,6 @@ class InfluencerController(BaseUserController):
                                     audience_age_55_to_64_split=payload_dict["audience_age_55_to_64_split"],
                                     audience_age_65_plus_split=payload_dict["audience_age_65_plus_split"])
             self._user_repository.write_new_for_auth_user(auth_user_id=auth_user_id, payload=influencer)
-            self._auth_user_repository.update_influencer_claims(user=influencer)
         except (AlreadyExistsException, ValidationError) as e:
             print_exception(e)
             context.response.body = {}
@@ -259,10 +235,6 @@ class InfluencerController(BaseUserController):
                                                                                     map(lambda x: CategoryEnum[x],
                                                                                         payload_dict["categories"]))
                                                                             ))
-            auth_user = self._auth_user_repository.get_by_id(_id=auth_user_id)
-            influencer_from_db.first_name = auth_user.first_name
-            influencer_from_db.last_name = auth_user.last_name
-            influencer_from_db.email = auth_user.email
             context.response.status_code = 200
             context.response.body = influencer_from_db.__dict__
             return

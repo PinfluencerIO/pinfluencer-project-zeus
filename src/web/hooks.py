@@ -7,6 +7,7 @@ class UserBeforeHooks:
     def set_auth_user_id(self, context: PinfluencerContext):
         context.auth_user_id = context.event['requestContext']['authorizer']['jwt']['claims']['cognito:username']
 
+
 class UserAfterHooks:
 
     def __init__(self, auth_user_repository: AuthUserRepository):
