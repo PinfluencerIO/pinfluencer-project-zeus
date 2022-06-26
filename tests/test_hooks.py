@@ -4,9 +4,27 @@ from unittest.mock import Mock, MagicMock, call
 from src.domain.models import User
 from src.types import AuthUserRepository
 from src.web import PinfluencerContext, PinfluencerResponse
-from src.web.hooks import UserAfterHooks
-from tests import brand_dto_generator, RepoEnum
+from src.web.hooks import UserAfterHooks, UserBeforeHooks
+from tests import brand_dto_generator, RepoEnum, get_auth_user_event
 
+
+class TestUserBeforeHooks(TestCase):
+
+    def setUp(self) -> None:
+        self.__sut = UserBeforeHooks()
+
+    def test_set_auth_user_id(self):
+
+        # arrange
+        response = PinfluencerResponse()
+        auth_id = "12341"
+
+        # act
+        context = PinfluencerContext(response=response, event=get_auth_user_event(auth_id=auth_id))
+        self.__sut.set_auth_user_id(context=context)
+
+        # assert
+        assert context.auth_user_id == auth_id
 
 class TestUserAfterHooks(TestCase):
 
