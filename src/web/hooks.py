@@ -1,6 +1,15 @@
 from src.domain.models import Brand, Influencer
-from src.types import AuthUserRepository
+from src.types import AuthUserRepository, Deserializer
 from src.web import PinfluencerContext
+
+
+class CommonHooks:
+
+    def __init__(self, deserializer: Deserializer):
+        self.__serializer = deserializer
+
+    def set_body(self, context: PinfluencerContext):
+        ...
 
 
 class BrandAfterHooks:

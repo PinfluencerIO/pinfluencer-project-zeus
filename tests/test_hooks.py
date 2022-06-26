@@ -3,11 +3,36 @@ from unittest.mock import Mock, MagicMock, call
 
 from callee import Captor
 
+from src.crosscutting import JsonCamelToSnakeCaseDeserializer
 from src.domain.models import User, Brand, Influencer
 from src.types import AuthUserRepository
 from src.web import PinfluencerContext, PinfluencerResponse
-from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks, InfluencerAfterHooks
-from tests import brand_dto_generator, RepoEnum, get_auth_user_event
+from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, CommonHooks
+from tests import brand_dto_generator, RepoEnum, get_auth_user_event, create_for_auth_user_event
+
+
+class TestCommonHooks(TestCase):
+
+    def setUp(self) -> None:
+        self.__deserializer = JsonCamelToSnakeCaseDeserializer()
+        self.__sut = CommonHooks(deserializer=self.__deserializer)
+
+    def test_set_body(self):
+
+        # arrange
+        body = {
+            "first_name": "aidan",
+            "last_name": "aidan",
+            "email": "aidanwilliamgannon@gmail.com"
+        }
+        pinfluencer_context = PinfluencerContext(event=create_for_auth_user_event(auth_id="1234",
+                                                                                  payload=body))
+
+        # act
+        self.__sut.set_body(context=pinfluencer_context)
+
+        # assert
+        assert pinfluencer_context.body == body
 
 
 class TestBrandAfterHooks(TestCase):
