@@ -61,3 +61,37 @@ class UserAfterHooks:
             user["first_name"] = auth_user.first_name
             user["last_name"] = auth_user.last_name
             user["email"] = auth_user.email
+
+
+class HooksFacade:
+
+    def __init__(self, common_hooks: CommonHooks,
+                 brand_after_hooks: BrandAfterHooks,
+                 influencer_after_hooks: InfluencerAfterHooks,
+                 user_before_hooks: UserBeforeHooks,
+                 user_after_hooks: UserAfterHooks):
+        self.__user_after_hooks = user_after_hooks
+        self.__influencer_after_hooks = influencer_after_hooks
+        self.__user_before_hooks = user_before_hooks
+        self.__brand_after_hooks = brand_after_hooks
+        self.__common_hooks = common_hooks
+
+    @property
+    def user_after_hooks(self) -> UserAfterHooks:
+        return self.__user_after_hooks
+
+    @property
+    def influencer_after_hooks(self) -> InfluencerAfterHooks:
+        return self.__influencer_after_hooks
+
+    @property
+    def user_before_hooks(self) -> UserBeforeHooks:
+        return self.__user_before_hooks
+
+    @property
+    def brand_after_hooks(self) -> BrandAfterHooks:
+        return self.__brand_after_hooks
+
+    @property
+    def common_hooks(self) -> CommonHooks:
+        return self.__common_hooks
