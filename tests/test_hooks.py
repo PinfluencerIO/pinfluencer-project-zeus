@@ -42,6 +42,7 @@ class TestBrandAfterHooks(TestCase):
         assert user_payload_arg.first_name == first_name
         assert user_payload_arg.last_name == last_name
         assert user_payload_arg.email == email
+        assert user_payload_arg.auth_user_id == auth_user_id
 
 
 class TestUserBeforeHooks(TestCase):

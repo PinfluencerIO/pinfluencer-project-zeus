@@ -1,3 +1,4 @@
+from src.domain.models import Brand
 from src.types import AuthUserRepository
 from src.web import PinfluencerContext
 
@@ -8,7 +9,11 @@ class BrandAfterHooks:
         self.__auth_user_repository = auth_user_repository
 
     def set_brand_claims(self, context: PinfluencerContext):
-        ...
+        user = Brand(first_name=context.body["first_name"],
+                     last_name=context.body["last_name"],
+                     email=context.body["email"],
+                     auth_user_id=context.auth_user_id)
+        self.__auth_user_repository.update_brand_claims(user=user)
 
 
 class InfluencerAfterHooks:
