@@ -20,17 +20,17 @@ class BaseUserController:
         self._user_repository = user_repository
         self._deserializer = deserializer
 
-    def _update_image(self, event: dict, updater: Callable[[str, str], dict]) -> PinfluencerResponse:
+    def _update_image(self, event: dict, updater: Callable[[str, str], dict]) -> [PinfluencerResponse, bool]:
         auth_user_id = get_cognito_user(event)
         payload_json_string = event['body']
         payload_dict = self._deserializer.deserialize(payload_json_string)
         try:
             user = updater(auth_user_id, payload_dict['image_bytes'])
-            return PinfluencerResponse(status_code=200,
-                                       body=user)
+            return [PinfluencerResponse(status_code=200,
+                                       body=user), False]
         except NotFoundException as e:
             print_exception(e)
-            return PinfluencerResponse(status_code=404, body={})
+            return [PinfluencerResponse(status_code=404, body={}), True]
 
     def get_all(self, context: PinfluencerContext) -> None:
         users = self._user_repository.load_collection()
@@ -47,9 +47,11 @@ class BaseUserController:
                 return
             except NotFoundException as e:
                 print_exception(e)
+                context.short_circuit = True
                 context.response.status_code = 404
                 context.response.body = {}
                 return
+        context.short_circuit = True
         context.response.status_code = 400
         context.response.body = {}
 
@@ -63,6 +65,7 @@ class BaseUserController:
                 return
             except NotFoundException as e:
                 print_exception(e)
+        context.short_circuit = True
         context.response.status_code = 404
         context.response.body = {}
 
@@ -92,6 +95,7 @@ class BrandController(BaseUserController):
             self._user_repository.write_new_for_auth_user(auth_user_id=auth_user_id, payload=brand)
         except (AlreadyExistsException, ValidationError) as e:
             print_exception(e)
+            context.short_circuit = True
             context.response.body = {}
             context.response.status_code = 400
             return
@@ -116,28 +120,32 @@ class BrandController(BaseUserController):
             return
         except ValidationError as e:
             print_exception(e)
+            context.short_circuit = True
             context.response.body = {}
             context.response.status_code = 400
             return
         except NotFoundException as e:
             print_exception(e)
+            context.short_circuit = True
             context.response.body = {}
             context.response.status_code = 404
 
     def update_logo(self, context: PinfluencerContext) -> None:
-        response = self._update_image(event=context.event,
+        [response, short_circuit] = self._update_image(event=context.event,
                                       updater=lambda auth_id, bytes: self._user_repository.update_logo_for_auth_user(
                                           auth_id,
                                           bytes).__dict__)
+        context.short_circuit = short_circuit
         context.response.body = response.body
         context.response.status_code = response.status_code
 
     def update_header_image(self, context: PinfluencerContext) -> None:
-        response = self._update_image(event=context.event,
+        [response, short_circuit] = self._update_image(event=context.event,
                                       updater=lambda auth_id,
                                                      bytes: self._user_repository.update_header_image_for_auth_user(
                                           auth_id,
                                           bytes).__dict__)
+        context.short_circuit = short_circuit
         context.response.status_code = response.status_code
         context.response.body = response.body
 
@@ -177,6 +185,7 @@ class InfluencerController(BaseUserController):
             self._user_repository.write_new_for_auth_user(auth_user_id=auth_user_id, payload=influencer)
         except (AlreadyExistsException, ValidationError) as e:
             print_exception(e)
+            context.short_circuit = True
             context.response.body = {}
             context.response.status_code = 400
             return
@@ -184,10 +193,11 @@ class InfluencerController(BaseUserController):
         context.response.status_code = 201
 
     def update_profile_image(self, context: PinfluencerContext) -> None:
-        response = self._update_image(event=context.event,
+        [response, short_circuit] = self._update_image(event=context.event,
                                   updater=lambda auth_id, bytes: self._user_repository.update_image_for_auth_user(
                                       auth_id,
                                       bytes).__dict__)
+        context.short_circuit = short_circuit
         context.response.status_code = response.status_code
         context.response.body = response.body
 
@@ -240,10 +250,12 @@ class InfluencerController(BaseUserController):
             return
         except NotFoundException as e:
             print_exception(e)
+            context.short_circuit = True
             context.response.status_code = 404
             context.response.body = {}
             return
         except ValidationError as e:
             print_exception(e)
+            context.short_circuit = True
             context.response.status_code = 400
             context.response.body = {}
