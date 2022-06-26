@@ -1,4 +1,4 @@
-from src.domain.models import Brand
+from src.domain.models import Brand, Influencer
 from src.types import AuthUserRepository
 from src.web import PinfluencerContext
 
@@ -22,7 +22,11 @@ class InfluencerAfterHooks:
         self.__auth_user_repository = auth_user_repository
 
     def set_influencer_claims(self, context: PinfluencerContext):
-        ...
+        user = Influencer(first_name=context.body["first_name"],
+                     last_name=context.body["last_name"],
+                     email=context.body["email"],
+                     auth_user_id=context.auth_user_id)
+        self.__auth_user_repository.update_influencer_claims(user=user)
 
 
 class UserBeforeHooks:
