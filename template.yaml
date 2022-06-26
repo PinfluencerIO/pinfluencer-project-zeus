@@ -73,6 +73,7 @@ Resources:
   PinfluencerFunction:
     Type: AWS::Serverless::Function
     Properties:
+      MemorySize: 10240
       Role: !Ref LambdaRole
       CodeUri: ./
       Handler: src/app.lambda_handler
