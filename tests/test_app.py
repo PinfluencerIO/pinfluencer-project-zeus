@@ -104,10 +104,14 @@ class TestRoutes(TestCase):
                   service_locator=self.__mock_service_locator)
 
         # assert
-        self.__mock_middleware_pipeline.execute_middleware \
+        self.__mock_middleware_pipeline\
+            .execute_middleware \
             .assert_called_once_with(context=Any(),
-                                     middleware=[self.__brand_before_hooks.validate_uuid,
-                                                 self.__mock_brand_controller.get_by_id])
+                                     middleware=[
+                                         self.__brand_before_hooks.validate_uuid,
+                                         self.__mock_brand_controller.get_by_id,
+                                         self.__user_after_hooks.tag_auth_user_claims_to_response
+                                     ])
 
     def test_get_all_influencers(self):
         # arrange
