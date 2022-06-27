@@ -74,10 +74,7 @@ class BrandController(BaseUserController):
         auth_user_id = context.auth_user_id
         payload_dict = context.body
         try:
-            brand = Brand(first_name=payload_dict["first_name"],
-                          last_name=payload_dict["last_name"],
-                          email=payload_dict["email"],
-                          brand_name=payload_dict["brand_name"],
+            brand = Brand(brand_name=payload_dict["brand_name"],
                           brand_description=payload_dict["brand_description"],
                           website=payload_dict["website"],
                           insta_handle=payload_dict["insta_handle"],

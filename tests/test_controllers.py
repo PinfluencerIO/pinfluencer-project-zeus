@@ -174,22 +174,6 @@ class TestInfluencerController(TestCase):
         assert return_value.status_code == 404
         assert context.short_circuit == True
 
-    def test_update_when_payload_not_valid(self):
-        # arrange
-        payload = update_influencer_payload()
-        payload['bio'] = 120
-        return_value = PinfluencerResponse()
-
-        # act
-        context = PinfluencerContext(auth_user_id="12341", body=payload,
-                                     response=return_value)
-        self.__sut.update(context)
-
-        # assert
-        assert return_value.body == {}
-        assert return_value.status_code == 400
-        assert context.short_circuit == True
-
 
 class TestBrandController(TestCase):
 
@@ -328,9 +312,10 @@ class TestBrandController(TestCase):
         auth_id = "12341"
         self.__brand_repository.write_new_for_auth_user = MagicMock(side_effect=AlreadyExistsException())
         response = PinfluencerResponse()
+        brand = update_brand_payload()
 
         # act
-        context = PinfluencerContext(auth_user_id=auth_id, response=response)
+        context = PinfluencerContext(auth_user_id=auth_id, response=response, body=brand)
         self.__sut.create(context)
 
         # assert
