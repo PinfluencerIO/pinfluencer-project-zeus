@@ -3,6 +3,7 @@ from typing import Union
 from unittest import TestCase
 from unittest.mock import Mock, MagicMock
 
+from callee import Any
 from cfn_tools import load_yaml
 
 from src.app import bootstrap
@@ -11,6 +12,7 @@ from src.types import Serializer
 from src.web import PinfluencerContext
 from src.web.controllers import BrandController
 from src.web.ioc import ServiceLocator
+from src.web.middleware import MiddlewarePipeline
 from src.web.routing import Dispatcher
 from tests import get_as_json
 
@@ -49,11 +51,24 @@ class TestRoutes(TestCase):
                                               expected_status_code=405)
 
     def test_get_all_brands(self):
-        self.__assert_service_endpoint_200(expected_body="""{"allBrands": "some_all_brands_value"}""",
-                                           service_function="get_all",
-                                           actual_body={"all_brands": "some_all_brands_value"},
-                                           route_key="GET /brands",
-                                           service_name="get_new_brand_controller")
+
+        # arrange
+        mock_brand_controller: BrandController = Mock()
+        mock_middleware_pipeline: MiddlewarePipeline = Mock()
+        self.__mock_service_locator.get_new_brand_controller = MagicMock(return_value=mock_brand_controller)
+        self.__mock_service_locator.get_new_middlware_pipeline = MagicMock(return_value=mock_middleware_pipeline)
+        mock_middleware_pipeline.execute_middleware = MagicMock()
+
+        # act
+        bootstrap(event={"routeKey": "GET /brands"},
+                  context={},
+                  service_locator=self.__mock_service_locator)
+
+        # assert
+        mock_middleware_pipeline.execute_middleware.assert_called_once_with(context=Any(),
+                                                                            middleware=[mock_brand_controller.get_all])
+
+
 
     def test_get_all_empty_list(self):
         self.__assert_service_endpoint_200(expected_body="""[]""",
