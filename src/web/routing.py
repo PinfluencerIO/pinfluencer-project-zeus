@@ -1,8 +1,14 @@
 from collections import OrderedDict
 
 from src.service import ServiceLocator
-from src.web import Route, PinfluencerContext
+from src.web import Route, PinfluencerContext, PinfluencerAction
 
+
+class MiddlewarePipeline:
+
+    def execute_middleware(self, context: PinfluencerContext,
+                           middleware: list[PinfluencerAction]):
+        ...
 
 class Dispatcher:
     def __init__(self, service_locator: ServiceLocator):
