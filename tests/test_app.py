@@ -22,13 +22,13 @@ from tests import get_as_json
 class TestRoutes(TestCase):
 
     def setUp(self) -> None:
-
         # controllers
         self.__mock_service_locator: ServiceLocator = Mock()
         self.__mock_brand_controller: BrandController = Mock()
         self.__mock_service_locator.get_new_brand_controller = MagicMock(return_value=self.__mock_brand_controller)
         self.__mock_influencer_controller: InfluencerController = Mock()
-        self.__mock_service_locator.get_new_influencer_controller = MagicMock(return_value=self.__mock_influencer_controller)
+        self.__mock_service_locator.get_new_influencer_controller = MagicMock(
+            return_value=self.__mock_influencer_controller)
 
         # hooks
         self.__hooks_facade: HooksFacade = Mock()
@@ -56,7 +56,6 @@ class TestRoutes(TestCase):
         self.__mock_service_locator.get_new_middlware_pipeline = MagicMock(return_value=self.__mock_middleware_pipeline)
 
     def test_server_error(self):
-
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock(side_effect=Exception("some exception"))
 
@@ -78,7 +77,6 @@ class TestRoutes(TestCase):
         self.__assert_not_implemented(route="GET /feed")
 
     def test_get_all_brands(self):
-
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
 
@@ -88,12 +86,15 @@ class TestRoutes(TestCase):
                   service_locator=self.__mock_service_locator)
 
         # assert
-        self.__mock_middleware_pipeline.execute_middleware.assert_called_once_with(context=Any(),
-                                                                                   middleware=[
-                                                                                       self.__mock_brand_controller.get_all])
+        self.__mock_middleware_pipeline \
+            .execute_middleware \
+            .assert_called_once_with(context=Any(),
+                                     middleware=[
+                                         self.__mock_brand_controller.get_all,
+                                         self.__user_after_hooks.tag_auth_user_claims_to_response_collection
+                                     ])
 
     def test_get_brand_by_id(self):
-
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
 
@@ -103,12 +104,12 @@ class TestRoutes(TestCase):
                   service_locator=self.__mock_service_locator)
 
         # assert
-        self.__mock_middleware_pipeline.execute_middleware\
+        self.__mock_middleware_pipeline.execute_middleware \
             .assert_called_once_with(context=Any(),
-                                     middleware=[self.__brand_before_hooks.validate_uuid, self.__mock_brand_controller.get_by_id])
+                                     middleware=[self.__brand_before_hooks.validate_uuid,
+                                                 self.__mock_brand_controller.get_by_id])
 
     def test_get_all_influencers(self):
-
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
 
@@ -123,7 +124,6 @@ class TestRoutes(TestCase):
                                                                                        self.__mock_influencer_controller.get_all])
 
     def test_get_influencer_by_id(self):
-
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
 
@@ -138,7 +138,6 @@ class TestRoutes(TestCase):
                                                                                        self.__mock_influencer_controller.get_by_id])
 
     def test_get_auth_brand(self):
-
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
 
@@ -153,7 +152,6 @@ class TestRoutes(TestCase):
                                                                                        self.__mock_brand_controller.get])
 
     def test_create_auth_brand(self):
-
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
 
@@ -168,7 +166,6 @@ class TestRoutes(TestCase):
                                                                                        self.__mock_brand_controller.create])
 
     def test_update_auth_brand(self):
-
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
 
@@ -183,7 +180,6 @@ class TestRoutes(TestCase):
                                                                                        self.__mock_brand_controller.update])
 
     def test_create_or_replace_auth_brand_header_image(self):
-
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
 
@@ -198,7 +194,6 @@ class TestRoutes(TestCase):
                                                                                        self.__mock_brand_controller.update_header_image])
 
     def test_create_or_replace_auth_brand_logo(self):
-
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
 
@@ -213,7 +208,6 @@ class TestRoutes(TestCase):
                                                                                        self.__mock_brand_controller.update_logo])
 
     def test_get_auth_influencer(self):
-
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
 
@@ -228,7 +222,6 @@ class TestRoutes(TestCase):
                                                                                        self.__mock_influencer_controller.get])
 
     def test_create_auth_influencer(self):
-
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
 
@@ -243,7 +236,6 @@ class TestRoutes(TestCase):
                                                                                        self.__mock_influencer_controller.create])
 
     def test_update_auth_influencer_image(self):
-
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
 
@@ -258,7 +250,6 @@ class TestRoutes(TestCase):
                                                                                        self.__mock_influencer_controller.update_profile_image])
 
     def test_update_auth_influencer(self):
-
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
 
@@ -339,7 +330,6 @@ class TestRoutes(TestCase):
         assert response == get_as_json(status_code=expected_status_code, body=expected_body)
 
     def __assert_not_implemented(self, route: str):
-
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
         context = PinfluencerContext(response=PinfluencerResponse())
