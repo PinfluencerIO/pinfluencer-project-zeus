@@ -45,6 +45,7 @@ class TestRoutes(TestCase):
         self.__hooks_facade.get_brand_before_hooks = MagicMock(return_value=self.__brand_before_hooks)
         self.__hooks_facade.get_influencer_after_hooks = MagicMock(return_value=self.__influencer_after_hooks)
         self.__hooks_facade.get_influencer_before_hooks = MagicMock(return_value=self.__influencer_after_hooks)
+        self.__mock_service_locator.get_new_hooks_facade = MagicMock(return_value=self.__hooks_facade)
 
         # crosscutting
         self.__serializer: Serializer = JsonSnakeToCamelSerializer()

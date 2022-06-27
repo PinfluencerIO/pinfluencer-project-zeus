@@ -8,7 +8,7 @@ class Dispatcher:
     def __init__(self, service_locator: ServiceLocator):
         self.__brand_ctr = service_locator.get_new_brand_controller()
         self.__influencer_ctr = service_locator.get_new_influencer_controller()
-        self.__hooks_facade = service_locator.get_hooks_facade()
+        self.__hooks_facade = service_locator.get_new_hooks_facade()
 
     def get_not_implemented_method(self, route: str) -> Route:
         return Route(action=lambda context: self.not_implemented(context=context,
@@ -31,7 +31,7 @@ class Dispatcher:
 
                 'GET /influencers': Route(action=self.__influencer_ctr.get_all),
 
-                'GET /brands/{brand_id}': Route(action=self.__brand_ctr.get_by_id),
+                'GET /brands/{brand_id}': Route(before_hooks=[self.__hooks_facade.get_brand_before_hooks().validate_uuid], action=self.__brand_ctr.get_by_id),
 
                 'GET /influencers/{influencer_id}': Route(action=self.__influencer_ctr.get_by_id),
 

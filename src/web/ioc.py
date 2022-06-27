@@ -59,7 +59,7 @@ class ServiceLocator:
     def get_new_middlware_pipeline(self) -> MiddlewarePipeline:
         return MiddlewarePipeline()
 
-    def get_hooks_facade(self) -> HooksFacade:
+    def get_new_hooks_facade(self) -> HooksFacade:
         return HooksFacade(common_hooks=CommonBeforeHooks(deserializer=self.get_new_deserializer()),
                            brand_after_hooks=BrandAfterHooks(auth_user_repository=self.get_new_auth_user_repository()),
                            influencer_after_hooks=InfluencerAfterHooks(auth_user_repository=self.get_new_auth_user_repository()),
