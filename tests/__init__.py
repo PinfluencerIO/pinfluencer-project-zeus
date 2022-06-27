@@ -349,9 +349,9 @@ def get_auth_user_event(auth_id):
 
 def update_brand_payload():
     return {
-        "first_name": "first_name",
-        "last_name": "last_name",
-        "email": "email@gmail.com",
+        "first_name": "",
+        "last_name": "",
+        "email": "",
         "brand_name": "name",
         "brand_description": "description",
         "website": "https://website.com",
