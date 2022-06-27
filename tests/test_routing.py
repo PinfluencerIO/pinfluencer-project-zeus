@@ -28,4 +28,5 @@ class TestMiddlewarePipeline(TestCase):
                                       middleware=middlware)
 
         # assert
+        print(context.body["invocations"])
         assert context.body["invocations"] == [1, 2, 3, 4, 5]

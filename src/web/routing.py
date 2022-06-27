@@ -8,7 +8,8 @@ class MiddlewarePipeline:
 
     def execute_middleware(self, context: PinfluencerContext,
                            middleware: list[PinfluencerAction]):
-        ...
+        for action in middleware:
+            action(context)
 
 class Dispatcher:
     def __init__(self, service_locator: ServiceLocator):
