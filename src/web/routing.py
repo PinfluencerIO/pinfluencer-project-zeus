@@ -8,6 +8,7 @@ class Dispatcher:
     def __init__(self, service_locator: ServiceLocator):
         self.__brand_ctr = service_locator.get_new_brand_controller()
         self.__influencer_ctr = service_locator.get_new_influencer_controller()
+        self.__hooks_facade = service_locator.get_hooks_facade()
 
     def get_not_implemented_method(self, route: str) -> Route:
         return Route(action=lambda context: self.not_implemented(context=context,
@@ -16,7 +17,7 @@ class Dispatcher:
     @staticmethod
     def not_implemented(context: PinfluencerContext, route: str):
         context.response.status_code = 405
-        context.response.body={"message": f"{route} is not implemented"}
+        context.response.body = {"message": f"{route} is not implemented"}
 
     @property
     def dispatch_route_to_ctr(self) -> dict[dict[str, Route]]:
@@ -76,4 +77,3 @@ class Dispatcher:
         routes.update(users)
         routes.update(campaigns)
         return routes
-

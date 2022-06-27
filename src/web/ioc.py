@@ -5,9 +5,11 @@ from src.data import SqlAlchemyDataManager
 from src.data.repositories import S3ImageRepository, SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository, \
     CognitoAuthUserRepository, CognitoAuthService
 from src.domain.validation import BrandValidator, InfluencerValidator
-from src.types import DataManager, ImageRepository, BrandValidatable, ObjectMapperAdapter, BrandRepository, \
+from src.types import DataManager, ImageRepository, ObjectMapperAdapter, BrandRepository, \
     InfluencerRepository, Deserializer, Serializer, AuthUserRepository
 from src.web.controllers import BrandController, InfluencerController
+from src.web.hooks import HooksFacade, CommonBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, UserBeforeHooks, \
+    UserAfterHooks, InfluencerBeforeHooks, BrandBeforeHooks
 from src.web.middleware import MiddlewarePipeline
 
 
@@ -19,7 +21,7 @@ class ServiceLocator:
     def get_new_image_repository(self) -> ImageRepository:
         return S3ImageRepository()
 
-    def get_new_brand_validator(self) -> BrandValidatable:
+    def get_new_brand_validator(self) -> BrandValidator:
         return BrandValidator()
 
     def get_new_object_mapper(self) -> ObjectMapperAdapter:
@@ -56,3 +58,12 @@ class ServiceLocator:
 
     def get_new_middlware_pipeline(self) -> MiddlewarePipeline:
         return MiddlewarePipeline()
+
+    def get_hooks_facade(self) -> HooksFacade:
+        return HooksFacade(common_hooks=CommonBeforeHooks(deserializer=self.get_new_deserializer()),
+                           brand_after_hooks=BrandAfterHooks(auth_user_repository=self.get_new_auth_user_repository()),
+                           influencer_after_hooks=InfluencerAfterHooks(auth_user_repository=self.get_new_auth_user_repository()),
+                           user_before_hooks=UserBeforeHooks(),
+                           user_after_hooks=UserAfterHooks(auth_user_repository=self.get_new_auth_user_repository()),
+                           influencer_before_hooks=InfluencerBeforeHooks(influencer_validator=self.get_new_influencer_validator()),
+                           brand_before_hooks=BrandBeforeHooks(brand_validator=self.get_new_brand_validator()))

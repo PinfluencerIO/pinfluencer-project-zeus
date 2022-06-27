@@ -11,6 +11,7 @@ from src.crosscutting import JsonSnakeToCamelSerializer
 from src.types import Serializer
 from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.controllers import BrandController, InfluencerController
+from src.web.hooks import HooksFacade
 from src.web.ioc import ServiceLocator
 from src.web.middleware import MiddlewarePipeline
 from src.web.routing import Dispatcher
@@ -20,9 +21,35 @@ from tests import get_as_json
 class TestRoutes(TestCase):
 
     def setUp(self) -> None:
+
+        # controllers
         self.__mock_service_locator: ServiceLocator = Mock()
+        self.__mock_brand_controller: BrandController = Mock()
+        self.__mock_service_locator.get_new_brand_controller = MagicMock(return_value=self.__mock_brand_controller)
+        self.__mock_influencer_controller: InfluencerController = Mock()
+        self.__mock_service_locator.get_new_influencer_controller = MagicMock(return_value=self.__mock_influencer_controller)
+
+        # hooks
+        self.__hooks_facade: HooksFacade = Mock()
+        self.__common_hooks = Mock()
+        self.__user_after_hooks = Mock()
+        self.__brand_after_hooks = Mock()
+        self.__user_before_hooks = Mock()
+        self.__get_brand_before_hooks = Mock()
+        self.__influencer_after_hooks = Mock()
+        self.__hooks_facade.get_common_hooks = MagicMock(return_value=self.__common_hooks)
+        self.__hooks_facade.get_user_after_hooks = MagicMock(return_value=self.__user_after_hooks)
+        self.__hooks_facade.get_brand_after_hooks = MagicMock(return_value=self.__brand_after_hooks)
+        self.__hooks_facade.get_user_before_hooks = MagicMock(return_value=self.__user_before_hooks)
+        self.__hooks_facade.get_brand_before_hooks = MagicMock(return_value=self.__get_brand_before_hooks)
+        self.__hooks_facade.get_influencer_after_hooks = MagicMock(return_value=self.__influencer_after_hooks)
+        self.__hooks_facade.get_influencer_before_hooks = MagicMock(return_value=self.__influencer_after_hooks)
+
+        # crosscutting
         self.__serializer: Serializer = JsonSnakeToCamelSerializer()
         self.__mock_service_locator.get_new_serializer = MagicMock(return_value=self.__serializer)
+
+        # middleware
         self.__mock_middleware_pipeline: MiddlewarePipeline = Mock()
         self.__mock_service_locator.get_new_middlware_pipeline = MagicMock(return_value=self.__mock_middleware_pipeline)
 
@@ -52,8 +79,6 @@ class TestRoutes(TestCase):
 
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
-        mock_brand_controller: BrandController = Mock()
-        self.__mock_service_locator.get_new_brand_controller = MagicMock(return_value=mock_brand_controller)
 
         # act
         bootstrap(event={"routeKey": "GET /brands"},
@@ -63,14 +88,12 @@ class TestRoutes(TestCase):
         # assert
         self.__mock_middleware_pipeline.execute_middleware.assert_called_once_with(context=Any(),
                                                                                    middleware=[
-                                                                                       mock_brand_controller.get_all])
+                                                                                       self.__mock_brand_controller.get_all])
 
     def test_get_brand_by_id(self):
 
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
-        mock_brand_controller: BrandController = Mock()
-        self.__mock_service_locator.get_new_brand_controller = MagicMock(return_value=mock_brand_controller)
 
         # act
         bootstrap(event={"routeKey": "GET /brands/{brand_id}"},
@@ -80,14 +103,12 @@ class TestRoutes(TestCase):
         # assert
         self.__mock_middleware_pipeline.execute_middleware.assert_called_once_with(context=Any(),
                                                                                    middleware=[
-                                                                                       mock_brand_controller.get_by_id])
+                                                                                       self.__mock_brand_controller.get_by_id])
 
     def test_get_all_influencers(self):
 
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
-        mock_influencer_controller: InfluencerController = Mock()
-        self.__mock_service_locator.get_new_influencer_controller = MagicMock(return_value=mock_influencer_controller)
 
         # act
         bootstrap(event={"routeKey": "GET /influencers"},
@@ -97,14 +118,12 @@ class TestRoutes(TestCase):
         # assert
         self.__mock_middleware_pipeline.execute_middleware.assert_called_once_with(context=Any(),
                                                                                    middleware=[
-                                                                                       mock_influencer_controller.get_all])
+                                                                                       self.__mock_influencer_controller.get_all])
 
     def test_get_influencer_by_id(self):
 
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
-        mock_influencer_controller: InfluencerController = Mock()
-        self.__mock_service_locator.get_new_influencer_controller = MagicMock(return_value=mock_influencer_controller)
 
         # act
         bootstrap(event={"routeKey": "GET /influencers/{influencer_id}"},
@@ -114,14 +133,12 @@ class TestRoutes(TestCase):
         # assert
         self.__mock_middleware_pipeline.execute_middleware.assert_called_once_with(context=Any(),
                                                                                    middleware=[
-                                                                                       mock_influencer_controller.get_by_id])
+                                                                                       self.__mock_influencer_controller.get_by_id])
 
     def test_get_auth_brand(self):
 
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
-        mock_brand_controller: BrandController = Mock()
-        self.__mock_service_locator.get_new_brand_controller = MagicMock(return_value=mock_brand_controller)
 
         # act
         bootstrap(event={"routeKey": "GET /brands/me"},
@@ -131,14 +148,12 @@ class TestRoutes(TestCase):
         # assert
         self.__mock_middleware_pipeline.execute_middleware.assert_called_once_with(context=Any(),
                                                                                    middleware=[
-                                                                                       mock_brand_controller.get])
+                                                                                       self.__mock_brand_controller.get])
 
     def test_create_auth_brand(self):
 
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
-        mock_brand_controller: BrandController = Mock()
-        self.__mock_service_locator.get_new_brand_controller = MagicMock(return_value=mock_brand_controller)
 
         # act
         bootstrap(event={"routeKey": "POST /brands/me"},
@@ -148,14 +163,12 @@ class TestRoutes(TestCase):
         # assert
         self.__mock_middleware_pipeline.execute_middleware.assert_called_once_with(context=Any(),
                                                                                    middleware=[
-                                                                                       mock_brand_controller.create])
+                                                                                       self.__mock_brand_controller.create])
 
     def test_update_auth_brand(self):
 
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
-        mock_brand_controller: BrandController = Mock()
-        self.__mock_service_locator.get_new_brand_controller = MagicMock(return_value=mock_brand_controller)
 
         # act
         bootstrap(event={"routeKey": "PUT /brands/me"},
@@ -165,14 +178,12 @@ class TestRoutes(TestCase):
         # assert
         self.__mock_middleware_pipeline.execute_middleware.assert_called_once_with(context=Any(),
                                                                                    middleware=[
-                                                                                       mock_brand_controller.update])
+                                                                                       self.__mock_brand_controller.update])
 
     def test_create_or_replace_auth_brand_header_image(self):
 
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
-        mock_brand_controller: BrandController = Mock()
-        self.__mock_service_locator.get_new_brand_controller = MagicMock(return_value=mock_brand_controller)
 
         # act
         bootstrap(event={"routeKey": "POST /brands/me/header-image"},
@@ -182,14 +193,12 @@ class TestRoutes(TestCase):
         # assert
         self.__mock_middleware_pipeline.execute_middleware.assert_called_once_with(context=Any(),
                                                                                    middleware=[
-                                                                                       mock_brand_controller.update_header_image])
+                                                                                       self.__mock_brand_controller.update_header_image])
 
     def test_create_or_replace_auth_brand_logo(self):
 
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
-        mock_brand_controller: BrandController = Mock()
-        self.__mock_service_locator.get_new_brand_controller = MagicMock(return_value=mock_brand_controller)
 
         # act
         bootstrap(event={"routeKey": "POST /brands/me/logo"},
@@ -199,14 +208,12 @@ class TestRoutes(TestCase):
         # assert
         self.__mock_middleware_pipeline.execute_middleware.assert_called_once_with(context=Any(),
                                                                                    middleware=[
-                                                                                       mock_brand_controller.update_logo])
+                                                                                       self.__mock_brand_controller.update_logo])
 
     def test_get_auth_influencer(self):
 
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
-        mock_influencer_controller: InfluencerController = Mock()
-        self.__mock_service_locator.get_new_influencer_controller = MagicMock(return_value=mock_influencer_controller)
 
         # act
         bootstrap(event={"routeKey": "GET /influencers/me"},
@@ -216,14 +223,12 @@ class TestRoutes(TestCase):
         # assert
         self.__mock_middleware_pipeline.execute_middleware.assert_called_once_with(context=Any(),
                                                                                    middleware=[
-                                                                                       mock_influencer_controller.get])
+                                                                                       self.__mock_influencer_controller.get])
 
     def test_create_auth_influencer(self):
 
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
-        mock_influencer_controller: InfluencerController = Mock()
-        self.__mock_service_locator.get_new_influencer_controller = MagicMock(return_value=mock_influencer_controller)
 
         # act
         bootstrap(event={"routeKey": "POST /influencers/me"},
@@ -233,14 +238,12 @@ class TestRoutes(TestCase):
         # assert
         self.__mock_middleware_pipeline.execute_middleware.assert_called_once_with(context=Any(),
                                                                                    middleware=[
-                                                                                       mock_influencer_controller.create])
+                                                                                       self.__mock_influencer_controller.create])
 
     def test_update_auth_influencer_image(self):
 
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
-        mock_influencer_controller: InfluencerController = Mock()
-        self.__mock_service_locator.get_new_influencer_controller = MagicMock(return_value=mock_influencer_controller)
 
         # act
         bootstrap(event={"routeKey": "POST /influencers/me/image"},
@@ -250,14 +253,12 @@ class TestRoutes(TestCase):
         # assert
         self.__mock_middleware_pipeline.execute_middleware.assert_called_once_with(context=Any(),
                                                                                    middleware=[
-                                                                                       mock_influencer_controller.update_profile_image])
+                                                                                       self.__mock_influencer_controller.update_profile_image])
 
     def test_update_auth_influencer(self):
 
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
-        mock_influencer_controller: InfluencerController = Mock()
-        self.__mock_service_locator.get_new_influencer_controller = MagicMock(return_value=mock_influencer_controller)
 
         # act
         bootstrap(event={"routeKey": "PUT /influencers/me"},
@@ -267,7 +268,7 @@ class TestRoutes(TestCase):
         # assert
         self.__mock_middleware_pipeline.execute_middleware.assert_called_once_with(context=Any(),
                                                                                    middleware=[
-                                                                                       mock_influencer_controller.update])
+                                                                                       self.__mock_influencer_controller.update])
 
     def test_get_auth_campaigns(self):
         self.__assert_not_implemented(route="GET /campaigns/me")

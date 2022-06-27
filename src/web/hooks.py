@@ -134,30 +134,23 @@ class HooksFacade:
         self.__brand_after_hooks = brand_after_hooks
         self.__common_hooks = common_hooks
 
-    @property
-    def brand_before_hooks(self) -> BrandBeforeHooks:
+    def get_brand_before_hooks(self) -> BrandBeforeHooks:
         return self.__brand_before_hooks
 
-    @property
-    def influencer_before_hooks(self) -> InfluencerBeforeHooks:
+    def get_influencer_before_hooks(self) -> InfluencerBeforeHooks:
         return self.__influencer_before_hooks
 
-    @property
-    def user_after_hooks(self) -> UserAfterHooks:
+    def get_user_after_hooks(self) -> UserAfterHooks:
         return self.__user_after_hooks
 
-    @property
-    def influencer_after_hooks(self) -> InfluencerAfterHooks:
+    def get_influencer_after_hooks(self) -> InfluencerAfterHooks:
         return self.__influencer_after_hooks
 
-    @property
-    def user_before_hooks(self) -> UserBeforeHooks:
+    def get_user_before_hooks(self) -> UserBeforeHooks:
         return self.__user_before_hooks
 
-    @property
-    def brand_after_hooks(self) -> BrandAfterHooks:
+    def get_brand_after_hooks(self) -> BrandAfterHooks:
         return self.__brand_after_hooks
 
-    @property
-    def common_hooks(self) -> CommonBeforeHooks:
+    def get_common_hooks(self) -> CommonBeforeHooks:
         return self.__common_hooks
