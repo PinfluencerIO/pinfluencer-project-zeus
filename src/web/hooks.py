@@ -29,6 +29,8 @@ class InfluencerBeforeHooks:
             context.short_circuit = True
             context.response.body = {}
             context.response.status_code = 400
+        else:
+            context.id = id
 
     def validate_influencer(self, context: PinfluencerContext):
         try:
@@ -51,6 +53,8 @@ class BrandBeforeHooks:
             context.short_circuit = True
             context.response.body = {}
             context.response.status_code = 400
+        else:
+            context.id = id
 
     def validate_brand(self, context: PinfluencerContext):
         try:
