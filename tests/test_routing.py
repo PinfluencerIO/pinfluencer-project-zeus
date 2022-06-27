@@ -2,7 +2,7 @@ from unittest import TestCase
 from unittest.mock import MagicMock
 
 from src.web import PinfluencerContext
-from src.web.routing import MiddlewarePipeline
+from src.web.middleware import MiddlewarePipeline
 
 
 class TestMiddlewarePipeline(TestCase):

@@ -1,6 +1,6 @@
 from src.crosscutting import print_exception
-from src.service import ServiceLocator
 from src.web import PinfluencerResponse, PinfluencerContext, Route, PinfluencerAction
+from src.web.ioc import ServiceLocator
 from src.web.routing import Dispatcher
 
 
@@ -34,12 +34,8 @@ def bootstrap(event: dict,
 
             # middleware execution
             middleware_pipeline: list[PinfluencerAction] = [*route_desc.before_hooks, route_desc.action, *route_desc.after_hooks]
-            for action in middleware_pipeline:
-                action(pinfluencer_context)
-
-                # if something fails early response at current middleware/route action is used
-                if pinfluencer_context.short_circuit:
-                    break
+            service_locator.get_new_middlware_pipeline().execute_middleware(context=pinfluencer_context,
+                                                                            middleware=middleware_pipeline)
     except Exception as e:
         print_exception(e)
         response = PinfluencerResponse.as_500_error()

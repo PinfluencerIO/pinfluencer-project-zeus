@@ -7,10 +7,10 @@ from cfn_tools import load_yaml
 
 from src.app import bootstrap
 from src.crosscutting import JsonSnakeToCamelSerializer
-from src.service import ServiceLocator
 from src.types import Serializer
 from src.web import PinfluencerContext
 from src.web.controllers import BrandController
+from src.web.ioc import ServiceLocator
 from src.web.routing import Dispatcher
 from tests import get_as_json
 

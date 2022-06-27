@@ -2,12 +2,13 @@ from mapper.object_mapper import ObjectMapper
 
 from src.crosscutting import JsonCamelToSnakeCaseDeserializer, JsonSnakeToCamelSerializer
 from src.data import SqlAlchemyDataManager
-from src.data.repositories import SqlAlchemyBrandRepository, S3ImageRepository, SqlAlchemyInfluencerRepository, \
+from src.data.repositories import S3ImageRepository, SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository, \
     CognitoAuthUserRepository, CognitoAuthService
 from src.domain.validation import BrandValidator, InfluencerValidator
-from src.types import DataManager, BrandRepository, BrandValidatable, Deserializer, ObjectMapperAdapter, \
-    ImageRepository, Serializer, InfluencerRepository, AuthUserRepository
+from src.types import DataManager, ImageRepository, BrandValidatable, ObjectMapperAdapter, BrandRepository, \
+    InfluencerRepository, Deserializer, Serializer, AuthUserRepository
 from src.web.controllers import BrandController, InfluencerController
+from src.web.middleware import MiddlewarePipeline
 
 
 class ServiceLocator:
@@ -52,3 +53,6 @@ class ServiceLocator:
 
     def get_new_influencer_validator(self) -> InfluencerValidator:
         return InfluencerValidator()
+
+    def get_new_middlware_pipeline(self) -> MiddlewarePipeline:
+        return MiddlewarePipeline()
