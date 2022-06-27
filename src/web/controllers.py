@@ -1,12 +1,9 @@
 from typing import Callable
 
-from jsonschema.exceptions import ValidationError
-
 from src.crosscutting import print_exception
 from src.domain.models import ValueEnum, CategoryEnum, Brand, Influencer
-from src.domain.validation import InfluencerValidator
 from src.exceptions import AlreadyExistsException, NotFoundException
-from src.types import BrandRepository, Deserializer, BrandValidatable, UserRepository, InfluencerRepository
+from src.types import BrandRepository, UserRepository, InfluencerRepository
 from src.web import PinfluencerResponse, BRAND_ID_PATH_KEY, INFLUENCER_ID_PATH_KEY, PinfluencerContext
 from src.web.validation import valid_path_resource_id
 
@@ -70,17 +67,13 @@ class BaseUserController:
 
 
 class BrandController(BaseUserController):
-    def __init__(self, brand_repository: BrandRepository,
-                 brand_validator: BrandValidatable,
-                 deserializer: Deserializer):
+    def __init__(self, brand_repository: BrandRepository):
         super().__init__(brand_repository, BRAND_ID_PATH_KEY)
-        self.__brand_validator = brand_validator
 
     def create(self, context: PinfluencerContext) -> None:
         auth_user_id = context.auth_user_id
         payload_dict = context.body
         try:
-            self.__brand_validator.validate_brand(payload=payload_dict)
             brand = Brand(first_name=payload_dict["first_name"],
                           last_name=payload_dict["last_name"],
                           email=payload_dict["email"],
@@ -91,7 +84,7 @@ class BrandController(BaseUserController):
                           values=list(map(lambda x: ValueEnum[x], payload_dict["values"])),
                           categories=list(map(lambda x: CategoryEnum[x], payload_dict["categories"])))
             self._user_repository.write_new_for_auth_user(auth_user_id=auth_user_id, payload=brand)
-        except (AlreadyExistsException, ValidationError) as e:
+        except (AlreadyExistsException) as e:
             print_exception(e)
             context.short_circuit = True
             context.response.body = {}
@@ -104,7 +97,6 @@ class BrandController(BaseUserController):
         auth_user_id = context.auth_user_id
         payload_dict = context.body
         try:
-            self.__brand_validator.validate_brand(payload_dict)
             brand = Brand(brand_name=payload_dict["brand_name"],
                           brand_description=payload_dict["brand_description"],
                           website=payload_dict["website"],
@@ -114,12 +106,6 @@ class BrandController(BaseUserController):
             brand_to_return = self._user_repository.update_for_auth_user(auth_user_id=auth_user_id, payload=brand)
             context.response.body = brand_to_return.__dict__
             context.response.status_code = 200
-            return
-        except ValidationError as e:
-            print_exception(e)
-            context.short_circuit = True
-            context.response.body = {}
-            context.response.status_code = 400
             return
         except NotFoundException as e:
             print_exception(e)
@@ -150,17 +136,13 @@ class BrandController(BaseUserController):
 
 class InfluencerController(BaseUserController):
 
-    def __init__(self, deserializer: Deserializer,
-                 influencer_repository: InfluencerRepository,
-                 influencer_validator: InfluencerValidator):
+    def __init__(self, influencer_repository: InfluencerRepository):
         super().__init__(influencer_repository, INFLUENCER_ID_PATH_KEY)
-        self.__influencer_validator = influencer_validator
 
     def create(self, context: PinfluencerContext) -> None:
         auth_user_id = context.auth_user_id
         payload_dict = context.body
         try:
-            self.__influencer_validator.validate_influencer(payload=payload_dict)
             influencer = Influencer(first_name=payload_dict["first_name"],
                                     last_name=payload_dict["last_name"],
                                     email=payload_dict["email"],
@@ -180,7 +162,7 @@ class InfluencerController(BaseUserController):
                                     audience_age_55_to_64_split=payload_dict["audience_age_55_to_64_split"],
                                     audience_age_65_plus_split=payload_dict["audience_age_65_plus_split"])
             self._user_repository.write_new_for_auth_user(auth_user_id=auth_user_id, payload=influencer)
-        except (AlreadyExistsException, ValidationError) as e:
+        except (AlreadyExistsException) as e:
             print_exception(e)
             context.short_circuit = True
             context.response.body = {}
@@ -203,7 +185,6 @@ class InfluencerController(BaseUserController):
         auth_user_id = context.auth_user_id
         payload_dict = context.body
         try:
-            self.__influencer_validator.validate_influencer(payload_dict)
             influencer_from_db = self._user_repository.update_for_auth_user(auth_user_id=auth_user_id,
                                                                             payload=Influencer(
                                                                                 auth_user_id=auth_user_id,
@@ -249,10 +230,4 @@ class InfluencerController(BaseUserController):
             print_exception(e)
             context.short_circuit = True
             context.response.status_code = 404
-            context.response.body = {}
-            return
-        except ValidationError as e:
-            print_exception(e)
-            context.short_circuit = True
-            context.response.status_code = 400
             context.response.body = {}

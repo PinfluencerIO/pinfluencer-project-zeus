@@ -39,16 +39,10 @@ class ServiceLocator:
 
     def get_new_brand_controller(self) -> BrandController:
         return BrandController(
-            brand_repository=self.get_new_brand_repository(),
-            brand_validator=self.get_new_brand_validator(),
-            deserializer=self.get_new_deserializer(),
-            auth_user_repository=self.get_new_auth_user_repository())
+            brand_repository=self.get_new_brand_repository())
 
     def get_new_influencer_controller(self) -> InfluencerController:
-        return InfluencerController(influencer_repository=self.get_new_influencer_repository(),
-                                    deserializer=self.get_new_deserializer(),
-                                    auth_user_repository=self.get_new_auth_user_repository(),
-                                    influencer_validator=self.get_new_influencer_validator())
+        return InfluencerController(influencer_repository=self.get_new_influencer_repository())
 
     def get_new_serializer(self) -> Serializer:
         return JsonSnakeToCamelSerializer()

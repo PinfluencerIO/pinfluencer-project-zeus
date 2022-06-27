@@ -4,9 +4,7 @@ from unittest.mock import Mock, MagicMock
 
 from callee import Captor
 
-from src.crosscutting import JsonCamelToSnakeCaseDeserializer
 from src.domain.models import Influencer
-from src.domain.validation import BrandValidator, InfluencerValidator
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.types import BrandRepository, InfluencerRepository
 from src.web import PinfluencerContext, PinfluencerResponse
@@ -25,9 +23,7 @@ class TestInfluencerController(TestCase):
 
     def setUp(self):
         self.__influencer_repository: InfluencerRepository = Mock()
-        self.__sut = InfluencerController(influencer_repository=self.__influencer_repository,
-                                          deserializer=JsonCamelToSnakeCaseDeserializer(),
-                                          influencer_validator=InfluencerValidator())
+        self.__sut = InfluencerController(influencer_repository=self.__influencer_repository)
 
     def test_get_by_id(self):
         # arrange
@@ -106,22 +102,6 @@ class TestInfluencerController(TestCase):
         auth_id = "12341"
         payload = update_influencer_payload()
         self.__influencer_repository.write_new_for_auth_user = MagicMock(side_effect=AlreadyExistsException())
-        response = PinfluencerResponse()
-
-        # act
-        context = PinfluencerContext(body=payload, auth_user_id=auth_id, response=response)
-        self.__sut.create(context)
-
-        # assert
-        assert response.status_code == 400
-        assert response.body == {}
-        assert context.short_circuit == True
-
-    def test_create_when_invalid_payload(self):
-        # arrange
-        auth_id = "12341"
-        payload = update_influencer_payload()
-        payload['bio'] = 120
         response = PinfluencerResponse()
 
         # act
@@ -215,10 +195,7 @@ class TestBrandController(TestCase):
 
     def setUp(self):
         self.__brand_repository: BrandRepository = Mock()
-        self.__brand_validator = BrandValidator()
-        self.__sut = BrandController(brand_repository=self.__brand_repository,
-                                     brand_validator=self.__brand_validator,
-                                     deserializer=JsonCamelToSnakeCaseDeserializer())
+        self.__sut = BrandController(brand_repository=self.__brand_repository)
 
     def test_get_by_id(self):
         # arrange
@@ -361,22 +338,6 @@ class TestBrandController(TestCase):
         assert response.body == {}
         assert context.short_circuit == True
 
-    def test_create_when_invalid_payload(self):
-        # arrange
-        auth_id = "12341"
-        payload = update_brand_payload()
-        payload['brand_name'] = 120
-        response = PinfluencerResponse()
-
-        # act
-        context = PinfluencerContext(body=payload, auth_user_id=auth_id, response=response)
-        self.__sut.create(context)
-
-        # assert
-        assert response.status_code == 400
-        assert response.body == {}
-        assert context.short_circuit == True
-
     def test_update(self):
         # arrange
         expected_payload = update_brand_payload()
@@ -401,22 +362,6 @@ class TestBrandController(TestCase):
         assert list(map(lambda x: x.name, actual_payload.categories)) == expected_payload['categories']
         assert response.status_code == 200
         assert response.body == brand_in_db.__dict__
-
-    def test_update_when_invalid_payload(self):
-        # arrange
-        auth_id = "12341"
-        payload = update_brand_payload()
-        payload['brand_name'] = 120
-        response = PinfluencerResponse()
-
-        # act
-        context = PinfluencerContext(auth_user_id=auth_id, body=payload, response=response)
-        self.__sut.update(context)
-
-        # assert
-        assert response.status_code == 400
-        assert response.body == {}
-        assert context.short_circuit == True
 
     def test_update_when_not_found(self):
         # arrange
