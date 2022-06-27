@@ -7,7 +7,7 @@ from src.types import AuthUserRepository, Deserializer
 from src.web import PinfluencerContext
 
 
-class CommonHooks:
+class CommonBeforeHooks:
 
     def __init__(self, deserializer: Deserializer):
         self.__deserializer = deserializer
@@ -20,6 +20,10 @@ class InfluencerBeforeHooks:
 
     def __init__(self, influencer_validator: InfluencerValidator):
         self.__influencer_validator = influencer_validator
+
+
+    def validate_uuid(self, context: PinfluencerContext):
+        ...
 
     def validate_influencer(self, context: PinfluencerContext):
         try:
@@ -35,6 +39,9 @@ class BrandBeforeHooks:
 
     def __init__(self, brand_validator: BrandValidator):
         self.__brand_validator = brand_validator
+
+    def validate_uuid(self, context: PinfluencerContext):
+        ...
 
     def validate_brand(self, context: PinfluencerContext):
         try:
@@ -99,7 +106,7 @@ class UserAfterHooks:
 
 class HooksFacade:
 
-    def __init__(self, common_hooks: CommonHooks,
+    def __init__(self, common_hooks: CommonBeforeHooks,
                  brand_after_hooks: BrandAfterHooks,
                  influencer_after_hooks: InfluencerAfterHooks,
                  user_before_hooks: UserBeforeHooks,
@@ -139,5 +146,5 @@ class HooksFacade:
         return self.__brand_after_hooks
 
     @property
-    def common_hooks(self) -> CommonHooks:
+    def common_hooks(self) -> CommonBeforeHooks:
         return self.__common_hooks

@@ -1,5 +1,6 @@
 from unittest import TestCase
 from unittest.mock import Mock, MagicMock, call
+from uuid import uuid4
 
 from callee import Captor
 
@@ -8,9 +9,10 @@ from src.domain.models import User, Brand, Influencer
 from src.domain.validation import InfluencerValidator, BrandValidator
 from src.types import AuthUserRepository
 from src.web import PinfluencerContext, PinfluencerResponse
-from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, CommonHooks, \
+from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, CommonBeforeHooks, \
     InfluencerBeforeHooks, BrandBeforeHooks
-from tests import brand_dto_generator, RepoEnum, get_auth_user_event, create_for_auth_user_event
+from tests import brand_dto_generator, RepoEnum, get_auth_user_event, create_for_auth_user_event, get_brand_id_event, \
+    get_influencer_id_event
 
 
 class TestBrandBeforeHooks(TestCase):
@@ -18,6 +20,30 @@ class TestBrandBeforeHooks(TestCase):
     def setUp(self) -> None:
         self.__brand_validator = BrandValidator()
         self.__sut = BrandBeforeHooks(brand_validator=self.__brand_validator)
+
+    def test_validate_uuid(self):
+        # arrange
+        context = PinfluencerContext(event=get_brand_id_event(brand_id=uuid4()),
+                                     short_circuit=False)
+
+        # act
+        self.__sut.validate_uuid(context=context)
+
+        # assert
+        assert not context.short_circuit
+
+    def test_validate_uuid_when_invalid(self):
+        # arrange
+        context = PinfluencerContext(event=get_brand_id_event(brand_id="boo"),
+                                     short_circuit=False)
+
+        # act
+        self.__sut.validate_uuid(context=context)
+
+        # assert
+        assert context.short_circuit
+        assert context.response.status_code == 400
+        assert context.response.body == {}
 
     def test_validate_brand_when_valid(self):
         # arrange
@@ -56,6 +82,31 @@ class TestInfluencerBeforeHooks(TestCase):
         self.__influencer_validator = InfluencerValidator()
         self.__sut = InfluencerBeforeHooks(influencer_validator=self.__influencer_validator)
 
+    def test_validate_uuid(self):
+
+        # arrange
+        context = PinfluencerContext(event=get_influencer_id_event(id=uuid4()),
+                                     short_circuit=False)
+
+        # act
+        self.__sut.validate_uuid(context=context)
+
+        # assert
+        assert not context.short_circuit
+
+    def test_validate_uuid_when_invalid(self):
+        # arrange
+        context = PinfluencerContext(event=get_influencer_id_event(id="boo"),
+                                     short_circuit=False)
+
+        # act
+        self.__sut.validate_uuid(context=context)
+
+        # assert
+        assert context.short_circuit
+        assert context.response.status_code == 400
+        assert context.response.body == {}
+
     def test_validate_influencer_when_valid(self):
         # arrange
         context = PinfluencerContext(body={
@@ -89,7 +140,7 @@ class TestCommonHooks(TestCase):
 
     def setUp(self) -> None:
         self.__deserializer = JsonCamelToSnakeCaseDeserializer()
-        self.__sut = CommonHooks(deserializer=self.__deserializer)
+        self.__sut = CommonBeforeHooks(deserializer=self.__deserializer)
 
     def test_set_body(self):
         # arrange
