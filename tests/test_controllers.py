@@ -14,7 +14,7 @@ from tests import brand_dto_generator, assert_brand_updatable_fields_are_equal, 
     TEST_DEFAULT_BRAND_HEADER_IMAGE, influencer_dto_generator, RepoEnum, \
     assert_brand_creatable_generated_fields_are_equal, TEST_DEFAULT_INFLUENCER_PROFILE_IMAGE, \
     assert_influencer_creatable_generated_fields_are_equal, assert_influencer_update_fields_are_equal, \
-    get_influencer_id_event, get_brand_id_event, update_brand_payload, create_brand_dto, \
+    update_brand_payload, create_brand_dto, \
     update_image_payload, update_brand_return_dto, create_influencer_dto, \
     update_influencer_payload
 
@@ -33,7 +33,7 @@ class TestInfluencerController(TestCase):
 
         # act
         self.__sut.get_by_id(PinfluencerContext(response=pinfluencer_response,
-                                                event=get_influencer_id_event(influencer_in_db.id)))
+                                                id=influencer_in_db.id))
 
         # assert
         assert pinfluencer_response.body == influencer_in_db.__dict__
@@ -188,7 +188,7 @@ class TestBrandController(TestCase):
         pinfluencer_response = PinfluencerResponse()
 
         # act
-        self.__sut.get_by_id(PinfluencerContext(event=get_brand_id_event(brand_from_db.id),
+        self.__sut.get_by_id(PinfluencerContext(id=brand_from_db.id,
                                                 response=pinfluencer_response))
 
         # assert
@@ -203,7 +203,7 @@ class TestBrandController(TestCase):
         pinfluencer_response = PinfluencerResponse()
 
         # act
-        context = PinfluencerContext(event=get_brand_id_event(field), response=pinfluencer_response)
+        context = PinfluencerContext(id=field, response=pinfluencer_response)
         self.__sut.get_by_id(context)
 
         # assert

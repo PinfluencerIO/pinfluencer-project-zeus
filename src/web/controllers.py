@@ -33,21 +33,16 @@ class BaseUserController:
         context.response.body = list(map(lambda x: x.__dict__, users))
 
     def get_by_id(self, context: PinfluencerContext) -> None:
-        if id_:
-            try:
-                user = self._user_repository.load_by_id(id_=id_)
-                context.response.status_code = 200
-                context.response.body = user.__dict__
-                return
-            except NotFoundException as e:
-                print_exception(e)
-                context.short_circuit = True
-                context.response.status_code = 404
-                context.response.body = {}
-                return
-        context.short_circuit = True
-        context.response.status_code = 400
-        context.response.body = {}
+        try:
+            user = self._user_repository.load_by_id(id_=context.id)
+            context.response.status_code = 200
+            context.response.body = user.__dict__
+            return
+        except NotFoundException as e:
+            print_exception(e)
+            context.short_circuit = True
+            context.response.status_code = 404
+            context.response.body = {}
 
     def get(self, context: PinfluencerContext) -> None:
         auth_user_id = context.auth_user_id
