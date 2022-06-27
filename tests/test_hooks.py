@@ -23,7 +23,8 @@ class TestBrandBeforeHooks(TestCase):
 
     def test_validate_uuid(self):
         # arrange
-        context = PinfluencerContext(event=get_brand_id_event(brand_id=str(uuid4())),
+        id = str(uuid4())
+        context = PinfluencerContext(event=get_brand_id_event(brand_id=id),
                                      short_circuit=False)
 
         # act
@@ -31,6 +32,7 @@ class TestBrandBeforeHooks(TestCase):
 
         # assert
         assert not context.short_circuit
+        assert context.id == id
 
     def test_validate_uuid_when_invalid(self):
         # arrange
@@ -45,6 +47,7 @@ class TestBrandBeforeHooks(TestCase):
         assert context.short_circuit
         assert context.response.status_code == 400
         assert context.response.body == {}
+        assert context.id == ""
 
     def test_validate_brand_when_valid(self):
         # arrange
@@ -86,7 +89,8 @@ class TestInfluencerBeforeHooks(TestCase):
     def test_validate_uuid(self):
 
         # arrange
-        context = PinfluencerContext(event=get_influencer_id_event(id=str(uuid4())),
+        id = str(uuid4())
+        context = PinfluencerContext(event=get_influencer_id_event(id=id),
                                      short_circuit=False)
 
         # act
@@ -94,10 +98,12 @@ class TestInfluencerBeforeHooks(TestCase):
 
         # assert
         assert not context.short_circuit
+        assert context.id == id
 
     def test_validate_uuid_when_invalid(self):
         # arrange
-        context = PinfluencerContext(event=get_influencer_id_event(id="boo"),
+        id = "boo"
+        context = PinfluencerContext(event=get_influencer_id_event(id=id),
                                      short_circuit=False,
                                      response=PinfluencerResponse())
 
@@ -108,6 +114,7 @@ class TestInfluencerBeforeHooks(TestCase):
         assert context.short_circuit
         assert context.response.status_code == 400
         assert context.response.body == {}
+        assert context.id == ""
 
     def test_validate_influencer_when_valid(self):
         # arrange

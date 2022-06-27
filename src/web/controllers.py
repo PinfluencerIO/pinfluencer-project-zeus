@@ -5,7 +5,6 @@ from src.domain.models import ValueEnum, CategoryEnum, Brand, Influencer
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.types import BrandRepository, UserRepository, InfluencerRepository
 from src.web import PinfluencerResponse, BRAND_ID_PATH_KEY, INFLUENCER_ID_PATH_KEY, PinfluencerContext
-from src.web.validation import valid_path_resource_id
 
 
 class BaseUserController:
@@ -34,7 +33,6 @@ class BaseUserController:
         context.response.body = list(map(lambda x: x.__dict__, users))
 
     def get_by_id(self, context: PinfluencerContext) -> None:
-        id_ = valid_path_resource_id(context.event, self._resource_id)
         if id_:
             try:
                 user = self._user_repository.load_by_id(id_=id_)

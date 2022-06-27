@@ -6,6 +6,11 @@ from src.types import Serializer
 BRAND_ID_PATH_KEY = 'brand_id'
 INFLUENCER_ID_PATH_KEY = 'influencer_id'
 
+@dataclass
+class PinfluencerRequest:
+    body: dict
+    id: str = ""
+    auth_user_id: str = ""
 
 class PinfluencerResponse:
     def __init__(self, status_code: int = 200, body: Union[dict, list] = {}) -> None:
@@ -45,6 +50,10 @@ class PinfluencerContext:
     event: Union[list, dict] = field(default_factory=dict),
     auth_user_id: str = "",
     body: dict = field(default_factory=dict)
+    id: str = ""
+
+
+
 
 
 PinfluencerAction = Callable[[PinfluencerContext], None]

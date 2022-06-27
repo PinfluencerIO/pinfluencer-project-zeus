@@ -212,22 +212,6 @@ class TestBrandController(TestCase):
         assert pinfluencer_response.status_code == 404
         assert context.short_circuit == True
 
-    def test_get_by_id_when_invalid_uuid(self):
-        # arrange
-        self.__brand_repository.load_by_id = MagicMock(return_value=None)
-        field = "12345"
-        pinfluencer_response = PinfluencerResponse()
-
-        # act
-        context = PinfluencerContext(event=get_brand_id_event(field), response=pinfluencer_response)
-        self.__sut.get_by_id(context)
-
-        # assert
-        self.__brand_repository.load_by_id.assert_not_called()
-        assert pinfluencer_response.body == {}
-        assert pinfluencer_response.status_code == 400
-        assert context.short_circuit == True
-
     def test_get_all(self):
         # arrange
         brands_from_db = [
