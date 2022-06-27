@@ -9,19 +9,19 @@ class Dispatcher:
         self.__brand_ctr = service_locator.get_new_brand_controller()
         self.__influencer_ctr = service_locator.get_new_influencer_controller()
 
-    def __get_not_implemented_method(self, route: str) -> Route:
-        return Route(action=lambda context: self.__not_implemented(context=context,
-                                                                   route=route))
+    def get_not_implemented_method(self, route: str) -> Route:
+        return Route(action=lambda context: self.not_implemented(context=context,
+                                                                 route=route))
 
     @staticmethod
-    def __not_implemented(context: PinfluencerContext, route: str):
+    def not_implemented(context: PinfluencerContext, route: str):
         context.response.status_code = 405
         context.response.body={"message": f"{route} is not implemented"}
 
     @property
     def dispatch_route_to_ctr(self) -> dict[dict[str, Route]]:
         feed = OrderedDict(
-            {'GET /feed': self.__get_not_implemented_method('GET /feed')}
+            {'GET /feed': self.get_not_implemented_method('GET /feed')}
         )
 
         users = OrderedDict(
@@ -58,16 +58,16 @@ class Dispatcher:
 
         campaigns = OrderedDict(
             {
-                'GET /campaigns/me': self.__get_not_implemented_method('GET /campaigns/me'),
+                'GET /campaigns/me': self.get_not_implemented_method('GET /campaigns/me'),
 
-                'DELETE /campaigns/me/{campaign_id}': self.__get_not_implemented_method(
+                'DELETE /campaigns/me/{campaign_id}': self.get_not_implemented_method(
                     'DELETE /campaigns/me/{campaign_id}'),
 
-                'GET /campaigns/me/{campaign_id}': self.__get_not_implemented_method('GET /campaigns/me/{campaign_id}'),
+                'GET /campaigns/me/{campaign_id}': self.get_not_implemented_method('GET /campaigns/me/{campaign_id}'),
 
-                'POST /campaigns/me': self.__get_not_implemented_method('POST /campaigns/me'),
+                'POST /campaigns/me': self.get_not_implemented_method('POST /campaigns/me'),
 
-                'PUT /campaigns/me/{campaign_id}': self.__get_not_implemented_method('PUT /campaigns/me/{campaign_id}')
+                'PUT /campaigns/me/{campaign_id}': self.get_not_implemented_method('PUT /campaigns/me/{campaign_id}')
             }
         )
 
