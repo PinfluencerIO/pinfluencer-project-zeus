@@ -23,7 +23,7 @@ class TestBrandBeforeHooks(TestCase):
 
     def test_validate_uuid(self):
         # arrange
-        context = PinfluencerContext(event=get_brand_id_event(brand_id=uuid4()),
+        context = PinfluencerContext(event=get_brand_id_event(brand_id=str(uuid4())),
                                      short_circuit=False)
 
         # act
@@ -35,7 +35,8 @@ class TestBrandBeforeHooks(TestCase):
     def test_validate_uuid_when_invalid(self):
         # arrange
         context = PinfluencerContext(event=get_brand_id_event(brand_id="boo"),
-                                     short_circuit=False)
+                                     short_circuit=False,
+                                     response=PinfluencerResponse())
 
         # act
         self.__sut.validate_uuid(context=context)
@@ -85,7 +86,7 @@ class TestInfluencerBeforeHooks(TestCase):
     def test_validate_uuid(self):
 
         # arrange
-        context = PinfluencerContext(event=get_influencer_id_event(id=uuid4()),
+        context = PinfluencerContext(event=get_influencer_id_event(id=str(uuid4())),
                                      short_circuit=False)
 
         # act
@@ -97,7 +98,8 @@ class TestInfluencerBeforeHooks(TestCase):
     def test_validate_uuid_when_invalid(self):
         # arrange
         context = PinfluencerContext(event=get_influencer_id_event(id="boo"),
-                                     short_circuit=False)
+                                     short_circuit=False,
+                                     response=PinfluencerResponse())
 
         # act
         self.__sut.validate_uuid(context=context)

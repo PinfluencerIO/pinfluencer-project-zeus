@@ -5,6 +5,7 @@ from src.domain.models import Brand, Influencer
 from src.domain.validation import BrandValidator, InfluencerValidator
 from src.types import AuthUserRepository, Deserializer
 from src.web import PinfluencerContext
+from src.web.validation import valid_path_resource_id
 
 
 class CommonBeforeHooks:
@@ -23,7 +24,11 @@ class InfluencerBeforeHooks:
 
 
     def validate_uuid(self, context: PinfluencerContext):
-        ...
+        id = valid_path_resource_id(event=context.event, resource_key="influencer_id")
+        if not id:
+            context.short_circuit = True
+            context.response.body = {}
+            context.response.status_code = 400
 
     def validate_influencer(self, context: PinfluencerContext):
         try:
@@ -41,7 +46,11 @@ class BrandBeforeHooks:
         self.__brand_validator = brand_validator
 
     def validate_uuid(self, context: PinfluencerContext):
-        ...
+        id = valid_path_resource_id(event=context.event, resource_key="brand_id")
+        if not id:
+            context.short_circuit = True
+            context.response.body = {}
+            context.response.status_code = 400
 
     def validate_brand(self, context: PinfluencerContext):
         try:
