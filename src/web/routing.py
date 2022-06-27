@@ -10,6 +10,8 @@ class MiddlewarePipeline:
                            middleware: list[PinfluencerAction]):
         for action in middleware:
             action(context)
+            if context.short_circuit:
+                break
 
 class Dispatcher:
     def __init__(self, service_locator: ServiceLocator):

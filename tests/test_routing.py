@@ -16,7 +16,7 @@ class TestMiddlewarePipeline(TestCase):
             "invocations": [
 
             ]
-        })
+        }, short_circuit=False)
         middlware = [MagicMock(side_effect=lambda x: x.body["invocations"].append(1)),
                      MagicMock(side_effect=lambda x: x.body["invocations"].append(2)),
                      MagicMock(side_effect=lambda x: x.body["invocations"].append(3)),
@@ -42,7 +42,7 @@ class TestMiddlewarePipeline(TestCase):
             "invocations": [
 
             ]
-        })
+        }, short_circuit=False)
         middlware = [MagicMock(side_effect=lambda x: x.body["invocations"].append(1)),
                      MagicMock(side_effect=lambda x: x.body["invocations"].append(2)),
                      MagicMock(side_effect=lambda x: self.__short_middlware(context=x, invoc_num=3)),
