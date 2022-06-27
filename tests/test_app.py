@@ -11,7 +11,8 @@ from src.crosscutting import JsonSnakeToCamelSerializer
 from src.types import Serializer
 from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.controllers import BrandController, InfluencerController
-from src.web.hooks import HooksFacade
+from src.web.hooks import HooksFacade, CommonBeforeHooks, UserAfterHooks, BrandAfterHooks, UserBeforeHooks, \
+    BrandBeforeHooks, InfluencerAfterHooks
 from src.web.ioc import ServiceLocator
 from src.web.middleware import MiddlewarePipeline
 from src.web.routing import Dispatcher
@@ -31,17 +32,17 @@ class TestRoutes(TestCase):
 
         # hooks
         self.__hooks_facade: HooksFacade = Mock()
-        self.__common_hooks = Mock()
-        self.__user_after_hooks = Mock()
-        self.__brand_after_hooks = Mock()
-        self.__user_before_hooks = Mock()
-        self.__get_brand_before_hooks = Mock()
-        self.__influencer_after_hooks = Mock()
+        self.__common_hooks: CommonBeforeHooks = Mock()
+        self.__user_after_hooks: UserAfterHooks = Mock()
+        self.__brand_after_hooks: BrandAfterHooks = Mock()
+        self.__user_before_hooks: UserBeforeHooks = Mock()
+        self.__brand_before_hooks: BrandBeforeHooks = Mock()
+        self.__influencer_after_hooks: InfluencerAfterHooks = Mock()
         self.__hooks_facade.get_common_hooks = MagicMock(return_value=self.__common_hooks)
         self.__hooks_facade.get_user_after_hooks = MagicMock(return_value=self.__user_after_hooks)
         self.__hooks_facade.get_brand_after_hooks = MagicMock(return_value=self.__brand_after_hooks)
         self.__hooks_facade.get_user_before_hooks = MagicMock(return_value=self.__user_before_hooks)
-        self.__hooks_facade.get_brand_before_hooks = MagicMock(return_value=self.__get_brand_before_hooks)
+        self.__hooks_facade.get_brand_before_hooks = MagicMock(return_value=self.__brand_before_hooks)
         self.__hooks_facade.get_influencer_after_hooks = MagicMock(return_value=self.__influencer_after_hooks)
         self.__hooks_facade.get_influencer_before_hooks = MagicMock(return_value=self.__influencer_after_hooks)
 
@@ -101,9 +102,9 @@ class TestRoutes(TestCase):
                   service_locator=self.__mock_service_locator)
 
         # assert
-        self.__mock_middleware_pipeline.execute_middleware.assert_called_once_with(context=Any(),
-                                                                                   middleware=[
-                                                                                       self.__mock_brand_controller.get_by_id])
+        self.__mock_middleware_pipeline.execute_middleware\
+            .assert_called_once_with(context=Any(),
+                                     middleware=[self.__brand_before_hooks.validate_uuid, self.__mock_brand_controller.get_by_id])
 
     def test_get_all_influencers(self):
 
