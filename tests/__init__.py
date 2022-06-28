@@ -344,7 +344,7 @@ def get_brand_id_event(brand_id):
 
 
 def get_auth_user_event(auth_id):
-    return {"requestContext": {"authorizer": {"jwt": {"claims": {"cognito:username": auth_id}}}}}
+    return {"requestContext": {"authorizer": {"jwt": {"claims": {"username": auth_id}}}}}
 
 
 def update_brand_payload():
