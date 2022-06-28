@@ -185,6 +185,7 @@ class TestRoutes(TestCase):
             .assert_called_once_with(context=Any(),
                                      middleware=[
                                          self.__common_hooks.set_body,
+                                         self.__user_before_hooks.set_auth_user_id,
                                          self.__brand_before_hooks.validate_brand,
                                          self.__mock_brand_controller.create,
                                          self.__brand_after_hooks.set_brand_claims,
