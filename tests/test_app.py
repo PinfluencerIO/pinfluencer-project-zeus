@@ -335,20 +335,20 @@ class TestRoutes(TestCase):
                                          self.__user_after_hooks.tag_auth_user_claims_to_response
                                      ])
 
-    def test_get_auth_campaigns(self):
-        self.__assert_not_implemented(route="GET /campaigns/me")
+    def test_create_auth_brand_campaign(self):
+        self.__assert_not_implemented(route="POST /brands/me/campaigns")
 
-    def test_delete_auth_campaign_by_id(self):
-        self.__assert_not_implemented(route="DELETE /campaigns/me/{campaign_id}")
+    def test_get_campaign_by_id(self):
+        self.__assert_not_implemented(route="GET /campaigns/{campaign_id}")
 
-    def test_get_auth_campaign_by_id(self):
-        self.__assert_not_implemented(route="GET /campaigns/me/{campaign_id}")
+    def test_get_auth_brand_campaigns(self):
+        self.__assert_not_implemented(route="GET /brands/me/campaigns")
 
-    def test_update_auth_campaign_by_id(self):
-        self.__assert_not_implemented(route="PUT /campaigns/me/{campaign_id}")
+    def test_update_brand_auth_campaign_by_id(self):
+        self.__assert_not_implemented(route="PUT /brands/me/campaigns/{campaign_id}")
 
-    def test_create_auth_campaign(self):
-        self.__assert_not_implemented(route="POST /campaigns/me")
+    def test_delete_brand_auth_campaign_by_id(self):
+        self.__assert_not_implemented(route="DELETE /brands/me/campaigns/{campaign_id}")
 
     def test_template_matches_routes(self):
         template_file_path = f"./../template.yaml"

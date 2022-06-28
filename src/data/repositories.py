@@ -8,8 +8,9 @@ import boto3
 from botocore.exceptions import ClientError
 from filetype import filetype
 
-from src.data.entities import SqlAlchemyBrandEntity, SqlAlchemyInfluencerEntity, create_mappings
-from src.domain.models import Brand, Influencer
+from src.data.entities import SqlAlchemyBrandEntity, SqlAlchemyInfluencerEntity, create_mappings, \
+    SqlAlchemyCampaignEntity
+from src.domain.models import Brand, Influencer, Campaign
 from src.domain.models import User as UserModel
 from src.exceptions import AlreadyExistsException, ImageException, NotFoundException
 from src.types import DataManager, ImageRepository, Model, User, ObjectMapperAdapter
@@ -156,9 +157,9 @@ class SqlAlchemyInfluencerRepository(BaseSqlAlchemyUserRepository):
                          resource_dto=Influencer)
 
     def update_for_auth_user(self, auth_user_id: str, payload: Influencer) -> Influencer:
-        entity: SqlAlchemyInfluencerEntity = self._data_manager.session\
-            .query(self._resource_entity)\
-            .filter(self._resource_entity.auth_user_id == auth_user_id)\
+        entity: SqlAlchemyInfluencerEntity = self._data_manager.session \
+            .query(self._resource_entity) \
+            .filter(self._resource_entity.auth_user_id == auth_user_id) \
             .first()
         if entity:
             entity.values = payload.values
@@ -187,6 +188,21 @@ class SqlAlchemyInfluencerRepository(BaseSqlAlchemyUserRepository):
     @staticmethod
     def __header_image_setter(profile_image, influencer):
         influencer.image = profile_image
+
+
+class SqlAlchemyCampaignRepository(BaseSqlAlchemyRepository):
+
+    def __init__(self, data_manager: DataManager,
+                 object_mapper: ObjectMapperAdapter):
+        super().__init__(data_manager,
+                         SqlAlchemyCampaignEntity,
+                         object_mapper,
+                         Campaign)
+
+    def write_new_for_brand(self, payload: Campaign,
+                            auth_user_id: str) -> Campaign:
+        ...
+
 
 
 class S3ImageRepository:

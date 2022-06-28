@@ -116,6 +116,13 @@ Resources:
             Path: /influencers/{influencer_id}
             Method: get
             ApiId: !Ref PinfluencerHttpApi
+
+        GetMyCampaignById:
+          Type: HttpApi
+          Properties:
+            Path: /campaigns/{campaign_id}
+            Method: get
+            ApiId: !Ref PinfluencerHttpApi
         #PUBLIC Endpoints END
 
         #Authenticated Influencer endpoints START
@@ -197,36 +204,28 @@ Resources:
         #Authenticated Brand endpoints END
 
         #Authenticated Campaign endpoints START
-        CreateMyCampaign:
+        CreateMyBrandCampaign:
           Type: HttpApi
           Properties:
             Auth:
               Authorizer: UserAuth
-            Path: /campaigns/me
+            Path: /brands/me/campaigns
             Method: post
             ApiId: !Ref PinfluencerHttpApi
-        GetAllMyCampaigns:
+        GetAllMyBrandCampaigns:
           Type: HttpApi
           Properties:
             Auth:
               Authorizer: UserAuth
-            Path: /campaigns/me
+            Path: /brands/me/campaigns
             Method: get
-            ApiId: !Ref PinfluencerHttpApi
-        GetMyCampaignById:
-          Type: HttpApi
-          Properties:
-            Auth:
-              Authorizer: UserAuth
-            Path: /campaigns/me/{campaign_id}
-            Method: get
-            ApiId: !Ref PinfluencerHttpApi
+          ApiId: !Ref PinfluencerHttpApi
         UpdateMyCampaignById:
           Type: HttpApi
           Properties:
             Auth:
               Authorizer: UserAuth
-            Path: /campaigns/me/{campaign_id}
+            Path: /brands/me/campaigns/{campaign_id}
             Method: put
             ApiId: !Ref PinfluencerHttpApi
         DeleteMyCampaignById:
@@ -234,7 +233,7 @@ Resources:
           Properties:
             Auth:
               Authorizer: UserAuth
-            Path: /campaigns/me/{campaign_id}
+            Path: /brands/me/campaigns/{campaign_id}
             Method: delete
             ApiId: !Ref PinfluencerHttpApi
         #Authenticated Campaign endpoints END

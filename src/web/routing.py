@@ -166,16 +166,16 @@ class Dispatcher:
 
         campaigns = OrderedDict(
             {
-                'GET /campaigns/me': self.get_not_implemented_method('GET /campaigns/me'),
+                'GET /brands/me/campaigns': self.get_not_implemented_method('GET /brands/me/campaigns'),
 
-                'DELETE /campaigns/me/{campaign_id}': self.get_not_implemented_method(
-                    'DELETE /campaigns/me/{campaign_id}'),
+                'DELETE /brands/me/campaigns/{campaign_id}': self.get_not_implemented_method(
+                    'DELETE /brands/me/campaigns/{campaign_id}'),
 
-                'GET /campaigns/me/{campaign_id}': self.get_not_implemented_method('GET /campaigns/me/{campaign_id}'),
+                'GET /campaigns/{campaign_id}': self.get_not_implemented_method('/campaigns/{campaign_id}'),
 
-                'POST /campaigns/me': self.get_not_implemented_method('POST /campaigns/me'),
+                'POST /brands/me/campaigns': self.get_not_implemented_method('POST /brands/me/campaigns'),
 
-                'PUT /campaigns/me/{campaign_id}': self.get_not_implemented_method('PUT /campaigns/me/{campaign_id}')
+                'PUT /brands/me/campaigns/{campaign_id}': self.get_not_implemented_method('PUT /brands/me/campaigns/{campaign_id}')
             }
         )
 

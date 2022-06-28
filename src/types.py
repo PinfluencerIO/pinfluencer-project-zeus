@@ -1,6 +1,6 @@
 from typing import Protocol, Optional, Union
 
-from src.domain.models import Brand, Influencer, User
+from src.domain.models import Brand, Influencer, User, Campaign
 
 
 class AuthUserRepository(Protocol):
@@ -14,6 +14,18 @@ class AuthUserRepository(Protocol):
     def get_by_id(self, _id: str) -> User:
         ...
 
+
+class CampaignRepository(Protocol):
+
+    def load_collection(self) -> list[Campaign]:
+        ...
+
+    def load_by_id(self, id_: str) -> Campaign:
+        ...
+
+    def write_new_for_brand(self, payload: Campaign,
+                            auth_user_id: str) -> Campaign:
+        ...
 
 class BrandRepository(Protocol):
 
