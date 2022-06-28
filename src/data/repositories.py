@@ -176,7 +176,7 @@ class SqlAlchemyInfluencerRepository(BaseSqlAlchemyUserRepository):
             entity.audience_age_55_to_64_split = payload.audience_age_55_to_64_split
             entity.audience_age_65_plus_split = payload.audience_age_65_plus_split
             self._data_manager.session.commit()
-            return payload
+            return self._object_mapper.map(from_obj=entity, to_type=Influencer)
         raise NotFoundException(f"influencer auth_user_id:<{auth_user_id}> not found")
 
     def update_image_for_auth_user(self, auth_user_id: str, image_bytes: str) -> Influencer:
