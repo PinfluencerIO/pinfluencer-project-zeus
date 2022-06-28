@@ -58,7 +58,15 @@ class Dispatcher:
                     ]),
 
                 # authenticated brand endpoints
-                'GET /brands/me': Route(action=self.__brand_ctr.get),
+                'GET /brands/me': Route(
+                    before_hooks=[
+                        self.__hooks_facade.get_user_before_hooks().set_auth_user_id
+                    ],
+                    action=self.__brand_ctr.get,
+                    after_hooks=[
+                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response
+                    ]
+                ),
 
                 'POST /brands/me': Route(action=self.__brand_ctr.create),
 
