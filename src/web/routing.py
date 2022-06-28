@@ -98,10 +98,22 @@ class Dispatcher:
                         self.__hooks_facade.get_common_hooks().set_body,
                         self.__hooks_facade.get_user_before_hooks().set_auth_user_id
                     ],
-                    action=self.__brand_ctr.update_header_image
+                    action=self.__brand_ctr.update_header_image,
+                    after_hooks=[
+                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response
+                    ]
                 ),
 
-                'POST /brands/me/logo': Route(action=self.__brand_ctr.update_logo),
+                'POST /brands/me/logo': Route(
+                    before_hooks=[
+                        self.__hooks_facade.get_common_hooks().set_body,
+                        self.__hooks_facade.get_user_before_hooks().set_auth_user_id
+                    ],
+                    action=self.__brand_ctr.update_logo,
+                    after_hooks=[
+                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response
+                    ]
+                ),
 
                 # authenticated influencer endpoints
                 'GET /influencers/me': Route(action=self.__influencer_ctr.get),
