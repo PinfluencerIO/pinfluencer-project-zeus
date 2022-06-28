@@ -88,7 +88,7 @@ class Campaign(Model):
     campaign_title: str = ""
     campaign_description: str = ""
     campaign_categories: list[CategoryEnum] = field(default_factory=list)
-    campaign_calues: list[ValueEnum] = field(default_factory=list)
+    campaign_values: list[ValueEnum] = field(default_factory=list)
     campaign_product_link: str = ""
     campaign_hashtag: str = ""
     campaign_discount_code: str = ""

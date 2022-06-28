@@ -1,8 +1,8 @@
 COGNITO-USER:
     firstName:                  str
     lastName:                   str
-    email:                      str
-    onboarded:                  string allowed-values{null, "influencer", "brand"}
+    email:                      str email
+    custom:usertype:            str allowed-values{null, "influencer", "brand"}
 
 ONBOARDING-BRAND:
 
@@ -10,10 +10,10 @@ ONBOARDING-BRAND:
     firstName:                  str
     lastName:                   str
     email:                      str
-    values:                     str[]
-    categories:                 str[]
+    values:                     str[] allowed-values{<values>}
+    categories:                 str[] allowed-values{<categories>}
     instaHandle:                str
-    website:                    str
+    website:                    str url
 
     -- brand-specific --
     brandName:                  str
@@ -27,12 +27,27 @@ ONBOARDING-INFLUENCER:
 
     -- influencer-specific --
     bio:                        str
-    audienceAge13To17Split:     float
-    audienceAge18To24Split:     float
-    audienceAge25To34Split:     float
-    audienceAge35To44Split:     float
-    audienceAge45To54Split:     float
-    audienceAge55To64Split:     float
-    audienceAge65PlusSplit:     float
-    audienceMaleSplit:          float
-    audienceFemaleSplit:        float
+    audienceAge13To17Split:     float fraction
+    audienceAge18To24Split:     float fraction
+    audienceAge25To34Split:     float fraction
+    audienceAge35To44Split:     float fraction
+    audienceAge45To54Split:     float fraction
+    audienceAge55To64Split:     float fraction
+    audienceAge65PlusSplit:     float fraction
+    audienceMaleSplit:          float fraction
+    audienceFemaleSplit:        float fraction
+
+
+CAMPAIGN:
+
+    objective:                  str allowed-values{<objectives>}
+    successDescription:         str
+    campaignTitle:              str
+    campaignDescription:        str
+    campaignCategories:         str[] allowed-values{<categories>}
+    campaignValues:             str[] allowed-values{<values>}
+    campaignProductLink:        str url
+    campaignHashtag:            str
+    campaignDiscountCode:       str
+    productTitle:               str
+    productDescription:         str

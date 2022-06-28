@@ -57,7 +57,7 @@ class SqlAlchemyCampaignEntity(Base, SqlAlchemyBaseEntity):
     campaign_title = Column(type_=String(length=120), nullable=False)
     campaign_description = Column(type_=String(length=500), nullable=False)
     campaign_categories = Column(type_=PickleType, nullable=False)
-    campaign_calues = Column(type_=PickleType, nullable=False)
+    campaign_values = Column(type_=PickleType, nullable=False)
     campaign_product_link = Column(type_=String(length=120), nullable=False)
     campaign_hashtag = Column(type_=String(length=120), nullable=False)
     campaign_discount_code = Column(type_=String(length=120), nullable=False)
