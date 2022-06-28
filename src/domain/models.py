@@ -79,3 +79,21 @@ class Influencer(User):
     audience_female_split: float = 0.0
     values: list[ValueEnum] = field(default_factory=list)
     categories: list[CategoryEnum] = field(default_factory=list)
+
+
+@dataclass
+class Campaign(Model):
+    objective: str = ""
+    success_description: str = ""
+    campaign_title: str = ""
+    campaign_description: str = ""
+    campaign_categories: list[CategoryEnum] = field(default_factory=list)
+    campaign_calues: list[ValueEnum] = field(default_factory=list)
+    campaign_product_link: str = ""
+    campaign_hashtag: str = ""
+    campaign_discount_code: str = ""
+    product_title: str = ""
+    product_description: str = ""
+    product_image1: str = ""
+    product_image2: str = ""
+    product_image3: str = ""

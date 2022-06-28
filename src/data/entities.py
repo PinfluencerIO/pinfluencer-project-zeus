@@ -3,7 +3,7 @@ from typing import Union
 from sqlalchemy import Column, String, DateTime, Float, PickleType
 
 from src.data import Base
-from src.domain.models import Brand, Influencer
+from src.domain.models import Brand, Influencer, Campaign
 from src.types import ObjectMapperAdapter
 
 
@@ -49,8 +49,29 @@ class SqlAlchemyInfluencerEntity(Base, SqlAlchemyBaseUserEntity):
     categories = Column(type_=PickleType, nullable=False)
 
 
+class SqlAlchemyCampaignEntity(Base, SqlAlchemyBaseEntity):
+    __tablename__ = 'campaign'
+
+    objective = Column(type_=String(length=120), nullable=False)
+    success_description = Column(type_=String(length=500), nullable=False)
+    campaign_title = Column(type_=String(length=120), nullable=False)
+    campaign_description = Column(type_=String(length=500), nullable=False)
+    campaign_categories = Column(type_=PickleType, nullable=False)
+    campaign_calues = Column(type_=PickleType, nullable=False)
+    campaign_product_link = Column(type_=String(length=120), nullable=False)
+    campaign_hashtag = Column(type_=String(length=120), nullable=False)
+    campaign_discount_code = Column(type_=String(length=120), nullable=False)
+    product_title = Column(type_=String(length=120), nullable=False)
+    product_description = Column(type_=String(length=500), nullable=False)
+    product_image1 = Column(type_=String(length=360), nullable=False)
+    product_image2 = Column(type_=String(length=360), nullable=False)
+    product_image3 = Column(type_=String(length=360), nullable=False)
+
+
 def create_mappings(mapper: Union[ObjectMapperAdapter, object]):
     mapper.create_map(Brand, SqlAlchemyBrandEntity)
     mapper.create_map(SqlAlchemyBrandEntity, Brand)
     mapper.create_map(Influencer, SqlAlchemyInfluencerEntity)
     mapper.create_map(SqlAlchemyInfluencerEntity, Influencer)
+    mapper.create_map(Campaign, SqlAlchemyCampaignEntity)
+    mapper.create_map(SqlAlchemyCampaignEntity, Campaign)

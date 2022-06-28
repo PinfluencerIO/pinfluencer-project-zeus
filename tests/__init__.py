@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from src.crosscutting import JsonSnakeToCamelSerializer
 from src.data import Base
 from src.data.entities import SqlAlchemyBrandEntity, SqlAlchemyBaseEntity, SqlAlchemyInfluencerEntity
-from src.domain.models import Brand, Influencer, ValueEnum, CategoryEnum, User
+from src.domain.models import Brand, Influencer, ValueEnum, CategoryEnum, User, Campaign
 
 TEST_DEFAULT_BRAND_LOGO = "default_brand_logo.png"
 TEST_DEFAULT_BRAND_HEADER_IMAGE = "default_brand_header_image.png"
@@ -54,7 +54,8 @@ def user_dto_generator(num: int) -> User:
                 email=f"email{num}",
                 auth_user_id=f"1234{num}")
 
-def brand_dto_generator(num, repo: RepoEnum=RepoEnum.NO_REPO):
+
+def brand_dto_generator(num, repo: RepoEnum = RepoEnum.NO_REPO):
     if num == 1:
         values = [ValueEnum.VALUE5, ValueEnum.VALUE6, ValueEnum.VALUE7]
         categories = [CategoryEnum.CATEGORY6, CategoryEnum.CATEGORY5, CategoryEnum.CATEGORY7]
@@ -98,7 +99,8 @@ def brand_dto_generator(num, repo: RepoEnum=RepoEnum.NO_REPO):
         categories=categories
     )
 
-def influencer_dto_generator(num, repo: RepoEnum=RepoEnum.NO_REPO):
+
+def influencer_dto_generator(num, repo: RepoEnum = RepoEnum.NO_REPO):
     if num == 1:
         values = [ValueEnum.VALUE5, ValueEnum.VALUE6, ValueEnum.VALUE7]
         categories = [CategoryEnum.CATEGORY6, CategoryEnum.CATEGORY5, CategoryEnum.CATEGORY7]
@@ -164,6 +166,39 @@ def influencer_dto_generator(num, repo: RepoEnum=RepoEnum.NO_REPO):
         audience_age_65_plus_split=audience_age_65_plus_split,
         audience_male_split=audience_male_split,
         audience_female_split=audience_female_split
+    )
+
+
+def campaign_dto_generator(num: int) -> Campaign:
+    if num == 1:
+        campaign_values = [ValueEnum.VALUE5, ValueEnum.VALUE6, ValueEnum.VALUE7]
+        campaign_categories = [CategoryEnum.CATEGORY6, CategoryEnum.CATEGORY5, CategoryEnum.CATEGORY7]
+    elif num == 2:
+        campaign_values = [ValueEnum.VALUE5, ValueEnum.RECYCLED, ValueEnum.VALUE7, ValueEnum.SUSTAINABLE]
+        campaign_categories = [CategoryEnum.CATEGORY6, CategoryEnum.CATEGORY9, CategoryEnum.CATEGORY8,
+                               CategoryEnum.FASHION]
+    else:
+        campaign_values = [ValueEnum.VALUE5, ValueEnum.RECYCLED, ValueEnum.VALUE7, ValueEnum.SUSTAINABLE,
+                           ValueEnum.VEGAN]
+        campaign_categories = [CategoryEnum.CATEGORY6, CategoryEnum.CATEGORY9, CategoryEnum.CATEGORY8,
+                               CategoryEnum.FASHION,
+                               CategoryEnum.PET]
+
+    return Campaign(
+        objective=f"objective{num}",
+        success_description=f"success_description{num}",
+        campaign_title=f"campaign_title{num}",
+        campaign_description=f"campaign_description{num}",
+        campaign_categories=campaign_categories,
+        campaign_calues=campaign_values,
+        campaign_product_link=f"campaign_product_link{num}",
+        campaign_hashtag=f"campaign_hashtag{num}",
+        campaign_discount_code=f"campaign_discount_code{num}",
+        product_title=f"product_title{num}",
+        product_description=f"product_description{num}",
+        product_image1=f"product_image1{num}",
+        product_image2=f"product_image2{num}",
+        product_image3=f"product_image3{num}"
     )
 
 
@@ -255,6 +290,22 @@ def brand_db_fields():
             'auth_user_id']
 
 
+def campaign_db_fields():
+    return [
+        "objective",
+        "success_description",
+        "campaign_title",
+        "campaign_description",
+        "campaign_categories",
+        "campaign_calues",
+        "campaign_product_link",
+        "campaign_hashtag",
+        "campaign_discount_code",
+        "product_title",
+        "product_description"
+    ]
+
+
 def influencer_db_fields():
     return ['website',
             'bio',
@@ -297,6 +348,12 @@ def assert_brand_db_fields_are_equal(brand1: dict, brand2: dict):
 def assert_influencer_db_fields_are_equal(influencer1: dict, influencer2: dict):
     for field in influencer_db_fields():
         assert influencer1[field] == influencer2[field]
+        print(f'asserted {field} is valid')
+
+
+def assert_campaign_db_fields_are_equal(campaign1: dict, campaign2: dict):
+    for field in campaign_db_fields():
+        assert campaign1[field] == campaign2[field]
         print(f'asserted {field} is valid')
 
 
