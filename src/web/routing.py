@@ -81,7 +81,17 @@ class Dispatcher:
                     ]
                 ),
 
-                'PUT /brands/me': Route(action=self.__brand_ctr.update),
+                'PUT /brands/me': Route(
+                    before_hooks=[
+                        self.__hooks_facade.get_common_hooks().set_body,
+                        self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
+                        self.__hooks_facade.get_brand_before_hooks().validate_brand
+                    ],
+                    action=self.__brand_ctr.update,
+                    after_hooks=[
+                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response
+                    ]
+                ),
 
                 'POST /brands/me/header-image': Route(action=self.__brand_ctr.update_header_image),
 
