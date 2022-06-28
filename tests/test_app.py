@@ -310,7 +310,6 @@ class TestRoutes(TestCase):
                                      middleware=[
                                          self.__common_hooks.set_body,
                                          self.__user_before_hooks.set_auth_user_id,
-                                         self.__influencer_before_hooks.validate_influencer,
                                          self.__mock_influencer_controller.update_profile_image,
                                          self.__user_after_hooks.tag_auth_user_claims_to_response
                                      ])

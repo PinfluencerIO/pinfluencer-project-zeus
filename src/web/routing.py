@@ -141,7 +141,16 @@ class Dispatcher:
 
                 'PUT /influencers/me': Route(action=self.__influencer_ctr.update),
 
-                'POST /influencers/me/image': Route(action=self.__influencer_ctr.update_profile_image),
+                'POST /influencers/me/image': Route(
+                    before_hooks=[
+                        self.__hooks_facade.get_common_hooks().set_body,
+                        self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
+                    ],
+                    action=self.__influencer_ctr.update_profile_image,
+                    after_hooks=[
+                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response
+                    ]
+                ),
             }
         )
 
