@@ -116,7 +116,15 @@ class Dispatcher:
                 ),
 
                 # authenticated influencer endpoints
-                'GET /influencers/me': Route(action=self.__influencer_ctr.get),
+                'GET /influencers/me': Route(
+                    before_hooks=[
+                        self.__hooks_facade.get_user_before_hooks().set_auth_user_id
+                    ],
+                    action=self.__influencer_ctr.get,
+                    after_hooks=[
+                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response
+                    ]
+                ),
 
                 'POST /influencers/me': Route(action=self.__influencer_ctr.create),
 
