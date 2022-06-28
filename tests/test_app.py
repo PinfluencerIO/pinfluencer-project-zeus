@@ -180,9 +180,16 @@ class TestRoutes(TestCase):
                   service_locator=self.__mock_service_locator)
 
         # assert
-        self.__mock_middleware_pipeline.execute_middleware.assert_called_once_with(context=Any(),
-                                                                                   middleware=[
-                                                                                       self.__mock_brand_controller.create])
+        self.__mock_middleware_pipeline \
+            .execute_middleware \
+            .assert_called_once_with(context=Any(),
+                                     middleware=[
+                                         self.__common_hooks.set_body,
+                                         self.__brand_before_hooks.validate_brand,
+                                         self.__mock_brand_controller.create,
+                                         self.__brand_after_hooks.set_brand_claims,
+                                         self.__user_after_hooks.tag_auth_user_claims_to_response
+                                     ])
 
     def test_update_auth_brand(self):
         # arrange
