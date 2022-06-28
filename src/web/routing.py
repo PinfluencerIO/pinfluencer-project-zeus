@@ -126,7 +126,18 @@ class Dispatcher:
                     ]
                 ),
 
-                'POST /influencers/me': Route(action=self.__influencer_ctr.create),
+                'POST /influencers/me': Route(
+                    before_hooks=[
+                        self.__hooks_facade.get_common_hooks().set_body,
+                        self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
+                        self.__hooks_facade.get_influencer_before_hooks().validate_influencer
+                    ],
+                    action=self.__influencer_ctr.create,
+                    after_hooks=[
+                        self.__hooks_facade.get_influencer_after_hooks().set_influencer_claims,
+                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response
+                    ]
+                ),
 
                 'PUT /influencers/me': Route(action=self.__influencer_ctr.update),
 
