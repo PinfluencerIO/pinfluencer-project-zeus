@@ -104,7 +104,7 @@ class TestRoutes(TestCase):
                   service_locator=self.__mock_service_locator)
 
         # assert
-        self.__mock_middleware_pipeline\
+        self.__mock_middleware_pipeline \
             .execute_middleware \
             .assert_called_once_with(context=Any(),
                                      middleware=[
@@ -123,9 +123,13 @@ class TestRoutes(TestCase):
                   service_locator=self.__mock_service_locator)
 
         # assert
-        self.__mock_middleware_pipeline.execute_middleware.assert_called_once_with(context=Any(),
-                                                                                   middleware=[
-                                                                                       self.__mock_influencer_controller.get_all])
+        self.__mock_middleware_pipeline \
+            .execute_middleware \
+            .assert_called_once_with(context=Any(),
+                                     middleware=[
+                                         self.__mock_influencer_controller.get_all,
+                                         self.__user_after_hooks.tag_auth_user_claims_to_response_collection
+                                     ])
 
     def test_get_influencer_by_id(self):
         # arrange
