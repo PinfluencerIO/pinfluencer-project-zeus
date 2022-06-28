@@ -7,9 +7,12 @@ Parameters:
   UserPoolId:
     Type: String
     Description: User pool id for Cognito
-  ClientIdAudience:
+  ClientIdAudienceLegacy:
     Type: String
-    Description: Client id for user pool
+    Description: Legacy client id for user pool
+  ClientIdAudienceWeb:
+    Type: String
+    Description: React SPA client id for user pool
   DatabaseUser:
     Type: String
     Description: DB_USER
@@ -68,7 +71,8 @@ Resources:
                     - '.amazonaws.com/'
                     - !Sub ${UserPoolId}
               audience: 
-                - !Sub ${ClientIdAudience}
+                - !Sub ${ClientIdAudienceLegacy}
+                - !Sub ${ClientIdAudienceWeb}
 
   PinfluencerFunction:
     Type: AWS::Serverless::Function
