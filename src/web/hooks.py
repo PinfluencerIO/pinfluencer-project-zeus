@@ -95,7 +95,7 @@ class InfluencerAfterHooks:
 class UserBeforeHooks:
 
     def set_auth_user_id(self, context: PinfluencerContext):
-        context.auth_user_id = context.event['requestContext']['authorizer']['jwt']['claims']['cognito:username']
+        context.auth_user_id = context.event['requestContext']['authorizer']['jwt']['claims']['username']
 
 
 class UserAfterHooks:
