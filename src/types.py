@@ -137,7 +137,7 @@ class ImageRepository(Protocol):
 User = Union[Brand, Influencer]
 
 # TODO: add rest
-Model = Union[User]
+Model = Union[User, Campaign]
 
 
 class ObjectMapperAdapter(Protocol):

@@ -83,6 +83,7 @@ class Influencer(User):
 
 @dataclass
 class Campaign(Model):
+    brand_id: str = ""
     objective: str = ""
     success_description: str = ""
     campaign_title: str = ""

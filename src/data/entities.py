@@ -52,6 +52,7 @@ class SqlAlchemyInfluencerEntity(Base, SqlAlchemyBaseUserEntity):
 class SqlAlchemyCampaignEntity(Base, SqlAlchemyBaseEntity):
     __tablename__ = 'campaign'
 
+    brand_id = Column(type_=String(length=360), nullable=False)
     objective = Column(type_=String(length=120), nullable=False)
     success_description = Column(type_=String(length=500), nullable=False)
     campaign_title = Column(type_=String(length=120), nullable=False)

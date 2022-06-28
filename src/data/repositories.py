@@ -201,8 +201,23 @@ class SqlAlchemyCampaignRepository(BaseSqlAlchemyRepository):
 
     def write_new_for_brand(self, payload: Campaign,
                             auth_user_id: str) -> Campaign:
-        ...
-
+        brand = self._data_manager\
+            .session\
+            .query(SqlAlchemyBrandEntity)\
+            .filter(SqlAlchemyBrandEntity.auth_user_id == auth_user_id)\
+            .first()
+        if brand:
+            payload.brand_id = brand.id
+            campaign_entity = self\
+                ._object_mapper\
+                .map(from_obj=payload, to_type=SqlAlchemyCampaignEntity)
+            self._data_manager.session.add(campaign_entity)
+            self._data_manager.session.commit()
+            return payload
+        else:
+            error_message = f"brand <{auth_user_id}> not found"
+            print(error_message)
+            raise NotFoundException(error_message)
 
 
 class S3ImageRepository:

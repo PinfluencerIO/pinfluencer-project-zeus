@@ -65,6 +65,9 @@ class TestInfluencerMappings(TestMappings):
         assert_influencer_db_fields_are_equal(influencer1=influencer.__dict__,
                                               influencer2=influencer_mapped_back.__dict__)
 
+
+class TestCampaignMappings(TestMappings):
+
     def test_map_campaign_to_campaign_entity(self):
         # arrange
         campaign = campaign_dto_generator(num=1)

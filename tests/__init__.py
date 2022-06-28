@@ -266,6 +266,13 @@ def assert_brand_creatable_generated_fields_are_equal(brand1, brand2):
     assert brand1 == brand2
 
 
+def assert_campaign_db_fields_are_equal_for_three(campaign1: dict, campaign2: dict, campaign3: dict):
+    campaign1.pop("brand_id")
+    campaign2.pop("brand_id")
+    campaign3.pop("brand_id")
+    assert campaign1 == campaign2 == campaign3
+
+
 def assert_brand_updatable_fields_are_equal(brand1, brand2):
     for field in brand_brand_updatable_fields():
         assert brand1[field] == brand2[field]
