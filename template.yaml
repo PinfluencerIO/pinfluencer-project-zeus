@@ -219,7 +219,7 @@ Resources:
               Authorizer: UserAuth
             Path: /brands/me/campaigns
             Method: get
-          ApiId: !Ref PinfluencerHttpApi
+            ApiId: !Ref PinfluencerHttpApi
         UpdateMyCampaignById:
           Type: HttpApi
           Properties:
