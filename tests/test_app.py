@@ -282,9 +282,17 @@ class TestRoutes(TestCase):
                   service_locator=self.__mock_service_locator)
 
         # assert
-        self.__mock_middleware_pipeline.execute_middleware.assert_called_once_with(context=Any(),
-                                                                                   middleware=[
-                                                                                       self.__mock_influencer_controller.create])
+        self.__mock_middleware_pipeline \
+            .execute_middleware \
+            .assert_called_once_with(context=Any(),
+                                     middleware=[
+                                         self.__common_hooks.set_body,
+                                         self.__user_before_hooks.set_auth_user_id,
+                                         self.__influencer_before_hooks.validate_influencer,
+                                         self.__mock_influencer_controller.create,
+                                         self.__influencer_after_hooks.set_influencer_claims,
+                                         self.__user_after_hooks.tag_auth_user_claims_to_response
+                                     ])
 
     def test_update_auth_influencer_image(self):
         # arrange
