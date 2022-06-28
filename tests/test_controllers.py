@@ -128,7 +128,7 @@ class TestInfluencerController(TestCase):
                                                            response=response))
 
         # assert
-        assert response.status_code == 200
+        assert response.status_code == 201
         assert response.body == expected_influencer.__dict__
 
     def test_update(self):
@@ -362,7 +362,7 @@ class TestBrandController(TestCase):
                                                   response=response))
 
         # assert
-        assert response.status_code == 200
+        assert response.status_code == 201
         assert response.body == expected_brand.__dict__
 
     def test_update_logo_when_not_found(self):
@@ -395,7 +395,7 @@ class TestBrandController(TestCase):
                                                           response=response))
 
         # assert
-        assert response.status_code == 200
+        assert response.status_code == 201
         assert response.body == expected_brand.__dict__
 
     def test_update_header_image_when_not_found(self):
