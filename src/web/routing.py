@@ -30,7 +30,8 @@ class Dispatcher:
                 'GET /brands': Route(action=self.__brand_ctr.get_all,
                                      after_hooks=[self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response_collection]),
 
-                'GET /influencers': Route(action=self.__influencer_ctr.get_all),
+                'GET /influencers': Route(action=self.__influencer_ctr.get_all,
+                                          after_hooks=[self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response_collection]),
 
                 'GET /brands/{brand_id}': Route(before_hooks=[self.__hooks_facade.get_brand_before_hooks().validate_uuid],
                                                 action=self.__brand_ctr.get_by_id,
