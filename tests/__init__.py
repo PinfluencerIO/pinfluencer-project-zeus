@@ -9,6 +9,9 @@ from src.data import Base
 from src.data.entities import SqlAlchemyBrandEntity, SqlAlchemyBaseEntity, SqlAlchemyInfluencerEntity
 from src.domain.models import Brand, Influencer, ValueEnum, CategoryEnum, User, Campaign
 
+TEST_DEFAULT_PRODUCT_IMAGE1 = "default_product_image1.png"
+TEST_DEFAULT_PRODUCT_IMAGE2 = "default_product_image2.png"
+TEST_DEFAULT_PRODUCT_IMAGE3 = "default_product_image3.png"
 TEST_DEFAULT_BRAND_LOGO = "default_brand_logo.png"
 TEST_DEFAULT_BRAND_HEADER_IMAGE = "default_brand_header_image.png"
 TEST_DEFAULT_INFLUENCER_PROFILE_IMAGE = "default_influencer_profile_image.png"
@@ -264,6 +267,18 @@ def assert_brand_creatable_generated_fields_are_equal(brand1, brand2):
     print(brand1)
     print(brand2)
     assert brand1 == brand2
+
+
+def assert_campaign_creatable_fields_are_equal_for_three(campaigns: list[dict]):
+    for campaign in campaigns:
+        campaign.pop("brand_id")
+        campaign.pop("id")
+        campaign.pop("created")
+        campaign.pop("product_image1")
+        campaign.pop("product_image2")
+        campaign.pop("product_image3")
+
+    assert campaigns[0] == campaigns[1] == campaigns[2]
 
 
 def assert_campaign_db_fields_are_equal_for_three(campaign1: dict, campaign2: dict, campaign3: dict):

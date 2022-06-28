@@ -1,5 +1,7 @@
 from jsonschema.validators import validate
 
+# TODO: do actual validation and write tests for it
+
 brand_payload_schema = {
     "type": "object",
     "properties":
@@ -52,6 +54,25 @@ influencer_payload_schema = {
         },
     "required": ["bio", "website"]
 }
+
+
+campaign_payload_schema = {
+    "type": "object",
+    "properties":
+        {
+            "campaign_hashtag": {
+                "type": "string",
+                "pattern": "^.{1,120}$"
+            }
+        },
+    "required": []
+}
+
+
+class CampaignValidator:
+
+    def validate_campaign(self, payload):
+        validate(instance=payload, schema=campaign_payload_schema)
 
 
 class BrandValidator:

@@ -27,6 +27,7 @@ class CampaignRepository(Protocol):
                             auth_user_id: str) -> Campaign:
         ...
 
+
 class BrandRepository(Protocol):
 
     def load_collection(self) -> list[Brand]:
@@ -71,6 +72,10 @@ class InfluencerRepository(Protocol):
     def update_image_for_auth_user(self, auth_user_id: str, image_bytes: str) -> Influencer:
         ...
 
+
+Repository = Union[BrandRepository,
+                   InfluencerRepository,
+                   CampaignRepository]
 
 UserRepository = Union[BrandRepository, InfluencerRepository]
 

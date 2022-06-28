@@ -40,5 +40,6 @@ class DataManageFactory:
 DEFAULT_BRAND_LOGO = "default_brand_logo.png"
 DEFAULT_BRAND_HEADER_IMAGE = "default_brand_header_image.png"
 DEFAULT_INFLUENCER_PROFILE_IMAGE = "default_influencer_profile_image.png"
-
-
+DEFAULT_CAMPAIGN_PRODUCT_IMAGE1 = "default_product_image1.png"
+DEFAULT_CAMPAIGN_PRODUCT_IMAGE2 = "default_product_image2.png"
+DEFAULT_CAMPAIGN_PRODUCT_IMAGE3 = "default_product_image3.png"

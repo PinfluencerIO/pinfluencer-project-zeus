@@ -4,11 +4,11 @@ from unittest.mock import Mock, MagicMock
 
 from callee import Captor
 
-from src.domain.models import Influencer
+from src.domain.models import Influencer, Campaign, CategoryEnum, ValueEnum
 from src.exceptions import AlreadyExistsException, NotFoundException
-from src.types import BrandRepository, InfluencerRepository
+from src.types import BrandRepository, InfluencerRepository, CampaignRepository
 from src.web import PinfluencerContext, PinfluencerResponse
-from src.web.controllers import BrandController, InfluencerController
+from src.web.controllers import BrandController, InfluencerController, CampaignController
 from src.web.validation import valid_uuid
 from tests import brand_dto_generator, assert_brand_updatable_fields_are_equal, TEST_DEFAULT_BRAND_LOGO, \
     TEST_DEFAULT_BRAND_HEADER_IMAGE, influencer_dto_generator, RepoEnum, \
@@ -16,7 +16,8 @@ from tests import brand_dto_generator, assert_brand_updatable_fields_are_equal, 
     assert_influencer_creatable_generated_fields_are_equal, assert_influencer_update_fields_are_equal, \
     update_brand_payload, create_brand_dto, \
     update_image_payload, update_brand_return_dto, create_influencer_dto, \
-    update_influencer_payload
+    update_influencer_payload, TEST_DEFAULT_PRODUCT_IMAGE1, TEST_DEFAULT_PRODUCT_IMAGE2, \
+    TEST_DEFAULT_PRODUCT_IMAGE3
 
 
 class TestInfluencerController(TestCase):
@@ -114,7 +115,6 @@ class TestInfluencerController(TestCase):
         assert context.short_circuit == True
 
     def test_update_profile_image(self):
-
         # arrange
         auth_id = "12341"
         payload = update_image_payload()
@@ -291,7 +291,6 @@ class TestBrandController(TestCase):
         print(response.body)
 
     def test_create_when_exists(self):
-
         # arrange
         auth_id = "12341"
         self.__brand_repository.write_new_for_auth_user = MagicMock(side_effect=AlreadyExistsException())
@@ -413,3 +412,109 @@ class TestBrandController(TestCase):
         assert response.status_code == 404
         assert response.body == {}
         assert context.short_circuit == True
+
+
+def create_campaign_from_db() -> Campaign:
+    return Campaign(objective="objective1",
+                    success_description="success_description1",
+                    campaign_title="campaign_title1",
+                    campaign_description="campaign_description1",
+                    campaign_categories=[CategoryEnum.CATEGORY6, CategoryEnum.CATEGORY5, CategoryEnum.CATEGORY7],
+                    campaign_values=[ValueEnum.VALUE5, ValueEnum.VALUE6, ValueEnum.VALUE7],
+                    campaign_product_link="campaign_product_link1",
+                    campaign_hashtag="campaign_hashtag1",
+                    campaign_discount_code="campaign_discount_code1",
+                    product_title="product_title1",
+                    product_description="product_description1",
+                )
+
+
+def create_campaign_body() -> dict:
+    return {
+        "objective": "objective1",
+        "success_description": "success_description1",
+        "campaign_title": "campaign_title1",
+        "campaign_description": "campaign_description1",
+        "campaign_categories": ["CATEGORY6", "CATEGORY5", "CATEGORY7"],
+        "campaign_values": ["VALUE5", "VALUE6", "VALUE7"],
+        "campaign_product_link": "campaign_product_link1",
+        "campaign_hashtag": "campaign_hashtag1",
+        "campaign_discount_code": "campaign_discount_code1",
+        "product_title": "product_title1",
+        "product_description": "product_description1",
+    }
+
+
+
+class TestCampaignController(TestCase):
+
+    def setUp(self) -> None:
+        self.__campaign_repository: CampaignRepository = Mock()
+        self.__sut = CampaignController(repository=self.__campaign_repository)
+
+    def test_write_for_brand(self):
+
+        # arrange
+        campaign_from_db = create_campaign_from_db()
+        context = PinfluencerContext(response=PinfluencerResponse(),
+                                     short_circuit=False,
+                                     auth_user_id="12341",
+                                     body=create_campaign_body())
+        self.__campaign_repository.write_new_for_brand = MagicMock(return_value=campaign_from_db)
+
+        # act
+        self.__sut.write_for_brand(context=context)
+
+        # assert
+        payload_captor = Captor()
+        self.__campaign_repository.write_new_for_brand.assert_called_once_with(
+            payload=payload_captor,
+            auth_user_id="12341")
+        payload_campaign: Campaign = payload_captor.arg
+        payload_campaign_dict = payload_campaign.__dict__
+        assert payload_campaign.product_image1 == TEST_DEFAULT_PRODUCT_IMAGE1
+        assert payload_campaign.product_image2 == TEST_DEFAULT_PRODUCT_IMAGE2
+        assert payload_campaign.product_image3 == TEST_DEFAULT_PRODUCT_IMAGE3
+        payload_campaign_dict.pop("id")
+        payload_campaign_dict.pop("created")
+        payload_campaign_dict.pop("brand_id")
+        payload_campaign_dict.pop("product_image1")
+        payload_campaign_dict.pop("product_image2")
+        payload_campaign_dict.pop("product_image3")
+        context.response.body.pop("id")
+        context.response.body.pop("created")
+        context.response.body.pop("brand_id")
+        context.response.body.pop("product_image1")
+        context.response.body.pop("product_image2")
+        context.response.body.pop("product_image3")
+        assert context.short_circuit == False
+        assert context.response.body == payload_campaign_dict
+        assert context.response.status_code == 201
+        assert list(map(
+            lambda x: x.name,
+            payload_campaign.campaign_categories)) == create_campaign_body()["campaign_categories"]
+        assert list(map(
+            lambda x: x.name,
+            payload_campaign.campaign_values)) == create_campaign_body()["campaign_values"]
+        campaign_body = create_campaign_body()
+        campaign_body.pop("campaign_categories")
+        campaign_body.pop("campaign_values")
+        payload_campaign_dict.pop("campaign_categories")
+        payload_campaign_dict.pop("campaign_values")
+        assert payload_campaign_dict == campaign_body
+
+    def test_write_for_brand_when_brand_not_found(self):
+
+        # arrange
+        context = PinfluencerContext(response=PinfluencerResponse(),
+                                     auth_user_id="1234",
+                                     body=create_campaign_body())
+        self.__campaign_repository.write_new_for_brand = MagicMock(side_effect=NotFoundException())
+
+        # act
+        self.__sut.write_for_brand(context=context)
+
+        # assert
+        assert context.short_circuit == True
+        assert context.response.body == {}
+        assert context.response.status_code == 404
