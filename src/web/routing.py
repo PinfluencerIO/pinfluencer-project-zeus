@@ -93,7 +93,13 @@ class Dispatcher:
                     ]
                 ),
 
-                'POST /brands/me/header-image': Route(action=self.__brand_ctr.update_header_image),
+                'POST /brands/me/header-image': Route(
+                    before_hooks=[
+                        self.__hooks_facade.get_common_hooks().set_body,
+                        self.__hooks_facade.get_user_before_hooks().set_auth_user_id
+                    ],
+                    action=self.__brand_ctr.update_header_image
+                ),
 
                 'POST /brands/me/logo': Route(action=self.__brand_ctr.update_logo),
 
