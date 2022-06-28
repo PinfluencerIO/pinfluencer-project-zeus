@@ -12,7 +12,7 @@ from src.types import Serializer
 from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.controllers import BrandController, InfluencerController
 from src.web.hooks import HooksFacade, CommonBeforeHooks, UserAfterHooks, BrandAfterHooks, UserBeforeHooks, \
-    BrandBeforeHooks, InfluencerAfterHooks
+    BrandBeforeHooks, InfluencerAfterHooks, InfluencerBeforeHooks
 from src.web.ioc import ServiceLocator
 from src.web.middleware import MiddlewarePipeline
 from src.web.routing import Dispatcher
@@ -38,13 +38,14 @@ class TestRoutes(TestCase):
         self.__user_before_hooks: UserBeforeHooks = Mock()
         self.__brand_before_hooks: BrandBeforeHooks = Mock()
         self.__influencer_after_hooks: InfluencerAfterHooks = Mock()
+        self.__influencer_before_hooks: InfluencerBeforeHooks = Mock()
         self.__hooks_facade.get_common_hooks = MagicMock(return_value=self.__common_hooks)
         self.__hooks_facade.get_user_after_hooks = MagicMock(return_value=self.__user_after_hooks)
         self.__hooks_facade.get_brand_after_hooks = MagicMock(return_value=self.__brand_after_hooks)
         self.__hooks_facade.get_user_before_hooks = MagicMock(return_value=self.__user_before_hooks)
         self.__hooks_facade.get_brand_before_hooks = MagicMock(return_value=self.__brand_before_hooks)
         self.__hooks_facade.get_influencer_after_hooks = MagicMock(return_value=self.__influencer_after_hooks)
-        self.__hooks_facade.get_influencer_before_hooks = MagicMock(return_value=self.__influencer_after_hooks)
+        self.__hooks_facade.get_influencer_before_hooks = MagicMock(return_value=self.__influencer_before_hooks)
         self.__mock_service_locator.get_new_hooks_facade = MagicMock(return_value=self.__hooks_facade)
 
         # crosscutting
@@ -141,9 +142,14 @@ class TestRoutes(TestCase):
                   service_locator=self.__mock_service_locator)
 
         # assert
-        self.__mock_middleware_pipeline.execute_middleware.assert_called_once_with(context=Any(),
-                                                                                   middleware=[
-                                                                                       self.__mock_influencer_controller.get_by_id])
+        self.__mock_middleware_pipeline \
+            .execute_middleware \
+            .assert_called_once_with(context=Any(),
+                                     middleware=[
+                                         self.__influencer_before_hooks.validate_uuid,
+                                         self.__mock_influencer_controller.get_by_id,
+                                         self.__user_after_hooks.tag_auth_user_claims_to_response_collection
+                                     ])
 
     def test_get_auth_brand(self):
         # arrange
