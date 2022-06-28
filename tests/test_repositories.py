@@ -298,7 +298,7 @@ class TestAuthUserRepository(TestCase):
                 "Value": expected_brand.email
             },
             {
-                "Name": "custom:type",
+                "Name": "custom:usertype",
                 "Value": "brand"
             }
         ]
@@ -334,8 +334,8 @@ class TestAuthUserRepository(TestCase):
                 "Value": expected_influencer.email
             },
             {
-                "Name": "custom:type",
-                "Value": "inflncr"
+                "Name": "custom:usertype",
+                "Value": "influencer"
             }
         ]
         actual_attributes = payload_captor.arg
