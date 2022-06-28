@@ -223,9 +223,14 @@ class TestRoutes(TestCase):
                   service_locator=self.__mock_service_locator)
 
         # assert
-        self.__mock_middleware_pipeline.execute_middleware.assert_called_once_with(context=Any(),
-                                                                                   middleware=[
-                                                                                       self.__mock_brand_controller.update_header_image])
+        self.__mock_middleware_pipeline \
+            .execute_middleware \
+            .assert_called_once_with(context=Any(),
+                                     middleware=[
+                                         self.__common_hooks.set_body,
+                                         self.__user_before_hooks.set_auth_user_id,
+                                         self.__mock_brand_controller.update_header_image
+                                     ])
 
     def test_create_or_replace_auth_brand_logo(self):
         # arrange
