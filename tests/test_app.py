@@ -148,7 +148,7 @@ class TestRoutes(TestCase):
                                      middleware=[
                                          self.__influencer_before_hooks.validate_uuid,
                                          self.__mock_influencer_controller.get_by_id,
-                                         self.__user_after_hooks.tag_auth_user_claims_to_response_collection
+                                         self.__user_after_hooks.tag_auth_user_claims_to_response
                                      ])
 
     def test_get_auth_brand(self):
