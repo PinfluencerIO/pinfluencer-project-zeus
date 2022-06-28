@@ -21,7 +21,7 @@ class BaseUserController:
         payload_dict = context.body
         try:
             user = updater(auth_user_id, payload_dict['image_bytes'])
-            return [PinfluencerResponse(status_code=200,
+            return [PinfluencerResponse(status_code=201,
                                         body=user), False]
         except NotFoundException as e:
             print_exception(e)
