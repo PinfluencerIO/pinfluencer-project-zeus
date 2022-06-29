@@ -10,7 +10,7 @@ from src.app import bootstrap
 from src.crosscutting import JsonSnakeToCamelSerializer
 from src.types import Serializer
 from src.web import PinfluencerContext, PinfluencerResponse
-from src.web.controllers import BrandController, InfluencerController
+from src.web.controllers import BrandController, InfluencerController, CampaignController
 from src.web.hooks import HooksFacade, CommonBeforeHooks, UserAfterHooks, BrandAfterHooks, UserBeforeHooks, \
     BrandBeforeHooks, InfluencerAfterHooks, InfluencerBeforeHooks, CampaignBeforeHooks
 from src.web.ioc import ServiceLocator
@@ -26,6 +26,8 @@ class TestRoutes(TestCase):
         self.__mock_service_locator: ServiceLocator = Mock()
         self.__mock_brand_controller: BrandController = Mock()
         self.__mock_service_locator.get_new_brand_controller = MagicMock(return_value=self.__mock_brand_controller)
+        self.__mock_campaign_controller: CampaignController = Mock()
+        self.__mock_service_locator.get_new_campaign_controller = MagicMock(return_value=self.__mock_campaign_controller)
         self.__mock_influencer_controller: InfluencerController = Mock()
         self.__mock_service_locator.get_new_influencer_controller = MagicMock(
             return_value=self.__mock_influencer_controller)
@@ -338,7 +340,24 @@ class TestRoutes(TestCase):
                                      ])
 
     def test_create_auth_brand_campaign(self):
-        self.__assert_not_implemented(route="POST /brands/me/campaigns")
+        # arrange
+        self.__mock_middleware_pipeline.execute_middleware = MagicMock()
+
+        # act
+        bootstrap(event={"routeKey": "POST /brands/me/campaigns"},
+                  context={},
+                  service_locator=self.__mock_service_locator)
+
+        # assert
+        self.__mock_middleware_pipeline \
+            .execute_middleware \
+            .assert_called_once_with(context=Any(),
+                                     middleware=[
+                                         self.__common_hooks.set_body,
+                                         self.__user_before_hooks.set_auth_user_id,
+                                         self.__campaign_before_hooks.validate_campaign,
+                                         self.__mock_campaign_controller.create
+                                     ])
 
     def test_get_campaign_by_id(self):
         self.__assert_not_implemented(route="GET /campaigns/{campaign_id}")

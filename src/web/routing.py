@@ -6,6 +6,7 @@ from src.web.ioc import ServiceLocator
 
 class Dispatcher:
     def __init__(self, service_locator: ServiceLocator):
+        self.__campaign_ctr = service_locator.get_new_campaign_controller()
         self.__brand_ctr = service_locator.get_new_brand_controller()
         self.__influencer_ctr = service_locator.get_new_influencer_controller()
         self.__hooks_facade = service_locator.get_new_hooks_facade()
@@ -173,7 +174,14 @@ class Dispatcher:
 
                 'GET /campaigns/{campaign_id}': self.get_not_implemented_method('/campaigns/{campaign_id}'),
 
-                'POST /brands/me/campaigns': self.get_not_implemented_method('POST /brands/me/campaigns'),
+                'POST /brands/me/campaigns': Route(
+                    before_hooks=[
+                        self.__hooks_facade.get_common_hooks().set_body,
+                        self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
+                        self.__hooks_facade.get_campaign_before_hooks().validate_campaign
+                    ],
+                    action=self.__campaign_ctr.create
+                ),
 
                 'PUT /brands/me/campaigns/{campaign_id}': self.get_not_implemented_method('PUT /brands/me/campaigns/{campaign_id}')
             }

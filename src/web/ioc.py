@@ -3,11 +3,11 @@ from mapper.object_mapper import ObjectMapper
 from src.crosscutting import JsonCamelToSnakeCaseDeserializer, JsonSnakeToCamelSerializer
 from src.data import SqlAlchemyDataManager
 from src.data.repositories import S3ImageRepository, SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository, \
-    CognitoAuthUserRepository, CognitoAuthService
+    CognitoAuthUserRepository, CognitoAuthService, SqlAlchemyCampaignRepository
 from src.domain.validation import BrandValidator, InfluencerValidator
 from src.types import DataManager, ImageRepository, ObjectMapperAdapter, BrandRepository, \
-    InfluencerRepository, Deserializer, Serializer, AuthUserRepository
-from src.web.controllers import BrandController, InfluencerController
+    InfluencerRepository, Deserializer, Serializer, AuthUserRepository, CampaignRepository
+from src.web.controllers import BrandController, InfluencerController, CampaignController
 from src.web.hooks import HooksFacade, CommonBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, UserBeforeHooks, \
     UserAfterHooks, InfluencerBeforeHooks, BrandBeforeHooks
 from src.web.middleware import MiddlewarePipeline
@@ -47,6 +47,9 @@ class ServiceLocator:
     def get_new_influencer_controller(self) -> InfluencerController:
         return InfluencerController(influencer_repository=self.get_new_influencer_repository())
 
+    def get_new_campaign_controller(self) -> CampaignController:
+        return CampaignController(repository=self.get_new_campaign_repository())
+
     def get_new_serializer(self) -> Serializer:
         return JsonSnakeToCamelSerializer()
 
@@ -67,3 +70,7 @@ class ServiceLocator:
                            user_after_hooks=UserAfterHooks(auth_user_repository=self.get_new_auth_user_repository()),
                            influencer_before_hooks=InfluencerBeforeHooks(influencer_validator=self.get_new_influencer_validator()),
                            brand_before_hooks=BrandBeforeHooks(brand_validator=self.get_new_brand_validator()))
+
+    def get_new_campaign_repository(self) -> CampaignRepository:
+        return SqlAlchemyCampaignRepository(data_manager=self.get_new_data_manager(),
+                                            object_mapper=self.get_new_object_mapper())

@@ -233,7 +233,7 @@ class CampaignController(BaseController):
     def __init__(self, repository: Repository):
         super().__init__(repository)
 
-    def write_for_brand(self, context: PinfluencerContext) -> None:
+    def create(self, context: PinfluencerContext) -> None:
         try:
             campaign = self._repository.write_new_for_brand(payload=Campaign(
                 objective=context.body["objective"],

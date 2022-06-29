@@ -463,7 +463,7 @@ class TestCampaignController(TestCase):
         self.__campaign_repository.write_new_for_brand = MagicMock(return_value=campaign_from_db)
 
         # act
-        self.__sut.write_for_brand(context=context)
+        self.__sut.create(context=context)
 
         # assert
         payload_captor = Captor()
@@ -512,7 +512,7 @@ class TestCampaignController(TestCase):
         self.__campaign_repository.write_new_for_brand = MagicMock(side_effect=NotFoundException())
 
         # act
-        self.__sut.write_for_brand(context=context)
+        self.__sut.create(context=context)
 
         # assert
         assert context.short_circuit == True
