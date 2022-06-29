@@ -7,7 +7,7 @@ from src.types import AuthUserRepository, Deserializer
 from src.web import PinfluencerContext
 from src.web.validation import valid_path_resource_id
 
-S3_URL = "https://pinfluencer-product-images.s3.eu-west-2.amazonaws.com/"
+S3_URL = "https://pinfluencer-product-images.s3.eu-west-2.amazonaws.com"
 
 
 class CommonBeforeHooks:

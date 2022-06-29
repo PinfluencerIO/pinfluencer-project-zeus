@@ -14,7 +14,7 @@ from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks, Infl
 from tests import brand_dto_generator, RepoEnum, get_auth_user_event, create_for_auth_user_event, get_brand_id_event, \
     get_influencer_id_event
 
-TEST_S3_URL = "https://pinfluencer-product-images.s3.eu-west-2.amazonaws.com/"
+TEST_S3_URL = "https://pinfluencer-product-images.s3.eu-west-2.amazonaws.com"
 
 
 class TestBrandBeforeHooks(TestCase):
