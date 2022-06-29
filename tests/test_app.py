@@ -43,7 +43,7 @@ class TestRoutes(TestCase):
         self.__influencer_before_hooks: InfluencerBeforeHooks = Mock()
         self.__campaign_before_hooks: CampaignBeforeHooks = Mock()
         self.__hooks_facade.get_campaign_before_hooks = MagicMock(return_value=self.__campaign_before_hooks)
-        self.__hooks_facade.get_common_hooks = MagicMock(return_value=self.__common_hooks)
+        self.__hooks_facade.get_before_common_hooks = MagicMock(return_value=self.__common_hooks)
         self.__hooks_facade.get_user_after_hooks = MagicMock(return_value=self.__user_after_hooks)
         self.__hooks_facade.get_brand_after_hooks = MagicMock(return_value=self.__brand_after_hooks)
         self.__hooks_facade.get_user_before_hooks = MagicMock(return_value=self.__user_before_hooks)
@@ -96,7 +96,8 @@ class TestRoutes(TestCase):
             .assert_called_once_with(context=Any(),
                                      middleware=[
                                          self.__mock_brand_controller.get_all,
-                                         self.__user_after_hooks.tag_auth_user_claims_to_response_collection
+                                         self.__user_after_hooks.tag_auth_user_claims_to_response_collection,
+                                         self.__brand_after_hooks.tag_bucket_url_to_images_collection
                                      ])
 
     def test_get_brand_by_id(self):
@@ -115,7 +116,8 @@ class TestRoutes(TestCase):
                                      middleware=[
                                          self.__brand_before_hooks.validate_uuid,
                                          self.__mock_brand_controller.get_by_id,
-                                         self.__user_after_hooks.tag_auth_user_claims_to_response
+                                         self.__user_after_hooks.tag_auth_user_claims_to_response,
+                                         self.__brand_after_hooks.tag_bucket_url_to_images
                                      ])
 
     def test_get_all_influencers(self):
@@ -133,7 +135,8 @@ class TestRoutes(TestCase):
             .assert_called_once_with(context=Any(),
                                      middleware=[
                                          self.__mock_influencer_controller.get_all,
-                                         self.__user_after_hooks.tag_auth_user_claims_to_response_collection
+                                         self.__user_after_hooks.tag_auth_user_claims_to_response_collection,
+                                         self.__influencer_after_hooks.tag_bucket_url_to_images_collection
                                      ])
 
     def test_get_influencer_by_id(self):
@@ -152,7 +155,8 @@ class TestRoutes(TestCase):
                                      middleware=[
                                          self.__influencer_before_hooks.validate_uuid,
                                          self.__mock_influencer_controller.get_by_id,
-                                         self.__user_after_hooks.tag_auth_user_claims_to_response
+                                         self.__user_after_hooks.tag_auth_user_claims_to_response,
+                                         self.__influencer_after_hooks.tag_bucket_url_to_images
                                      ])
 
     def test_get_auth_brand(self):
@@ -171,7 +175,8 @@ class TestRoutes(TestCase):
                                      middleware=[
                                          self.__user_before_hooks.set_auth_user_id,
                                          self.__mock_brand_controller.get,
-                                         self.__user_after_hooks.tag_auth_user_claims_to_response
+                                         self.__user_after_hooks.tag_auth_user_claims_to_response,
+                                         self.__brand_after_hooks.tag_bucket_url_to_images
                                      ])
 
     def test_create_auth_brand(self):
@@ -193,7 +198,8 @@ class TestRoutes(TestCase):
                                          self.__brand_before_hooks.validate_brand,
                                          self.__mock_brand_controller.create,
                                          self.__brand_after_hooks.set_brand_claims,
-                                         self.__user_after_hooks.tag_auth_user_claims_to_response
+                                         self.__user_after_hooks.tag_auth_user_claims_to_response,
+                                         self.__brand_after_hooks.tag_bucket_url_to_images
                                      ])
 
     def test_update_auth_brand(self):
@@ -214,7 +220,8 @@ class TestRoutes(TestCase):
                                          self.__user_before_hooks.set_auth_user_id,
                                          self.__brand_before_hooks.validate_brand,
                                          self.__mock_brand_controller.update,
-                                         self.__user_after_hooks.tag_auth_user_claims_to_response
+                                         self.__user_after_hooks.tag_auth_user_claims_to_response,
+                                         self.__brand_after_hooks.tag_bucket_url_to_images
                                      ])
 
     def test_create_or_replace_auth_brand_header_image(self):
@@ -234,7 +241,8 @@ class TestRoutes(TestCase):
                                          self.__common_hooks.set_body,
                                          self.__user_before_hooks.set_auth_user_id,
                                          self.__mock_brand_controller.update_header_image,
-                                         self.__user_after_hooks.tag_auth_user_claims_to_response
+                                         self.__user_after_hooks.tag_auth_user_claims_to_response,
+                                         self.__brand_after_hooks.tag_bucket_url_to_images
                                      ])
 
     def test_create_or_replace_auth_brand_logo(self):
@@ -254,7 +262,8 @@ class TestRoutes(TestCase):
                                          self.__common_hooks.set_body,
                                          self.__user_before_hooks.set_auth_user_id,
                                          self.__mock_brand_controller.update_logo,
-                                         self.__user_after_hooks.tag_auth_user_claims_to_response
+                                         self.__user_after_hooks.tag_auth_user_claims_to_response,
+                                         self.__brand_after_hooks.tag_bucket_url_to_images
                                      ])
 
     def test_get_auth_influencer(self):
@@ -273,7 +282,8 @@ class TestRoutes(TestCase):
                                      middleware=[
                                          self.__user_before_hooks.set_auth_user_id,
                                          self.__mock_influencer_controller.get,
-                                         self.__user_after_hooks.tag_auth_user_claims_to_response
+                                         self.__user_after_hooks.tag_auth_user_claims_to_response,
+                                         self.__influencer_after_hooks.tag_bucket_url_to_images
                                      ])
 
     def test_create_auth_influencer(self):
@@ -295,7 +305,8 @@ class TestRoutes(TestCase):
                                          self.__influencer_before_hooks.validate_influencer,
                                          self.__mock_influencer_controller.create,
                                          self.__influencer_after_hooks.set_influencer_claims,
-                                         self.__user_after_hooks.tag_auth_user_claims_to_response
+                                         self.__user_after_hooks.tag_auth_user_claims_to_response,
+                                         self.__influencer_after_hooks.tag_bucket_url_to_images
                                      ])
 
     def test_update_auth_influencer_image(self):
@@ -315,7 +326,8 @@ class TestRoutes(TestCase):
                                          self.__common_hooks.set_body,
                                          self.__user_before_hooks.set_auth_user_id,
                                          self.__mock_influencer_controller.update_profile_image,
-                                         self.__user_after_hooks.tag_auth_user_claims_to_response
+                                         self.__user_after_hooks.tag_auth_user_claims_to_response,
+                                         self.__influencer_after_hooks.tag_bucket_url_to_images
                                      ])
 
     def test_update_auth_influencer(self):
@@ -336,7 +348,8 @@ class TestRoutes(TestCase):
                                          self.__user_before_hooks.set_auth_user_id,
                                          self.__influencer_before_hooks.validate_influencer,
                                          self.__mock_influencer_controller.update,
-                                         self.__user_after_hooks.tag_auth_user_claims_to_response
+                                         self.__user_after_hooks.tag_auth_user_claims_to_response,
+                                         self.__influencer_after_hooks.tag_bucket_url_to_images
                                      ])
 
     def test_create_auth_brand_campaign(self):

@@ -31,13 +31,15 @@ class Dispatcher:
                 'GET /brands': Route(
                     action=self.__brand_ctr.get_all,
                     after_hooks=[
-                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response_collection
+                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response_collection,
+                        self.__hooks_facade.get_brand_after_hooks().tag_bucket_url_to_images_collection
                     ]),
 
                 'GET /influencers': Route(
                     action=self.__influencer_ctr.get_all,
                     after_hooks=[
-                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response_collection
+                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response_collection,
+                        self.__hooks_facade.get_influencer_after_hooks().tag_bucket_url_to_images_collection
                     ]),
 
                 'GET /brands/{brand_id}': Route(
@@ -46,7 +48,8 @@ class Dispatcher:
                     ],
                     action=self.__brand_ctr.get_by_id,
                     after_hooks=[
-                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response
+                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
+                        self.__hooks_facade.get_brand_after_hooks().tag_bucket_url_to_images
                     ]),
 
                 'GET /influencers/{influencer_id}': Route(
@@ -55,7 +58,8 @@ class Dispatcher:
                     ],
                     action=self.__influencer_ctr.get_by_id,
                     after_hooks=[
-                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response
+                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
+                        self.__hooks_facade.get_influencer_after_hooks().tag_bucket_url_to_images
                     ]),
 
                 # authenticated brand endpoints
@@ -65,54 +69,59 @@ class Dispatcher:
                     ],
                     action=self.__brand_ctr.get,
                     after_hooks=[
-                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response
+                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
+                        self.__hooks_facade.get_brand_after_hooks().tag_bucket_url_to_images
                     ]
                 ),
 
                 'POST /brands/me': Route(
                     before_hooks=[
-                        self.__hooks_facade.get_common_hooks().set_body,
+                        self.__hooks_facade.get_before_common_hooks().set_body,
                         self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
                         self.__hooks_facade.get_brand_before_hooks().validate_brand
                     ],
                     action=self.__brand_ctr.create,
                     after_hooks=[
                         self.__hooks_facade.get_brand_after_hooks().set_brand_claims,
-                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response
+                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
+                        self.__hooks_facade.get_brand_after_hooks().tag_bucket_url_to_images
                     ]
                 ),
 
                 'PUT /brands/me': Route(
                     before_hooks=[
-                        self.__hooks_facade.get_common_hooks().set_body,
+                        self.__hooks_facade.get_before_common_hooks().set_body,
                         self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
                         self.__hooks_facade.get_brand_before_hooks().validate_brand
                     ],
                     action=self.__brand_ctr.update,
                     after_hooks=[
-                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response
+                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
+                        self.__hooks_facade.get_brand_after_hooks().tag_bucket_url_to_images
                     ]
                 ),
 
                 'POST /brands/me/header-image': Route(
                     before_hooks=[
-                        self.__hooks_facade.get_common_hooks().set_body,
+                        self.__hooks_facade.get_before_common_hooks().set_body,
                         self.__hooks_facade.get_user_before_hooks().set_auth_user_id
                     ],
                     action=self.__brand_ctr.update_header_image,
                     after_hooks=[
-                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response
+                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
+                        self.__hooks_facade.get_brand_after_hooks().tag_bucket_url_to_images
                     ]
                 ),
 
                 'POST /brands/me/logo': Route(
                     before_hooks=[
-                        self.__hooks_facade.get_common_hooks().set_body,
+                        self.__hooks_facade.get_before_common_hooks().set_body,
                         self.__hooks_facade.get_user_before_hooks().set_auth_user_id
                     ],
                     action=self.__brand_ctr.update_logo,
                     after_hooks=[
-                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response
+                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
+                        self.__hooks_facade.get_brand_after_hooks().tag_bucket_url_to_images
                     ]
                 ),
 
@@ -123,43 +132,47 @@ class Dispatcher:
                     ],
                     action=self.__influencer_ctr.get,
                     after_hooks=[
-                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response
+                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
+                        self.__hooks_facade.get_influencer_after_hooks().tag_bucket_url_to_images
                     ]
                 ),
 
                 'POST /influencers/me': Route(
                     before_hooks=[
-                        self.__hooks_facade.get_common_hooks().set_body,
+                        self.__hooks_facade.get_before_common_hooks().set_body,
                         self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
                         self.__hooks_facade.get_influencer_before_hooks().validate_influencer
                     ],
                     action=self.__influencer_ctr.create,
                     after_hooks=[
                         self.__hooks_facade.get_influencer_after_hooks().set_influencer_claims,
-                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response
+                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
+                        self.__hooks_facade.get_influencer_after_hooks().tag_bucket_url_to_images
                     ]
                 ),
 
                 'PUT /influencers/me': Route(
                     before_hooks=[
-                        self.__hooks_facade.get_common_hooks().set_body,
+                        self.__hooks_facade.get_before_common_hooks().set_body,
                         self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
                         self.__hooks_facade.get_influencer_before_hooks().validate_influencer
                     ],
                     action=self.__influencer_ctr.update,
                     after_hooks=[
-                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response
+                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
+                        self.__hooks_facade.get_influencer_after_hooks().tag_bucket_url_to_images
                     ]
                 ),
 
                 'POST /influencers/me/image': Route(
                     before_hooks=[
-                        self.__hooks_facade.get_common_hooks().set_body,
+                        self.__hooks_facade.get_before_common_hooks().set_body,
                         self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
                     ],
                     action=self.__influencer_ctr.update_profile_image,
                     after_hooks=[
-                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response
+                        self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
+                        self.__hooks_facade.get_influencer_after_hooks().tag_bucket_url_to_images
                     ]
                 ),
             }
@@ -176,7 +189,7 @@ class Dispatcher:
 
                 'POST /brands/me/campaigns': Route(
                     before_hooks=[
-                        self.__hooks_facade.get_common_hooks().set_body,
+                        self.__hooks_facade.get_before_common_hooks().set_body,
                         self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
                         self.__hooks_facade.get_campaign_before_hooks().validate_campaign
                     ],

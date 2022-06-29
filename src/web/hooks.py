@@ -7,6 +7,8 @@ from src.types import AuthUserRepository, Deserializer
 from src.web import PinfluencerContext
 from src.web.validation import valid_path_resource_id
 
+S3_URL = "https://pinfluencer-product-images.s3.eu-west-2.amazonaws.com/"
+
 
 class CommonBeforeHooks:
 
@@ -30,6 +32,15 @@ class CampaignBeforeHooks:
             context.short_circuit = True
             context.response.body = {}
             context.response.status_code = 400
+
+
+class CampaignAfterHooks:
+
+    def tag_bucket_url_to_images(self, context: PinfluencerContext):
+        context.response.body["product_image1"] = f"{S3_URL}/{context.response.body['product_image1']}"
+        context.response.body["product_image2"] = f"{S3_URL}/{context.response.body['product_image2']}"
+        context.response.body["product_image3"] = f"{S3_URL}/{context.response.body['product_image3']}"
+
 
 class InfluencerBeforeHooks:
 
@@ -92,6 +103,15 @@ class BrandAfterHooks:
                      auth_user_id=context.auth_user_id)
         self.__auth_user_repository.update_brand_claims(user=user)
 
+    def tag_bucket_url_to_images(self, context: PinfluencerContext):
+        context.response.body["header_image"] = f"{S3_URL}/{context.response.body['header_image']}"
+        context.response.body["logo"] = f"{S3_URL}/{context.response.body['logo']}"
+
+    def tag_bucket_url_to_images_collection(self, context: PinfluencerContext):
+        for brand in context.response.body:
+            brand["header_image"] = f"{S3_URL}/{brand['header_image']}"
+            brand["logo"] = f"{S3_URL}/{brand['logo']}"
+
 
 class InfluencerAfterHooks:
 
@@ -104,6 +124,13 @@ class InfluencerAfterHooks:
                      email=context.body["email"],
                      auth_user_id=context.auth_user_id)
         self.__auth_user_repository.update_influencer_claims(user=user)
+
+    def tag_bucket_url_to_images(self, context: PinfluencerContext):
+        context.response.body["image"] = f"{S3_URL}/{context.response.body['image']}"
+
+    def tag_bucket_url_to_images_collection(self, context: PinfluencerContext):
+        for influencer in context.response.body:
+            influencer["image"] = f"{S3_URL}/{influencer['image']}"
 
 
 class UserBeforeHooks:
@@ -148,7 +175,7 @@ class HooksFacade:
         self.__influencer_after_hooks = influencer_after_hooks
         self.__user_before_hooks = user_before_hooks
         self.__brand_after_hooks = brand_after_hooks
-        self.__common_hooks = common_hooks
+        self.__common_before_hooks = common_hooks
 
     def get_campaign_before_hooks(self) -> CampaignBeforeHooks:
         return self.__campaign_before_hooks
@@ -171,5 +198,5 @@ class HooksFacade:
     def get_brand_after_hooks(self) -> BrandAfterHooks:
         return self.__brand_after_hooks
 
-    def get_common_hooks(self) -> CommonBeforeHooks:
-        return self.__common_hooks
+    def get_before_common_hooks(self) -> CommonBeforeHooks:
+        return self.__common_before_hooks
