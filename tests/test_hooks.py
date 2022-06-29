@@ -6,11 +6,11 @@ from callee import Captor
 
 from src.crosscutting import JsonCamelToSnakeCaseDeserializer
 from src.domain.models import User, Brand, Influencer
-from src.domain.validation import InfluencerValidator, BrandValidator
+from src.domain.validation import InfluencerValidator, BrandValidator, CampaignValidator
 from src.types import AuthUserRepository
 from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, CommonBeforeHooks, \
-    InfluencerBeforeHooks, BrandBeforeHooks
+    InfluencerBeforeHooks, BrandBeforeHooks, CampaignBeforeHooks
 from tests import brand_dto_generator, RepoEnum, get_auth_user_event, create_for_auth_user_event, get_brand_id_event, \
     get_influencer_id_event
 
@@ -143,6 +143,40 @@ class TestInfluencerBeforeHooks(TestCase):
         assert context.short_circuit == True
         assert context.response.status_code == 400
         assert context.response.body == {}
+
+
+class TestCampaignBeforeHooks(TestCase):
+
+    def setUp(self) -> None:
+        self.__campaign_validator = CampaignValidator()
+        self.__sut = CampaignBeforeHooks(campaign_validator=self.__campaign_validator)
+
+    def test_validate_campaign_when_valid(self):
+        # arrange
+        context = PinfluencerContext(body={
+            "campaign_hashtag": "nocountryforoldmenisthebestfilmfightme"
+        }, response=PinfluencerResponse(), short_circuit=False)
+
+        # act
+        self.__sut.validate_campaign(context=context)
+
+        # assert
+        assert not context.short_circuit
+
+    def test_validate_campaign_when_not_valid(self):
+        # arrange
+        context = PinfluencerContext(body={
+            "campaign_hashtag": "jfjfjfjfjfjfjfjfjfjfjfufhdsaihfdsuiafhduisahfuiewhasnfherawifujdsabvgfiujbhvgefawbhfewafewaihjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjefwaaaaaaaaa"
+        }, response=PinfluencerResponse(), short_circuit=False)
+
+        # act
+        self.__sut.validate_campaign(context=context)
+
+        # assert
+        assert context.short_circuit == True
+        assert context.response.status_code == 400
+        assert context.response.body == {}
+
 
 
 class TestCommonHooks(TestCase):

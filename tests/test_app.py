@@ -12,7 +12,7 @@ from src.types import Serializer
 from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.controllers import BrandController, InfluencerController
 from src.web.hooks import HooksFacade, CommonBeforeHooks, UserAfterHooks, BrandAfterHooks, UserBeforeHooks, \
-    BrandBeforeHooks, InfluencerAfterHooks, InfluencerBeforeHooks
+    BrandBeforeHooks, InfluencerAfterHooks, InfluencerBeforeHooks, CampaignBeforeHooks
 from src.web.ioc import ServiceLocator
 from src.web.middleware import MiddlewarePipeline
 from src.web.routing import Dispatcher
@@ -39,6 +39,8 @@ class TestRoutes(TestCase):
         self.__brand_before_hooks: BrandBeforeHooks = Mock()
         self.__influencer_after_hooks: InfluencerAfterHooks = Mock()
         self.__influencer_before_hooks: InfluencerBeforeHooks = Mock()
+        self.__campaign_before_hooks: CampaignBeforeHooks = Mock()
+        self.__hooks_facade.get_campaign_before_hooks = MagicMock(return_value=self.__campaign_before_hooks)
         self.__hooks_facade.get_common_hooks = MagicMock(return_value=self.__common_hooks)
         self.__hooks_facade.get_user_after_hooks = MagicMock(return_value=self.__user_after_hooks)
         self.__hooks_facade.get_brand_after_hooks = MagicMock(return_value=self.__brand_after_hooks)

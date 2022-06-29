@@ -2,7 +2,7 @@ from jsonschema.exceptions import ValidationError
 
 from src.crosscutting import print_exception
 from src.domain.models import Brand, Influencer
-from src.domain.validation import BrandValidator, InfluencerValidator
+from src.domain.validation import BrandValidator, InfluencerValidator, CampaignValidator
 from src.types import AuthUserRepository, Deserializer
 from src.web import PinfluencerContext
 from src.web.validation import valid_path_resource_id
@@ -16,6 +16,20 @@ class CommonBeforeHooks:
     def set_body(self, context: PinfluencerContext):
         context.body = self.__deserializer.deserialize(data=context.event["body"])
 
+
+class CampaignBeforeHooks:
+
+    def __init__(self, campaign_validator: CampaignValidator):
+        self.__campaign_validator = campaign_validator
+
+    def validate_campaign(self, context: PinfluencerContext):
+        try:
+            self.__campaign_validator.validate_campaign(payload=context.body)
+        except ValidationError as e:
+            print_exception(e)
+            context.short_circuit = True
+            context.response.body = {}
+            context.response.status_code = 400
 
 class InfluencerBeforeHooks:
 
@@ -125,7 +139,9 @@ class HooksFacade:
                  user_before_hooks: UserBeforeHooks,
                  user_after_hooks: UserAfterHooks,
                  influencer_before_hooks: InfluencerBeforeHooks,
-                 brand_before_hooks: BrandBeforeHooks):
+                 brand_before_hooks: BrandBeforeHooks,
+                 campaign_before_hooks: CampaignBeforeHooks):
+        self.__campaign_before_hooks = campaign_before_hooks
         self.__brand_before_hooks = brand_before_hooks
         self.__influencer_before_hooks = influencer_before_hooks
         self.__user_after_hooks = user_after_hooks
@@ -133,6 +149,9 @@ class HooksFacade:
         self.__user_before_hooks = user_before_hooks
         self.__brand_after_hooks = brand_after_hooks
         self.__common_hooks = common_hooks
+
+    def get_campaign_before_hooks(self) -> CampaignBeforeHooks:
+        return self.__campaign_before_hooks
 
     def get_brand_before_hooks(self) -> BrandBeforeHooks:
         return self.__brand_before_hooks
