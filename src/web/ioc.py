@@ -4,12 +4,12 @@ from src.crosscutting import JsonCamelToSnakeCaseDeserializer, JsonSnakeToCamelS
 from src.data import SqlAlchemyDataManager
 from src.data.repositories import S3ImageRepository, SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository, \
     CognitoAuthUserRepository, CognitoAuthService, SqlAlchemyCampaignRepository
-from src.domain.validation import BrandValidator, InfluencerValidator
+from src.domain.validation import BrandValidator, InfluencerValidator, CampaignValidator
 from src.types import DataManager, ImageRepository, ObjectMapperAdapter, BrandRepository, \
     InfluencerRepository, Deserializer, Serializer, AuthUserRepository, CampaignRepository
 from src.web.controllers import BrandController, InfluencerController, CampaignController
 from src.web.hooks import HooksFacade, CommonBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, UserBeforeHooks, \
-    UserAfterHooks, InfluencerBeforeHooks, BrandBeforeHooks
+    UserAfterHooks, InfluencerBeforeHooks, BrandBeforeHooks, CampaignBeforeHooks
 from src.web.middleware import MiddlewarePipeline
 
 
@@ -69,7 +69,8 @@ class ServiceLocator:
                            user_before_hooks=UserBeforeHooks(),
                            user_after_hooks=UserAfterHooks(auth_user_repository=self.get_new_auth_user_repository()),
                            influencer_before_hooks=InfluencerBeforeHooks(influencer_validator=self.get_new_influencer_validator()),
-                           brand_before_hooks=BrandBeforeHooks(brand_validator=self.get_new_brand_validator()))
+                           brand_before_hooks=BrandBeforeHooks(brand_validator=self.get_new_brand_validator()),
+                           campaign_before_hooks=CampaignBeforeHooks(campaign_validator=CampaignValidator()))
 
     def get_new_campaign_repository(self) -> CampaignRepository:
         return SqlAlchemyCampaignRepository(data_manager=self.get_new_data_manager(),
