@@ -32,14 +32,16 @@ class Dispatcher:
                     action=self.__brand_ctr.get_all,
                     after_hooks=[
                         self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response_collection,
-                        self.__hooks_facade.get_brand_after_hooks().tag_bucket_url_to_images_collection
+                        self.__hooks_facade.get_brand_after_hooks().tag_bucket_url_to_images_collection,
+                        self.__hooks_facade.get_user_after_hooks().format_values_and_categories_collection
                     ]),
 
                 'GET /influencers': Route(
                     action=self.__influencer_ctr.get_all,
                     after_hooks=[
                         self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response_collection,
-                        self.__hooks_facade.get_influencer_after_hooks().tag_bucket_url_to_images_collection
+                        self.__hooks_facade.get_influencer_after_hooks().tag_bucket_url_to_images_collection,
+                        self.__hooks_facade.get_user_after_hooks().format_values_and_categories_collection
                     ]),
 
                 'GET /brands/{brand_id}': Route(
@@ -49,7 +51,8 @@ class Dispatcher:
                     action=self.__brand_ctr.get_by_id,
                     after_hooks=[
                         self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
-                        self.__hooks_facade.get_brand_after_hooks().tag_bucket_url_to_images
+                        self.__hooks_facade.get_brand_after_hooks().tag_bucket_url_to_images,
+                        self.__hooks_facade.get_user_after_hooks().format_values_and_categories
                     ]),
 
                 'GET /influencers/{influencer_id}': Route(
@@ -59,7 +62,8 @@ class Dispatcher:
                     action=self.__influencer_ctr.get_by_id,
                     after_hooks=[
                         self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
-                        self.__hooks_facade.get_influencer_after_hooks().tag_bucket_url_to_images
+                        self.__hooks_facade.get_influencer_after_hooks().tag_bucket_url_to_images,
+                        self.__hooks_facade.get_user_after_hooks().format_values_and_categories
                     ]),
 
                 # authenticated brand endpoints
@@ -70,7 +74,8 @@ class Dispatcher:
                     action=self.__brand_ctr.get,
                     after_hooks=[
                         self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
-                        self.__hooks_facade.get_brand_after_hooks().tag_bucket_url_to_images
+                        self.__hooks_facade.get_brand_after_hooks().tag_bucket_url_to_images,
+                        self.__hooks_facade.get_user_after_hooks().format_values_and_categories
                     ]
                 ),
 
@@ -84,7 +89,8 @@ class Dispatcher:
                     after_hooks=[
                         self.__hooks_facade.get_brand_after_hooks().set_brand_claims,
                         self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
-                        self.__hooks_facade.get_brand_after_hooks().tag_bucket_url_to_images
+                        self.__hooks_facade.get_brand_after_hooks().tag_bucket_url_to_images,
+                        self.__hooks_facade.get_user_after_hooks().format_values_and_categories
                     ]
                 ),
 
@@ -97,7 +103,8 @@ class Dispatcher:
                     action=self.__brand_ctr.update,
                     after_hooks=[
                         self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
-                        self.__hooks_facade.get_brand_after_hooks().tag_bucket_url_to_images
+                        self.__hooks_facade.get_brand_after_hooks().tag_bucket_url_to_images,
+                        self.__hooks_facade.get_user_after_hooks().format_values_and_categories
                     ]
                 ),
 
@@ -109,7 +116,8 @@ class Dispatcher:
                     action=self.__brand_ctr.update_header_image,
                     after_hooks=[
                         self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
-                        self.__hooks_facade.get_brand_after_hooks().tag_bucket_url_to_images
+                        self.__hooks_facade.get_brand_after_hooks().tag_bucket_url_to_images,
+                        self.__hooks_facade.get_user_after_hooks().format_values_and_categories
                     ]
                 ),
 
@@ -121,7 +129,8 @@ class Dispatcher:
                     action=self.__brand_ctr.update_logo,
                     after_hooks=[
                         self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
-                        self.__hooks_facade.get_brand_after_hooks().tag_bucket_url_to_images
+                        self.__hooks_facade.get_brand_after_hooks().tag_bucket_url_to_images,
+                        self.__hooks_facade.get_user_after_hooks().format_values_and_categories
                     ]
                 ),
 
@@ -133,7 +142,8 @@ class Dispatcher:
                     action=self.__influencer_ctr.get,
                     after_hooks=[
                         self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
-                        self.__hooks_facade.get_influencer_after_hooks().tag_bucket_url_to_images
+                        self.__hooks_facade.get_influencer_after_hooks().tag_bucket_url_to_images,
+                        self.__hooks_facade.get_user_after_hooks().format_values_and_categories
                     ]
                 ),
 
@@ -147,7 +157,8 @@ class Dispatcher:
                     after_hooks=[
                         self.__hooks_facade.get_influencer_after_hooks().set_influencer_claims,
                         self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
-                        self.__hooks_facade.get_influencer_after_hooks().tag_bucket_url_to_images
+                        self.__hooks_facade.get_influencer_after_hooks().tag_bucket_url_to_images,
+                        self.__hooks_facade.get_user_after_hooks().format_values_and_categories
                     ]
                 ),
 
@@ -160,7 +171,8 @@ class Dispatcher:
                     action=self.__influencer_ctr.update,
                     after_hooks=[
                         self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
-                        self.__hooks_facade.get_influencer_after_hooks().tag_bucket_url_to_images
+                        self.__hooks_facade.get_influencer_after_hooks().tag_bucket_url_to_images,
+                        self.__hooks_facade.get_user_after_hooks().format_values_and_categories
                     ]
                 ),
 
@@ -172,7 +184,8 @@ class Dispatcher:
                     action=self.__influencer_ctr.update_profile_image,
                     after_hooks=[
                         self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
-                        self.__hooks_facade.get_influencer_after_hooks().tag_bucket_url_to_images
+                        self.__hooks_facade.get_influencer_after_hooks().tag_bucket_url_to_images,
+                        self.__hooks_facade.get_user_after_hooks().format_values_and_categories
                     ]
                 ),
             }

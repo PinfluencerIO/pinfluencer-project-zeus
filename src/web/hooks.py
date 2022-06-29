@@ -157,6 +157,15 @@ class UserAfterHooks:
             user["last_name"] = auth_user.last_name
             user["email"] = auth_user.email
 
+    def format_values_and_categories(self, context: PinfluencerContext):
+        context.response.body["values"] = list(map(lambda x: x.name, context.response.body["values"]))
+        context.response.body["categories"] = list(map(lambda x: x.name, context.response.body["categories"]))
+
+    def format_values_and_categories_collection(self, context: PinfluencerContext):
+        for user in context.response.body:
+            user["values"] = list(map(lambda x: x.name, user["values"]))
+            user["categories"] = list(map(lambda x: x.name, user["categories"]))
+
 
 class HooksFacade:
 

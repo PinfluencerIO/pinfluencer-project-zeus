@@ -5,7 +5,7 @@ from uuid import uuid4
 from callee import Captor
 
 from src.crosscutting import JsonCamelToSnakeCaseDeserializer
-from src.domain.models import User, Brand, Influencer
+from src.domain.models import User, Brand, Influencer, ValueEnum, CategoryEnum
 from src.domain.validation import InfluencerValidator, BrandValidator, CampaignValidator
 from src.types import AuthUserRepository
 from src.web import PinfluencerContext, PinfluencerResponse
@@ -451,3 +451,41 @@ class TestUserAfterHooks(TestCase):
             call(_id=brands[1]["auth_user_id"]),
             call(_id=brands[2]["auth_user_id"])
         ])
+
+    def test_format_values_and_categories(self):
+        # arrange
+        expected_values = ["VALUE9", "VALUE8", "VALUE7"]
+        expected_categories = ["PET", "FASHION", "FITNESS"]
+        context = PinfluencerContext(response=PinfluencerResponse(body={
+            "values": [ValueEnum.VALUE9, ValueEnum.VALUE8, ValueEnum.VALUE7],
+            "categories": [CategoryEnum.PET, CategoryEnum.FASHION, CategoryEnum.FITNESS]
+        }))
+
+        # act
+        self.__sut.format_values_and_categories(context=context)
+
+        # assert
+        assert context.response.body["values"] == expected_values
+        assert context.response.body["categories"] == expected_categories
+
+    def test_format_values_and_categories_collection(self):
+        # arrange
+        expected_values = ["VALUE9", "VALUE8", "VALUE7"]
+        expected_categories = ["PET", "FASHION", "FITNESS"]
+        expected_values2 = ["VALUE9", "VALUE8", "VALUE5"]
+        expected_categories2 = ["PET", "FASHION", "CATEGORY5"]
+        context = PinfluencerContext(response=PinfluencerResponse(body=[
+            {"values": [ValueEnum.VALUE9, ValueEnum.VALUE8, ValueEnum.VALUE7],
+            "categories": [CategoryEnum.PET, CategoryEnum.FASHION, CategoryEnum.FITNESS]},
+            {"values": [ValueEnum.VALUE9, ValueEnum.VALUE8, ValueEnum.VALUE5],
+             "categories": [CategoryEnum.PET, CategoryEnum.FASHION, CategoryEnum.CATEGORY5]}
+        ]))
+
+        # act
+        self.__sut.format_values_and_categories_collection(context=context)
+
+        # assert
+        assert context.response.body[0]["values"] == expected_values
+        assert context.response.body[0]["categories"] == expected_categories
+        assert context.response.body[1]["values"] == expected_values2
+        assert context.response.body[1]["categories"] == expected_categories2
