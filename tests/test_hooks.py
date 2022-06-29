@@ -12,7 +12,7 @@ from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, CommonBeforeHooks, \
     InfluencerBeforeHooks, BrandBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks
 from tests import brand_dto_generator, RepoEnum, get_auth_user_event, create_for_auth_user_event, get_brand_id_event, \
-    get_influencer_id_event
+    get_influencer_id_event, get_campaign_id_event
 
 TEST_S3_URL = "https://pinfluencer-product-images.s3.eu-west-2.amazonaws.com"
 
@@ -178,6 +178,34 @@ class TestCampaignBeforeHooks(TestCase):
         assert context.response.status_code == 400
         assert context.response.body == {}
 
+    def test_validate_id(self):
+
+        # arrange
+        id = str(uuid4())
+        context = PinfluencerContext(event=get_campaign_id_event(campaign_id=id),
+                                     short_circuit=False)
+
+        # act
+        self.__sut.validate_id(context=context)
+
+        # assert
+        assert context.short_circuit == False
+        assert context.id == id
+
+    def test_validate_id_when_invalid(self):
+        # arrange
+        id = "1234567"
+        context = PinfluencerContext(event=get_campaign_id_event(campaign_id=id),
+                                     short_circuit=False,
+                                     response=PinfluencerResponse())
+
+        # act
+        self.__sut.validate_id(context=context)
+
+        # assert
+        assert context.short_circuit == True
+        assert context.response.status_code == 400
+        assert context.response.body == {}
 
 class TestCommonHooks(TestCase):
 
@@ -363,6 +391,23 @@ class TestCampaignAfterHooks(TestCase):
         assert context.response.body["product_image1"] == f"{TEST_S3_URL}/{image_key}"
         assert context.response.body["product_image2"] == f"{TEST_S3_URL}/{image_key2}"
         assert context.response.body["product_image3"] == f"{TEST_S3_URL}/{image_key3}"
+
+    def test_format_values_and_categories(self):
+
+        # arrange
+        expected_values = ["VALUE9", "VALUE8", "VALUE7"]
+        expected_categories = ["PET", "FASHION", "FITNESS"]
+        context = PinfluencerContext(response=PinfluencerResponse(body={
+            "campaign_values": [ValueEnum.VALUE9, ValueEnum.VALUE8, ValueEnum.VALUE7],
+            "campaign_categories": [CategoryEnum.PET, CategoryEnum.FASHION, CategoryEnum.FITNESS]
+        }))
+
+        # act
+        self.__sut.format_values_and_categories(context=context)
+
+        # assert
+        assert context.response.body["campaign_categories"] == expected_categories
+        assert context.response.body["campaign_values"] == expected_values
 
 
 class TestUserBeforeHooks(TestCase):

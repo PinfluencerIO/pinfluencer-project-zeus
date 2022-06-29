@@ -9,7 +9,7 @@ from src.types import DataManager, ImageRepository, ObjectMapperAdapter, BrandRe
     InfluencerRepository, Deserializer, Serializer, AuthUserRepository, CampaignRepository
 from src.web.controllers import BrandController, InfluencerController, CampaignController
 from src.web.hooks import HooksFacade, CommonBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, UserBeforeHooks, \
-    UserAfterHooks, InfluencerBeforeHooks, BrandBeforeHooks, CampaignBeforeHooks
+    UserAfterHooks, InfluencerBeforeHooks, BrandBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks
 from src.web.middleware import MiddlewarePipeline
 
 
@@ -70,7 +70,8 @@ class ServiceLocator:
                            user_after_hooks=UserAfterHooks(auth_user_repository=self.get_new_auth_user_repository()),
                            influencer_before_hooks=InfluencerBeforeHooks(influencer_validator=self.get_new_influencer_validator()),
                            brand_before_hooks=BrandBeforeHooks(brand_validator=self.get_new_brand_validator()),
-                           campaign_before_hooks=CampaignBeforeHooks(campaign_validator=CampaignValidator()))
+                           campaign_before_hooks=CampaignBeforeHooks(campaign_validator=CampaignValidator()),
+                           campaign_after_hooks=CampaignAfterHooks())
 
     def get_new_campaign_repository(self) -> CampaignRepository:
         return SqlAlchemyCampaignRepository(data_manager=self.get_new_data_manager(),

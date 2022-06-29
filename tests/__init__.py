@@ -6,7 +6,8 @@ from sqlalchemy.orm import sessionmaker
 
 from src.crosscutting import JsonSnakeToCamelSerializer
 from src.data import Base
-from src.data.entities import SqlAlchemyBrandEntity, SqlAlchemyBaseEntity, SqlAlchemyInfluencerEntity
+from src.data.entities import SqlAlchemyBrandEntity, SqlAlchemyBaseEntity, SqlAlchemyInfluencerEntity, \
+    SqlAlchemyCampaignEntity
 from src.domain.models import Brand, Influencer, ValueEnum, CategoryEnum, User, Campaign
 
 TEST_DEFAULT_PRODUCT_IMAGE1 = "default_product_image1.png"
@@ -21,6 +22,11 @@ def get_entity_dict(entity: SqlAlchemyBaseEntity) -> dict:
     dict = entity.__dict__
     dict.pop('_sa_instance_state')
     return dict
+
+
+def campaign_generator(dto, mapper):
+    campaign = mapper.map(dto, SqlAlchemyCampaignEntity)
+    return campaign
 
 
 def brand_generator(dto, mapper):
@@ -420,6 +426,10 @@ def get_influencer_id_event(id):
 
 def get_brand_id_event(brand_id):
     return {'pathParameters': {'brand_id': brand_id}}
+
+
+def get_campaign_id_event(campaign_id):
+    return {'pathParameters': {'campaign_id': campaign_id}}
 
 
 def get_auth_user_event(auth_id):

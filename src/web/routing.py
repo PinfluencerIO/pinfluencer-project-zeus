@@ -195,10 +195,19 @@ class Dispatcher:
             {
                 'GET /brands/me/campaigns': self.get_not_implemented_method('GET /brands/me/campaigns'),
 
-                'DELETE /brands/me/campaigns/{campaign_id}': self.get_not_implemented_method(
-                    'DELETE /brands/me/campaigns/{campaign_id}'),
+                'DELETE /brands/me/campaigns/{campaign_id}':
+                    self.get_not_implemented_method('DELETE brands/me/campaigns/{campaign_id}'),
 
-                'GET /campaigns/{campaign_id}': self.get_not_implemented_method('/campaigns/{campaign_id}'),
+                'GET /campaigns/{campaign_id}': Route(
+                    before_hooks=[
+                        self.__hooks_facade.get_campaign_before_hooks().validate_id
+                    ],
+                    action=self.__campaign_ctr.get_by_id,
+                    after_hooks=[
+                        self.__hooks_facade.get_campaign_after_hooks().format_values_and_categories,
+                        self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images
+                    ]
+                ),
 
                 'POST /brands/me/campaigns': Route(
                     before_hooks=[

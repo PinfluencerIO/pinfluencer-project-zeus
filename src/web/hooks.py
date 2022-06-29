@@ -33,6 +33,15 @@ class CampaignBeforeHooks:
             context.response.body = {}
             context.response.status_code = 400
 
+    def validate_id(self, context: PinfluencerContext):
+        id = valid_path_resource_id(event=context.event, resource_key="campaign_id")
+        if not id:
+            context.short_circuit = True
+            context.response.body = {}
+            context.response.status_code = 400
+        else:
+            context.id = id
+
 
 class CampaignAfterHooks:
 
@@ -40,6 +49,10 @@ class CampaignAfterHooks:
         context.response.body["product_image1"] = f"{S3_URL}/{context.response.body['product_image1']}"
         context.response.body["product_image2"] = f"{S3_URL}/{context.response.body['product_image2']}"
         context.response.body["product_image3"] = f"{S3_URL}/{context.response.body['product_image3']}"
+
+    def format_values_and_categories(self, context: PinfluencerContext):
+        context.response.body["campaign_values"] = list(map(lambda x: x.name, context.response.body["campaign_values"]))
+        context.response.body["campaign_categories"] = list(map(lambda x: x.name, context.response.body["campaign_categories"]))
 
 
 class InfluencerBeforeHooks:
@@ -176,7 +189,8 @@ class HooksFacade:
                  user_after_hooks: UserAfterHooks,
                  influencer_before_hooks: InfluencerBeforeHooks,
                  brand_before_hooks: BrandBeforeHooks,
-                 campaign_before_hooks: CampaignBeforeHooks):
+                 campaign_before_hooks: CampaignBeforeHooks,
+                 campaign_after_hooks: CampaignAfterHooks):
         self.__campaign_before_hooks = campaign_before_hooks
         self.__brand_before_hooks = brand_before_hooks
         self.__influencer_before_hooks = influencer_before_hooks
@@ -185,6 +199,10 @@ class HooksFacade:
         self.__user_before_hooks = user_before_hooks
         self.__brand_after_hooks = brand_after_hooks
         self.__common_before_hooks = common_hooks
+        self.__campaign_after_hooks = campaign_after_hooks
+
+    def get_campaign_after_hooks(self) -> CampaignAfterHooks:
+        return self.__campaign_after_hooks
 
     def get_campaign_before_hooks(self) -> CampaignBeforeHooks:
         return self.__campaign_before_hooks

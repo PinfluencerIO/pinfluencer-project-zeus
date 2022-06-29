@@ -17,7 +17,7 @@ from tests import brand_dto_generator, assert_brand_updatable_fields_are_equal, 
     update_brand_payload, create_brand_dto, \
     update_image_payload, update_brand_return_dto, create_influencer_dto, \
     update_influencer_payload, TEST_DEFAULT_PRODUCT_IMAGE1, TEST_DEFAULT_PRODUCT_IMAGE2, \
-    TEST_DEFAULT_PRODUCT_IMAGE3
+    TEST_DEFAULT_PRODUCT_IMAGE3, campaign_dto_generator
 
 
 class TestInfluencerController(TestCase):
@@ -518,3 +518,17 @@ class TestCampaignController(TestCase):
         assert context.short_circuit == True
         assert context.response.body == {}
         assert context.response.status_code == 404
+
+    def test_get_by_id(self):
+
+        # arrange
+        campaign = campaign_dto_generator(num=1)
+        context = PinfluencerContext(id="123456",
+                                     response=PinfluencerResponse())
+        self.__campaign_repository.load_by_id = MagicMock(return_value=campaign)
+
+        # act
+        self.__sut.get_by_id(context=context)
+
+        # assert
+        assert context.response.body == campaign.__dict__

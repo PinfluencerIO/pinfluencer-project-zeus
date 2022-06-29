@@ -12,7 +12,7 @@ from tests import InMemorySqliteDataManager, brand_generator, brand_dto_generato
     TEST_DEFAULT_BRAND_HEADER_IMAGE, TEST_DEFAULT_INFLUENCER_PROFILE_IMAGE, influencer_dto_generator, \
     assert_brand_updatable_fields_are_equal_for_three, assert_brand_db_fields_are_equal, \
     assert_collection_brand_db_fields_are_equal, assert_brand_db_fields_are_equal_for_three, influencer_generator, \
-    assert_influencer_db_fields_are_equal_for_three, campaign_dto_generator
+    assert_influencer_db_fields_are_equal_for_three, campaign_dto_generator, campaign_generator
 
 
 class BrandRepositoryTestCase(TestCase):
@@ -390,7 +390,6 @@ class TestCampaignRepository(TestCase):
         assert campaign_payload.__dict__ == campaign_loaded_from_db_dict == returned_campaign_dict
 
     def test_write_for_new_brand_when_brand_does_not_exist(self):
-
         # arrange
         campaign = campaign_dto_generator(num=1)
 
@@ -398,3 +397,14 @@ class TestCampaignRepository(TestCase):
         self.assertRaises(NotFoundException, lambda: self.__sut
                           .write_new_for_brand(payload=campaign,
                                                auth_user_id="1234"))
+
+    def test_get_by_id(self):
+        # arrange
+        campaign = campaign_dto_generator(num=1)
+        self.__data_manager.create_fake_data([campaign_generator(dto=campaign, mapper=self.__object_mapper)])
+
+        # act
+        campaign_returned = self.__sut.load_by_id(id_=campaign.id)
+
+        # assert
+        assert campaign_returned.__dict__ == campaign.__dict__

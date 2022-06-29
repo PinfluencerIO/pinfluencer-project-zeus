@@ -12,7 +12,7 @@ from src.types import Serializer
 from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.controllers import BrandController, InfluencerController, CampaignController
 from src.web.hooks import HooksFacade, CommonBeforeHooks, UserAfterHooks, BrandAfterHooks, UserBeforeHooks, \
-    BrandBeforeHooks, InfluencerAfterHooks, InfluencerBeforeHooks, CampaignBeforeHooks
+    BrandBeforeHooks, InfluencerAfterHooks, InfluencerBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks
 from src.web.ioc import ServiceLocator
 from src.web.middleware import MiddlewarePipeline
 from src.web.routing import Dispatcher
@@ -43,6 +43,8 @@ class TestRoutes(TestCase):
         self.__influencer_after_hooks: InfluencerAfterHooks = Mock()
         self.__influencer_before_hooks: InfluencerBeforeHooks = Mock()
         self.__campaign_before_hooks: CampaignBeforeHooks = Mock()
+        self.__campaign_after_hooks: CampaignAfterHooks = Mock()
+        self.__hooks_facade.get_campaign_after_hooks = MagicMock(return_value=self.__campaign_after_hooks)
         self.__hooks_facade.get_campaign_before_hooks = MagicMock(return_value=self.__campaign_before_hooks)
         self.__hooks_facade.get_before_common_hooks = MagicMock(return_value=self.__common_hooks)
         self.__hooks_facade.get_user_after_hooks = MagicMock(return_value=self.__user_after_hooks)
@@ -387,7 +389,24 @@ class TestRoutes(TestCase):
                                      ])
 
     def test_get_campaign_by_id(self):
-        self.__assert_not_implemented(route="GET /campaigns/{campaign_id}")
+        # arrange
+        self.__mock_middleware_pipeline.execute_middleware = MagicMock()
+
+        # act
+        bootstrap(event={"routeKey": "GET /campaigns/{campaign_id}"},
+                  context={},
+                  service_locator=self.__mock_service_locator)
+
+        # assert
+        self.__mock_middleware_pipeline \
+            .execute_middleware \
+            .assert_called_once_with(context=Any(),
+                                     middleware=[
+                                         self.__campaign_before_hooks.validate_id,
+                                         self.__mock_campaign_controller.get_by_id,
+                                         self.__campaign_after_hooks.format_values_and_categories,
+                                         self.__campaign_after_hooks.tag_bucket_url_to_images
+                                     ])
 
     def test_get_auth_brand_campaigns(self):
         self.__assert_not_implemented(route="GET /brands/me/campaigns")
