@@ -385,7 +385,9 @@ class TestRoutes(TestCase):
                                          self.__common_hooks.set_body,
                                          self.__user_before_hooks.set_auth_user_id,
                                          self.__campaign_before_hooks.validate_campaign,
-                                         self.__mock_campaign_controller.create
+                                         self.__mock_campaign_controller.create,
+                                         self.__campaign_after_hooks.format_values_and_categories,
+                                         self.__campaign_after_hooks.tag_bucket_url_to_images
                                      ])
 
     def test_get_campaign_by_id(self):

@@ -215,7 +215,11 @@ class Dispatcher:
                         self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
                         self.__hooks_facade.get_campaign_before_hooks().validate_campaign
                     ],
-                    action=self.__campaign_ctr.create
+                    action=self.__campaign_ctr.create,
+                    after_hooks=[
+                        self.__hooks_facade.get_campaign_after_hooks().format_values_and_categories,
+                        self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images
+                    ]
                 ),
 
                 'PUT /brands/me/campaigns/{campaign_id}': self.get_not_implemented_method('PUT /brands/me/campaigns/{campaign_id}'),
