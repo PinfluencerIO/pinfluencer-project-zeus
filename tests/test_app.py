@@ -417,6 +417,15 @@ class TestRoutes(TestCase):
     def test_delete_brand_auth_campaign_by_id(self):
         self.__assert_not_implemented(route="DELETE /brands/me/campaigns/{campaign_id}")
 
+    def test_create_campaign_product_image1(self):
+        self.__assert_not_implemented(route="POST /campaigns/{campaign_id}/product-image1")
+
+    def test_create_campaign_product_image2(self):
+        self.__assert_not_implemented(route="POST /campaigns/{campaign_id}/product-image2")
+
+    def test_create_campaign_product_image3(self):
+        self.__assert_not_implemented(route="POST /campaigns/{campaign_id}/product-image3")
+
     def test_template_matches_routes(self):
         template_file_path = f"./../template.yaml"
         if "REMOTE_BUILD" in os.environ:

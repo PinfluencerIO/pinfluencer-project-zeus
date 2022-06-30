@@ -218,7 +218,14 @@ class Dispatcher:
                     action=self.__campaign_ctr.create
                 ),
 
-                'PUT /brands/me/campaigns/{campaign_id}': self.get_not_implemented_method('PUT /brands/me/campaigns/{campaign_id}')
+                'PUT /brands/me/campaigns/{campaign_id}': self.get_not_implemented_method('PUT /brands/me/campaigns/{campaign_id}'),
+
+                'POST /campaigns/{campaign_id}/product-image1':
+                    self.get_not_implemented_method('POST /campaigns/{campaign_id}/product-image1'),
+                'POST /campaigns/{campaign_id}/product-image2':
+                    self.get_not_implemented_method('POST /campaigns/{campaign_id}/product-image2'),
+                'POST /campaigns/{campaign_id}/product-image3':
+                    self.get_not_implemented_method('POST /campaigns/{campaign_id}/product-image3')
             }
         )
 
