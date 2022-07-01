@@ -191,9 +191,19 @@ class Dispatcher:
             }
         )
 
+
         campaigns = OrderedDict(
             {
-                'GET /brands/me/campaigns': self.get_not_implemented_method('GET /brands/me/campaigns'),
+                'GET /brands/me/campaigns': Route(
+                    before_hooks=[
+                        self.__hooks_facade.get_user_before_hooks().set_auth_user_id
+                    ],
+                    action=self.__campaign_ctr.get_for_brand,
+                    after_hooks=[
+                        self.__hooks_facade.get_campaign_after_hooks().format_values_and_categories_collection,
+                        self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images_collection
+                    ]
+                ),
 
                 'DELETE /brands/me/campaigns/{campaign_id}':
                     self.get_not_implemented_method('DELETE brands/me/campaigns/{campaign_id}'),
@@ -232,7 +242,6 @@ class Dispatcher:
                     self.get_not_implemented_method('POST /campaigns/{campaign_id}/product-image3')
             }
         )
-
         routes = {}
         routes.update(feed)
         routes.update(users)

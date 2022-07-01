@@ -54,6 +54,17 @@ class CampaignAfterHooks:
         context.response.body["campaign_values"] = list(map(lambda x: x.name, context.response.body["campaign_values"]))
         context.response.body["campaign_categories"] = list(map(lambda x: x.name, context.response.body["campaign_categories"]))
 
+    def tag_bucket_url_to_images_collection(self, context: PinfluencerContext):
+        for campaign in context.response.body:
+            campaign["product_image1"] = f"{S3_URL}/{campaign['product_image1']}"
+            campaign["product_image2"] = f"{S3_URL}/{campaign['product_image2']}"
+            campaign["product_image3"] = f"{S3_URL}/{campaign['product_image3']}"
+
+    def format_values_and_categories_collection(self, context: PinfluencerContext):
+        for campaign in context.response.body:
+            campaign["campaign_values"] = list(map(lambda x: x.name, campaign["campaign_values"]))
+            campaign["campaign_categories"] = list(map(lambda x: x.name, campaign["campaign_categories"]))
+
 
 class InfluencerBeforeHooks:
 

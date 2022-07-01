@@ -411,7 +411,24 @@ class TestRoutes(TestCase):
                                      ])
 
     def test_get_auth_brand_campaigns(self):
-        self.__assert_not_implemented(route="GET /brands/me/campaigns")
+        # arrange
+        self.__mock_middleware_pipeline.execute_middleware = MagicMock()
+
+        # act
+        bootstrap(event={"routeKey": "GET /brands/me/campaigns"},
+                  context={},
+                  service_locator=self.__mock_service_locator)
+
+        # assert
+        self.__mock_middleware_pipeline \
+            .execute_middleware \
+            .assert_called_once_with(context=Any(),
+                                     middleware=[
+                                         self.__user_before_hooks.set_auth_user_id,
+                                         self.__mock_campaign_controller.get_for_brand,
+                                         self.__campaign_after_hooks.format_values_and_categories_collection,
+                                         self.__campaign_after_hooks.tag_bucket_url_to_images_collection
+                                     ])
 
     def test_update_brand_auth_campaign_by_id(self):
         self.__assert_not_implemented(route="PUT /brands/me/campaigns/{campaign_id}")

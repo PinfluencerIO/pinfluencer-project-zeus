@@ -409,6 +409,63 @@ class TestCampaignAfterHooks(TestCase):
         assert context.response.body["campaign_categories"] == expected_categories
         assert context.response.body["campaign_values"] == expected_values
 
+    def test_format_values_and_categories_collection(self):
+        # arrange
+        expected_values = ["VALUE9", "VALUE8", "VALUE7"]
+        expected_categories = ["PET", "FASHION", "FITNESS"]
+        expected_values2 = ["VALUE10", "VALUE8", "VALUE7"]
+        expected_categories2 = ["PET", "FASHION", "CATEGORY9"]
+        context = PinfluencerContext(response=PinfluencerResponse(body=[
+            {
+                "campaign_values": [ValueEnum.VALUE9, ValueEnum.VALUE8, ValueEnum.VALUE7],
+                "campaign_categories": [CategoryEnum.PET, CategoryEnum.FASHION, CategoryEnum.FITNESS]
+            },
+            {
+                "campaign_values": [ValueEnum.VALUE10, ValueEnum.VALUE8, ValueEnum.VALUE7],
+                "campaign_categories": [CategoryEnum.PET, CategoryEnum.FASHION, CategoryEnum.CATEGORY9]
+            }
+        ]))
+
+        # act
+        self.__sut.format_values_and_categories_collection(context=context)
+
+        # assert
+        assert context.response.body[0]["campaign_categories"] == expected_categories
+        assert context.response.body[0]["campaign_values"] == expected_values
+        assert context.response.body[1]["campaign_categories"] == expected_categories2
+        assert context.response.body[1]["campaign_values"] == expected_values2
+
+    def test_tag_bucket_url_to_images_collection(self):
+        # arrange
+        image_key = "path1"
+        image_key2 = "path2"
+        image_key3 = "path3"
+        image_key4 = "path4"
+        image_key5 = "path5"
+        image_key6 = "path6"
+        context = PinfluencerContext(response=PinfluencerResponse(body=[
+            {
+                "product_image1": image_key,
+                "product_image2": image_key2,
+                "product_image3": image_key3
+            },
+            {
+                "product_image1": image_key4,
+                "product_image2": image_key5,
+                "product_image3": image_key6
+            }
+        ]))
+
+        # act
+        self.__sut.tag_bucket_url_to_images_collection(context=context)
+
+        # assert
+        assert context.response.body[0]["product_image1"] == f"{TEST_S3_URL}/{image_key}"
+        assert context.response.body[0]["product_image2"] == f"{TEST_S3_URL}/{image_key2}"
+        assert context.response.body[0]["product_image3"] == f"{TEST_S3_URL}/{image_key3}"
+        assert context.response.body[1]["product_image1"] == f"{TEST_S3_URL}/{image_key4}"
+        assert context.response.body[1]["product_image2"] == f"{TEST_S3_URL}/{image_key5}"
+        assert context.response.body[1]["product_image3"] == f"{TEST_S3_URL}/{image_key6}"
 
 class TestUserBeforeHooks(TestCase):
 
