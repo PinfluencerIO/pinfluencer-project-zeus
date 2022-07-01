@@ -219,6 +219,22 @@ class SqlAlchemyCampaignRepository(BaseSqlAlchemyRepository):
             print(error_message)
             raise NotFoundException(error_message)
 
+    def load_for_auth_brand(self, auth_user_id: str) -> list[Campaign]:
+        brand = self._data_manager\
+            .session\
+            .query(SqlAlchemyBrandEntity)\
+            .filter(SqlAlchemyBrandEntity.auth_user_id == auth_user_id)\
+            .first()
+        if brand != None:
+            campaigns = self._data_manager\
+                .session\
+                .query(SqlAlchemyCampaignEntity)\
+                .filter(SqlAlchemyCampaignEntity.brand_id == brand.id)\
+                .all()
+            return list(map(lambda x: self._object_mapper.map(from_obj=x, to_type=Campaign), campaigns))
+        else:
+            raise NotFoundException("brand not found")
+
 
 class S3ImageRepository:
 

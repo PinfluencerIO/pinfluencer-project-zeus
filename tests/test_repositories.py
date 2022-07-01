@@ -408,3 +408,29 @@ class TestCampaignRepository(TestCase):
 
         # assert
         assert campaign_returned.__dict__ == campaign.__dict__
+
+    def test_load_for_brand(self):
+
+        # arrange
+        brand = brand_dto_generator(num=1)
+        campaigns = [
+            campaign_dto_generator(num=1),
+            campaign_dto_generator(num=2),
+            campaign_dto_generator(num=3)
+        ]
+        campaigns[0].brand_id = brand.id
+        campaigns[1].brand_id = brand.id
+        campaigns[2].brand_id = brand.id
+        self.__data_manager.create_fake_data([brand_generator(dto=brand, mapper=self.__object_mapper)])
+        self.__data_manager.create_fake_data(
+            list(map(lambda x: campaign_generator(dto=x, mapper=self.__object_mapper), campaigns))
+        )
+
+        # act
+        returned_campaigns = self.__sut.load_for_auth_brand(auth_user_id=brand.auth_user_id)
+
+        # assert
+        assert list(map(lambda x: x.__dict__, campaigns)) == list(map(lambda x: x.__dict__, returned_campaigns))
+
+    def test_load_for_brand_when_brand_not_found(self):
+        self.assertRaises(NotFoundException, lambda: self.__sut.load_for_auth_brand(auth_user_id="1234"))
