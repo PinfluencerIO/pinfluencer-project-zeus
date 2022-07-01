@@ -18,12 +18,14 @@ class BaseController:
         context.response.status_code = 200
         context.response.body = list(map(lambda x: x.__dict__, users))
 
-    def _update_image(self, context: PinfluencerContext, updater: Callable[[str, str], dict]) -> [PinfluencerResponse,
-                                                                                                  bool]:
-        auth_user_id = context.auth_user_id
+    def _update_image(self,
+                      context: PinfluencerContext,
+                      id: str,
+                      updater: Callable[[str, str], dict]) -> [PinfluencerResponse,
+                                                               bool]:
         payload_dict = context.body
         try:
-            user = updater(auth_user_id, payload_dict['image_bytes'])
+            user = updater(id, payload_dict['image_bytes'])
             return [PinfluencerResponse(status_code=201,
                                         body=user), False]
         except NotFoundException as e:
@@ -113,7 +115,8 @@ class BrandController(BaseUserController):
                                                        updater=lambda auth_id,
                                                                       bytes: self._repository.update_logo_for_auth_user(
                                                            auth_id,
-                                                           bytes).__dict__)
+                                                           bytes).__dict__,
+                                                       id=context.auth_user_id)
         context.short_circuit = short_circuit
         context.response.body = response.body
         context.response.status_code = response.status_code
@@ -123,7 +126,8 @@ class BrandController(BaseUserController):
                                                        updater=lambda auth_id,
                                                                       bytes: self._repository.update_header_image_for_auth_user(
                                                            auth_id,
-                                                           bytes).__dict__)
+                                                           bytes).__dict__,
+                                                       id=context.auth_user_id)
         context.short_circuit = short_circuit
         context.response.status_code = response.status_code
         context.response.body = response.body
@@ -171,7 +175,8 @@ class InfluencerController(BaseUserController):
                                                        updater=lambda auth_id,
                                                                       bytes: self._repository.update_image_for_auth_user(
                                                            auth_id,
-                                                           bytes).__dict__)
+                                                           bytes).__dict__,
+                                                       id=context.auth_user_id)
         context.short_circuit = short_circuit
         context.response.status_code = response.status_code
         context.response.body = response.body
@@ -181,43 +186,43 @@ class InfluencerController(BaseUserController):
         payload_dict = context.body
         try:
             influencer_from_db = self._repository.update_for_auth_user(auth_user_id=auth_user_id,
-                                                                            payload=Influencer(
-                                                                                auth_user_id=auth_user_id,
-                                                                                insta_handle=payload_dict[
-                                                                                    'insta_handle'],
-                                                                                website=payload_dict["website"],
-                                                                                bio=payload_dict["bio"],
-                                                                                audience_male_split=payload_dict[
-                                                                                    "audience_male_split"],
-                                                                                audience_female_split=payload_dict[
-                                                                                    "audience_female_split"],
-                                                                                audience_age_13_to_17_split=
-                                                                                payload_dict[
-                                                                                    "audience_age_13_to_17_split"],
-                                                                                audience_age_18_to_24_split=
-                                                                                payload_dict[
-                                                                                    "audience_age_18_to_24_split"],
-                                                                                audience_age_25_to_34_split=
-                                                                                payload_dict[
-                                                                                    "audience_age_25_to_34_split"],
-                                                                                audience_age_35_to_44_split=
-                                                                                payload_dict[
-                                                                                    "audience_age_35_to_44_split"],
-                                                                                audience_age_45_to_54_split=
-                                                                                payload_dict[
-                                                                                    "audience_age_45_to_54_split"],
-                                                                                audience_age_55_to_64_split=
-                                                                                payload_dict[
-                                                                                    "audience_age_55_to_64_split"],
-                                                                                audience_age_65_plus_split=payload_dict[
-                                                                                    "audience_age_65_plus_split"],
-                                                                                values=list(map(lambda x: ValueEnum[x],
-                                                                                                payload_dict[
-                                                                                                    "values"])),
-                                                                                categories=list(
-                                                                                    map(lambda x: CategoryEnum[x],
-                                                                                        payload_dict["categories"]))
-                                                                            ))
+                                                                       payload=Influencer(
+                                                                           auth_user_id=auth_user_id,
+                                                                           insta_handle=payload_dict[
+                                                                               'insta_handle'],
+                                                                           website=payload_dict["website"],
+                                                                           bio=payload_dict["bio"],
+                                                                           audience_male_split=payload_dict[
+                                                                               "audience_male_split"],
+                                                                           audience_female_split=payload_dict[
+                                                                               "audience_female_split"],
+                                                                           audience_age_13_to_17_split=
+                                                                           payload_dict[
+                                                                               "audience_age_13_to_17_split"],
+                                                                           audience_age_18_to_24_split=
+                                                                           payload_dict[
+                                                                               "audience_age_18_to_24_split"],
+                                                                           audience_age_25_to_34_split=
+                                                                           payload_dict[
+                                                                               "audience_age_25_to_34_split"],
+                                                                           audience_age_35_to_44_split=
+                                                                           payload_dict[
+                                                                               "audience_age_35_to_44_split"],
+                                                                           audience_age_45_to_54_split=
+                                                                           payload_dict[
+                                                                               "audience_age_45_to_54_split"],
+                                                                           audience_age_55_to_64_split=
+                                                                           payload_dict[
+                                                                               "audience_age_55_to_64_split"],
+                                                                           audience_age_65_plus_split=payload_dict[
+                                                                               "audience_age_65_plus_split"],
+                                                                           values=list(map(lambda x: ValueEnum[x],
+                                                                                           payload_dict[
+                                                                                               "values"])),
+                                                                           categories=list(
+                                                                               map(lambda x: CategoryEnum[x],
+                                                                                   payload_dict["categories"]))
+                                                                       ))
             context.response.status_code = 200
             context.response.body = influencer_from_db.__dict__
             return
@@ -270,3 +275,36 @@ class CampaignController(BaseController):
             context.response.status_code = 404
             context.response.body = {}
             context.short_circuit = True
+
+    def update_product_image1(self, context: PinfluencerContext) -> None:
+        [response, short_circuit] = self._update_image(context=context,
+                                                       updater=self.product_image1_updater,
+                                                       id=context.id)
+        context.short_circuit = short_circuit
+        context.response.status_code = response.status_code
+        context.response.body = response.body
+
+    def product_image1_updater(self, id: str, bytes: str) -> dict:
+        return self._repository.update_product_image1(id=id, image_bytes=bytes).__dict__
+
+    def update_product_image2(self, context: PinfluencerContext) -> None:
+        [response, short_circuit] = self._update_image(context=context,
+                                                       updater=self.product_image2_updater,
+                                                       id=context.id)
+        context.short_circuit = short_circuit
+        context.response.status_code = response.status_code
+        context.response.body = response.body
+
+    def product_image2_updater(self, id: str, bytes: str) -> dict:
+        return self._repository.update_product_image2(id=id, image_bytes=bytes).__dict__
+
+    def update_product_image3(self, context: PinfluencerContext) -> None:
+        [response, short_circuit] = self._update_image(context=context,
+                                                       updater=self.product_image3_updater,
+                                                       id=context.id)
+        context.short_circuit = short_circuit
+        context.response.status_code = response.status_code
+        context.response.body = response.body
+
+    def product_image3_updater(self, id: str, bytes: str) -> dict:
+        return self._repository.update_product_image3(id=id, image_bytes=bytes).__dict__

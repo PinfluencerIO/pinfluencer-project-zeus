@@ -475,7 +475,7 @@ class TestCampaignRepository(TestCase):
 
         # assert
         self.__image_repository.upload.assert_called_once_with(path=campaign.id, image_base64_encoded=bytes)
-        assert returned_campaign.product_image1 == image_key
+        assert returned_campaign.product_image2 == image_key
 
     def test_update_product_image3(self):
         # arrange
@@ -492,4 +492,4 @@ class TestCampaignRepository(TestCase):
 
         # assert
         self.__image_repository.upload.assert_called_once_with(path=campaign.id, image_base64_encoded=bytes)
-        assert returned_campaign.product_image1 == image_key
+        assert returned_campaign.product_image3 == image_key

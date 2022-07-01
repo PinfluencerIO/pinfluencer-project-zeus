@@ -566,3 +566,51 @@ class TestCampaignController(TestCase):
         assert context.short_circuit == True
         assert context.response.body == {}
         assert context.response.status_code == 404
+
+    def test_update_product_image1(self):
+        # arrange
+        expected_campaign = campaign_dto_generator(num=1)
+        self.__campaign_repository.update_product_image1 = MagicMock(return_value=expected_campaign)
+        context = PinfluencerContext(body=update_image_payload(),
+                                     id="12341",
+                                     response=PinfluencerResponse())
+
+        # act
+        self.__sut.update_product_image1(context)
+
+        # assert
+        self.__campaign_repository.update_product_image1.assert_called_once_with(id=context.id,
+                                                                                 image_bytes="random_bytes")
+        assert context.response.body == expected_campaign.__dict__
+
+    def test_update_product_image2(self):
+        # arrange
+        expected_campaign = campaign_dto_generator(num=1)
+        self.__campaign_repository.update_product_image2 = MagicMock(return_value=expected_campaign)
+        context = PinfluencerContext(body=update_image_payload(),
+                                     id="12341",
+                                     response=PinfluencerResponse())
+
+        # act
+        self.__sut.update_product_image2(context)
+
+        # assert
+        self.__campaign_repository.update_product_image2.assert_called_once_with(id=context.id,
+                                                                                 image_bytes="random_bytes")
+        assert context.response.body == expected_campaign.__dict__
+
+    def test_update_product_image3(self):
+        # arrange
+        expected_campaign = campaign_dto_generator(num=1)
+        self.__campaign_repository.update_product_image3 = MagicMock(return_value=expected_campaign)
+        context = PinfluencerContext(body=update_image_payload(),
+                                     id="12341",
+                                     response=PinfluencerResponse())
+
+        # act
+        self.__sut.update_product_image3(context)
+
+        # assert
+        self.__campaign_repository.update_product_image3.assert_called_once_with(id=context.id,
+                                                                                 image_bytes="random_bytes")
+        assert context.response.body == expected_campaign.__dict__
