@@ -27,6 +27,9 @@ class CampaignRepository(Protocol):
                             auth_user_id: str) -> Campaign:
         ...
 
+    def load_for_auth_brand(self, auth_user_id: str) -> list[Campaign]:
+        ...
+
 
 class BrandRepository(Protocol):
 

@@ -426,7 +426,7 @@ def create_campaign_from_db() -> Campaign:
                     campaign_discount_code="campaign_discount_code1",
                     product_title="product_title1",
                     product_description="product_description1",
-                )
+                    )
 
 
 def create_campaign_body() -> dict:
@@ -445,7 +445,6 @@ def create_campaign_body() -> dict:
     }
 
 
-
 class TestCampaignController(TestCase):
 
     def setUp(self) -> None:
@@ -453,7 +452,6 @@ class TestCampaignController(TestCase):
         self.__sut = CampaignController(repository=self.__campaign_repository)
 
     def test_write_for_brand(self):
-
         # arrange
         campaign_from_db = create_campaign_from_db()
         context = PinfluencerContext(response=PinfluencerResponse(),
@@ -504,7 +502,6 @@ class TestCampaignController(TestCase):
         assert payload_campaign_dict == campaign_body
 
     def test_write_for_brand_when_brand_not_found(self):
-
         # arrange
         context = PinfluencerContext(response=PinfluencerResponse(),
                                      auth_user_id="1234",
@@ -520,7 +517,6 @@ class TestCampaignController(TestCase):
         assert context.response.status_code == 404
 
     def test_get_by_id(self):
-
         # arrange
         campaign = campaign_dto_generator(num=1)
         context = PinfluencerContext(id="123456",
@@ -532,3 +528,41 @@ class TestCampaignController(TestCase):
 
         # assert
         assert context.response.body == campaign.__dict__
+
+    def test_get_for_brand(self):
+        # arrange
+        campaigns = [
+            campaign_dto_generator(num=1),
+            campaign_dto_generator(num=2),
+            campaign_dto_generator(num=3)
+        ]
+        auth_user_id = "1234"
+        context = PinfluencerContext(auth_user_id=auth_user_id,
+                                     response=PinfluencerResponse(),
+                                     short_circuit=False)
+        self.__campaign_repository.load_for_auth_brand = MagicMock(return_value=campaigns)
+
+        # act
+        self.__sut.get_for_brand(context=context)
+
+        # assert
+        self.__campaign_repository.load_for_auth_brand.assert_called_once_with(auth_user_id=auth_user_id)
+        assert context.short_circuit == False
+        assert context.response.body == list(map(lambda x: x.__dict__, campaigns))
+        assert context.response.status_code == 200
+
+    def test_get_for_brand_when_brand_not_found(self):
+
+        # arrange
+        context = PinfluencerContext(response=PinfluencerResponse(),
+                                     short_circuit=False,
+                                     auth_user_id="12341")
+        self.__campaign_repository.load_for_auth_brand = MagicMock(side_effect=NotFoundException())
+
+        # act
+        self.__sut.get_for_brand(context=context)
+
+        # assert
+        assert context.short_circuit == True
+        assert context.response.body == {}
+        assert context.response.status_code == 404

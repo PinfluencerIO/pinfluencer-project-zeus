@@ -259,3 +259,14 @@ class CampaignController(BaseController):
             context.response.body = {}
             context.response.status_code = 404
             context.short_circuit = True
+
+    def get_for_brand(self, context: PinfluencerContext) -> None:
+        try:
+            campaigns = self._repository.load_for_auth_brand(auth_user_id=context.auth_user_id)
+            context.response.status_code = 200
+            context.response.body = list(map(lambda x: x.__dict__, campaigns))
+        except NotFoundException as e:
+            print_exception(e)
+            context.response.status_code = 404
+            context.response.body = {}
+            context.short_circuit = True
