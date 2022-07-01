@@ -365,8 +365,10 @@ class TestCampaignRepository(TestCase):
     def setUp(self) -> None:
         self.__object_mapper = ObjectMapper()
         self.__data_manager = InMemorySqliteDataManager()
+        self.__image_repository: ImageRepository = Mock()
         self.__sut = SqlAlchemyCampaignRepository(data_manager=self.__data_manager,
-                                                  object_mapper=self.__object_mapper)
+                                                  object_mapper=self.__object_mapper,
+                                                  image_repository=self.__image_repository)
 
     def test_write_for_new_brand(self):
         # arrange
@@ -410,7 +412,6 @@ class TestCampaignRepository(TestCase):
         assert campaign_returned.__dict__ == campaign.__dict__
 
     def test_load_for_brand(self):
-
         # arrange
         brand = brand_dto_generator(num=1)
         campaigns = [
@@ -434,3 +435,61 @@ class TestCampaignRepository(TestCase):
 
     def test_load_for_brand_when_brand_not_found(self):
         self.assertRaises(NotFoundException, lambda: self.__sut.load_for_auth_brand(auth_user_id="1234"))
+
+    def test_update_product_image1(self):
+        # arrange
+        campaign = campaign_dto_generator(num=1)
+        self.__data_manager.create_fake_data([campaign_generator(dto=campaign,
+                                                                 mapper=self.__object_mapper)])
+        bytes = "bytesbytesbytes"
+        image_key = "product_image_key_1"
+        self.__image_repository.upload = MagicMock(return_value=image_key)
+
+        # act
+        returned_campaign = self.__sut.update_product_image1(id=campaign.id,
+                                                             image_bytes=bytes)
+
+        # assert
+        self.__image_repository.upload.assert_called_once_with(path=campaign.id, image_base64_encoded=bytes)
+        assert returned_campaign.product_image1 == image_key
+        del campaign.product_image1
+        del returned_campaign.product_image1
+        assert campaign.__dict__ == returned_campaign.__dict__
+
+    def test_update_product_image1_when_not_found(self):
+        self.assertRaises(NotFoundException, lambda: self.__sut.update_product_image1(id="12345",
+                                                                                      image_bytes="imagebytes"))
+
+    def test_update_product_image2(self):
+        # arrange
+        campaign = campaign_dto_generator(num=1)
+        self.__data_manager.create_fake_data([campaign_generator(dto=campaign,
+                                                                 mapper=self.__object_mapper)])
+        bytes = "bytesbytesbytes"
+        image_key = "product_image_key_2"
+        self.__image_repository.upload = MagicMock(return_value=image_key)
+
+        # act
+        returned_campaign = self.__sut.update_product_image2(id=campaign.id,
+                                                             image_bytes=bytes)
+
+        # assert
+        self.__image_repository.upload.assert_called_once_with(path=campaign.id, image_base64_encoded=bytes)
+        assert returned_campaign.product_image1 == image_key
+
+    def test_update_product_image3(self):
+        # arrange
+        campaign = campaign_dto_generator(num=1)
+        self.__data_manager.create_fake_data([campaign_generator(dto=campaign,
+                                                                 mapper=self.__object_mapper)])
+        bytes = "bytesbytesbytes"
+        image_key = "product_image_key_3"
+        self.__image_repository.upload = MagicMock(return_value=image_key)
+
+        # act
+        returned_campaign = self.__sut.update_product_image3(id=campaign.id,
+                                                             image_bytes=bytes)
+
+        # assert
+        self.__image_repository.upload.assert_called_once_with(path=campaign.id, image_base64_encoded=bytes)
+        assert returned_campaign.product_image1 == image_key

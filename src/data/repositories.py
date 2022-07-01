@@ -21,7 +21,9 @@ class BaseSqlAlchemyRepository:
                  data_manager: DataManager,
                  resource_entity,
                  object_mapper: ObjectMapperAdapter,
-                 resource_dto):
+                 resource_dto,
+                 image_repository: ImageRepository):
+        self._image_repository = image_repository
         self._object_mapper = object_mapper
         self._data_manager = data_manager
         self._resource_entity = resource_entity
@@ -40,6 +42,27 @@ class BaseSqlAlchemyRepository:
         else:
             raise NotFoundException(f'model {id} was not found')
 
+    def _update_image_by_id(self, id: str,
+                            image_bytes: str,
+                            field_setter: Callable[[str, Model], None]):
+        model = self._data_manager.session.query(self._resource_entity).filter(
+            self._resource_entity.id == id).first()
+        if model:
+            image = self._image_repository.upload(path=model.id,
+                                                  image_base64_encoded=image_bytes)
+            print(f'setting entity {self._resource_dto.__name__}|{id} image to {image}')
+            field_setter(image, model)
+            self._data_manager.session.commit()
+            print(
+                f'Repository Event: user after image set \n{self._object_mapper.map(from_obj=model, to_type=self._resource_dto).__dict__}')
+            first = self._data_manager.session \
+                .query(self._resource_entity) \
+                .filter(self._resource_entity.id == id) \
+                .first()
+            return self._object_mapper.map(from_obj=first, to_type=self._resource_dto)
+        else:
+            raise NotFoundException(f'{self._resource_dto.__name__} {id} could not be found')
+
 
 class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):
     def __init__(self, data_manager: DataManager,
@@ -50,8 +73,8 @@ class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):
         super().__init__(data_manager=data_manager,
                          resource_entity=resource_entity,
                          object_mapper=object_mapper,
-                         resource_dto=resource_dto)
-        self.__image_repository = image_repository
+                         resource_dto=resource_dto,
+                         image_repository=image_repository)
 
     def load_for_auth_user(self, auth_user_id) -> User:
         print(f"QUERY: <load for auth user> ENTITY: {self._resource_entity.__name__}")
@@ -80,12 +103,12 @@ class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):
                 self._data_manager.session.rollback()
                 raise e
 
-    def _update_image(self, auth_user_id, image_bytes, field_setter: Callable[[str, User], None]):
+    def _update_image(self, auth_user_id, image_bytes, field_setter: Callable[[str, Model], None]):
         user = self._data_manager.session.query(self._resource_entity).filter(
             self._resource_entity.auth_user_id == auth_user_id).first()
         if user:
-            image = self.__image_repository.upload(path=user.id,
-                                                   image_base64_encoded=image_bytes)
+            image = self._image_repository.upload(path=user.id,
+                                                  image_base64_encoded=image_bytes)
             print(f'setting user {auth_user_id} image to {image}')
             field_setter(image, user)
             self._data_manager.session.commit()
@@ -193,23 +216,25 @@ class SqlAlchemyInfluencerRepository(BaseSqlAlchemyUserRepository):
 class SqlAlchemyCampaignRepository(BaseSqlAlchemyRepository):
 
     def __init__(self, data_manager: DataManager,
-                 object_mapper: ObjectMapperAdapter):
+                 object_mapper: ObjectMapperAdapter,
+                 image_repository: ImageRepository):
         super().__init__(data_manager,
                          SqlAlchemyCampaignEntity,
                          object_mapper,
-                         Campaign)
+                         Campaign,
+                         image_repository=image_repository)
 
     def write_new_for_brand(self, payload: Campaign,
                             auth_user_id: str) -> Campaign:
-        brand = self._data_manager\
-            .session\
-            .query(SqlAlchemyBrandEntity)\
-            .filter(SqlAlchemyBrandEntity.auth_user_id == auth_user_id)\
+        brand = self._data_manager \
+            .session \
+            .query(SqlAlchemyBrandEntity) \
+            .filter(SqlAlchemyBrandEntity.auth_user_id == auth_user_id) \
             .first()
         if brand:
             payload.brand_id = brand.id
-            campaign_entity = self\
-                ._object_mapper\
+            campaign_entity = self \
+                ._object_mapper \
                 .map(from_obj=payload, to_type=SqlAlchemyCampaignEntity)
             self._data_manager.session.add(campaign_entity)
             self._data_manager.session.commit()
@@ -220,20 +245,47 @@ class SqlAlchemyCampaignRepository(BaseSqlAlchemyRepository):
             raise NotFoundException(error_message)
 
     def load_for_auth_brand(self, auth_user_id: str) -> list[Campaign]:
-        brand = self._data_manager\
-            .session\
-            .query(SqlAlchemyBrandEntity)\
-            .filter(SqlAlchemyBrandEntity.auth_user_id == auth_user_id)\
+        brand = self._data_manager \
+            .session \
+            .query(SqlAlchemyBrandEntity) \
+            .filter(SqlAlchemyBrandEntity.auth_user_id == auth_user_id) \
             .first()
         if brand != None:
-            campaigns = self._data_manager\
-                .session\
-                .query(SqlAlchemyCampaignEntity)\
-                .filter(SqlAlchemyCampaignEntity.brand_id == brand.id)\
+            campaigns = self._data_manager \
+                .session \
+                .query(SqlAlchemyCampaignEntity) \
+                .filter(SqlAlchemyCampaignEntity.brand_id == brand.id) \
                 .all()
             return list(map(lambda x: self._object_mapper.map(from_obj=x, to_type=Campaign), campaigns))
         else:
             raise NotFoundException("brand not found")
+
+    def update_product_image1(self, id: str, image_bytes: str) -> Campaign:
+        return self._update_image_by_id(id=id,
+                                        image_bytes=image_bytes,
+                                        field_setter=self.__product_image1_setter)
+
+    def update_product_image2(self, id: str, image_bytes: str) -> Campaign:
+        return self._update_image_by_id(id=id,
+                                        image_bytes=image_bytes,
+                                        field_setter=self.__product_image2_setter)
+
+    def update_product_image3(self, id: str, image_bytes: str) -> Campaign:
+        return self._update_image_by_id(id=id,
+                                        image_bytes=image_bytes,
+                                        field_setter=self.__product_image3_setter)
+
+    @staticmethod
+    def __product_image1_setter(product_image1, campaign):
+        campaign.product_image1 = product_image1
+
+    @staticmethod
+    def __product_image2_setter(product_image2, campaign):
+        campaign.product_image2 = product_image2
+
+    @staticmethod
+    def __product_image3_setter(product_image3, campaign):
+        campaign.product_image3 = product_image3
 
 
 class S3ImageRepository:

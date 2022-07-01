@@ -30,6 +30,15 @@ class CampaignRepository(Protocol):
     def load_for_auth_brand(self, auth_user_id: str) -> list[Campaign]:
         ...
 
+    def update_product_image1(self, id: str, image_bytes: str) -> Campaign:
+        ...
+
+    def update_product_image2(self, id: str, image_bytes: str) -> Campaign:
+        ...
+
+    def update_product_image3(self, id: str, image_bytes: str) -> Campaign:
+        ...
+
 
 class BrandRepository(Protocol):
 
