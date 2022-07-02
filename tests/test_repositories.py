@@ -6,6 +6,7 @@ from mapper.object_mapper import ObjectMapper
 
 from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository, CognitoAuthUserRepository, \
     CognitoAuthService, SqlAlchemyCampaignRepository
+from src.domain.models import Campaign
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.types import ImageRepository
 from tests import InMemorySqliteDataManager, brand_generator, brand_dto_generator, TEST_DEFAULT_BRAND_LOGO, \
@@ -493,3 +494,37 @@ class TestCampaignRepository(TestCase):
         # assert
         self.__image_repository.upload.assert_called_once_with(path=campaign.id, image_base64_encoded=bytes)
         assert returned_campaign.product_image3 == image_key
+
+    def test_update_campaign(self):
+        # arrange
+        campaign_in_db = campaign_dto_generator(num=1)
+        campaign = campaign_dto_generator(num=2)
+        _id = campaign_in_db.id
+        self.__data_manager.create_fake_data([campaign_generator(dto=campaign_in_db,
+                                                                 mapper=self.__object_mapper)])
+
+        # act
+        returned_campaign = self.__sut.update_campaign(_id=_id,
+                                                       payload=campaign)
+        queried_brand = self.__sut.load_by_id(id_=_id)
+
+        # assert
+        assert returned_campaign.id == campaign_in_db.id
+
+        self.__delete_fields_that_arent_updatable(campaign=queried_brand)
+        self.__delete_fields_that_arent_updatable(campaign=returned_campaign)
+        self.__delete_fields_that_arent_updatable(campaign=campaign)
+
+        assert returned_campaign.__dict__ == campaign.__dict__ == queried_brand.__dict__
+
+    def test_update_campaign_when_not_found(self):
+        self.assertRaises(NotFoundException, lambda: self.__sut.update_campaign(_id="1234",
+                                                                                payload=campaign_dto_generator(num=1)))
+
+    def __delete_fields_that_arent_updatable(self, campaign: Campaign):
+        del campaign.brand_id
+        del campaign.id
+        del campaign.product_image1
+        del campaign.product_image2
+        del campaign.product_image3
+        del campaign.created

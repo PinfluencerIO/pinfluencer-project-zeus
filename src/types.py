@@ -39,6 +39,9 @@ class CampaignRepository(Protocol):
     def update_product_image3(self, id: str, image_bytes: str) -> Campaign:
         ...
 
+    def update_campaign(self, _id: str, payload: Campaign) -> Campaign:
+        ...
+
 
 class BrandRepository(Protocol):
 

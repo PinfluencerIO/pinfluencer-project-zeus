@@ -288,6 +288,31 @@ class SqlAlchemyCampaignRepository(BaseSqlAlchemyRepository):
     def __product_image3_setter(product_image3, campaign):
         campaign.product_image3 = product_image3
 
+    def update_campaign(self, _id: str, payload: Campaign) -> Campaign:
+        campaign: SqlAlchemyCampaignEntity = self._data_manager\
+            .session\
+            .query(SqlAlchemyCampaignEntity)\
+            .filter(SqlAlchemyCampaignEntity.id == _id)\
+            .first()
+        if campaign != None:
+            campaign.campaign_hashtag = payload.campaign_hashtag
+            campaign.campaign_categories = payload.campaign_categories
+            campaign.product_description = payload.product_description
+            campaign.product_title = payload.product_title
+            campaign.campaign_discount_code = payload.campaign_discount_code
+            campaign.objective = payload.objective
+            campaign.campaign_title = payload.campaign_title
+            campaign.campaign_description = payload.campaign_description
+            campaign.success_description = payload.success_description
+            campaign.campaign_values = payload.campaign_values
+            campaign.campaign_product_link = payload.campaign_product_link
+            self._data_manager\
+                .session\
+                .commit()
+            return self._object_mapper.map(from_obj=campaign, to_type=Campaign)
+        else:
+            raise NotFoundException(f"{self._resource_dto.__name__}||{_id} not found")
+
 
 class S3ImageRepository:
 
