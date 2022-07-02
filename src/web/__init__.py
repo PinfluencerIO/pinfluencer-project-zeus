@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Union, Callable
 
+from src.crosscutting import valid_uuid
 from src.types import Serializer
 
 BRAND_ID_PATH_KEY = 'brand_id'
@@ -66,3 +67,14 @@ class Route:
     after_hooks: list[PinfluencerAction] = field(default_factory=list)
 
 
+def valid_path_resource_id(event, resource_key):
+    try:
+        id_ = event['pathParameters'][resource_key]
+        if valid_uuid(id_):
+            return id_
+        else:
+            print(f'Path parameter not a valid uuid {id_}')
+    except KeyError:
+        print(f'Missing key in event pathParameters.{resource_key}')
+
+    return None

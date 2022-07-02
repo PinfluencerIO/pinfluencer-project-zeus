@@ -1,5 +1,6 @@
 import json
 import re
+import uuid
 from typing import Union
 
 
@@ -39,3 +40,20 @@ class JsonCamelToSnakeCaseDeserializer:
     def __camel_case_key_to_snake_case(key: str) -> str:
         words = re.findall(r'[A-Z]?[a-z]+|[A-Z]{2,}(?=[A-Z][a-z]|\d|\W|$)|\d+', key)
         return '_'.join(map(str.lower, words))
+
+
+def valid_uuid(id_):
+    try:
+        val = uuid.UUID(id_, version=4)
+        # If uuid_string is valid hex, but invalid uuid4, UUID.__init__ converts to valid uuid4.
+        # This is bad for validation purposes, so try and match str with UUID
+        if str(val) == id_:
+            return True
+        else:
+            print_exception(f'equality failed {val} {id_}')
+    except ValueError as ve:
+        print_exception(ve)
+    except AttributeError as e:
+        print_exception(e)
+
+    return False
