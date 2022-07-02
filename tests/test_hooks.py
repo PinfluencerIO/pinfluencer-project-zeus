@@ -7,6 +7,7 @@ from callee import Captor
 from src.crosscutting import JsonCamelToSnakeCaseDeserializer
 from src.domain.models import User, Brand, Influencer, ValueEnum, CategoryEnum
 from src.domain.validation import InfluencerValidator, BrandValidator, CampaignValidator
+from src.exceptions import NotFoundException
 from src.types import AuthUserRepository, BrandRepository
 from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, CommonBeforeHooks, \
@@ -82,6 +83,36 @@ class TestBrandBeforeHooks(TestCase):
         assert context.short_circuit == True
         assert context.response.status_code == 400
         assert context.response.body == {}
+
+    def test_validate_auth_brand(self):
+
+        # arrange
+        self.__brand_repository.load_for_auth_user = MagicMock()
+        context = PinfluencerContext(auth_user_id="1234",
+                                     response=PinfluencerResponse(),
+                                     short_circuit=False)
+
+        # act
+        self.__sut.validate_auth_brand(context=context)
+
+        # assert
+        self.__brand_repository.load_for_auth_user.assert_called_once_with(auth_user_id="1234")
+        assert context.short_circuit == False
+
+    def test_validate_auth_brand_when_not_found(self):
+        # arrange
+        self.__brand_repository.load_for_auth_user = MagicMock(side_effect=NotFoundException())
+        context = PinfluencerContext(auth_user_id="1234",
+                                     response=PinfluencerResponse(),
+                                     short_circuit=False)
+
+        # act
+        self.__sut.validate_auth_brand(context=context)
+
+        # assert
+        assert context.short_circuit == True
+        assert context.response.body == {}
+        assert context.response.status_code == 400
 
 
 class TestInfluencerBeforeHooks(TestCase):

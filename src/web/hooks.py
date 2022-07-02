@@ -3,6 +3,7 @@ from jsonschema.exceptions import ValidationError
 from src.crosscutting import print_exception
 from src.domain.models import Brand, Influencer
 from src.domain.validation import BrandValidator, InfluencerValidator, CampaignValidator
+from src.exceptions import NotFoundException
 from src.types import AuthUserRepository, Deserializer, BrandRepository
 from src.web import PinfluencerContext, valid_path_resource_id
 
@@ -97,8 +98,14 @@ class BrandBeforeHooks:
         self.__brand_repository = brand_repository
         self.__brand_validator = brand_validator
 
-    def validate_auth_brand(self):
-        ...
+    def validate_auth_brand(self, context: PinfluencerContext):
+        try:
+            self.__brand_repository.load_for_auth_user(auth_user_id=context.auth_user_id)
+        except NotFoundException as e:
+            print_exception(e)
+            context.short_circuit = True
+            context.response.status_code = 400
+            context.body = {}
 
     def validate_uuid(self, context: PinfluencerContext):
         id = valid_path_resource_id(event=context.event, resource_key="brand_id")
