@@ -232,7 +232,11 @@ class Dispatcher:
                     ]
                 ),
 
-                'PUT /brands/me/campaigns/{campaign_id}': self.get_not_implemented_method('PUT /brands/me/campaigns/{campaign_id}'),
+                'PATCH /brands/me/campaigns/{campaign_id}/state': self.get_not_implemented_method(
+                    'PATCH /brands/me/campaigns/{campaign_id}/state'),
+
+                'PUT /brands/me/campaigns/{campaign_id}': self.get_not_implemented_method(
+                    'PUT /brands/me/campaigns/{campaign_id}'),
 
                 'POST /brands/me/campaigns/{campaign_id}/product-image1': Route(
                     before_hooks=[

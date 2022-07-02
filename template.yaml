@@ -252,6 +252,14 @@ Resources:
             Path: /brands/me/campaigns/{campaign_id}
             Method: put
             ApiId: !Ref PinfluencerHttpApi
+        UpdateMyCampaignStateById:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /brands/me/campaigns/{campaign_id}/state
+            Method: patch
+            ApiId: !Ref PinfluencerHttpApi
         DeleteMyCampaignById:
           Type: HttpApi
           Properties:
