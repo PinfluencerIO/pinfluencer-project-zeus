@@ -433,6 +433,9 @@ class TestRoutes(TestCase):
     def test_update_brand_auth_campaign_by_id(self):
         self.__assert_not_implemented(route="PUT /brands/me/campaigns/{campaign_id}")
 
+    def test_update_brand_auth_campaign_state_by_id(self):
+        self.__assert_not_implemented(route="PATCH /brands/me/campaigns/{campaign_id}/state")
+
     def test_delete_brand_auth_campaign_by_id(self):
         self.__assert_not_implemented(route="DELETE /brands/me/campaigns/{campaign_id}")
 
