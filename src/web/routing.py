@@ -237,7 +237,9 @@ class Dispatcher:
                 'POST brands/me/campaigns/{campaign_id}/product-image1': Route(
                     before_hooks=[
                         self.__hooks_facade.get_before_common_hooks().set_body,
-                        self.__hooks_facade.get_campaign_before_hooks().validate_id
+                        self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
+                        self.__hooks_facade.get_campaign_before_hooks().validate_id,
+                        self.__hooks_facade.get_brand_before_hooks().validate_auth_brand
                     ],
                     action=self.__campaign_ctr.update_product_image1,
                     after_hooks=[
@@ -248,7 +250,9 @@ class Dispatcher:
                 'POST brands/me/campaigns/{campaign_id}/product-image2': Route(
                     before_hooks=[
                         self.__hooks_facade.get_before_common_hooks().set_body,
-                        self.__hooks_facade.get_campaign_before_hooks().validate_id
+                        self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
+                        self.__hooks_facade.get_campaign_before_hooks().validate_id,
+                        self.__hooks_facade.get_brand_before_hooks().validate_auth_brand
                     ],
                     action=self.__campaign_ctr.update_product_image2,
                     after_hooks=[
@@ -259,7 +263,9 @@ class Dispatcher:
                 'POST brands/me/campaigns/{campaign_id}/product-image3': Route(
                     before_hooks=[
                         self.__hooks_facade.get_before_common_hooks().set_body,
-                        self.__hooks_facade.get_campaign_before_hooks().validate_id
+                        self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
+                        self.__hooks_facade.get_campaign_before_hooks().validate_id,
+                        self.__hooks_facade.get_brand_before_hooks().validate_auth_brand
                     ],
                     action=self.__campaign_ctr.update_product_image3,
                     after_hooks=[

@@ -451,7 +451,9 @@ class TestRoutes(TestCase):
             .assert_called_once_with(context=Any(),
                                      middleware=[
                                          self.__common_hooks.set_body,
+                                         self.__user_before_hooks.set_auth_user_id,
                                          self.__campaign_before_hooks.validate_id,
+                                         self.__brand_before_hooks.validate_auth_brand,
                                          self.__mock_campaign_controller.update_product_image1,
                                          self.__campaign_after_hooks.format_values_and_categories,
                                          self.__campaign_after_hooks.tag_bucket_url_to_images
@@ -472,7 +474,9 @@ class TestRoutes(TestCase):
             .assert_called_once_with(context=Any(),
                                      middleware=[
                                          self.__common_hooks.set_body,
+                                         self.__user_before_hooks.set_auth_user_id,
                                          self.__campaign_before_hooks.validate_id,
+                                         self.__brand_before_hooks.validate_auth_brand,
                                          self.__mock_campaign_controller.update_product_image2,
                                          self.__campaign_after_hooks.format_values_and_categories,
                                          self.__campaign_after_hooks.tag_bucket_url_to_images
@@ -493,7 +497,9 @@ class TestRoutes(TestCase):
             .assert_called_once_with(context=Any(),
                                      middleware=[
                                          self.__common_hooks.set_body,
+                                         self.__user_before_hooks.set_auth_user_id,
                                          self.__campaign_before_hooks.validate_id,
+                                         self.__brand_before_hooks.validate_auth_brand,
                                          self.__mock_campaign_controller.update_product_image3,
                                          self.__campaign_after_hooks.format_values_and_categories,
                                          self.__campaign_after_hooks.tag_bucket_url_to_images
