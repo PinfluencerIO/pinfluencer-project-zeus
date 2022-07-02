@@ -45,6 +45,7 @@ class BaseSqlAlchemyRepository:
     def _update_image_by_id(self, id: str,
                             image_bytes: str,
                             field_setter: Callable[[str, Model], None]):
+        print(f"query: <update_image_by_id> for <{self._resource_dto.__name__}||{id}>")
         model = self._data_manager.session.query(self._resource_entity).filter(
             self._resource_entity.id == id).first()
         if model:
