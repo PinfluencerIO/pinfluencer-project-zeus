@@ -75,4 +75,5 @@ class ServiceLocator:
 
     def get_new_campaign_repository(self) -> CampaignRepository:
         return SqlAlchemyCampaignRepository(data_manager=self.get_new_data_manager(),
-                                            object_mapper=self.get_new_object_mapper())
+                                            object_mapper=self.get_new_object_mapper(),
+                                            image_repository=self.get_new_image_repository())
