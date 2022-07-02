@@ -437,13 +437,64 @@ class TestRoutes(TestCase):
         self.__assert_not_implemented(route="DELETE /brands/me/campaigns/{campaign_id}")
 
     def test_create_campaign_product_image1(self):
-        self.__assert_not_implemented(route="POST /campaigns/{campaign_id}/product-image1")
+        # arrange
+        self.__mock_middleware_pipeline.execute_middleware = MagicMock()
+
+        # act
+        bootstrap(event={"routeKey": "POST /campaigns/{campaign_id}/product-image1"},
+                  context={},
+                  service_locator=self.__mock_service_locator)
+
+        # assert
+        self.__mock_middleware_pipeline \
+            .execute_middleware \
+            .assert_called_once_with(context=Any(),
+                                     middleware=[
+                                         self.__common_hooks.set_body,
+                                         self.__mock_campaign_controller.update_product_image1,
+                                         self.__campaign_after_hooks.format_values_and_categories,
+                                         self.__campaign_after_hooks.tag_bucket_url_to_images
+                                     ])
 
     def test_create_campaign_product_image2(self):
-        self.__assert_not_implemented(route="POST /campaigns/{campaign_id}/product-image2")
+        # arrange
+        self.__mock_middleware_pipeline.execute_middleware = MagicMock()
+
+        # act
+        bootstrap(event={"routeKey": "POST /campaigns/{campaign_id}/product-image2"},
+                  context={},
+                  service_locator=self.__mock_service_locator)
+
+        # assert
+        self.__mock_middleware_pipeline \
+            .execute_middleware \
+            .assert_called_once_with(context=Any(),
+                                     middleware=[
+                                         self.__common_hooks.set_body,
+                                         self.__mock_campaign_controller.update_product_image2,
+                                         self.__campaign_after_hooks.format_values_and_categories,
+                                         self.__campaign_after_hooks.tag_bucket_url_to_images
+                                     ])
 
     def test_create_campaign_product_image3(self):
-        self.__assert_not_implemented(route="POST /campaigns/{campaign_id}/product-image3")
+        # arrange
+        self.__mock_middleware_pipeline.execute_middleware = MagicMock()
+
+        # act
+        bootstrap(event={"routeKey": "POST /campaigns/{campaign_id}/product-image3"},
+                  context={},
+                  service_locator=self.__mock_service_locator)
+
+        # assert
+        self.__mock_middleware_pipeline \
+            .execute_middleware \
+            .assert_called_once_with(context=Any(),
+                                     middleware=[
+                                         self.__common_hooks.set_body,
+                                         self.__mock_campaign_controller.update_product_image3,
+                                         self.__campaign_after_hooks.format_values_and_categories,
+                                         self.__campaign_after_hooks.tag_bucket_url_to_images
+                                     ])
 
     def test_template_matches_routes(self):
         template_file_path = f"./../template.yaml"

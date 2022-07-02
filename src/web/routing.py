@@ -234,12 +234,36 @@ class Dispatcher:
 
                 'PUT /brands/me/campaigns/{campaign_id}': self.get_not_implemented_method('PUT /brands/me/campaigns/{campaign_id}'),
 
-                'POST /campaigns/{campaign_id}/product-image1':
-                    self.get_not_implemented_method('POST /campaigns/{campaign_id}/product-image1'),
-                'POST /campaigns/{campaign_id}/product-image2':
-                    self.get_not_implemented_method('POST /campaigns/{campaign_id}/product-image2'),
-                'POST /campaigns/{campaign_id}/product-image3':
-                    self.get_not_implemented_method('POST /campaigns/{campaign_id}/product-image3')
+                'POST /campaigns/{campaign_id}/product-image1': Route(
+                    before_hooks=[
+                        self.__hooks_facade.get_before_common_hooks().set_body
+                    ],
+                    action=self.__campaign_ctr.update_product_image1,
+                    after_hooks=[
+                        self.__hooks_facade.get_campaign_after_hooks().format_values_and_categories,
+                        self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images
+                    ]
+                ),
+                'POST /campaigns/{campaign_id}/product-image2': Route(
+                    before_hooks=[
+                        self.__hooks_facade.get_before_common_hooks().set_body
+                    ],
+                    action=self.__campaign_ctr.update_product_image2,
+                    after_hooks=[
+                        self.__hooks_facade.get_campaign_after_hooks().format_values_and_categories,
+                        self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images
+                    ]
+                ),
+                'POST /campaigns/{campaign_id}/product-image3': Route(
+                    before_hooks=[
+                        self.__hooks_facade.get_before_common_hooks().set_body
+                    ],
+                    action=self.__campaign_ctr.update_product_image3,
+                    after_hooks=[
+                        self.__hooks_facade.get_campaign_after_hooks().format_values_and_categories,
+                        self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images
+                    ]
+                )
             }
         )
         routes = {}
