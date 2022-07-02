@@ -234,7 +234,7 @@ class Dispatcher:
 
                 'PUT /brands/me/campaigns/{campaign_id}': self.get_not_implemented_method('PUT /brands/me/campaigns/{campaign_id}'),
 
-                'POST /campaigns/{campaign_id}/product-image1': Route(
+                'POST brands/me/campaigns/{campaign_id}/product-image1': Route(
                     before_hooks=[
                         self.__hooks_facade.get_before_common_hooks().set_body,
                         self.__hooks_facade.get_campaign_before_hooks().validate_id
@@ -245,7 +245,7 @@ class Dispatcher:
                         self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images
                     ]
                 ),
-                'POST /campaigns/{campaign_id}/product-image2': Route(
+                'POST brands/me/campaigns/{campaign_id}/product-image2': Route(
                     before_hooks=[
                         self.__hooks_facade.get_before_common_hooks().set_body,
                         self.__hooks_facade.get_campaign_before_hooks().validate_id
@@ -256,7 +256,7 @@ class Dispatcher:
                         self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images
                     ]
                 ),
-                'POST /campaigns/{campaign_id}/product-image3': Route(
+                'POST brands/me/campaigns/{campaign_id}/product-image3': Route(
                     before_hooks=[
                         self.__hooks_facade.get_before_common_hooks().set_body,
                         self.__hooks_facade.get_campaign_before_hooks().validate_id

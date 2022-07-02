@@ -441,7 +441,7 @@ class TestRoutes(TestCase):
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
 
         # act
-        bootstrap(event={"routeKey": "POST /campaigns/{campaign_id}/product-image1"},
+        bootstrap(event={"routeKey": "POST brands/me/campaigns/{campaign_id}/product-image1"},
                   context={},
                   service_locator=self.__mock_service_locator)
 
@@ -462,7 +462,7 @@ class TestRoutes(TestCase):
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
 
         # act
-        bootstrap(event={"routeKey": "POST /campaigns/{campaign_id}/product-image2"},
+        bootstrap(event={"routeKey": "POST brands/me/campaigns/{campaign_id}/product-image2"},
                   context={},
                   service_locator=self.__mock_service_locator)
 
@@ -483,7 +483,7 @@ class TestRoutes(TestCase):
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
 
         # act
-        bootstrap(event={"routeKey": "POST /campaigns/{campaign_id}/product-image3"},
+        bootstrap(event={"routeKey": "POST brands/me/campaigns/{campaign_id}/product-image3"},
                   context={},
                   service_locator=self.__mock_service_locator)
 

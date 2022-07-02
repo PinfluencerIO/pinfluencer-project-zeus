@@ -3,7 +3,7 @@ from jsonschema.exceptions import ValidationError
 from src.crosscutting import print_exception
 from src.domain.models import Brand, Influencer
 from src.domain.validation import BrandValidator, InfluencerValidator, CampaignValidator
-from src.types import AuthUserRepository, Deserializer
+from src.types import AuthUserRepository, Deserializer, BrandRepository
 from src.web import PinfluencerContext, valid_path_resource_id
 
 S3_URL = "https://pinfluencer-product-images.s3.eu-west-2.amazonaws.com"
@@ -92,8 +92,13 @@ class InfluencerBeforeHooks:
 
 class BrandBeforeHooks:
 
-    def __init__(self, brand_validator: BrandValidator):
+    def __init__(self, brand_validator: BrandValidator,
+                 brand_repository: BrandRepository):
+        self.__brand_repository = brand_repository
         self.__brand_validator = brand_validator
+
+    def validate_auth_brand(self):
+        ...
 
     def validate_uuid(self, context: PinfluencerContext):
         id = valid_path_resource_id(event=context.event, resource_key="brand_id")

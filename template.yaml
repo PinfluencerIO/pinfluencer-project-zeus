@@ -217,7 +217,7 @@ Resources:
           Properties:
             Auth:
               Authorizer: UserAuth
-            Path: /campaigns/{campaign_id}/product-image1
+            Path: brands/me/campaigns/{campaign_id}/product-image1
             Method: post
             ApiId: !Ref PinfluencerHttpApi
         CreateCampaignProductImage2:
@@ -225,7 +225,7 @@ Resources:
           Properties:
             Auth:
               Authorizer: UserAuth
-            Path: /campaigns/{campaign_id}/product-image2
+            Path: brands/me/campaigns/{campaign_id}/product-image2
             Method: post
             ApiId: !Ref PinfluencerHttpApi
         CreateCampaignProductImage3:
@@ -233,7 +233,7 @@ Resources:
           Properties:
             Auth:
               Authorizer: UserAuth
-            Path: /campaigns/{campaign_id}/product-image3
+            Path: brands/me/campaigns/{campaign_id}/product-image3
             Method: post
             ApiId: !Ref PinfluencerHttpApi
         GetAllMyBrandCampaigns:

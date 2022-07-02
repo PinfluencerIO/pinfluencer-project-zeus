@@ -69,7 +69,8 @@ class ServiceLocator:
                            user_before_hooks=UserBeforeHooks(),
                            user_after_hooks=UserAfterHooks(auth_user_repository=self.get_new_auth_user_repository()),
                            influencer_before_hooks=InfluencerBeforeHooks(influencer_validator=self.get_new_influencer_validator()),
-                           brand_before_hooks=BrandBeforeHooks(brand_validator=self.get_new_brand_validator()),
+                           brand_before_hooks=BrandBeforeHooks(brand_validator=self.get_new_brand_validator(),
+                                                               brand_repository=self.get_new_brand_repository()),
                            campaign_before_hooks=CampaignBeforeHooks(campaign_validator=CampaignValidator()),
                            campaign_after_hooks=CampaignAfterHooks())
 

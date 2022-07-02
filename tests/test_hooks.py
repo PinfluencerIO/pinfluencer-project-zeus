@@ -7,7 +7,7 @@ from callee import Captor
 from src.crosscutting import JsonCamelToSnakeCaseDeserializer
 from src.domain.models import User, Brand, Influencer, ValueEnum, CategoryEnum
 from src.domain.validation import InfluencerValidator, BrandValidator, CampaignValidator
-from src.types import AuthUserRepository
+from src.types import AuthUserRepository, BrandRepository
 from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, CommonBeforeHooks, \
     InfluencerBeforeHooks, BrandBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks
@@ -20,8 +20,10 @@ TEST_S3_URL = "https://pinfluencer-product-images.s3.eu-west-2.amazonaws.com"
 class TestBrandBeforeHooks(TestCase):
 
     def setUp(self) -> None:
+        self.__brand_repository: BrandRepository = Mock()
         self.__brand_validator = BrandValidator()
-        self.__sut = BrandBeforeHooks(brand_validator=self.__brand_validator)
+        self.__sut = BrandBeforeHooks(brand_validator=self.__brand_validator,
+                                      brand_repository=self.__brand_repository)
 
     def test_validate_uuid(self):
         # arrange
