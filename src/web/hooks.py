@@ -65,6 +65,13 @@ class CampaignAfterHooks:
             campaign["campaign_values"] = list(map(lambda x: x.name, campaign["campaign_values"]))
             campaign["campaign_categories"] = list(map(lambda x: x.name, campaign["campaign_categories"]))
 
+    def format_campaign_state_collection(self, context: PinfluencerContext):
+        for campaign in context.response.body:
+            campaign["campaign_state"] = campaign["campaign_state"].name
+
+    def format_campaign_state(self, context: PinfluencerContext):
+        context.response.body["campaign_state"] = context.response.body["campaign_state"].name
+
 
 class InfluencerBeforeHooks:
 

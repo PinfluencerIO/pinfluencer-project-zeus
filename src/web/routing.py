@@ -201,7 +201,8 @@ class Dispatcher:
                     action=self.__campaign_ctr.get_for_brand,
                     after_hooks=[
                         self.__hooks_facade.get_campaign_after_hooks().format_values_and_categories_collection,
-                        self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images_collection
+                        self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images_collection,
+                        self.__hooks_facade.get_campaign_after_hooks().format_campaign_state_collection
                     ]
                 ),
 
@@ -215,7 +216,8 @@ class Dispatcher:
                     action=self.__campaign_ctr.get_by_id,
                     after_hooks=[
                         self.__hooks_facade.get_campaign_after_hooks().format_values_and_categories,
-                        self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images
+                        self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images,
+                        self.__hooks_facade.get_campaign_after_hooks().format_campaign_state
                     ]
                 ),
 
@@ -228,12 +230,13 @@ class Dispatcher:
                     action=self.__campaign_ctr.create,
                     after_hooks=[
                         self.__hooks_facade.get_campaign_after_hooks().format_values_and_categories,
-                        self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images
+                        self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images,
+                        self.__hooks_facade.get_campaign_after_hooks().format_campaign_state
                     ]
                 ),
 
-                'PATCH /brands/me/campaigns/{campaign_id}/state': self.get_not_implemented_method(
-                    'PATCH /brands/me/campaigns/{campaign_id}/state'),
+                'PATCH /brands/me/campaigns/{campaign_id}/campaign-state': self.get_not_implemented_method(
+                    'PATCH /brands/me/campaigns/{campaign_id}/campaign-state'),
 
                 'PUT /brands/me/campaigns/{campaign_id}': self.get_not_implemented_method(
                     'PUT /brands/me/campaigns/{campaign_id}'),
@@ -248,7 +251,8 @@ class Dispatcher:
                     action=self.__campaign_ctr.update_product_image1,
                     after_hooks=[
                         self.__hooks_facade.get_campaign_after_hooks().format_values_and_categories,
-                        self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images
+                        self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images,
+                        self.__hooks_facade.get_campaign_after_hooks().format_campaign_state
                     ]
                 ),
                 'POST /brands/me/campaigns/{campaign_id}/product-image2': Route(
@@ -261,7 +265,8 @@ class Dispatcher:
                     action=self.__campaign_ctr.update_product_image2,
                     after_hooks=[
                         self.__hooks_facade.get_campaign_after_hooks().format_values_and_categories,
-                        self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images
+                        self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images,
+                        self.__hooks_facade.get_campaign_after_hooks().format_campaign_state
                     ]
                 ),
                 'POST /brands/me/campaigns/{campaign_id}/product-image3': Route(
@@ -274,7 +279,8 @@ class Dispatcher:
                     action=self.__campaign_ctr.update_product_image3,
                     after_hooks=[
                         self.__hooks_facade.get_campaign_after_hooks().format_values_and_categories,
-                        self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images
+                        self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images,
+                        self.__hooks_facade.get_campaign_after_hooks().format_campaign_state
                     ]
                 )
             }

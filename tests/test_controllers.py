@@ -5,7 +5,7 @@ from unittest.mock import Mock, MagicMock
 from callee import Captor
 
 from src.crosscutting import valid_uuid
-from src.domain.models import Influencer, Campaign, CategoryEnum, ValueEnum
+from src.domain.models import Influencer, Campaign, CategoryEnum, ValueEnum, CampaignStateEnum
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.types import BrandRepository, InfluencerRepository, CampaignRepository
 from src.web import PinfluencerContext, PinfluencerResponse
@@ -470,16 +470,19 @@ class TestCampaignController(TestCase):
             auth_user_id="12341")
         payload_campaign: Campaign = payload_captor.arg
         payload_campaign_dict = payload_campaign.__dict__
+        assert payload_campaign.campaign_state == CampaignStateEnum.DRAFT
         assert payload_campaign.product_image1 == TEST_DEFAULT_PRODUCT_IMAGE1
         assert payload_campaign.product_image2 == TEST_DEFAULT_PRODUCT_IMAGE2
         assert payload_campaign.product_image3 == TEST_DEFAULT_PRODUCT_IMAGE3
         payload_campaign_dict.pop("id")
+        payload_campaign_dict.pop("campaign_state")
         payload_campaign_dict.pop("created")
         payload_campaign_dict.pop("brand_id")
         payload_campaign_dict.pop("product_image1")
         payload_campaign_dict.pop("product_image2")
         payload_campaign_dict.pop("product_image3")
         context.response.body.pop("id")
+        context.response.body.pop("campaign_state")
         context.response.body.pop("created")
         context.response.body.pop("brand_id")
         context.response.body.pop("product_image1")

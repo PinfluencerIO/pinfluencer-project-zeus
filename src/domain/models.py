@@ -81,6 +81,13 @@ class Influencer(User):
     categories: list[CategoryEnum] = field(default_factory=list)
 
 
+class CampaignStateEnum(Enum):
+    DRAFT = "DRAFT",
+    ACTIVE = "ACTIVE",
+    CLOSED = "CLOSED",
+    DELETED = "DELETED"
+
+
 @dataclass
 class Campaign(Model):
     brand_id: str = ""
@@ -90,6 +97,7 @@ class Campaign(Model):
     campaign_description: str = ""
     campaign_categories: list[CategoryEnum] = field(default_factory=list)
     campaign_values: list[ValueEnum] = field(default_factory=list)
+    campaign_state: CampaignStateEnum = CampaignStateEnum.DRAFT
     campaign_product_link: str = ""
     campaign_hashtag: str = ""
     campaign_discount_code: str = ""

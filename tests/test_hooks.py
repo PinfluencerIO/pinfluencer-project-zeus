@@ -5,7 +5,7 @@ from uuid import uuid4
 from callee import Captor
 
 from src.crosscutting import JsonCamelToSnakeCaseDeserializer
-from src.domain.models import User, Brand, Influencer, ValueEnum, CategoryEnum
+from src.domain.models import User, Brand, Influencer, ValueEnum, CategoryEnum, CampaignStateEnum
 from src.domain.validation import InfluencerValidator, BrandValidator, CampaignValidator
 from src.exceptions import NotFoundException
 from src.types import AuthUserRepository, BrandRepository
@@ -499,6 +499,36 @@ class TestCampaignAfterHooks(TestCase):
         assert context.response.body[1]["product_image1"] == f"{TEST_S3_URL}/{image_key4}"
         assert context.response.body[1]["product_image2"] == f"{TEST_S3_URL}/{image_key5}"
         assert context.response.body[1]["product_image3"] == f"{TEST_S3_URL}/{image_key6}"
+
+    def test_format_campaign_state(self):
+
+        # arrange
+        context = context = PinfluencerContext(
+            response=PinfluencerResponse(body={"campaign_state": CampaignStateEnum.DRAFT}))
+
+        # act
+        self.__sut.format_campaign_state(context)
+
+        # assert
+        assert context.response.body["campaign_state"] == "DRAFT"
+
+    def test_format_campaign_state_collection(self):
+        # arrange
+        context = context = PinfluencerContext(
+            response=PinfluencerResponse(body=[
+                {"campaign_state": CampaignStateEnum.DRAFT},
+                {"campaign_state": CampaignStateEnum.ACTIVE},
+                {"campaign_state": CampaignStateEnum.CLOSED}
+            ]))
+
+        # act
+        self.__sut.format_campaign_state_collection(context)
+
+        # assert
+        assert context.response.body[0]["campaign_state"] == "DRAFT"
+        assert context.response.body[1]["campaign_state"] == "ACTIVE"
+        assert context.response.body[2]["campaign_state"] == "CLOSED"
+
 
 class TestUserBeforeHooks(TestCase):
 

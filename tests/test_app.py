@@ -387,7 +387,8 @@ class TestRoutes(TestCase):
                                          self.__campaign_before_hooks.validate_campaign,
                                          self.__mock_campaign_controller.create,
                                          self.__campaign_after_hooks.format_values_and_categories,
-                                         self.__campaign_after_hooks.tag_bucket_url_to_images
+                                         self.__campaign_after_hooks.tag_bucket_url_to_images,
+                                         self.__campaign_after_hooks.format_campaign_state
                                      ])
 
     def test_get_campaign_by_id(self):
@@ -407,7 +408,8 @@ class TestRoutes(TestCase):
                                          self.__campaign_before_hooks.validate_id,
                                          self.__mock_campaign_controller.get_by_id,
                                          self.__campaign_after_hooks.format_values_and_categories,
-                                         self.__campaign_after_hooks.tag_bucket_url_to_images
+                                         self.__campaign_after_hooks.tag_bucket_url_to_images,
+                                         self.__campaign_after_hooks.format_campaign_state
                                      ])
 
     def test_get_auth_brand_campaigns(self):
@@ -427,14 +429,15 @@ class TestRoutes(TestCase):
                                          self.__user_before_hooks.set_auth_user_id,
                                          self.__mock_campaign_controller.get_for_brand,
                                          self.__campaign_after_hooks.format_values_and_categories_collection,
-                                         self.__campaign_after_hooks.tag_bucket_url_to_images_collection
+                                         self.__campaign_after_hooks.tag_bucket_url_to_images_collection,
+                                         self.__campaign_after_hooks.format_campaign_state_collection
                                      ])
 
     def test_update_brand_auth_campaign_by_id(self):
         self.__assert_not_implemented(route="PUT /brands/me/campaigns/{campaign_id}")
 
     def test_update_brand_auth_campaign_state_by_id(self):
-        self.__assert_not_implemented(route="PATCH /brands/me/campaigns/{campaign_id}/state")
+        self.__assert_not_implemented(route="PATCH /brands/me/campaigns/{campaign_id}/campaign-state")
 
     def test_delete_brand_auth_campaign_by_id(self):
         self.__assert_not_implemented(route="DELETE /brands/me/campaigns/{campaign_id}")
@@ -459,7 +462,8 @@ class TestRoutes(TestCase):
                                          self.__brand_before_hooks.validate_auth_brand,
                                          self.__mock_campaign_controller.update_product_image1,
                                          self.__campaign_after_hooks.format_values_and_categories,
-                                         self.__campaign_after_hooks.tag_bucket_url_to_images
+                                         self.__campaign_after_hooks.tag_bucket_url_to_images,
+                                         self.__campaign_after_hooks.format_campaign_state
                                      ])
 
     def test_create_campaign_product_image2(self):
@@ -482,7 +486,8 @@ class TestRoutes(TestCase):
                                          self.__brand_before_hooks.validate_auth_brand,
                                          self.__mock_campaign_controller.update_product_image2,
                                          self.__campaign_after_hooks.format_values_and_categories,
-                                         self.__campaign_after_hooks.tag_bucket_url_to_images
+                                         self.__campaign_after_hooks.tag_bucket_url_to_images,
+                                         self.__campaign_after_hooks.format_campaign_state
                                      ])
 
     def test_create_campaign_product_image3(self):
@@ -505,7 +510,8 @@ class TestRoutes(TestCase):
                                          self.__brand_before_hooks.validate_auth_brand,
                                          self.__mock_campaign_controller.update_product_image3,
                                          self.__campaign_after_hooks.format_values_and_categories,
-                                         self.__campaign_after_hooks.tag_bucket_url_to_images
+                                         self.__campaign_after_hooks.tag_bucket_url_to_images,
+                                         self.__campaign_after_hooks.format_campaign_state
                                      ])
 
     def test_template_matches_routes(self):

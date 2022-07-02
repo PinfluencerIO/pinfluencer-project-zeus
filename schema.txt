@@ -51,3 +51,12 @@ CAMPAIGN:
     campaignDiscountCode:       str
     productTitle:               str
     productDescription:         str
+
+
+CAMPAIGN-STATES:
+
+    DRAFT -> ACTIVE
+    DRAFT -> ACTIVE -> CLOSED
+    DRAFT -> ACTIVE -> CLOSED -> DELETED
+    DRAFT -> ACTIVE -> DRAFT
+
