@@ -429,7 +429,7 @@ def create_campaign_from_db() -> Campaign:
                     )
 
 
-def create_campaign_body() -> dict:
+def create_or_update_campaign_body() -> dict:
     return {
         "objective": "objective1",
         "success_description": "success_description1",
@@ -445,6 +445,23 @@ def create_campaign_body() -> dict:
     }
 
 
+def remove_non_updatable_fields_from_campaign(campaign: dict) -> None:
+    campaign.pop("id")
+    campaign.pop("campaign_state")
+    campaign.pop("created")
+    campaign.pop("brand_id")
+    campaign.pop("product_image1")
+    campaign.pop("product_image2")
+    campaign.pop("product_image3")
+    campaign.pop("campaign_categories")
+    campaign.pop("campaign_values")
+
+
+def remove_non_updatable_fields_from_campaign_body(campaign: dict) -> None:
+    campaign.pop("campaign_categories")
+    campaign.pop("campaign_values")
+
+
 class TestCampaignController(TestCase):
 
     def setUp(self) -> None:
@@ -457,7 +474,7 @@ class TestCampaignController(TestCase):
         context = PinfluencerContext(response=PinfluencerResponse(),
                                      short_circuit=False,
                                      auth_user_id="12341",
-                                     body=create_campaign_body())
+                                     body=create_or_update_campaign_body())
         self.__campaign_repository.write_new_for_brand = MagicMock(return_value=campaign_from_db)
 
         # act
@@ -474,41 +491,26 @@ class TestCampaignController(TestCase):
         assert payload_campaign.product_image1 == TEST_DEFAULT_PRODUCT_IMAGE1
         assert payload_campaign.product_image2 == TEST_DEFAULT_PRODUCT_IMAGE2
         assert payload_campaign.product_image3 == TEST_DEFAULT_PRODUCT_IMAGE3
-        payload_campaign_dict.pop("id")
-        payload_campaign_dict.pop("campaign_state")
-        payload_campaign_dict.pop("created")
-        payload_campaign_dict.pop("brand_id")
-        payload_campaign_dict.pop("product_image1")
-        payload_campaign_dict.pop("product_image2")
-        payload_campaign_dict.pop("product_image3")
-        context.response.body.pop("id")
-        context.response.body.pop("campaign_state")
-        context.response.body.pop("created")
-        context.response.body.pop("brand_id")
-        context.response.body.pop("product_image1")
-        context.response.body.pop("product_image2")
-        context.response.body.pop("product_image3")
+        assert list(map(
+            lambda x: x.name,
+            payload_campaign.campaign_categories)) == create_or_update_campaign_body()["campaign_categories"]
+        assert list(map(
+            lambda x: x.name,
+            payload_campaign.campaign_values)) == create_or_update_campaign_body()["campaign_values"]
+        remove_non_updatable_fields_from_campaign(campaign=payload_campaign_dict)
+        remove_non_updatable_fields_from_campaign(campaign=context.response.body)
+        campaign_body = create_or_update_campaign_body()
+        remove_non_updatable_fields_from_campaign_body(campaign=campaign_body)
         assert context.short_circuit == False
         assert context.response.body == payload_campaign_dict
         assert context.response.status_code == 201
-        assert list(map(
-            lambda x: x.name,
-            payload_campaign.campaign_categories)) == create_campaign_body()["campaign_categories"]
-        assert list(map(
-            lambda x: x.name,
-            payload_campaign.campaign_values)) == create_campaign_body()["campaign_values"]
-        campaign_body = create_campaign_body()
-        campaign_body.pop("campaign_categories")
-        campaign_body.pop("campaign_values")
-        payload_campaign_dict.pop("campaign_categories")
-        payload_campaign_dict.pop("campaign_values")
         assert payload_campaign_dict == campaign_body
 
     def test_write_for_brand_when_brand_not_found(self):
         # arrange
         context = PinfluencerContext(response=PinfluencerResponse(),
                                      auth_user_id="1234",
-                                     body=create_campaign_body())
+                                     body=create_or_update_campaign_body())
         self.__campaign_repository.write_new_for_brand = MagicMock(side_effect=NotFoundException())
 
         # act
@@ -617,3 +619,51 @@ class TestCampaignController(TestCase):
         self.__campaign_repository.update_product_image3.assert_called_once_with(id=context.id,
                                                                                  image_bytes="random_bytes")
         assert context.response.body == expected_campaign.__dict__
+
+    def test_update(self):
+        # arrange
+
+        campaign_body = create_or_update_campaign_body()
+        context = PinfluencerContext(body=campaign_body,
+                                     response=PinfluencerResponse(),
+                                     id="123456",
+                                     short_circuit=False)
+        updated_campaign_in_db = campaign_dto_generator(num=1)
+        updated_campaign_in_db.id = "123456"
+        self.__campaign_repository.update_campaign = MagicMock(return_value=updated_campaign_in_db)
+
+        # act
+        self.__sut.update(context=context)
+
+        # assert
+        captor = Captor()
+        self.__campaign_repository.update_campaign.assert_called_once_with(_id="123456",
+                                                                           payload=captor)
+        actual_payload: Campaign = captor.arg
+        assert context.response.body["id"] == "123456"
+        assert context.response.body["brand_id"] == "brand_id1"
+        assert campaign_body["campaign_values"] == list(map(lambda x: x.name, actual_payload.campaign_values)) == list(map(lambda x: x.name, context.response.body["campaign_values"]))
+        assert campaign_body["campaign_categories"] == list(map(lambda x: x.name, actual_payload.campaign_categories)) == list(map(lambda x: x.name, context.response.body["campaign_categories"]))
+        remove_non_updatable_fields_from_campaign_body(campaign=campaign_body)
+        remove_non_updatable_fields_from_campaign(campaign=context.response.body)
+        actual_payload_dict = actual_payload.__dict__
+        remove_non_updatable_fields_from_campaign(campaign=actual_payload_dict)
+        assert actual_payload_dict == context.response.body == campaign_body
+        assert context.response.status_code == 200
+        assert context.short_circuit == False
+
+    def test_update_when_not_found(self):
+        # arrange
+        context = PinfluencerContext(response=PinfluencerResponse(),
+                                     short_circuit=False,
+                                     body=create_or_update_campaign_body())
+        self.__campaign_repository.update_campaign = MagicMock(side_effect=NotFoundException())
+
+        # act
+        self.__sut.update(context=context)
+
+        # assert
+        assert context.short_circuit == True
+        assert context.response.body == {}
+        assert context.response.status_code == 404
+

@@ -194,6 +194,7 @@ def campaign_dto_generator(num: int) -> Campaign:
                                CategoryEnum.PET]
 
     return Campaign(
+        brand_id=f"brand_id{num}",
         objective=f"objective{num}",
         success_description=f"success_description{num}",
         campaign_title=f"campaign_title{num}",

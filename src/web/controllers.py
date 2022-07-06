@@ -276,6 +276,29 @@ class CampaignController(BaseController):
             context.response.body = {}
             context.short_circuit = True
 
+    def update(self, context: PinfluencerContext) -> None:
+        try:
+            campaign = self._repository.update_campaign(_id=context.id, payload=Campaign(
+                objective=context.body["objective"],
+                success_description=context.body["success_description"],
+                campaign_title=context.body["campaign_title"],
+                campaign_description=context.body["campaign_description"],
+                campaign_categories=list(map(lambda x: CategoryEnum[x], context.body["campaign_categories"])),
+                campaign_values=list(map(lambda x: ValueEnum[x], context.body["campaign_values"])),
+                campaign_product_link=context.body["campaign_product_link"],
+                campaign_hashtag=context.body["campaign_hashtag"],
+                campaign_discount_code=context.body["campaign_discount_code"],
+                product_title=context.body["product_title"],
+                product_description=context.body["product_description"]
+            ))
+            context.response.body = campaign.__dict__
+            context.response.status_code = 200
+        except NotFoundException as e:
+            print_exception(e)
+            context.response.body = {}
+            context.response.status_code = 404
+            context.short_circuit = True
+
     def update_product_image1(self, context: PinfluencerContext) -> None:
         [response, short_circuit] = self._update_image(context=context,
                                                        updater=self.product_image1_updater,
