@@ -4,7 +4,7 @@ from mapper.object_mapper import ObjectMapper
 
 from src.data.entities import create_mappings, SqlAlchemyBrandEntity, SqlAlchemyInfluencerEntity, \
     SqlAlchemyCampaignEntity
-from src.domain.models import Brand, Influencer, Campaign
+from src.domain.models import Brand, Influencer, Campaign, CampaignStateEnum
 from tests import brand_dto_generator, get_entity_dict, influencer_dto_generator, assert_brand_db_fields_are_equal, \
     assert_influencer_db_fields_are_equal, campaign_dto_generator, assert_campaign_db_fields_are_equal
 
@@ -71,6 +71,7 @@ class TestCampaignMappings(TestMappings):
     def test_map_campaign_to_campaign_entity(self):
         # arrange
         campaign = campaign_dto_generator(num=1)
+        campaign.campaign_state = CampaignStateEnum.CLOSED
 
         # act
         campaign_entity = self._mapper.map(from_obj=campaign, to_type=SqlAlchemyCampaignEntity)
@@ -83,6 +84,7 @@ class TestCampaignMappings(TestMappings):
     def test_map_campaign_entity_to_campaign(self):
         # arrange
         campaign = campaign_dto_generator(num=1)
+        campaign.campaign_state = CampaignStateEnum.ACTIVE
 
         # act
         campaign_entity = self._mapper.map(from_obj=campaign, to_type=SqlAlchemyCampaignEntity)

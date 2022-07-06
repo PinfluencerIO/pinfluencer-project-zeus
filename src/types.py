@@ -1,6 +1,6 @@
 from typing import Protocol, Optional, Union
 
-from src.domain.models import Brand, Influencer, User, Campaign
+from src.domain.models import Brand, Influencer, User, Campaign, CampaignStateEnum
 
 
 class AuthUserRepository(Protocol):
@@ -40,6 +40,9 @@ class CampaignRepository(Protocol):
         ...
 
     def update_campaign(self, _id: str, payload: Campaign) -> Campaign:
+        ...
+
+    def update_campaign_state(self, _id: str, payload: CampaignStateEnum) -> Campaign:
         ...
 
 

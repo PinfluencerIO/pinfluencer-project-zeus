@@ -6,7 +6,7 @@ from mapper.object_mapper import ObjectMapper
 
 from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository, CognitoAuthUserRepository, \
     CognitoAuthService, SqlAlchemyCampaignRepository
-from src.domain.models import Campaign
+from src.domain.models import Campaign, CampaignStateEnum
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.types import ImageRepository
 from tests import InMemorySqliteDataManager, brand_generator, brand_dto_generator, TEST_DEFAULT_BRAND_LOGO, \
@@ -520,6 +520,29 @@ class TestCampaignRepository(TestCase):
     def test_update_campaign_when_not_found(self):
         self.assertRaises(NotFoundException, lambda: self.__sut.update_campaign(_id="1234",
                                                                                 payload=campaign_dto_generator(num=1)))
+
+    def test_update_campaign_state(self):
+        # arrange
+        campaign_in_db = campaign_dto_generator(num=1)
+        campaign_in_db.id = "12345"
+        campaign_in_db.campaign_state = CampaignStateEnum.DRAFT
+        self.__data_manager.create_fake_data([campaign_generator(dto=campaign_in_db,
+                                                                 mapper=self.__object_mapper)])
+
+        # act
+        returned_campaign = self.__sut.update_campaign_state(_id="12345",
+                                                             payload=CampaignStateEnum.ACTIVE)
+        queried_campaign = self.__sut.load_by_id(id_=campaign_in_db.id)
+
+        # arrange
+        assert returned_campaign.campaign_state == CampaignStateEnum.ACTIVE == queried_campaign.campaign_state
+        del returned_campaign.campaign_state
+        del campaign_in_db.campaign_state
+        assert returned_campaign == campaign_in_db
+
+    def test_update_campaign_state_when_not_found(self):
+        self.assertRaises(NotFoundException, lambda: self.__sut.update_campaign_state(_id="123456",
+                                         payload=CampaignStateEnum.DELETED))
 
     def __delete_fields_that_arent_updatable(self, campaign: Campaign):
         del campaign.brand_id

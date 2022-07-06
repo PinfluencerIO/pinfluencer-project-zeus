@@ -10,7 +10,7 @@ from filetype import filetype
 
 from src.data.entities import SqlAlchemyBrandEntity, SqlAlchemyInfluencerEntity, create_mappings, \
     SqlAlchemyCampaignEntity
-from src.domain.models import Brand, Influencer, Campaign
+from src.domain.models import Brand, Influencer, Campaign, CampaignStateEnum
 from src.domain.models import User as UserModel
 from src.exceptions import AlreadyExistsException, ImageException, NotFoundException
 from src.types import DataManager, ImageRepository, Model, User, ObjectMapperAdapter
@@ -312,6 +312,19 @@ class SqlAlchemyCampaignRepository(BaseSqlAlchemyRepository):
             return self._object_mapper.map(from_obj=campaign, to_type=Campaign)
         else:
             raise NotFoundException(f"{self._resource_dto.__name__}||{_id} not found")
+
+    def update_campaign_state(self, _id: str, payload: CampaignStateEnum) -> Campaign:
+        campaign: SqlAlchemyCampaignEntity = self._data_manager\
+            .session\
+            .query(SqlAlchemyCampaignEntity)\
+            .filter(SqlAlchemyCampaignEntity.id == _id)\
+            .first()
+        if campaign is not None:
+            campaign.campaign_state = payload
+            self._data_manager.session.commit()
+            return self._object_mapper.map(from_obj=campaign, to_type=Campaign)
+        else:
+            raise NotFoundException(f"cannot find campaign {_id}")
 
 
 class S3ImageRepository:

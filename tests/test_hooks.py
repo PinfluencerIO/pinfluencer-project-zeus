@@ -112,7 +112,7 @@ class TestBrandBeforeHooks(TestCase):
         # assert
         assert context.short_circuit == True
         assert context.response.body == {}
-        assert context.response.status_code == 400
+        assert context.response.status_code == 404
 
 
 class TestInfluencerBeforeHooks(TestCase):

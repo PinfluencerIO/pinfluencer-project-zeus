@@ -331,7 +331,8 @@ def campaign_db_fields():
         "campaign_hashtag",
         "campaign_discount_code",
         "product_title",
-        "product_description"
+        "product_description",
+        "campaign_state"
     ]
 
 

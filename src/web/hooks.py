@@ -111,7 +111,7 @@ class BrandBeforeHooks:
         except NotFoundException as e:
             print_exception(e)
             context.short_circuit = True
-            context.response.status_code = 400
+            context.response.status_code = 404
             context.body = {}
 
     def validate_uuid(self, context: PinfluencerContext):
