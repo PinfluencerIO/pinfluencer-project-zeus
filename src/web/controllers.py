@@ -2,7 +2,7 @@ from typing import Callable
 
 from src.crosscutting import print_exception
 from src.data import DEFAULT_CAMPAIGN_PRODUCT_IMAGE1, DEFAULT_CAMPAIGN_PRODUCT_IMAGE2, DEFAULT_CAMPAIGN_PRODUCT_IMAGE3
-from src.domain.models import ValueEnum, CategoryEnum, Brand, Influencer, Campaign
+from src.domain.models import ValueEnum, CategoryEnum, Brand, Influencer, Campaign, CampaignStateEnum
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.types import BrandRepository, UserRepository, InfluencerRepository, Repository
 from src.web import PinfluencerResponse, BRAND_ID_PATH_KEY, INFLUENCER_ID_PATH_KEY, PinfluencerContext
@@ -298,6 +298,21 @@ class CampaignController(BaseController):
             context.response.body = {}
             context.response.status_code = 404
             context.short_circuit = True
+
+    def update_campaign_state(self, context: PinfluencerContext) -> None:
+        try:
+            campaign = self\
+                ._repository\
+                .update_campaign_state(_id=context.id,
+                                       payload=CampaignStateEnum[context.body["campaign_state"]])
+            context.response.body = campaign.__dict__
+            context.response.status_code = 200
+        except NotFoundException as e:
+            print_exception(e)
+            context.response.body = {}
+            context.response.status_code = 404
+            context.short_circuit = True
+
 
     def update_product_image1(self, context: PinfluencerContext) -> None:
         [response, short_circuit] = self._update_image(context=context,

@@ -667,3 +667,43 @@ class TestCampaignController(TestCase):
         assert context.response.body == {}
         assert context.response.status_code == 404
 
+    def test_update_campaign_state(self):
+        # arrange
+        context = PinfluencerContext(id="123456",
+                                     response=PinfluencerResponse(),
+                                     short_circuit=False,
+                                     body={
+                                         "campaign_state": "ACTIVE"
+                                     })
+        campaign = campaign_dto_generator(num=1)
+        campaign.campaign_state = CampaignStateEnum.ACTIVE
+        campaign.id = "123456"
+        self.__campaign_repository.update_campaign_state = MagicMock(return_value=campaign)
+
+        # act
+        self.__sut.update_campaign_state(context=context)
+
+        # assert
+        self.__campaign_repository.update_campaign_state.assert_called_once_with(_id="123456",
+                                                                                 payload=CampaignStateEnum.ACTIVE)
+        assert context.response.body == campaign.__dict__
+        assert context.response.status_code == 200
+        assert context.short_circuit == False
+
+    def test_update_campaign_state_when_not_found(self):
+        # arrange
+        context = PinfluencerContext(id="123456",
+                                     response=PinfluencerResponse(),
+                                     short_circuit=False,
+                                     body={
+                                         "campaign_state": "ACTIVE"
+                                     })
+        self.__campaign_repository.update_campaign_state = MagicMock(side_effect=NotFoundException())
+
+        # act
+        self.__sut.update_campaign_state(context=context)
+
+        # assert
+        assert context.response.body == {}
+        assert context.response.status_code == 404
+        assert context.short_circuit == True
