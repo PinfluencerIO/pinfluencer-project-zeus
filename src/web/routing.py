@@ -235,8 +235,20 @@ class Dispatcher:
                     ]
                 ),
 
-                'PATCH /brands/me/campaigns/{campaign_id}/campaign-state': self.get_not_implemented_method(
-                    'PATCH /brands/me/campaigns/{campaign_id}/campaign-state'),
+                'PATCH /brands/me/campaigns/{campaign_id}': Route(
+                    before_hooks=[
+                        self.__hooks_facade.get_before_common_hooks().set_body,
+                        self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
+                        self.__hooks_facade.get_campaign_before_hooks().validate_id,
+                        self.__hooks_facade.get_brand_before_hooks().validate_auth_brand
+                    ],
+                    action=self.__campaign_ctr.update_campaign_state,
+                    after_hooks=[
+                        self.__hooks_facade.get_campaign_after_hooks().format_values_and_categories,
+                        self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images,
+                        self.__hooks_facade.get_campaign_after_hooks().format_campaign_state
+                    ]
+                ),
 
                 'PUT /brands/me/campaigns/{campaign_id}': Route(
                     before_hooks=[

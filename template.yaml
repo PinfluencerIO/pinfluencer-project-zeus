@@ -257,7 +257,7 @@ Resources:
           Properties:
             Auth:
               Authorizer: UserAuth
-            Path: /brands/me/campaigns/{campaign_id}/campaign-state
+            Path: /brands/me/campaigns/{campaign_id}
             Method: patch
             ApiId: !Ref PinfluencerHttpApi
         DeleteMyCampaignById:
