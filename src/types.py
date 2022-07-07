@@ -98,18 +98,6 @@ Repository = Union[BrandRepository,
 UserRepository = Union[BrandRepository, InfluencerRepository]
 
 
-class InfluencerValidatable(Protocol):
-
-    def validate_influencer(self, payload: dict) -> None:
-        ...
-
-
-class BrandValidatable(Protocol):
-
-    def validate_brand(self, payload: dict) -> None:
-        ...
-
-
 class Queryable(Protocol):
 
     def filter(self, filter) -> 'Queryable':
