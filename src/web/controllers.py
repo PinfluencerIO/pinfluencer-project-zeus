@@ -1,7 +1,6 @@
 from typing import Callable
 
 from src.crosscutting import print_exception
-from src.data import DEFAULT_CAMPAIGN_PRODUCT_IMAGE1, DEFAULT_CAMPAIGN_PRODUCT_IMAGE2, DEFAULT_CAMPAIGN_PRODUCT_IMAGE3
 from src.domain.models import ValueEnum, CategoryEnum, Brand, Influencer, Campaign, CampaignStateEnum
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.types import BrandRepository, UserRepository, InfluencerRepository, Repository
@@ -251,10 +250,7 @@ class CampaignController(BaseController):
                 campaign_hashtag=context.body["campaign_hashtag"],
                 campaign_discount_code=context.body["campaign_discount_code"],
                 product_title=context.body["product_title"],
-                product_description=context.body["product_description"],
-                product_image1=DEFAULT_CAMPAIGN_PRODUCT_IMAGE1,
-                product_image2=DEFAULT_CAMPAIGN_PRODUCT_IMAGE2,
-                product_image3=DEFAULT_CAMPAIGN_PRODUCT_IMAGE3,
+                product_description=context.body["product_description"]
             ), auth_user_id=context.auth_user_id)
             context.response.body = campaign.__dict__
             context.response.status_code = 201

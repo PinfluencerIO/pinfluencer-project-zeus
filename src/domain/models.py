@@ -3,8 +3,6 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 
-from src.data import DEFAULT_BRAND_HEADER_IMAGE, DEFAULT_BRAND_LOGO, DEFAULT_INFLUENCER_PROFILE_IMAGE
-
 
 def uuid4_str():
     return str(uuid.uuid4())
@@ -55,8 +53,8 @@ class Brand(User):
     brand_name: str = ""
     brand_description: str = ""
     website: str = ""
-    logo: str = DEFAULT_BRAND_LOGO
-    header_image: str = DEFAULT_BRAND_HEADER_IMAGE
+    logo: str = None
+    header_image: str = None
     insta_handle: str = ""
     values: list[ValueEnum] = field(default_factory=list)
     categories: list[CategoryEnum] = field(default_factory=list)
@@ -67,7 +65,7 @@ class Influencer(User):
     insta_handle: str = ""
     website: str = ""
     bio: str = ""
-    image: str = DEFAULT_INFLUENCER_PROFILE_IMAGE
+    image: str = None
     audience_age_13_to_17_split: float = 0.0
     audience_age_18_to_24_split: float = 0.0
     audience_age_25_to_34_split: float = 0.0
@@ -103,6 +101,6 @@ class Campaign(Model):
     campaign_discount_code: str = ""
     product_title: str = ""
     product_description: str = ""
-    product_image1: str = ""
-    product_image2: str = ""
-    product_image3: str = ""
+    product_image1: str = None
+    product_image2: str = None
+    product_image3: str = None

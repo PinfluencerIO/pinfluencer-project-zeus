@@ -9,8 +9,7 @@ from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluence
 from src.domain.models import Campaign, CampaignStateEnum
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.types import ImageRepository
-from tests import InMemorySqliteDataManager, brand_generator, brand_dto_generator, TEST_DEFAULT_BRAND_LOGO, \
-    TEST_DEFAULT_BRAND_HEADER_IMAGE, TEST_DEFAULT_INFLUENCER_PROFILE_IMAGE, influencer_dto_generator, \
+from tests import InMemorySqliteDataManager, brand_generator, brand_dto_generator, influencer_dto_generator, \
     assert_brand_updatable_fields_are_equal_for_three, assert_brand_db_fields_are_equal, \
     assert_collection_brand_db_fields_are_equal, assert_brand_db_fields_are_equal_for_three, influencer_generator, \
     assert_influencer_db_fields_are_equal_for_three, campaign_dto_generator, campaign_generator
@@ -119,8 +118,7 @@ class TestBrandRepository(BrandRepositoryTestCase):
         actual = self._sut.load_by_id(id_=expected.id)
 
         # assert
-        assert actual.logo == TEST_DEFAULT_BRAND_LOGO
-        assert actual.header_image == TEST_DEFAULT_BRAND_HEADER_IMAGE
+        assert actual.id == expected.id
 
     def test_update_for_auth_user(self):
         # arrange
@@ -212,7 +210,7 @@ class TestInfluencerRepository(TestCase):
         actual = self.__sut.load_by_id(id_=expected.id)
 
         # assert
-        assert actual.image == TEST_DEFAULT_INFLUENCER_PROFILE_IMAGE == returned_influencer.image
+        assert actual.id == expected.id == returned_influencer.id
 
     def test_update_profile_image(self):
         # arrange

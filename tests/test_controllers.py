@@ -10,14 +10,12 @@ from src.exceptions import AlreadyExistsException, NotFoundException
 from src.types import BrandRepository, InfluencerRepository, CampaignRepository
 from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.controllers import BrandController, InfluencerController, CampaignController
-from tests import brand_dto_generator, assert_brand_updatable_fields_are_equal, TEST_DEFAULT_BRAND_LOGO, \
-    TEST_DEFAULT_BRAND_HEADER_IMAGE, influencer_dto_generator, RepoEnum, \
-    assert_brand_creatable_generated_fields_are_equal, TEST_DEFAULT_INFLUENCER_PROFILE_IMAGE, \
-    assert_influencer_creatable_generated_fields_are_equal, assert_influencer_update_fields_are_equal, \
+from tests import brand_dto_generator, assert_brand_updatable_fields_are_equal, influencer_dto_generator, RepoEnum, \
+    assert_brand_creatable_generated_fields_are_equal, assert_influencer_creatable_generated_fields_are_equal, \
+    assert_influencer_update_fields_are_equal, \
     update_brand_payload, create_brand_dto, \
     update_image_payload, update_brand_return_dto, create_influencer_dto, \
-    update_influencer_payload, TEST_DEFAULT_PRODUCT_IMAGE1, TEST_DEFAULT_PRODUCT_IMAGE2, \
-    TEST_DEFAULT_PRODUCT_IMAGE3, campaign_dto_generator
+    update_influencer_payload, campaign_dto_generator
 
 
 class TestInfluencerController(TestCase):
@@ -92,7 +90,7 @@ class TestInfluencerController(TestCase):
                                                                                      payload=payload_captor)
         actual_payload: Influencer = payload_captor.arg
         assert valid_uuid(actual_payload.id)
-        assert actual_payload.image == TEST_DEFAULT_INFLUENCER_PROFILE_IMAGE
+        assert actual_payload.image is None
         assert_influencer_creatable_generated_fields_are_equal(expected_payload, actual_payload.__dict__)
         assert response.status_code == 201
         assert response.body == actual_payload.__dict__
@@ -283,8 +281,8 @@ class TestBrandController(TestCase):
                                                                                 payload=payload_captor)
         actual_payload = payload_captor.arg
         assert valid_uuid(actual_payload.id)
-        assert actual_payload.logo == TEST_DEFAULT_BRAND_LOGO
-        assert actual_payload.header_image == TEST_DEFAULT_BRAND_HEADER_IMAGE
+        assert actual_payload.logo is None
+        assert actual_payload.header_image is None
         assert_brand_creatable_generated_fields_are_equal(expected_payload, actual_payload.__dict__)
         assert response.status_code == 201
         assert response.body == actual_payload.__dict__
@@ -488,9 +486,9 @@ class TestCampaignController(TestCase):
         payload_campaign: Campaign = payload_captor.arg
         payload_campaign_dict = payload_campaign.__dict__
         assert payload_campaign.campaign_state == CampaignStateEnum.DRAFT
-        assert payload_campaign.product_image1 == TEST_DEFAULT_PRODUCT_IMAGE1
-        assert payload_campaign.product_image2 == TEST_DEFAULT_PRODUCT_IMAGE2
-        assert payload_campaign.product_image3 == TEST_DEFAULT_PRODUCT_IMAGE3
+        assert payload_campaign.product_image1 is None
+        assert payload_campaign.product_image2 is None
+        assert payload_campaign.product_image3 is None
         assert list(map(
             lambda x: x.name,
             payload_campaign.campaign_categories)) == create_or_update_campaign_body()["campaign_categories"]
