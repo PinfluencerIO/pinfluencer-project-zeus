@@ -45,6 +45,7 @@ class SqlAlchemyInfluencerEntity(Base, SqlAlchemyBaseUserEntity):
     audience_male_split = Column(type_=Float, nullable=True)
     audience_female_split = Column(type_=Float, nullable=True)
     insta_handle = Column(type_=String(length=30), nullable=True)
+    address = Column(type_=String(length=500), nullable=True)
     values = Column(type_=PickleType, nullable=False)
     categories = Column(type_=PickleType, nullable=False)
 

@@ -77,6 +77,7 @@ class Influencer(User):
     audience_female_split: float = 0.0
     values: list[ValueEnum] = field(default_factory=list)
     categories: list[CategoryEnum] = field(default_factory=list)
+    address: str = ""
 
 
 class CampaignStateEnum(Enum):

@@ -136,6 +136,7 @@ def influencer_dto_generator(num, repo: RepoEnum = RepoEnum.NO_REPO):
     audience_age_65_plus_split = 0.15
     audience_male_split = 0.75
     audience_female_split = 0.25
+    address = f"address{num}"
     if repo == RepoEnum.STD_REPO:
         first_name = ''
         last_name = ''
@@ -156,6 +157,7 @@ def influencer_dto_generator(num, repo: RepoEnum = RepoEnum.NO_REPO):
         audience_age_65_plus_split = 0.0
         audience_male_split = 0.0
         audience_female_split = 0.0
+        address = ""
     return Influencer(
         first_name=first_name,
         last_name=last_name,
@@ -174,7 +176,8 @@ def influencer_dto_generator(num, repo: RepoEnum = RepoEnum.NO_REPO):
         audience_age_55_to_64_split=audience_age_55_to_64_split,
         audience_age_65_plus_split=audience_age_65_plus_split,
         audience_male_split=audience_male_split,
-        audience_female_split=audience_female_split
+        audience_female_split=audience_female_split,
+        address=address
     )
 
 
@@ -351,7 +354,8 @@ def influencer_db_fields():
             'audience_female_split',
             'insta_handle',
             'values',
-            'categories']
+            'categories',
+            'address']
 
 
 def influencer_update_db_fields():
@@ -366,7 +370,8 @@ def influencer_update_db_fields():
             'audience_age_65_plus_split',
             'audience_male_split',
             'audience_female_split',
-            'insta_handle']
+            'insta_handle',
+            'address']
 
 
 def assert_brand_db_fields_are_equal(brand1: dict, brand2: dict):
@@ -548,5 +553,6 @@ def update_influencer_payload():
         "audience_age_35_to_44_split": 0.142,
         "audience_age_45_to_54_split": 0.142,
         "audience_age_55_to_64_split": 0.142,
-        "audience_age_65_plus_split": 0.143
+        "audience_age_65_plus_split": 0.143,
+        "address": "69 beans road"
     }
