@@ -158,7 +158,8 @@ class InfluencerController(BaseUserController):
                                     audience_age_35_to_44_split=payload_dict["audience_age_35_to_44_split"],
                                     audience_age_45_to_54_split=payload_dict["audience_age_45_to_54_split"],
                                     audience_age_55_to_64_split=payload_dict["audience_age_55_to_64_split"],
-                                    audience_age_65_plus_split=payload_dict["audience_age_65_plus_split"])
+                                    audience_age_65_plus_split=payload_dict["audience_age_65_plus_split"],
+                                    address=payload_dict["address"])
             self._repository.write_new_for_auth_user(auth_user_id=auth_user_id, payload=influencer)
         except (AlreadyExistsException) as e:
             print_exception(e)
@@ -220,7 +221,8 @@ class InfluencerController(BaseUserController):
                                                                                                "values"])),
                                                                            categories=list(
                                                                                map(lambda x: CategoryEnum[x],
-                                                                                   payload_dict["categories"]))
+                                                                                   payload_dict["categories"])),
+                                                                           address=payload_dict["address"]
                                                                        ))
             context.response.status_code = 200
             context.response.body = influencer_from_db.__dict__
