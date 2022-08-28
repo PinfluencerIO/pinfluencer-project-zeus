@@ -11,11 +11,63 @@ from src.exceptions import NotFoundException
 from src.types import AuthUserRepository, BrandRepository
 from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, CommonBeforeHooks, \
-    InfluencerBeforeHooks, BrandBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks
+    InfluencerBeforeHooks, BrandBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, CommonAfterHooks
 from tests import brand_dto_generator, RepoEnum, get_auth_user_event, create_for_auth_user_event, get_brand_id_event, \
     get_influencer_id_event, get_campaign_id_event
 
 TEST_S3_URL = "https://pinfluencer-product-images.s3.eu-west-2.amazonaws.com"
+
+
+class TestCommonAfterHooks(TestCase):
+
+    def setUp(self) -> None:
+        self.__sut = CommonAfterHooks()
+
+    def test_set_image_url(self):
+        # arrange
+        path = "image_path"
+        context = PinfluencerContext(response=PinfluencerResponse(body={
+            "image": path
+        }))
+
+        # act
+        self.__sut.set_image_url(context=context,
+                                 image_fields=["image"])
+
+        # assert
+        assert context.response.body["image"] == f'{TEST_S3_URL}/{path}'
+
+    def test_set_image_url_for_collection(self):
+        # arrange
+        path = "image_path"
+        path2 = "image_path2"
+        context = PinfluencerContext(response=PinfluencerResponse(body=[
+            {"image": path},
+            {"image": path2}
+        ]))
+
+        # act
+        self.__sut.set_image_url(context=context,
+                                 image_fields=["image"],
+                                 collection=True)
+
+        # assert
+        assert context.response.body[0]["image"] == f'{TEST_S3_URL}/{path}'
+        assert context.response.body[1]["image"] == f'{TEST_S3_URL}/{path2}'
+
+    def test_set_image_url_where_image_is_none(self):
+        # arrange
+        path = None
+        context = PinfluencerContext(response=PinfluencerResponse(body={
+            "image": path
+        }))
+
+        # act
+        self.__sut.set_image_url(context=context,
+                                 image_fields=["image"])
+
+        # assert
+        assert context.response.body["image"] is None
 
 
 class TestBrandBeforeHooks(TestCase):
@@ -85,7 +137,6 @@ class TestBrandBeforeHooks(TestCase):
         assert context.response.body == {}
 
     def test_validate_auth_brand(self):
-
         # arrange
         self.__brand_repository.load_for_auth_user = MagicMock()
         context = PinfluencerContext(auth_user_id="1234",
@@ -212,7 +263,6 @@ class TestCampaignBeforeHooks(TestCase):
         assert context.response.body == {}
 
     def test_validate_id(self):
-
         # arrange
         id = str(uuid4())
         context = PinfluencerContext(event=get_campaign_id_event(campaign_id=id),
@@ -239,6 +289,7 @@ class TestCampaignBeforeHooks(TestCase):
         assert context.short_circuit == True
         assert context.response.status_code == 400
         assert context.response.body == {}
+
 
 class TestCommonHooks(TestCase):
 
@@ -267,7 +318,9 @@ class TestBrandAfterHooks(TestCase):
 
     def setUp(self) -> None:
         self.__auth_user_repository: AuthUserRepository = Mock()
-        self.__sut = BrandAfterHooks(auth_user_repository=self.__auth_user_repository)
+        self.__common_after_hooks: CommonAfterHooks = Mock()
+        self.__sut = BrandAfterHooks(auth_user_repository=self.__auth_user_repository,
+                                     common_after_common_hooks=self.__common_after_hooks)
 
     def test_set_brand_claims(self):
         # arrange
@@ -298,48 +351,40 @@ class TestBrandAfterHooks(TestCase):
 
     def test_tag_bucket_url_to_images(self):
         # arrange
-        image_key1 = "path1"
-        image_key2 = "path2"
-        context = PinfluencerContext(response=PinfluencerResponse(body={
-            "header_image": image_key1,
-            "logo": image_key2
-        }))
+        self.__common_after_hooks.set_image_url = MagicMock()
+        context = PinfluencerContext()
 
         # act
         self.__sut.tag_bucket_url_to_images(context=context)
 
         # assert
-        assert context.response.body["header_image"] == f"{TEST_S3_URL}/{image_key1}"
-        assert context.response.body["logo"] == f"{TEST_S3_URL}/{image_key2}"
+        self.__common_after_hooks.set_image_url.assert_called_once_with(context=context,
+                                                                        image_fields=["header_image",
+                                                                                      "logo"],
+                                                                        collection=False)
 
     def test_tag_bucket_url_to_images_collection(self):
         # arrange
-        image_key1 = "path1"
-        image_key2 = "path2"
-        image_key3 = "path3"
-        image_key4 = "path4"
-        context = PinfluencerContext(response=PinfluencerResponse(body=[
-            {"header_image": image_key1,
-             "logo": image_key2},
-            {"header_image": image_key3,
-             "logo": image_key4}
-        ]))
+        self.__common_after_hooks.set_image_url = MagicMock()
+        context = PinfluencerContext()
 
         # act
         self.__sut.tag_bucket_url_to_images_collection(context=context)
 
         # assert
-        assert context.response.body[0]["header_image"] == f"{TEST_S3_URL}/{image_key1}"
-        assert context.response.body[0]["logo"] == f"{TEST_S3_URL}/{image_key2}"
-        assert context.response.body[1]["header_image"] == f"{TEST_S3_URL}/{image_key3}"
-        assert context.response.body[1]["logo"] == f"{TEST_S3_URL}/{image_key4}"
+        self.__common_after_hooks.set_image_url.assert_called_once_with(context=context,
+                                                                        image_fields=["header_image",
+                                                                                      "logo"],
+                                                                        collection=True)
 
 
 class TestInfluencerAfterHooks(TestCase):
 
     def setUp(self) -> None:
         self.__auth_user_repository: AuthUserRepository = Mock()
-        self.__sut = InfluencerAfterHooks(auth_user_repository=self.__auth_user_repository)
+        self.__common_after_hooks: CommonAfterHooks = Mock()
+        self.__sut = InfluencerAfterHooks(auth_user_repository=self.__auth_user_repository,
+                                          common_after_hooks=self.__common_after_hooks)
 
     def test_set_brand_claims(self):
         # arrange
@@ -370,63 +415,53 @@ class TestInfluencerAfterHooks(TestCase):
 
     def test_tag_bucket_url_to_images(self):
         # arrange
-        image_key = "path"
-        context = PinfluencerContext(response=PinfluencerResponse(body={
-            "image": image_key
-        }))
+        self.__common_after_hooks.set_image_url = MagicMock()
+        context = PinfluencerContext()
 
         # act
         self.__sut.tag_bucket_url_to_images(context=context)
 
         # assert
-        assert context.response.body["image"] == f"{TEST_S3_URL}/{image_key}"
+        self.__common_after_hooks.set_image_url.assert_called_once_with(context=context,
+                                                                        image_fields=["image"],
+                                                                        collection=False)
 
     def test_tag_bucket_url_to_images_collection(self):
         # arrange
-        image_key = "path1"
-        image_key2 = "path2"
-        image_key3 = "path3"
-        context = PinfluencerContext(response=PinfluencerResponse(body=[
-            {"image": image_key},
-            {"image": image_key2},
-            {"image": image_key3}
-        ]))
+        self.__common_after_hooks.set_image_url = MagicMock()
+        context = PinfluencerContext()
 
         # act
         self.__sut.tag_bucket_url_to_images_collection(context=context)
 
         # assert
-        assert context.response.body[0]["image"] == f"{TEST_S3_URL}/{image_key}"
-        assert context.response.body[1]["image"] == f"{TEST_S3_URL}/{image_key2}"
-        assert context.response.body[2]["image"] == f"{TEST_S3_URL}/{image_key3}"
+        self.__common_after_hooks.set_image_url.assert_called_once_with(context=context,
+                                                                        image_fields=["image"],
+                                                                        collection=True)
 
 
 class TestCampaignAfterHooks(TestCase):
 
     def setUp(self) -> None:
-        self.__sut = CampaignAfterHooks()
+        self.__common_after_hooks: CommonAfterHooks = Mock()
+        self.__sut = CampaignAfterHooks(common_after_hooks=self.__common_after_hooks)
 
     def test_tag_bucket_url_to_images(self):
         # arrange
-        image_key = "path1"
-        image_key2 = "path2"
-        image_key3 = "path3"
-        context = PinfluencerContext(response=PinfluencerResponse(body={
-            "product_image1": image_key,
-            "product_image2": image_key2,
-            "product_image3": image_key3
-        }))
+        self.__common_after_hooks.set_image_url = MagicMock()
+        context = PinfluencerContext()
 
         # act
         self.__sut.tag_bucket_url_to_images(context=context)
 
         # assert
-        assert context.response.body["product_image1"] == f"{TEST_S3_URL}/{image_key}"
-        assert context.response.body["product_image2"] == f"{TEST_S3_URL}/{image_key2}"
-        assert context.response.body["product_image3"] == f"{TEST_S3_URL}/{image_key3}"
+        self.__common_after_hooks.set_image_url.assert_called_once_with(context=context,
+                                                                        image_fields=["product_image1",
+                                                                                      "product_image2",
+                                                                                      "product_image3"],
+                                                                        collection=False)
 
     def test_format_values_and_categories(self):
-
         # arrange
         expected_values = ["VALUE9", "VALUE8", "VALUE7"]
         expected_categories = ["PET", "FASHION", "FITNESS"]
@@ -470,38 +505,20 @@ class TestCampaignAfterHooks(TestCase):
 
     def test_tag_bucket_url_to_images_collection(self):
         # arrange
-        image_key = "path1"
-        image_key2 = "path2"
-        image_key3 = "path3"
-        image_key4 = "path4"
-        image_key5 = "path5"
-        image_key6 = "path6"
-        context = PinfluencerContext(response=PinfluencerResponse(body=[
-            {
-                "product_image1": image_key,
-                "product_image2": image_key2,
-                "product_image3": image_key3
-            },
-            {
-                "product_image1": image_key4,
-                "product_image2": image_key5,
-                "product_image3": image_key6
-            }
-        ]))
+        self.__common_after_hooks.set_image_url = MagicMock()
+        context = PinfluencerContext()
 
         # act
         self.__sut.tag_bucket_url_to_images_collection(context=context)
 
         # assert
-        assert context.response.body[0]["product_image1"] == f"{TEST_S3_URL}/{image_key}"
-        assert context.response.body[0]["product_image2"] == f"{TEST_S3_URL}/{image_key2}"
-        assert context.response.body[0]["product_image3"] == f"{TEST_S3_URL}/{image_key3}"
-        assert context.response.body[1]["product_image1"] == f"{TEST_S3_URL}/{image_key4}"
-        assert context.response.body[1]["product_image2"] == f"{TEST_S3_URL}/{image_key5}"
-        assert context.response.body[1]["product_image3"] == f"{TEST_S3_URL}/{image_key6}"
+        self.__common_after_hooks.set_image_url.assert_called_once_with(context=context,
+                                                                        image_fields=["product_image1",
+                                                                                      "product_image2",
+                                                                                      "product_image3"],
+                                                                        collection=True)
 
     def test_format_campaign_state(self):
-
         # arrange
         context = context = PinfluencerContext(
             response=PinfluencerResponse(body={"campaign_state": CampaignStateEnum.DRAFT}))
@@ -641,7 +658,7 @@ class TestUserAfterHooks(TestCase):
         expected_categories2 = ["PET", "FASHION", "CATEGORY5"]
         context = PinfluencerContext(response=PinfluencerResponse(body=[
             {"values": [ValueEnum.VALUE9, ValueEnum.VALUE8, ValueEnum.VALUE7],
-            "categories": [CategoryEnum.PET, CategoryEnum.FASHION, CategoryEnum.FITNESS]},
+             "categories": [CategoryEnum.PET, CategoryEnum.FASHION, CategoryEnum.FITNESS]},
             {"values": [ValueEnum.VALUE9, ValueEnum.VALUE8, ValueEnum.VALUE5],
              "categories": [CategoryEnum.PET, CategoryEnum.FASHION, CategoryEnum.CATEGORY5]}
         ]))

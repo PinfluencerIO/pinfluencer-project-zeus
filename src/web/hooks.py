@@ -10,6 +10,27 @@ from src.web import PinfluencerContext, valid_path_resource_id
 S3_URL = "https://pinfluencer-product-images.s3.eu-west-2.amazonaws.com"
 
 
+class CommonAfterHooks:
+
+    def set_image_url(self,
+                      context: PinfluencerContext,
+                      image_fields: list[str],
+                      collection: bool = False):
+        if collection:
+            for entity in context.response.body:
+                self.__set_image_fields(entity=entity, fields=image_fields)
+        else:
+            self.__set_image_fields(entity=context.response.body, fields=image_fields)
+
+    def __set_image_fields(self, entity: dict, fields: list[str]):
+        for field in fields:
+            self.__set_image(entity=entity, field=field)
+
+    def __set_image(self, entity: dict, field: str):
+        if entity[field] is not None:
+            entity[field] = f'{S3_URL}/{entity[field]}'
+
+
 class CommonBeforeHooks:
 
     def __init__(self, deserializer: Deserializer):
@@ -45,20 +66,27 @@ class CampaignBeforeHooks:
 
 class CampaignAfterHooks:
 
+    def __init__(self, common_after_hooks: CommonAfterHooks):
+        self.__common_after_hooks = common_after_hooks
+
     def tag_bucket_url_to_images(self, context: PinfluencerContext):
-        context.response.body["product_image1"] = f"{S3_URL}/{context.response.body['product_image1']}"
-        context.response.body["product_image2"] = f"{S3_URL}/{context.response.body['product_image2']}"
-        context.response.body["product_image3"] = f"{S3_URL}/{context.response.body['product_image3']}"
+        self.__common_after_hooks.set_image_url(context=context,
+                                                image_fields=["product_image1",
+                                                              "product_image2",
+                                                              "product_image3"],
+                                                collection=False)
 
     def format_values_and_categories(self, context: PinfluencerContext):
         context.response.body["campaign_values"] = list(map(lambda x: x.name, context.response.body["campaign_values"]))
-        context.response.body["campaign_categories"] = list(map(lambda x: x.name, context.response.body["campaign_categories"]))
+        context.response.body["campaign_categories"] = list(
+            map(lambda x: x.name, context.response.body["campaign_categories"]))
 
     def tag_bucket_url_to_images_collection(self, context: PinfluencerContext):
-        for campaign in context.response.body:
-            campaign["product_image1"] = f"{S3_URL}/{campaign['product_image1']}"
-            campaign["product_image2"] = f"{S3_URL}/{campaign['product_image2']}"
-            campaign["product_image3"] = f"{S3_URL}/{campaign['product_image3']}"
+        self.__common_after_hooks.set_image_url(context=context,
+                                                image_fields=["product_image1",
+                                                              "product_image2",
+                                                              "product_image3"],
+                                                collection=True)
 
     def format_values_and_categories_collection(self, context: PinfluencerContext):
         for campaign in context.response.body:
@@ -77,7 +105,6 @@ class InfluencerBeforeHooks:
 
     def __init__(self, influencer_validator: InfluencerValidator):
         self.__influencer_validator = influencer_validator
-
 
     def validate_uuid(self, context: PinfluencerContext):
         id = valid_path_resource_id(event=context.event, resource_key="influencer_id")
@@ -135,7 +162,9 @@ class BrandBeforeHooks:
 
 class BrandAfterHooks:
 
-    def __init__(self, auth_user_repository: AuthUserRepository):
+    def __init__(self, auth_user_repository: AuthUserRepository,
+                 common_after_common_hooks: CommonAfterHooks):
+        self.__common_after_common_hooks = common_after_common_hooks
         self.__auth_user_repository = auth_user_repository
 
     def set_brand_claims(self, context: PinfluencerContext):
@@ -146,33 +175,41 @@ class BrandAfterHooks:
         self.__auth_user_repository.update_brand_claims(user=user)
 
     def tag_bucket_url_to_images(self, context: PinfluencerContext):
-        context.response.body["header_image"] = f"{S3_URL}/{context.response.body['header_image']}"
-        context.response.body["logo"] = f"{S3_URL}/{context.response.body['logo']}"
+        self.__common_after_common_hooks.set_image_url(context=context,
+                                                       image_fields=["header_image",
+                                                                     "logo"],
+                                                       collection=False)
 
     def tag_bucket_url_to_images_collection(self, context: PinfluencerContext):
-        for brand in context.response.body:
-            brand["header_image"] = f"{S3_URL}/{brand['header_image']}"
-            brand["logo"] = f"{S3_URL}/{brand['logo']}"
+        self.__common_after_common_hooks.set_image_url(context=context,
+                                                       image_fields=["header_image",
+                                                                     "logo"],
+                                                       collection=True)
 
 
 class InfluencerAfterHooks:
 
-    def __init__(self, auth_user_repository: AuthUserRepository):
+    def __init__(self, auth_user_repository: AuthUserRepository,
+                 common_after_hooks: CommonAfterHooks):
+        self.__common_after_hooks = common_after_hooks
         self.__auth_user_repository = auth_user_repository
 
     def set_influencer_claims(self, context: PinfluencerContext):
         user = Influencer(first_name=context.body["first_name"],
-                     last_name=context.body["last_name"],
-                     email=context.body["email"],
-                     auth_user_id=context.auth_user_id)
+                          last_name=context.body["last_name"],
+                          email=context.body["email"],
+                          auth_user_id=context.auth_user_id)
         self.__auth_user_repository.update_influencer_claims(user=user)
 
     def tag_bucket_url_to_images(self, context: PinfluencerContext):
-        context.response.body["image"] = f"{S3_URL}/{context.response.body['image']}"
+        self.__common_after_hooks.set_image_url(context=context,
+                                                image_fields=["image"],
+                                                collection=False)
 
     def tag_bucket_url_to_images_collection(self, context: PinfluencerContext):
-        for influencer in context.response.body:
-            influencer["image"] = f"{S3_URL}/{influencer['image']}"
+        self.__common_after_hooks.set_image_url(context=context,
+                                                image_fields=["image"],
+                                                collection=True)
 
 
 class UserBeforeHooks:
