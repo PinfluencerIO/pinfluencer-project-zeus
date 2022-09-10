@@ -4,11 +4,11 @@ from uuid import uuid4
 
 from callee import Captor
 
+from src._types import AuthUserRepository, BrandRepository
 from src.crosscutting import JsonCamelToSnakeCaseDeserializer
 from src.domain.models import User, Brand, Influencer, ValueEnum, CategoryEnum, CampaignStateEnum
 from src.domain.validation import InfluencerValidator, BrandValidator, CampaignValidator
 from src.exceptions import NotFoundException
-from src.types import AuthUserRepository, BrandRepository
 from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, CommonBeforeHooks, \
     InfluencerBeforeHooks, BrandBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, CommonAfterHooks

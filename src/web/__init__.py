@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
 from typing import Union, Callable
 
+from src._types import Serializer
 from src.crosscutting import valid_uuid
-from src.types import Serializer
 
 BRAND_ID_PATH_KEY = 'brand_id'
 INFLUENCER_ID_PATH_KEY = 'influencer_id'

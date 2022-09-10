@@ -2,18 +2,18 @@ import base64
 import io
 import os
 import uuid
-from typing import Callable, Union
+from typing import Callable
 
 import boto3
 from botocore.exceptions import ClientError
 from filetype import filetype
 
+from src._types import DataManager, ImageRepository, Model, User, ObjectMapperAdapter
 from src.data.entities import SqlAlchemyBrandEntity, SqlAlchemyInfluencerEntity, create_mappings, \
     SqlAlchemyCampaignEntity
 from src.domain.models import Brand, Influencer, Campaign, CampaignStateEnum
 from src.domain.models import User as UserModel
 from src.exceptions import AlreadyExistsException, ImageException, NotFoundException
-from src.types import DataManager, ImageRepository, Model, User, ObjectMapperAdapter
 
 
 class BaseSqlAlchemyRepository:
@@ -128,7 +128,7 @@ class SqlAlchemyBrandRepository(BaseSqlAlchemyUserRepository):
     def __init__(self,
                  data_manager: DataManager,
                  image_repository: ImageRepository,
-                 object_mapper: Union[object, ObjectMapperAdapter]):
+                 object_mapper: ObjectMapperAdapter):
         super().__init__(data_manager=data_manager,
                          resource_entity=SqlAlchemyBrandEntity,
                          image_repository=image_repository,
@@ -173,7 +173,7 @@ class SqlAlchemyInfluencerRepository(BaseSqlAlchemyUserRepository):
     def __init__(self,
                  data_manager: DataManager,
                  image_repository: ImageRepository,
-                 object_mapper: Union[object, ObjectMapperAdapter]):
+                 object_mapper: ObjectMapperAdapter):
         super().__init__(data_manager=data_manager,
                          resource_entity=SqlAlchemyInfluencerEntity,
                          image_repository=image_repository,

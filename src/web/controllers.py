@@ -1,9 +1,9 @@
 from typing import Callable
 
+from src._types import BrandRepository, UserRepository, InfluencerRepository, Repository, CampaignRepository
 from src.crosscutting import print_exception
 from src.domain.models import ValueEnum, CategoryEnum, Brand, Influencer, Campaign, CampaignStateEnum
 from src.exceptions import AlreadyExistsException, NotFoundException
-from src.types import BrandRepository, UserRepository, InfluencerRepository, Repository
 from src.web import PinfluencerResponse, BRAND_ID_PATH_KEY, INFLUENCER_ID_PATH_KEY, PinfluencerContext
 
 
@@ -236,7 +236,7 @@ class InfluencerController(BaseUserController):
 
 class CampaignController(BaseController):
 
-    def __init__(self, repository: Repository):
+    def __init__(self, repository: CampaignRepository):
         super().__init__(repository)
 
     def create(self, context: PinfluencerContext) -> None:

@@ -1,10 +1,10 @@
 from jsonschema.exceptions import ValidationError
 
+from src._types import AuthUserRepository, Deserializer, BrandRepository
 from src.crosscutting import print_exception
 from src.domain.models import Brand, Influencer
 from src.domain.validation import BrandValidator, InfluencerValidator, CampaignValidator
 from src.exceptions import NotFoundException
-from src.types import AuthUserRepository, Deserializer, BrandRepository
 from src.web import PinfluencerContext, valid_path_resource_id
 
 S3_URL = "https://pinfluencer-product-images.s3.eu-west-2.amazonaws.com"

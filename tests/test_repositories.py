@@ -4,11 +4,11 @@ from unittest.mock import Mock, MagicMock
 from callee import Captor
 from mapper.object_mapper import ObjectMapper
 
+from src._types import ImageRepository
 from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository, CognitoAuthUserRepository, \
     CognitoAuthService, SqlAlchemyCampaignRepository
 from src.domain.models import Campaign, CampaignStateEnum
 from src.exceptions import AlreadyExistsException, NotFoundException
-from src.types import ImageRepository
 from tests import InMemorySqliteDataManager, brand_generator, brand_dto_generator, influencer_dto_generator, \
     assert_brand_updatable_fields_are_equal_for_three, assert_brand_db_fields_are_equal, \
     assert_collection_brand_db_fields_are_equal, assert_brand_db_fields_are_equal_for_three, influencer_generator, \

@@ -1,15 +1,19 @@
 from collections import OrderedDict
 
 from src.web import Route, PinfluencerContext
-from src.web.ioc import ServiceLocator
+from src.web.controllers import CampaignController, BrandController, InfluencerController
+from src.web.hooks import HooksFacade
 
 
 class Dispatcher:
-    def __init__(self, service_locator: ServiceLocator):
-        self.__campaign_ctr = service_locator.get_new_campaign_controller()
-        self.__brand_ctr = service_locator.get_new_brand_controller()
-        self.__influencer_ctr = service_locator.get_new_influencer_controller()
-        self.__hooks_facade = service_locator.get_new_hooks_facade()
+    def __init__(self, campaign_ctr: CampaignController,
+                 brand_ctr: BrandController,
+                 influencer_ctr: InfluencerController,
+                 hooks_facade: HooksFacade):
+        self.__campaign_ctr = campaign_ctr
+        self.__brand_ctr = brand_ctr
+        self.__influencer_ctr = influencer_ctr
+        self.__hooks_facade = hooks_facade
 
     def get_not_implemented_method(self, route: str) -> Route:
         return Route(action=lambda context: self.not_implemented(context=context,

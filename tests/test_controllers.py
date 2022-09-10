@@ -4,10 +4,10 @@ from unittest.mock import Mock, MagicMock
 
 from callee import Captor
 
+from src._types import BrandRepository, InfluencerRepository, CampaignRepository
 from src.crosscutting import valid_uuid
 from src.domain.models import Influencer, Campaign, CategoryEnum, ValueEnum, CampaignStateEnum
 from src.exceptions import AlreadyExistsException, NotFoundException
-from src.types import BrandRepository, InfluencerRepository, CampaignRepository
 from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.controllers import BrandController, InfluencerController, CampaignController
 from tests import brand_dto_generator, assert_brand_updatable_fields_are_equal, influencer_dto_generator, RepoEnum, \

@@ -1,10 +1,9 @@
-from typing import Union
-
+from mapper.object_mapper_exception import ObjectMapperException
 from sqlalchemy import Column, String, DateTime, Float, PickleType
 
+from src._types import ObjectMapperAdapter
 from src.data import Base
 from src.domain.models import Brand, Influencer, Campaign
-from src.types import ObjectMapperAdapter
 
 
 class SqlAlchemyBaseEntity:
@@ -71,10 +70,13 @@ class SqlAlchemyCampaignEntity(Base, SqlAlchemyBaseEntity):
     product_image3 = Column(type_=String(length=360), nullable=False)
 
 
-def create_mappings(mapper: Union[ObjectMapperAdapter, object]):
-    mapper.create_map(Brand, SqlAlchemyBrandEntity)
-    mapper.create_map(SqlAlchemyBrandEntity, Brand)
-    mapper.create_map(Influencer, SqlAlchemyInfluencerEntity)
-    mapper.create_map(SqlAlchemyInfluencerEntity, Influencer)
-    mapper.create_map(Campaign, SqlAlchemyCampaignEntity)
-    mapper.create_map(SqlAlchemyCampaignEntity, Campaign)
+def create_mappings(mapper: ObjectMapperAdapter):
+    try:
+        mapper.create_map(Brand, SqlAlchemyBrandEntity)
+        mapper.create_map(SqlAlchemyBrandEntity, Brand)
+        mapper.create_map(Influencer, SqlAlchemyInfluencerEntity)
+        mapper.create_map(SqlAlchemyInfluencerEntity, Influencer)
+        mapper.create_map(Campaign, SqlAlchemyCampaignEntity)
+        mapper.create_map(SqlAlchemyCampaignEntity, Campaign)
+    except ObjectMapperException as e:
+        print(f"mappings tried to be created more than once {e}")
