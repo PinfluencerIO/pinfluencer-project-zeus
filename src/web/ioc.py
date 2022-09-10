@@ -64,8 +64,8 @@ class ServiceLocator:
 
     def get_new_hooks_facade(self) -> HooksFacade:
         return HooksFacade(common_hooks=CommonBeforeHooks(deserializer=self.get_new_deserializer()),
-                           brand_after_hooks=BrandAfterHooks(auth_user_repository=self.get_new_auth_user_repository()),
-                           influencer_after_hooks=InfluencerAfterHooks(auth_user_repository=self.get_new_auth_user_repository()),
+                           brand_after_hooks=BrandAfterHooks(auth_user_repository=self.get_new_auth_user_repository(), common_after_common_hooks=CommonAfterHooks()),
+                           influencer_after_hooks=InfluencerAfterHooks(auth_user_repository=self.get_new_auth_user_repository(), common_after_hooks=CommonAfterHooks()),
                            user_before_hooks=UserBeforeHooks(),
                            user_after_hooks=UserAfterHooks(auth_user_repository=self.get_new_auth_user_repository()),
                            influencer_before_hooks=InfluencerBeforeHooks(influencer_validator=self.get_new_influencer_validator()),
