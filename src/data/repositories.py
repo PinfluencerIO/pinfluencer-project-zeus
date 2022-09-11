@@ -340,7 +340,10 @@ class S3ImageRepository:
         print(f"uploading image to S3 repo bytes64 encoded {image}")
         f = io.BytesIO(image)
         print(f"bytesIO file {f}")
-        file_type = filetype.guess(f)
+        try:
+            file_type = filetype.guess(f)
+        except TypeError:
+            file_type = filetype.get_type(mime='image/jpg')
         print(f'image uploading to {path}/ of {file_type}')
         if file_type is not None:
             print(f"file type {file_type}")
