@@ -341,8 +341,8 @@ class S3ImageRepository:
         file_type = filetype.guess(f)
         print(f'image uploading to {path}/ of {file_type}')
         if file_type is not None:
+            print(f"file type {file_type}")
             mime = file_type.MIME
-            print(f"file type {mime}")
         else:
             mime = 'image/jpg'
         image_id = str(uuid.uuid4())
