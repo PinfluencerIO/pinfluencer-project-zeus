@@ -14,9 +14,9 @@ class CommonAfterHooks:
 
     def map_enums(self,
                   context: PinfluencerContext,
-                  enum_type: type,
+                  enum_type,
                   key: str):
-        ...
+        context.body[key] = list(map(lambda x: enum_type[x], context.body[key]))
 
     def set_image_url(self,
                       context: PinfluencerContext,
