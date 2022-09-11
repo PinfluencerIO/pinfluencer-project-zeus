@@ -12,7 +12,7 @@ brand_payload_schema = {
             },
             "brand_description": {
                 "type": "string",
-                "pattern": "^.{1,500}$"
+                "pattern": "^[\s\S]{1,500}$"
             },
             "website": {
                 "type": "string",
@@ -37,7 +37,7 @@ influencer_payload_schema = {
         {
             "bio": {
                 "type": "string",
-                "pattern": "^.{1,500}$"
+                "pattern": "^[\s\S]{1,500}$"
             },
             "website": {
                 "type": "string",
