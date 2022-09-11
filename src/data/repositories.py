@@ -335,6 +335,7 @@ class S3ImageRepository:
         self.__s3_client = boto3.client('s3')
 
     def upload(self, path, image_base64_encoded):
+        print(f"uploading image to S3 repo {image_base64_encoded}")
         image = base64.b64decode(image_base64_encoded)
         f = io.BytesIO(image)
         file_type = filetype.guess(f)
