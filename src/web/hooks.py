@@ -14,23 +14,19 @@ class CommonAfterHooks:
 
     def map_enums(self,
                   context: PinfluencerContext,
-                  enum_type,
                   key: str):
         self.__map_enum_base(entity=context.response.body,
-                             key=key,
-                             enum_type=enum_type)
+                             key=key)
 
     def __map_enum_base(self, entity: dict,
-                        key: str,
-                        enum_type):
-        entity[key] = list(map(lambda x: enum_type[x], entity[key]))
+                        key: str):
+        entity[key] = list(map(lambda x: x.name, entity[key]))
 
     def map_enums_collection(self,
                              context: PinfluencerContext,
-                             enum_type,
                              key: str):
         for entity in context.response.body:
-            self.__map_enum_base(entity=entity, key=key, enum_type=enum_type)
+            self.__map_enum_base(entity=entity, key=key)
 
     def set_image_url(self,
                       context: PinfluencerContext,
@@ -57,8 +53,9 @@ class CommonBeforeHooks:
         self.__deserializer = deserializer
 
     def map_enums(self, context: PinfluencerContext,
-                  key: str):
-        ...
+                  key: str,
+                  enum_value):
+        context.body[key] = list(map(lambda x: enum_value[x],context.body[key]))
 
     def set_body(self, context: PinfluencerContext):
         context.body = self.__deserializer.deserialize(data=context.event["body"])

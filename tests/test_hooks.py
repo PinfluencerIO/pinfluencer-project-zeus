@@ -32,7 +32,6 @@ class TestCommonAfterHooks(TestCase):
 
         # act
         self.__sut.map_enums_collection(context=context,
-                                        enum_type=ValueEnum,
                                         key="values")
 
         # assert
@@ -48,7 +47,6 @@ class TestCommonAfterHooks(TestCase):
 
         # act
         self.__sut.map_enums(context=context,
-                             enum_type=ValueEnum,
                              key="values")
 
         # assert
@@ -335,7 +333,8 @@ class TestCommonHooks(TestCase):
 
         # act
         self.__sut.map_enums(context=context,
-                             key="values")
+                             key="values",
+                             enum_value=ValueEnum)
 
         # assert
         assert context.body["values"][0] == ValueEnum.SUSTAINABLE
