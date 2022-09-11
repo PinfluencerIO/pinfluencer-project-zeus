@@ -26,25 +26,25 @@ class TestCommonAfterHooks(TestCase):
     def test_map_enums_collection(self):
         # arrange
         context = PinfluencerContext(response=PinfluencerResponse(body=[
-            {"values": ["SUSTAINABLE", "ORGANIC"]},
-            {"values": ["VALUE7", "VALUE6", "RECYCLED"]}
+            {"values": [ValueEnum.SUSTAINABLE, ValueEnum.ORGANIC]},
+            {"values": [ValueEnum.VALUE7, ValueEnum.VALUE6, ValueEnum.RECYCLED]}
         ]))
 
         # act
         self.__sut.map_enums_collection(context=context,
-                             enum_type=ValueEnum,
-                             key="values")
+                                        enum_type=ValueEnum,
+                                        key="values")
 
         # assert
-        assert context.response.body[0]["values"][0] == ValueEnum.SUSTAINABLE
-        assert context.response.body[0]["values"][1] == ValueEnum.ORGANIC
-        assert context.response.body[1]["values"][0] == ValueEnum.VALUE7
-        assert context.response.body[1]["values"][1] == ValueEnum.VALUE6
-        assert context.response.body[1]["values"][2] == ValueEnum.RECYCLED
+        assert context.response.body[0]["values"][0] == "SUSTAINABLE"
+        assert context.response.body[0]["values"][1] == "ORGANIC"
+        assert context.response.body[1]["values"][0] == "VALUE7"
+        assert context.response.body[1]["values"][1] == "VALUE6"
+        assert context.response.body[1]["values"][2] == "RECYCLED"
 
     def test_map_enums(self):
         # arrange
-        context = PinfluencerContext(response=PinfluencerResponse(body={"values": ["SUSTAINABLE", "ORGANIC"]}))
+        context = PinfluencerContext(response=PinfluencerResponse(body={"values": [ValueEnum.SUSTAINABLE, ValueEnum.ORGANIC]}))
 
         # act
         self.__sut.map_enums(context=context,
@@ -52,9 +52,8 @@ class TestCommonAfterHooks(TestCase):
                              key="values")
 
         # assert
-        assert context.response.body["values"][0] == ValueEnum.SUSTAINABLE
-        assert context.response.body["values"][1] == ValueEnum.ORGANIC
-
+        assert context.response.body["values"][0] == "SUSTAINABLE"
+        assert context.response.body["values"][1] == "ORGANIC"
 
     def test_set_image_url(self):
         # arrange
@@ -329,6 +328,18 @@ class TestCommonHooks(TestCase):
     def setUp(self) -> None:
         self.__deserializer = JsonCamelToSnakeCaseDeserializer()
         self.__sut = CommonBeforeHooks(deserializer=self.__deserializer)
+
+    def test_map_enums(self):
+        # arrange
+        context = PinfluencerContext(body={"values": ["SUSTAINABLE", "ORGANIC"]})
+
+        # act
+        self.__sut.map_enums(context=context,
+                             key="values")
+
+        # assert
+        assert context.body["values"][0] == ValueEnum.SUSTAINABLE
+        assert context.body["values"][1] == ValueEnum.ORGANIC
 
     def test_set_body(self):
         # arrange

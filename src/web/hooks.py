@@ -56,6 +56,10 @@ class CommonBeforeHooks:
     def __init__(self, deserializer: Deserializer):
         self.__deserializer = deserializer
 
+    def map_enums(self, context: PinfluencerContext,
+                  key: str):
+        ...
+
     def set_body(self, context: PinfluencerContext):
         context.body = self.__deserializer.deserialize(data=context.event["body"])
 
