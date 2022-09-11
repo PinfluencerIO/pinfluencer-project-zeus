@@ -689,9 +689,9 @@ class TestUserAfterHooks(TestCase):
         self.__sut.format_values_and_categories(context=context)
 
         # assert
-        self.__common_after_hooks.map_enums.assert_called_once_with(context=context,
+        self.__common_after_hooks.map_enums.assert_any_call(context=context,
                                                                     key="values")
-        self.__common_after_hooks.map_enums.assert_called_once_with(context=context,
+        self.__common_after_hooks.map_enums.assert_any_call(context=context,
                                                                     key="categories")
 
     def test_format_values_and_categories_collection(self):
@@ -700,10 +700,10 @@ class TestUserAfterHooks(TestCase):
         self.__common_after_hooks.map_enums_collection = MagicMock()
 
         # act
-        self.__sut.format_values_and_categories(context=context)
+        self.__sut.format_values_and_categories_collection(context=context)
 
         # assert
-        self.__common_after_hooks.map_enums_collection.assert_called_once_with(context=context,
-                                                                               key="values")
-        self.__common_after_hooks.map_enums_collection.assert_called_once_with(context=context,
-                                                                               key="categories")
+        self.__common_after_hooks.map_enums_collection.assert_any_call(context=context,
+                                                               key="values")
+        self.__common_after_hooks.map_enums_collection.assert_any_call(context=context,
+                                                               key="categories")

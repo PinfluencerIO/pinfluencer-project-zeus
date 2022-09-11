@@ -55,7 +55,7 @@ class CommonBeforeHooks:
     def map_enums(self, context: PinfluencerContext,
                   key: str,
                   enum_value):
-        context.body[key] = list(map(lambda x: enum_value[x],context.body[key]))
+        context.body[key] = list(map(lambda x: enum_value[x], context.body[key]))
 
     def set_body(self, context: PinfluencerContext):
         context.body = self.__deserializer.deserialize(data=context.event["body"])
@@ -260,13 +260,16 @@ class UserAfterHooks:
             user["email"] = auth_user.email
 
     def format_values_and_categories(self, context: PinfluencerContext):
-        context.response.body["values"] = list(map(lambda x: x.name, context.response.body["values"]))
-        context.response.body["categories"] = list(map(lambda x: x.name, context.response.body["categories"]))
+        self.__common_after_hooks.map_enums(context=context,
+                                            key="values")
+        self.__common_after_hooks.map_enums(context=context,
+                                            key="categories")
 
     def format_values_and_categories_collection(self, context: PinfluencerContext):
-        for user in context.response.body:
-            user["values"] = list(map(lambda x: x.name, user["values"]))
-            user["categories"] = list(map(lambda x: x.name, user["categories"]))
+        self.__common_after_hooks.map_enums_collection(context=context,
+                                                       key="values")
+        self.__common_after_hooks.map_enums_collection(context=context,
+                                                       key="categories")
 
 
 class HooksFacade:
