@@ -1,3 +1,5 @@
+from enum import Enum
+
 from jsonschema.exceptions import ValidationError
 
 from src._types import AuthUserRepository, Deserializer, BrandRepository
@@ -11,6 +13,12 @@ S3_URL = "https://pinfluencer-product-images.s3.eu-west-2.amazonaws.com"
 
 
 class CommonAfterHooks:
+
+    def map_enums(self,
+                  context: PinfluencerContext,
+                  enum_type: Enum,
+                  key: str):
+        ...
 
     def set_image_url(self,
                       context: PinfluencerContext,
