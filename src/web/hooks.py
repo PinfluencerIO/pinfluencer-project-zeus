@@ -241,7 +241,9 @@ class UserBeforeHooks:
 
 class UserAfterHooks:
 
-    def __init__(self, auth_user_repository: AuthUserRepository):
+    def __init__(self, auth_user_repository: AuthUserRepository,
+                 common_after_hooks: CommonAfterHooks):
+        self.__common_after_hooks = common_after_hooks
         self.__auth_user_repository = auth_user_repository
 
     def tag_auth_user_claims_to_response(self, context: PinfluencerContext):
