@@ -16,7 +16,21 @@ class CommonAfterHooks:
                   context: PinfluencerContext,
                   enum_type,
                   key: str):
-        context.body[key] = list(map(lambda x: enum_type[x], context.body[key]))
+        self.__map_enum_base(entity=context.response.body,
+                             key=key,
+                             enum_type=enum_type)
+
+    def __map_enum_base(self, entity: dict,
+                        key: str,
+                        enum_type):
+        entity[key] = list(map(lambda x: enum_type[x], entity[key]))
+
+    def map_enums_collection(self,
+                             context: PinfluencerContext,
+                             enum_type,
+                             key: str):
+        for entity in context.response.body:
+            self.__map_enum_base(entity=entity, key=key, enum_type=enum_type)
 
     def set_image_url(self,
                       context: PinfluencerContext,
