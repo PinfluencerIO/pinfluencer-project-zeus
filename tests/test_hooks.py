@@ -23,6 +23,20 @@ class TestCommonAfterHooks(TestCase):
     def setUp(self) -> None:
         self.__sut = CommonAfterHooks()
 
+    def test_map_enums(self):
+        # arrange
+        context = PinfluencerContext(body={"values": ["SUSTAINABLE", "ORGANIC"]})
+
+        # act
+        self.__sut.map_enums(context=context,
+                             enum_type=ValueEnum,
+                             key="values")
+
+        # assert
+        assert context.body["values"][0] == ValueEnum.SUSTAINABLE
+        assert context.body["values"][1] == ValueEnum.ORGANIC
+
+
     def test_set_image_url(self):
         # arrange
         path = "image_path"

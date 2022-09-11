@@ -1,5 +1,3 @@
-from enum import Enum
-
 from jsonschema.exceptions import ValidationError
 
 from src._types import AuthUserRepository, Deserializer, BrandRepository
@@ -16,7 +14,7 @@ class CommonAfterHooks:
 
     def map_enums(self,
                   context: PinfluencerContext,
-                  enum_type: Enum,
+                  enum_type: type,
                   key: str):
         ...
 
