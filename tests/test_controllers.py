@@ -324,8 +324,8 @@ class TestBrandController(TestCase):
         actual_payload = payload_captor.arg
         assert valid_uuid(actual_payload.id)
         assert_brand_updatable_fields_are_equal(actual_payload.__dict__, expected_payload)
-        assert list(map(lambda x: x.name, actual_payload.values)) == expected_payload['values']
-        assert list(map(lambda x: x.name, actual_payload.categories)) == expected_payload['categories']
+        assert actual_payload.values == expected_payload['values']
+        assert actual_payload.categories == expected_payload['categories']
         assert response.status_code == 200
         assert response.body == brand_in_db.__dict__
 

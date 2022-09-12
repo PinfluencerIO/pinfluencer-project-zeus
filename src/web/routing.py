@@ -87,7 +87,8 @@ class Dispatcher:
                     before_hooks=[
                         self.__hooks_facade.get_before_common_hooks().set_body,
                         self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
-                        self.__hooks_facade.get_brand_before_hooks().validate_brand
+                        self.__hooks_facade.get_brand_before_hooks().validate_brand,
+                        self.__hooks_facade.get_user_before_hooks().set_categories_and_values
                     ],
                     action=self.__brand_ctr.create,
                     after_hooks=[

@@ -77,8 +77,8 @@ class BrandController(BaseUserController):
                           brand_description=payload_dict["brand_description"],
                           website=payload_dict["website"],
                           insta_handle=payload_dict["insta_handle"],
-                          values=list(map(lambda x: ValueEnum[x], payload_dict["values"])),
-                          categories=list(map(lambda x: CategoryEnum[x], payload_dict["categories"])))
+                          values=payload_dict["values"],
+                          categories=payload_dict["categories"])
             self._repository.write_new_for_auth_user(auth_user_id=auth_user_id, payload=brand)
         except (AlreadyExistsException) as e:
             print_exception(e)
@@ -97,8 +97,8 @@ class BrandController(BaseUserController):
                           brand_description=payload_dict["brand_description"],
                           website=payload_dict["website"],
                           insta_handle=payload_dict["insta_handle"],
-                          values=list(map(lambda x: ValueEnum[x], payload_dict["values"])),
-                          categories=list(map(lambda x: CategoryEnum[x], payload_dict["categories"])))
+                          values=payload_dict["values"],
+                          categories=payload_dict["categories"])
             brand_to_return = self._repository.update_for_auth_user(auth_user_id=auth_user_id, payload=brand)
             context.response.body = brand_to_return.__dict__
             context.response.status_code = 200

@@ -2,7 +2,7 @@ from jsonschema.exceptions import ValidationError
 
 from src._types import AuthUserRepository, Deserializer, BrandRepository
 from src.crosscutting import print_exception
-from src.domain.models import Brand, Influencer
+from src.domain.models import Brand, Influencer, CategoryEnum, ValueEnum, CampaignStateEnum
 from src.domain.validation import BrandValidator, InfluencerValidator, CampaignValidator
 from src.exceptions import NotFoundException
 from src.web import PinfluencerContext, valid_path_resource_id
@@ -12,21 +12,38 @@ S3_URL = "https://pinfluencer-product-images.s3.eu-west-2.amazonaws.com"
 
 class CommonAfterHooks:
 
-    def map_enums(self,
-                  context: PinfluencerContext,
-                  key: str):
+    def map_enum(self,
+                 context: PinfluencerContext,
+                 key: str):
         self.__map_enum_base(entity=context.response.body,
                              key=key)
 
+    def map_enum_collection(self,
+                            context: PinfluencerContext,
+                            key: str):
+        for entity in context.response.body:
+            self.__map_enum_base(entity=entity,
+                                 key=key)
+
+    def map_enums(self,
+                  context: PinfluencerContext,
+                  key: str):
+        self.__map_enums_base(entity=context.response.body,
+                              key=key)
+
     def __map_enum_base(self, entity: dict,
                         key: str):
+        entity[key] = entity[key].name
+
+    def __map_enums_base(self, entity: dict,
+                         key: str):
         entity[key] = list(map(lambda x: x.name, entity[key]))
 
     def map_enums_collection(self,
                              context: PinfluencerContext,
                              key: str):
         for entity in context.response.body:
-            self.__map_enum_base(entity=entity, key=key)
+            self.__map_enums_base(entity=entity, key=key)
 
     def set_image_url(self,
                       context: PinfluencerContext,
@@ -52,6 +69,11 @@ class CommonBeforeHooks:
     def __init__(self, deserializer: Deserializer):
         self.__deserializer = deserializer
 
+    def map_enum(self, context: PinfluencerContext,
+                  key: str,
+                  enum_value):
+        context.body[key] = enum_value[context.body[key]]
+
     def map_enums(self, context: PinfluencerContext,
                   key: str,
                   enum_value):
@@ -63,8 +85,23 @@ class CommonBeforeHooks:
 
 class CampaignBeforeHooks:
 
-    def __init__(self, campaign_validator: CampaignValidator):
+    def __init__(self, campaign_validator: CampaignValidator,
+                 common_before_hooks: CommonBeforeHooks):
+        self.__common_before_hooks = common_before_hooks
         self.__campaign_validator = campaign_validator
+
+    def map_campaign_categories_and_values(self, context: PinfluencerContext):
+        self.__common_before_hooks.map_enums(context=context,
+                                             key="campaign_categories",
+                                             enum_value=CategoryEnum)
+        self.__common_before_hooks.map_enums(context=context,
+                                             key="campaign_values",
+                                             enum_value=ValueEnum)
+
+    def map_campaign_state(self, context: PinfluencerContext):
+        self.__common_before_hooks.map_enum(context=context,
+                                             key="campaign_state",
+                                             enum_value=CampaignStateEnum)
 
     def validate_campaign(self, context: PinfluencerContext):
         try:
@@ -98,9 +135,10 @@ class CampaignAfterHooks:
                                                 collection=False)
 
     def format_values_and_categories(self, context: PinfluencerContext):
-        context.response.body["campaign_values"] = list(map(lambda x: x.name, context.response.body["campaign_values"]))
-        context.response.body["campaign_categories"] = list(
-            map(lambda x: x.name, context.response.body["campaign_categories"]))
+        self.__common_after_hooks.map_enums(context=context,
+                                            key="campaign_values")
+        self.__common_after_hooks.map_enums(context=context,
+                                            key="campaign_categories")
 
     def tag_bucket_url_to_images_collection(self, context: PinfluencerContext):
         self.__common_after_hooks.set_image_url(context=context,
@@ -110,16 +148,18 @@ class CampaignAfterHooks:
                                                 collection=True)
 
     def format_values_and_categories_collection(self, context: PinfluencerContext):
-        for campaign in context.response.body:
-            campaign["campaign_values"] = list(map(lambda x: x.name, campaign["campaign_values"]))
-            campaign["campaign_categories"] = list(map(lambda x: x.name, campaign["campaign_categories"]))
+        self.__common_after_hooks.map_enums_collection(context=context,
+                                                       key="campaign_values")
+        self.__common_after_hooks.map_enums_collection(context=context,
+                                                       key="campaign_categories")
 
     def format_campaign_state_collection(self, context: PinfluencerContext):
-        for campaign in context.response.body:
-            campaign["campaign_state"] = campaign["campaign_state"].name
+        self.__common_after_hooks.map_enum_collection(context=context,
+                                                      key="campaign_state")
 
     def format_campaign_state(self, context: PinfluencerContext):
-        context.response.body["campaign_state"] = context.response.body["campaign_state"].name
+        self.__common_after_hooks.map_enum(context=context,
+                                           key="campaign_state")
 
 
 class InfluencerBeforeHooks:
@@ -235,8 +275,19 @@ class InfluencerAfterHooks:
 
 class UserBeforeHooks:
 
+    def __init__(self, common_before_hooks: CommonBeforeHooks):
+        self.__common_before_hooks = common_before_hooks
+
     def set_auth_user_id(self, context: PinfluencerContext):
         context.auth_user_id = context.event['requestContext']['authorizer']['jwt']['claims']['username']
+
+    def set_categories_and_values(self, context: PinfluencerContext):
+        self.__common_before_hooks.map_enums(context=context,
+                                             key="values",
+                                             enum_value=ValueEnum)
+        self.__common_before_hooks.map_enums(context=context,
+                                             key="categories",
+                                             enum_value=CategoryEnum)
 
 
 class UserAfterHooks:

@@ -271,8 +271,6 @@ def assert_brand_creatable_generated_fields_are_equal(brand1, brand2):
     brand2.pop("auth_user_id")
     brand2.pop("logo")
     brand2.pop("header_image")
-    brand2["categories"] = list(map(lambda x: x.name, brand2["categories"]))
-    brand2["values"] = list(map(lambda x: x.name, brand2["values"]))
     print("")
     print(brand1)
     print(brand2)
@@ -452,8 +450,8 @@ def update_brand_payload():
         "brand_description": "description",
         "website": "https://website.com",
         "insta_handle": "instahandle",
-        "values": ["VALUE7", "VALUE8", "VALUE9"],
-        "categories": ["CATEGORY7", "CATEGORY6", "CATEGORY5"]
+        "values": [ValueEnum.VALUE7, ValueEnum.VALUE8, ValueEnum.VALUE9],
+        "categories": [CategoryEnum.CATEGORY7, CategoryEnum.CATEGORY6, CategoryEnum.CATEGORY5]
     }
 
 

@@ -185,6 +185,7 @@ class TestRoutes(TestCase):
                                          self.__ioc.resolve(CommonBeforeHooks).set_body,
                                          self.__ioc.resolve(UserBeforeHooks).set_auth_user_id,
                                          self.__ioc.resolve(BrandBeforeHooks).validate_brand,
+                                         self.__ioc.resolve(UserBeforeHooks).set_categories_and_values,
                                          self.__ioc.resolve(BrandController).create,
                                          self.__ioc.resolve(BrandAfterHooks).set_brand_claims,
                                          self.__ioc.resolve(UserAfterHooks).tag_auth_user_claims_to_response,

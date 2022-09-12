@@ -23,6 +23,33 @@ class TestCommonAfterHooks(TestCase):
     def setUp(self) -> None:
         self.__sut = CommonAfterHooks()
 
+    def test_map_enum_collection(self):
+        # arrange
+        context = PinfluencerContext(response=PinfluencerResponse(body=[
+            {"values": ValueEnum.SUSTAINABLE},
+            {"values": ValueEnum.VALUE7}
+        ]))
+
+        # act
+        self.__sut.map_enum_collection(context=context,
+                                       key="values")
+
+        # assert
+        assert context.response.body[0]["values"] == "SUSTAINABLE"
+        assert context.response.body[1]["values"] == "VALUE7"
+
+    def test_map_enum(self):
+        # arrange
+        context = PinfluencerContext(
+            response=PinfluencerResponse(body={"values": ValueEnum.ORGANIC}))
+
+        # act
+        self.__sut.map_enum(context=context,
+                            key="values")
+
+        # assert
+        assert context.response.body["values"] == "ORGANIC"
+
     def test_map_enums_collection(self):
         # arrange
         context = PinfluencerContext(response=PinfluencerResponse(body=[
@@ -265,7 +292,9 @@ class TestCampaignBeforeHooks(TestCase):
 
     def setUp(self) -> None:
         self.__campaign_validator = CampaignValidator()
-        self.__sut = CampaignBeforeHooks(campaign_validator=self.__campaign_validator)
+        self.__common_before_hooks: CommonBeforeHooks = Mock()
+        self.__sut = CampaignBeforeHooks(campaign_validator=self.__campaign_validator,
+                                         common_before_hooks=self.__common_before_hooks)
 
     def test_validate_campaign_when_valid(self):
         # arrange
@@ -306,6 +335,35 @@ class TestCampaignBeforeHooks(TestCase):
         assert context.short_circuit == False
         assert context.id == id
 
+    def test_map_categories_and_values(self):
+        # arrange
+        self.__common_before_hooks.map_enums = MagicMock()
+        context = PinfluencerContext()
+
+        # act
+        self.__sut.map_campaign_categories_and_values(context=context)
+
+        # assert
+        self.__common_before_hooks.map_enums.assert_any_call(context=context,
+                                                             key="campaign_categories",
+                                                             enum_value=CategoryEnum)
+        self.__common_before_hooks.map_enums.assert_any_call(context=context,
+                                                             key="campaign_values",
+                                                             enum_value=ValueEnum)
+
+    def test_map_state(self):
+        # arrange
+        self.__common_before_hooks.map_enum = MagicMock()
+        context = PinfluencerContext()
+
+        # act
+        self.__sut.map_campaign_state(context=context)
+
+        # assert
+        self.__common_before_hooks.map_enum.assert_any_call(context=context,
+                                                             key="campaign_state",
+                                                             enum_value=CampaignStateEnum)
+
     def test_validate_id_when_invalid(self):
         # arrange
         id = "1234567"
@@ -327,6 +385,18 @@ class TestCommonHooks(TestCase):
     def setUp(self) -> None:
         self.__deserializer = JsonCamelToSnakeCaseDeserializer()
         self.__sut = CommonBeforeHooks(deserializer=self.__deserializer)
+
+    def test_map_enum(self):
+        # arrange
+        context = PinfluencerContext(body={"value": "ORGANIC"})
+
+        # act
+        self.__sut.map_enum(context=context,
+                            key="value",
+                            enum_value=ValueEnum)
+
+        # assert
+        assert context.body["value"] == ValueEnum.ORGANIC
 
     def test_map_enums(self):
         # arrange
@@ -507,45 +577,27 @@ class TestCampaignAfterHooks(TestCase):
 
     def test_format_values_and_categories(self):
         # arrange
-        expected_values = ["VALUE9", "VALUE8", "VALUE7"]
-        expected_categories = ["PET", "FASHION", "FITNESS"]
-        context = PinfluencerContext(response=PinfluencerResponse(body={
-            "campaign_values": [ValueEnum.VALUE9, ValueEnum.VALUE8, ValueEnum.VALUE7],
-            "campaign_categories": [CategoryEnum.PET, CategoryEnum.FASHION, CategoryEnum.FITNESS]
-        }))
+        self.__common_after_hooks.map_enums = MagicMock()
+        context = PinfluencerContext()
 
         # act
         self.__sut.format_values_and_categories(context=context)
 
         # assert
-        assert context.response.body["campaign_categories"] == expected_categories
-        assert context.response.body["campaign_values"] == expected_values
+        self.__common_after_hooks.map_enums.assert_any_call(context=context, key="campaign_categories")
+        self.__common_after_hooks.map_enums.assert_any_call(context=context, key="campaign_values")
 
     def test_format_values_and_categories_collection(self):
         # arrange
-        expected_values = ["VALUE9", "VALUE8", "VALUE7"]
-        expected_categories = ["PET", "FASHION", "FITNESS"]
-        expected_values2 = ["VALUE10", "VALUE8", "VALUE7"]
-        expected_categories2 = ["PET", "FASHION", "CATEGORY9"]
-        context = PinfluencerContext(response=PinfluencerResponse(body=[
-            {
-                "campaign_values": [ValueEnum.VALUE9, ValueEnum.VALUE8, ValueEnum.VALUE7],
-                "campaign_categories": [CategoryEnum.PET, CategoryEnum.FASHION, CategoryEnum.FITNESS]
-            },
-            {
-                "campaign_values": [ValueEnum.VALUE10, ValueEnum.VALUE8, ValueEnum.VALUE7],
-                "campaign_categories": [CategoryEnum.PET, CategoryEnum.FASHION, CategoryEnum.CATEGORY9]
-            }
-        ]))
+        self.__common_after_hooks.map_enums_collection = MagicMock()
+        context = PinfluencerContext()
 
         # act
         self.__sut.format_values_and_categories_collection(context=context)
 
         # assert
-        assert context.response.body[0]["campaign_categories"] == expected_categories
-        assert context.response.body[0]["campaign_values"] == expected_values
-        assert context.response.body[1]["campaign_categories"] == expected_categories2
-        assert context.response.body[1]["campaign_values"] == expected_values2
+        self.__common_after_hooks.map_enums_collection.assert_any_call(context=context, key="campaign_categories")
+        self.__common_after_hooks.map_enums_collection.assert_any_call(context=context, key="campaign_values")
 
     def test_tag_bucket_url_to_images_collection(self):
         # arrange
@@ -564,37 +616,50 @@ class TestCampaignAfterHooks(TestCase):
 
     def test_format_campaign_state(self):
         # arrange
-        context = context = PinfluencerContext(
-            response=PinfluencerResponse(body={"campaign_state": CampaignStateEnum.DRAFT}))
+        context = PinfluencerContext()
+        self.__common_after_hooks.map_enum = MagicMock()
 
         # act
-        self.__sut.format_campaign_state(context)
+        self.__sut.format_campaign_state(context=context)
 
         # assert
-        assert context.response.body["campaign_state"] == "DRAFT"
+        self.__common_after_hooks.map_enum(context=context,
+                                           key="campaign_state")
 
     def test_format_campaign_state_collection(self):
         # arrange
-        context = context = PinfluencerContext(
-            response=PinfluencerResponse(body=[
-                {"campaign_state": CampaignStateEnum.DRAFT},
-                {"campaign_state": CampaignStateEnum.ACTIVE},
-                {"campaign_state": CampaignStateEnum.CLOSED}
-            ]))
+        context = PinfluencerContext()
+        self.__common_after_hooks.map_enum_collection = MagicMock()
 
         # act
-        self.__sut.format_campaign_state_collection(context)
+        self.__sut.format_campaign_state_collection(context=context)
 
         # assert
-        assert context.response.body[0]["campaign_state"] == "DRAFT"
-        assert context.response.body[1]["campaign_state"] == "ACTIVE"
-        assert context.response.body[2]["campaign_state"] == "CLOSED"
+        self.__common_after_hooks.map_enums(context=context,
+                                            key="campaign_state")
 
 
 class TestUserBeforeHooks(TestCase):
 
     def setUp(self) -> None:
-        self.__sut = UserBeforeHooks()
+        self.__common_before_hooks: CommonBeforeHooks = Mock()
+        self.__sut = UserBeforeHooks(self.__common_before_hooks)
+
+    def test_map_categories_and_values(self):
+        # arrange
+        self.__common_before_hooks.map_enums = MagicMock()
+        context = PinfluencerContext()
+
+        # act
+        self.__sut.set_categories_and_values(context=context)
+
+        # assert
+        self.__common_before_hooks.map_enums.assert_any_call(context=context,
+                                                             key="categories",
+                                                             enum_value=CategoryEnum)
+        self.__common_before_hooks.map_enums.assert_any_call(context=context,
+                                                             key="values",
+                                                             enum_value=ValueEnum)
 
     def test_set_auth_user_id(self):
         # arrange
@@ -690,9 +755,9 @@ class TestUserAfterHooks(TestCase):
 
         # assert
         self.__common_after_hooks.map_enums.assert_any_call(context=context,
-                                                                    key="values")
+                                                            key="values")
         self.__common_after_hooks.map_enums.assert_any_call(context=context,
-                                                                    key="categories")
+                                                            key="categories")
 
     def test_format_values_and_categories_collection(self):
         # arrange
@@ -704,6 +769,6 @@ class TestUserAfterHooks(TestCase):
 
         # assert
         self.__common_after_hooks.map_enums_collection.assert_any_call(context=context,
-                                                               key="values")
+                                                                       key="values")
         self.__common_after_hooks.map_enums_collection.assert_any_call(context=context,
-                                                               key="categories")
+                                                                       key="categories")
