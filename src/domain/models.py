@@ -34,50 +34,52 @@ class CategoryEnum(Enum):
     CATEGORY10 = "CATEGORY10"
 
 
-@dataclass
-class Model:
+@dataclass(unsafe_hash=True)
+class DataModel:
     id: str = field(default_factory=uuid4_str)
     created: datetime = field(default_factory=datetime.utcnow)
 
 
-@dataclass
-class User(Model):
-    first_name: str = ""
-    last_name: str = ""
-    email: str = ""
-    auth_user_id: str = ""
-
-
-@dataclass
-class Brand(User):
-    brand_name: str = ""
-    brand_description: str = ""
-    website: str = ""
+@dataclass(unsafe_hash=True)
+class Brand(DataModel):
+    brand_name: str = None
+    brand_description: str = None
+    website: str = None
     logo: str = None
     header_image: str = None
-    insta_handle: str = ""
-    values: list[ValueEnum] = field(default_factory=list)
-    categories: list[CategoryEnum] = field(default_factory=list)
+    insta_handle: str = None
+    values: list[ValueEnum] = None
+    categories: list[CategoryEnum] = None
+    auth_user_id: str = None
+
+
+@dataclass(unsafe_hash=True)
+class User:
+    first_name: str = None
+    last_name: str = None
+    email: str = None
+    auth_user_id: str = None
 
 
 @dataclass
-class Influencer(User):
-    insta_handle: str = ""
-    website: str = ""
-    bio: str = ""
+class Influencer(DataModel):
+    insta_handle: str = None
+    website: str = None
+    bio: str = None
     image: str = None
-    audience_age_13_to_17_split: float = 0.0
-    audience_age_18_to_24_split: float = 0.0
-    audience_age_25_to_34_split: float = 0.0
-    audience_age_35_to_44_split: float = 0.0
-    audience_age_45_to_54_split: float = 0.0
-    audience_age_55_to_64_split: float = 0.0
-    audience_age_65_plus_split: float = 0.0
-    audience_male_split: float = 0.0
-    audience_female_split: float = 0.0
-    values: list[ValueEnum] = field(default_factory=list)
-    categories: list[CategoryEnum] = field(default_factory=list)
-    address: str = ""
+    audience_age_13_to_17_split: float = None
+    audience_age_18_to_24_split: float = None
+    audience_age_25_to_34_split: float = None
+    audience_age_35_to_44_split: float = None
+    audience_age_45_to_54_split: float = None
+    audience_age_55_to_64_split: float = None
+    audience_age_65_plus_split: float = None
+    audience_male_split: float = None
+    audience_female_split: float = None
+    values: list[ValueEnum] = None
+    categories: list[CategoryEnum] = None
+    address: str = None
+    auth_user_id: str = None
 
 
 class CampaignStateEnum(Enum):
@@ -88,20 +90,22 @@ class CampaignStateEnum(Enum):
 
 
 @dataclass
-class Campaign(Model):
-    brand_id: str = ""
-    objective: str = ""
-    success_description: str = ""
-    campaign_title: str = ""
-    campaign_description: str = ""
-    campaign_categories: list[CategoryEnum] = field(default_factory=list)
-    campaign_values: list[ValueEnum] = field(default_factory=list)
-    campaign_state: CampaignStateEnum = CampaignStateEnum.DRAFT
-    campaign_product_link: str = ""
-    campaign_hashtag: str = ""
-    campaign_discount_code: str = ""
-    product_title: str = ""
-    product_description: str = ""
+class Campaign:
+    brand_id: str = None
+    objective: str = None
+    success_description: str = None
+    campaign_title: str = None
+    campaign_description: str = None
+    campaign_categories: list[CategoryEnum] = None
+    campaign_values: list[ValueEnum] = None
+    campaign_state: CampaignStateEnum = None
+    campaign_product_link: str = None
+    campaign_hashtag: str = None
+    campaign_discount_code: str = None
+    product_title: str = None
+    product_description: str = None
     product_image1: str = None
     product_image2: str = None
     product_image3: str = None
+    id: str = None
+    created: datetime = None

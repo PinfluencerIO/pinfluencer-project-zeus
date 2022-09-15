@@ -6,7 +6,7 @@ from callee import Captor
 
 from src._types import AuthUserRepository, BrandRepository
 from src.crosscutting import JsonCamelToSnakeCaseDeserializer
-from src.domain.models import User, Brand, Influencer, ValueEnum, CategoryEnum, CampaignStateEnum
+from src.domain.models import User, ValueEnum, CategoryEnum, CampaignStateEnum
 from src.domain.validation import InfluencerValidator, BrandValidator, CampaignValidator
 from src.exceptions import NotFoundException
 from src.web import PinfluencerContext, PinfluencerResponse
@@ -457,7 +457,7 @@ class TestBrandAfterHooks(TestCase):
         # assert
         captor = Captor()
         self.__auth_user_repository.update_brand_claims.assert_called_once_with(user=captor)
-        user_payload_arg: Brand = captor.arg
+        user_payload_arg: User = captor.arg
         assert user_payload_arg.first_name == first_name
         assert user_payload_arg.last_name == last_name
         assert user_payload_arg.email == email
@@ -521,7 +521,7 @@ class TestInfluencerAfterHooks(TestCase):
         # assert
         captor = Captor()
         self.__auth_user_repository.update_influencer_claims.assert_called_once_with(user=captor)
-        user_payload_arg: Influencer = captor.arg
+        user_payload_arg: User = captor.arg
         assert user_payload_arg.first_name == first_name
         assert user_payload_arg.last_name == last_name
         assert user_payload_arg.email == email

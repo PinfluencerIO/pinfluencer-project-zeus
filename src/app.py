@@ -3,7 +3,8 @@ from simple_injection import ServiceCollection
 
 from src._types import DataManager, BrandRepository, InfluencerRepository, CampaignRepository, ImageRepository, \
     ObjectMapperAdapter, Deserializer, Serializer, AuthUserRepository
-from src.crosscutting import print_exception, JsonCamelToSnakeCaseDeserializer, JsonSnakeToCamelSerializer
+from src.crosscutting import print_exception, JsonCamelToSnakeCaseDeserializer, JsonSnakeToCamelSerializer, \
+    PinfluencerObjectMapper
 from src.data import SqlAlchemyDataManager
 from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository, \
     SqlAlchemyCampaignRepository, S3ImageRepository, CognitoAuthUserRepository, CognitoAuthService
@@ -115,6 +116,7 @@ def register_controllers(ioc):
 def register_object_mapping(ioc):
     mapper = ObjectMapper()
     ioc.add_instance(ObjectMapperAdapter, mapper)
+    ioc.add_singleton(PinfluencerObjectMapper)
 
 
 def register_domain(ioc):

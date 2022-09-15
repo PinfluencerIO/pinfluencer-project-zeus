@@ -1,5 +1,5 @@
-from mapper.object_mapper_exception import ObjectMapperException
-from sqlalchemy import Column, String, DateTime, Float, PickleType
+import sqlalchemy.orm
+from sqlalchemy import Column, String, DateTime, Float, PickleType, Table
 
 from src._types import ObjectMapperAdapter
 from src.data import Base
@@ -15,7 +15,7 @@ class SqlAlchemyBaseUserEntity(SqlAlchemyBaseEntity):
     auth_user_id = Column(type_=String(length=64), nullable=False, unique=True)
 
 
-class SqlAlchemyBrandEntity(Base, SqlAlchemyBaseUserEntity):
+class SqlAlchemyBrandEntity(SqlAlchemyBaseUserEntity):
     __tablename__ = 'brand'
 
     brand_name = Column(type_=String(length=120), nullable=False)
@@ -26,6 +26,20 @@ class SqlAlchemyBrandEntity(Base, SqlAlchemyBaseUserEntity):
     insta_handle = Column(type_=String(length=30), nullable=True)
     website = Column(type_=String(length=120), nullable=False)
     logo = Column(type_=String(length=360), nullable=True)
+
+
+brand_table = Table('brand', Base.metadata,
+                    Column('id', String(length=36), primary_key=True),
+                    Column('created', DateTime),
+                    Column('auth_user_id', String(length=64)),
+                    Column('brand_name', String(length=120)),
+                    Column('brand_description', String(length=500)),
+                    Column('header_image', String(length=360)),
+                    Column('values', PickleType),
+                    Column('categories', PickleType),
+                    Column('insta_handle', String(length=30)),
+                    Column('website', String(length=120)),
+                    Column('logo', String(length=360)))
 
 
 class SqlAlchemyInfluencerEntity(Base, SqlAlchemyBaseUserEntity):
@@ -72,11 +86,17 @@ class SqlAlchemyCampaignEntity(Base, SqlAlchemyBaseEntity):
 
 def create_mappings(mapper: ObjectMapperAdapter):
     try:
+        # sqlalchemy mappings
+        sqlalchemy.orm.mapper(Brand, brand_table)
+
+        # old legacy mappings
         mapper.create_map(Brand, SqlAlchemyBrandEntity)
-        mapper.create_map(SqlAlchemyBrandEntity, Brand)
+
+        # TODO: replace with classical map
+        # mapper.create_map(SqlAlchemyBrandEntity, Brand)
         mapper.create_map(Influencer, SqlAlchemyInfluencerEntity)
         mapper.create_map(SqlAlchemyInfluencerEntity, Influencer)
         mapper.create_map(Campaign, SqlAlchemyCampaignEntity)
         mapper.create_map(SqlAlchemyCampaignEntity, Campaign)
-    except ObjectMapperException as e:
+    except Exception as e:
         print(f"mappings tried to be created more than once {e}")

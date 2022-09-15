@@ -7,7 +7,7 @@ from mapper.object_mapper import ObjectMapper
 from src._types import ImageRepository
 from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository, CognitoAuthUserRepository, \
     CognitoAuthService, SqlAlchemyCampaignRepository
-from src.domain.models import Campaign, CampaignStateEnum
+from src.domain.models import Campaign, CampaignStateEnum, Brand
 from src.exceptions import AlreadyExistsException, NotFoundException
 from tests import InMemorySqliteDataManager, brand_generator, brand_dto_generator, influencer_dto_generator, \
     assert_brand_updatable_fields_are_equal_for_three, assert_brand_db_fields_are_equal, \
@@ -119,6 +119,17 @@ class TestBrandRepository(BrandRepositoryTestCase):
 
         # assert
         assert actual.id == expected.id
+
+    def test_something(self):
+        # arrange
+        expected = brand_dto_generator(num=1)
+
+        # act
+        self._data_manager.create_fake_data([expected])
+        brand = self._data_manager.session.query(Brand).first()
+
+        # assert
+        assert brand == expected
 
     def test_update_for_auth_user(self):
         # arrange

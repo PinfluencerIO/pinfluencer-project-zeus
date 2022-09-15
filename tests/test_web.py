@@ -1,7 +1,35 @@
 from unittest import TestCase
 
-from src.crosscutting import JsonSnakeToCamelSerializer
-from src.web import PinfluencerResponse
+from src.crosscutting import JsonSnakeToCamelSerializer, AutoFixture
+from src.domain.models import Brand
+from src.web import PinfluencerResponse, RequestDtoMapper
+from src.web.request_dtos import BrandRequestDto
+
+
+class TestRequestDtoMapper(TestCase):
+
+    def setUp(self) -> None:
+        self.__sut = RequestDtoMapper()
+
+    def test_map(self):
+        # arrange
+        brand_request: BrandRequestDto = AutoFixture().create(dto=BrandRequestDto, list_limit=5)
+
+        # act
+        brand: Brand = self.__sut.map(_from=brand_request, to=Brand)
+
+        # assert
+        assert brand.brand_name == brand_request.brand_name
+        assert brand.brand_description == brand_request.brand_description
+        assert brand.values == brand_request.values
+        assert brand.logo == brand_request.logo
+        assert brand.categories == brand_request.categories
+        assert brand.insta_handle == brand_request.insta_handle
+        assert brand.website == brand_request.website
+        assert brand.header_image == brand_request.header_image
+
+
+
 
 
 class TestPinfluencerResponse(TestCase):

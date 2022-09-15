@@ -1,15 +1,18 @@
 from typing import Callable
 
 from src._types import BrandRepository, UserRepository, InfluencerRepository, Repository, CampaignRepository
-from src.crosscutting import print_exception
+from src.crosscutting import print_exception, PinfluencerObjectMapper
 from src.domain.models import ValueEnum, CategoryEnum, Brand, Influencer, Campaign, CampaignStateEnum
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.web import PinfluencerResponse, BRAND_ID_PATH_KEY, INFLUENCER_ID_PATH_KEY, PinfluencerContext
+from src.web.request_dtos import BrandRequestDto
 
 
 class BaseController:
 
-    def __init__(self, repository: Repository):
+    def __init__(self, repository: Repository,
+                 mapper: PinfluencerObjectMapper):
+        self._mapper = mapper
         self._repository = repository
 
     def get_all(self, context: PinfluencerContext) -> None:
@@ -46,8 +49,8 @@ class BaseController:
 
 class BaseUserController(BaseController):
 
-    def __init__(self, user_repository: UserRepository, resource_id: str):
-        super().__init__(user_repository)
+    def __init__(self, user_repository: UserRepository, resource_id: str, object_mapper: PinfluencerObjectMapper):
+        super().__init__(user_repository, object_mapper)
         self._resource_id = resource_id
 
     def get(self, context: PinfluencerContext) -> None:
@@ -66,19 +69,16 @@ class BaseUserController(BaseController):
 
 
 class BrandController(BaseUserController):
-    def __init__(self, brand_repository: BrandRepository):
-        super().__init__(brand_repository, BRAND_ID_PATH_KEY)
+    def __init__(self, brand_repository: BrandRepository, object_mapper: PinfluencerObjectMapper):
+        super().__init__(brand_repository, BRAND_ID_PATH_KEY, object_mapper)
 
     def create(self, context: PinfluencerContext) -> None:
         auth_user_id = context.auth_user_id
         payload_dict = context.body
         try:
-            brand = Brand(brand_name=payload_dict["brand_name"],
-                          brand_description=payload_dict["brand_description"],
-                          website=payload_dict["website"],
-                          insta_handle=payload_dict["insta_handle"],
-                          values=payload_dict["values"],
-                          categories=payload_dict["categories"])
+            brand = self._mapper.map(_from=self._mapper.map_from_dict(_from=payload_dict,
+                                                                      to=BrandRequestDto),
+                                     to=Brand)
             self._repository.write_new_for_auth_user(auth_user_id=auth_user_id, payload=brand)
         except (AlreadyExistsException) as e:
             print_exception(e)
@@ -134,17 +134,14 @@ class BrandController(BaseUserController):
 
 class InfluencerController(BaseUserController):
 
-    def __init__(self, influencer_repository: InfluencerRepository):
-        super().__init__(influencer_repository, INFLUENCER_ID_PATH_KEY)
+    def __init__(self, influencer_repository: InfluencerRepository, object_mapper: PinfluencerObjectMapper):
+        super().__init__(influencer_repository, INFLUENCER_ID_PATH_KEY, object_mapper)
 
     def create(self, context: PinfluencerContext) -> None:
         auth_user_id = context.auth_user_id
         payload_dict = context.body
         try:
-            influencer = Influencer(first_name=payload_dict["first_name"],
-                                    last_name=payload_dict["last_name"],
-                                    email=payload_dict["email"],
-                                    bio=payload_dict["bio"],
+            influencer = Influencer(bio=payload_dict["bio"],
                                     website=payload_dict["website"],
                                     insta_handle=payload_dict["insta_handle"],
                                     values=list(map(lambda x: ValueEnum[x], payload_dict["values"])),
@@ -236,8 +233,8 @@ class InfluencerController(BaseUserController):
 
 class CampaignController(BaseController):
 
-    def __init__(self, repository: CampaignRepository):
-        super().__init__(repository)
+    def __init__(self, repository: CampaignRepository, object_mapper: PinfluencerObjectMapper):
+        super().__init__(repository, object_mapper)
 
     def create(self, context: PinfluencerContext) -> None:
         try:
@@ -299,8 +296,8 @@ class CampaignController(BaseController):
 
     def update_campaign_state(self, context: PinfluencerContext) -> None:
         try:
-            campaign = self\
-                ._repository\
+            campaign = self \
+                ._repository \
                 .update_campaign_state(_id=context.id,
                                        payload=CampaignStateEnum[context.body["campaign_state"]])
             context.response.body = campaign.__dict__
@@ -310,7 +307,6 @@ class CampaignController(BaseController):
             context.response.body = {}
             context.response.status_code = 404
             context.short_circuit = True
-
 
     def update_product_image1(self, context: PinfluencerContext) -> None:
         [response, short_circuit] = self._update_image(context=context,

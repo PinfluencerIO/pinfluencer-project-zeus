@@ -1,4 +1,6 @@
+from contextlib import contextmanager
 from enum import Enum
+from unittest import TestCase
 from unittest.mock import Mock
 
 from sqlalchemy import create_engine
@@ -8,7 +10,7 @@ from src.crosscutting import JsonSnakeToCamelSerializer
 from src.data import Base
 from src.data.entities import SqlAlchemyBrandEntity, SqlAlchemyBaseEntity, SqlAlchemyInfluencerEntity, \
     SqlAlchemyCampaignEntity
-from src.domain.models import Brand, Influencer, ValueEnum, CategoryEnum, User, Campaign
+from src.domain.models import Brand, Influencer, ValueEnum, CategoryEnum, Campaign, User
 
 TEST_DEFAULT_PRODUCT_IMAGE1 = "default_product_image1.png"
 TEST_DEFAULT_PRODUCT_IMAGE2 = "default_product_image2.png"
@@ -96,9 +98,6 @@ def brand_dto_generator(num, repo: RepoEnum = RepoEnum.NO_REPO):
         values = []
         categories = []
     return Brand(
-        first_name=first_name,
-        last_name=last_name,
-        email=email,
         auth_user_id=auth_user_id,
         brand_name=brand_name,
         brand_description=brand_description,
@@ -159,9 +158,6 @@ def influencer_dto_generator(num, repo: RepoEnum = RepoEnum.NO_REPO):
         audience_female_split = 0.0
         address = ""
     return Influencer(
-        first_name=first_name,
-        last_name=last_name,
-        email=email,
         auth_user_id=auth_user_id,
         bio=bio,
         website=website,
@@ -462,10 +458,7 @@ def update_user_dto():
 
 
 def create_brand_dto():
-    return Brand(first_name="",
-                 last_name="",
-                 email="",
-                 brand_name="name",
+    return Brand(brand_name="name",
                  brand_description="description",
                  website="https://website.com",
                  insta_handle="instahandle",
@@ -481,10 +474,7 @@ def update_image_payload():
 
 
 def update_brand_return_dto():
-    return Brand(first_name="",
-                 last_name="",
-                 email="",
-                 brand_name="name",
+    return Brand(brand_name="name",
                  brand_description="description",
                  website="https://website.com",
                  insta_handle="instahandle",
@@ -493,10 +483,7 @@ def update_brand_return_dto():
 
 
 def update_brand_expected_dto():
-    return Brand(first_name="first_name",
-                 last_name="last_name",
-                 email="email@gmail.com",
-                 brand_name="name",
+    return Brand(brand_name="name",
                  brand_description="description",
                  website="https://website.com",
                  insta_handle="instahandle",
@@ -512,10 +499,7 @@ def create_for_auth_user_event(auth_id, payload):
 
 
 def create_influencer_dto():
-    return Influencer(first_name="",
-                      last_name="",
-                      email="",
-                      bio="bio",
+    return Influencer(bio="bio",
                       website="https://website.com",
                       insta_handle="instahandle",
                       values=[ValueEnum.VALUE7, ValueEnum.VALUE8, ValueEnum.VALUE9],
@@ -554,3 +538,32 @@ def update_influencer_payload():
         "audience_age_65_plus_split": 0.143,
         "address": "69 beans road"
     }
+
+
+class PinfluencerTestCase(TestCase):
+
+    def __init__(self, methodName: str = ...):
+        super().__init__(methodName)
+        self.results = []
+
+    @contextmanager
+    def tdd_test(self, msg):
+        try:
+            yield
+            print("\n===================================================================")
+            print(f"TEST {msg} PASSED!!")
+            print("===================================================================")
+        except Exception as e:
+            self.results.append((str(e), msg))
+
+    def tearDown(self) -> None:
+        message = ""
+        passed = self.results == []
+        for (result, test) in self.results:
+            message = f"\n{message}===================================================================\n"
+            message = f"{message}TEST {test} FAILED!!\n"
+            message = f"{message}==================================================================="
+            message = f"{message}\n{result}\n\n"
+        self.results = []
+        if not passed:
+            raise Exception(message)

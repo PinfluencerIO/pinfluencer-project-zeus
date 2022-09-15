@@ -1,14 +1,14 @@
 from typing import Protocol, Optional, Union
 
-from src.domain.models import Brand, Influencer, User, Campaign, CampaignStateEnum
+from src.domain.models import Brand, Influencer, Campaign, CampaignStateEnum, User
 
 
 class AuthUserRepository(Protocol):
 
-    def update_brand_claims(self, user: Brand) -> None:
+    def update_brand_claims(self, user: User) -> None:
         ...
 
-    def update_influencer_claims(self, user: Influencer) -> None:
+    def update_influencer_claims(self, user: User) -> None:
         ...
 
     def get_by_id(self, _id: str) -> User:
@@ -45,6 +45,9 @@ class CampaignRepository(Protocol):
     def update_campaign_state(self, _id: str, payload: CampaignStateEnum) -> Campaign:
         ...
 
+    def commit(self):
+        ...
+
 
 class BrandRepository(Protocol):
 
@@ -69,6 +72,9 @@ class BrandRepository(Protocol):
     def update_header_image_for_auth_user(self, auth_user_id: str, image_bytes: str) -> Brand:
         ...
 
+    def commit(self):
+        ...
+
 
 class InfluencerRepository(Protocol):
 
@@ -88,6 +94,9 @@ class InfluencerRepository(Protocol):
         ...
 
     def update_image_for_auth_user(self, auth_user_id: str, image_bytes: str) -> Influencer:
+        ...
+
+    def commit(self):
         ...
 
 
@@ -145,10 +154,10 @@ class ImageRepository(Protocol):
         pass
 
 
-User = Union[Brand, Influencer]
+UserModel = Union[Brand, Influencer]
 
 # TODO: add rest
-Model = Union[User, Campaign]
+Model = Union[UserModel, Campaign]
 
 
 class ObjectMapperAdapter(Protocol):

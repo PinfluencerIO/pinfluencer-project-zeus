@@ -2,7 +2,7 @@ from jsonschema.exceptions import ValidationError
 
 from src._types import AuthUserRepository, Deserializer, BrandRepository
 from src.crosscutting import print_exception
-from src.domain.models import Brand, Influencer, CategoryEnum, ValueEnum, CampaignStateEnum
+from src.domain.models import CategoryEnum, ValueEnum, CampaignStateEnum, User
 from src.domain.validation import BrandValidator, InfluencerValidator, CampaignValidator
 from src.exceptions import NotFoundException
 from src.web import PinfluencerContext, valid_path_resource_id
@@ -229,10 +229,7 @@ class BrandAfterHooks:
         self.__auth_user_repository = auth_user_repository
 
     def set_brand_claims(self, context: PinfluencerContext):
-        user = Brand(first_name=context.body["first_name"],
-                     last_name=context.body["last_name"],
-                     email=context.body["email"],
-                     auth_user_id=context.auth_user_id)
+        user = User(auth_user_id=context.auth_user_id)
         self.__auth_user_repository.update_brand_claims(user=user)
 
     def tag_bucket_url_to_images(self, context: PinfluencerContext):
@@ -256,10 +253,7 @@ class InfluencerAfterHooks:
         self.__auth_user_repository = auth_user_repository
 
     def set_influencer_claims(self, context: PinfluencerContext):
-        user = Influencer(first_name=context.body["first_name"],
-                          last_name=context.body["last_name"],
-                          email=context.body["email"],
-                          auth_user_id=context.auth_user_id)
+        user = User(auth_user_id=context.auth_user_id)
         self.__auth_user_repository.update_influencer_claims(user=user)
 
     def tag_bucket_url_to_images(self, context: PinfluencerContext):

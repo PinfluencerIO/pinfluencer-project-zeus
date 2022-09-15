@@ -8,11 +8,10 @@ import boto3
 from botocore.exceptions import ClientError
 from filetype import filetype
 
-from src._types import DataManager, ImageRepository, Model, User, ObjectMapperAdapter
+from src._types import DataManager, ImageRepository, Model, ObjectMapperAdapter, UserModel
 from src.data.entities import SqlAlchemyBrandEntity, SqlAlchemyInfluencerEntity, create_mappings, \
     SqlAlchemyCampaignEntity
-from src.domain.models import Brand, Influencer, Campaign, CampaignStateEnum
-from src.domain.models import User as UserModel
+from src.domain.models import Brand, Influencer, Campaign, CampaignStateEnum, User
 from src.exceptions import AlreadyExistsException, ImageException, NotFoundException
 
 
@@ -64,6 +63,9 @@ class BaseSqlAlchemyRepository:
         else:
             raise NotFoundException(f'{self._resource_dto.__name__} {id} could not be found')
 
+    def commit(self):
+        ...
+
 
 class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):
     def __init__(self, data_manager: DataManager,
@@ -77,7 +79,7 @@ class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):
                          resource_dto=resource_dto,
                          image_repository=image_repository)
 
-    def load_for_auth_user(self, auth_user_id) -> User:
+    def load_for_auth_user(self, auth_user_id) -> UserModel:
         print(f"QUERY: <load for auth user> ENTITY: {self._resource_entity.__name__}")
         first = self._data_manager.session \
             .query(self._resource_entity) \
@@ -87,7 +89,7 @@ class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):
             return self._object_mapper.map(from_obj=first, to_type=self._resource_dto)
         raise NotFoundException(f'user {auth_user_id} not found')
 
-    def write_new_for_auth_user(self, auth_user_id, payload) -> User:
+    def write_new_for_auth_user(self, auth_user_id, payload) -> UserModel:
         try:
             entity = self.load_for_auth_user(auth_user_id)
             raise AlreadyExistsException(f'{self._resource_entity.__name__}'
@@ -399,17 +401,17 @@ class CognitoAuthUserRepository:
                                                  attribute_name='family_name')
         email = self.__get_cognito_attribute(user=auth_user,
                                              attribute_name='email')
-        return UserModel(first_name=first_name,
+        return User(first_name=first_name,
                          last_name=last_name,
                          email=email)
 
     def __get_cognito_attribute(self, user: dict, attribute_name: str) -> str:
         return next(filter(lambda x: x['Name'] == attribute_name, user['UserAttributes']))['Value']
 
-    def update_brand_claims(self, user: Brand):
+    def update_brand_claims(self, user: User):
         self.__update_user_claims(user=user, type='brand')
 
-    def update_influencer_claims(self, user: Influencer):
+    def update_influencer_claims(self, user: User):
         self.__update_user_claims(user=user, type='influencer')
 
     def __update_user_claims(self, user: User, type: str):

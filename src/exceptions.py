@@ -8,3 +8,7 @@ class NotFoundException(Exception):
 
 class ImageException(Exception):
     pass
+
+
+class AutoFixtureException(Exception):
+    pass

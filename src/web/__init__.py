@@ -7,11 +7,13 @@ from src.crosscutting import valid_uuid
 BRAND_ID_PATH_KEY = 'brand_id'
 INFLUENCER_ID_PATH_KEY = 'influencer_id'
 
+
 @dataclass
 class PinfluencerRequest:
     body: dict
     id: str = ""
     auth_user_id: str = ""
+
 
 class PinfluencerResponse:
     def __init__(self, status_code: int = 200, body: Union[dict, list] = {}) -> None:
@@ -54,9 +56,6 @@ class PinfluencerContext:
     id: str = ""
 
 
-
-
-
 PinfluencerAction = Callable[[PinfluencerContext], None]
 
 
@@ -78,3 +77,9 @@ def valid_path_resource_id(event, resource_key):
         print(f'Missing key in event pathParameters.{resource_key}')
 
     return None
+
+
+class RequestDtoMapper:
+
+    def map(self, _from, to):
+        ...
