@@ -5,6 +5,7 @@ from callee import Captor
 from mapper.object_mapper import ObjectMapper
 
 from src._types import ImageRepository
+from src.crosscutting import AutoFixture
 from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository, CognitoAuthUserRepository, \
     CognitoAuthService, SqlAlchemyCampaignRepository
 from src.domain.models import Campaign, CampaignStateEnum, Brand
@@ -12,10 +13,10 @@ from src.exceptions import AlreadyExistsException, NotFoundException
 from tests import InMemorySqliteDataManager, brand_generator, brand_dto_generator, influencer_dto_generator, \
     assert_brand_updatable_fields_are_equal_for_three, assert_brand_db_fields_are_equal, \
     assert_collection_brand_db_fields_are_equal, assert_brand_db_fields_are_equal_for_three, influencer_generator, \
-    assert_influencer_db_fields_are_equal_for_three, campaign_dto_generator, campaign_generator
+    assert_influencer_db_fields_are_equal_for_three, campaign_dto_generator, campaign_generator, PinfluencerTestCase
 
 
-class BrandRepositoryTestCase(TestCase):
+class BrandRepositoryTestCase(PinfluencerTestCase):
 
     def setUp(self):
         self._data_manager = InMemorySqliteDataManager()
@@ -27,6 +28,30 @@ class BrandRepositoryTestCase(TestCase):
 
 
 class TestBaseRepository(BrandRepositoryTestCase):
+
+    def test_commit(self):
+        # arrange
+        expected_brand = AutoFixture().create(dto=Brand,
+                                              list_limit=5)
+        brand_names = [expected_brand.brand_name, "new_brand_name"]
+        self._data_manager.create_fake_data([expected_brand])
+
+        # act
+        self._data_manager \
+            .session \
+            .query(Brand) \
+            .filter(Brand.id == expected_brand.id) \
+            .first().brand_name = brand_names[1]
+        self._sut.commit()
+        self._data_manager.session.close()
+
+        # assert
+        with self.tdd_test(msg="brand name has been changed in db"):
+            assert self._data_manager\
+                       .session\
+                       .query(Brand)\
+                       .filter(Brand.id == expected_brand.id)\
+                       .first().brand_name == brand_names[1]
 
     def test_load_by_id(self):
         # arrange

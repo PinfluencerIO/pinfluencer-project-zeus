@@ -1,5 +1,5 @@
 import datetime
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from unittest import TestCase
 
 from src.crosscutting import JsonSnakeToCamelSerializer, JsonCamelToSnakeCaseDeserializer, AutoFixture, \
@@ -54,6 +54,12 @@ TEST_DICT_WITH_CAPS_KEY = {
 
 
 @dataclass(unsafe_hash=True)
+class InheritedDto:
+    id: str = field(default_factory=lambda: "default_id")
+    name: str = None
+
+
+@dataclass(unsafe_hash=True)
 class NestedTestOtherDto:
     id: str = None
     name: str = None
@@ -84,9 +90,7 @@ class NestedTestDto:
 
 
 @dataclass(unsafe_hash=True)
-class TestDto:
-    id: str = None
-    name: str = None
+class TestDto(InheritedDto):
     bool_: bool = None
     enum: ValueEnum = None
     list_of_enums: list[CategoryEnum] = None
@@ -112,7 +116,7 @@ class TestPinfluencerMapper:
         test_other_dto: TestOtherDto = PinfluencerObjectMapper().map(_from=test_dto, to=TestOtherDto)
 
         # assert
-        assert test_other_dto.id == test_dto.id
+        assert test_other_dto.id == "default_id"
         assert test_other_dto.date == test_dto.date
         assert test_other_dto.list_of_dates == test_dto.list_of_dates
         assert test_other_dto.name == test_dto.name
@@ -136,15 +140,13 @@ class TestAutoFixture:
         # arrange
         autofixture = AutoFixture()
 
-        print(autofixture.create_many(dto=TestDto, ammount=5, list_limit=5))
-
         # act
         dto: TestDto = autofixture.create(dto=TestDto,
                                           seed="1234",
                                           num=2)
 
         # assert
-        assert dto.id == "id1234"
+        assert dto.id == "default_id"
         assert dto.name == "name1234"
         assert dto.bool_ is True
         assert dto.enum == ValueEnum.RECYCLED

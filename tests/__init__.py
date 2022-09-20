@@ -229,6 +229,7 @@ class InMemorySqliteDataManager:
 
     def create_fake_data(self, objects):
         self.__session.bulk_save_objects(objects=objects)
+        self.session.commit()
 
 
 class StubDataManager:

@@ -10,8 +10,8 @@ from src.domain.models import Influencer, Campaign, CategoryEnum, ValueEnum, Cam
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.controllers import BrandController, InfluencerController, CampaignController
-from src.web.request_dtos import BrandRequestDto
-from tests import brand_dto_generator, assert_brand_updatable_fields_are_equal, influencer_dto_generator, RepoEnum, \
+from src.web.views import BrandRequestDto, BrandResponseDto
+from tests import brand_dto_generator, influencer_dto_generator, RepoEnum, \
     assert_influencer_creatable_generated_fields_are_equal, \
     assert_influencer_update_fields_are_equal, \
     update_brand_payload, update_image_payload, create_influencer_dto, \
@@ -183,6 +183,43 @@ class TestBrandController(PinfluencerTestCase):
         self.__sut = BrandController(brand_repository=self.__brand_repository,
                                      object_mapper=self.__object_mapper)
 
+    def test_unit_of_work(self):
+        # arrange
+        self.__brand_repository.load_by_id = MagicMock()
+        self.__brand_repository.commit = MagicMock()
+
+        # act
+        self.test_unit_of_work_call()
+
+        # assert
+        with self.tdd_test(msg="brand repository is called"):
+            self.__brand_repository.load_by_id.assert_called_once()
+
+        # assert
+        with self.tdd_test(msg="commit is called"):
+            self.__brand_repository.commit.assert_called_once()
+
+    def test_unit_of_work_when_error_occurs(self):
+        # arrange
+        self.__brand_repository.load_by_id = MagicMock(side_effect=NotFoundException())
+        self.__brand_repository.commit = MagicMock()
+
+        # act/assert
+        with self.tdd_test(msg="unit of work still throws"):
+            self.assertRaises(NotFoundException, lambda: self.test_unit_of_work_call())
+
+        # assert
+        with self.tdd_test(msg="brand repository is called"):
+            self.__brand_repository.load_by_id.assert_called_once()
+
+        # assert
+        with self.tdd_test(msg="commit is not called"):
+            self.__brand_repository.commit.assert_not_called()
+
+    def test_unit_of_work_call(self):
+        with self.__sut._unit_of_work():
+            self.__brand_repository.load_by_id(id_="")
+
     def test_get_by_id(self):
         # arrange
         brand_from_db = AutoFixture().create(dto=Brand,
@@ -307,33 +344,53 @@ class TestBrandController(PinfluencerTestCase):
 
     def test_create(self):
         # arrange
-        brand_request: dict = AutoFixture().create_dict(dto=BrandRequestDto,
-                                                        list_limit=5)
-        brand_db: Brand = self.__object_mapper.map_from_dict(_from=brand_request,
-                                                             to=Brand)
+        brand_request: BrandRequestDto = AutoFixture().create(dto=BrandRequestDto,
+                                                              list_limit=5)
+        brand_db: Brand = self.__object_mapper.map(_from=brand_request,
+                                                   to=Brand)
+        self.__sut._unit_of_work = MagicMock()
         brand_db.auth_user_id = "12345"
         self.__brand_repository.write_new_for_auth_user = MagicMock(return_value=brand_db)
         response = PinfluencerResponse()
 
         # act
-        self.__sut.create(PinfluencerContext(body=brand_request,
+        self.__sut.create(PinfluencerContext(body=brand_request.__dict__,
                                              auth_user_id=brand_db.auth_user_id,
                                              response=response))
         payload_captor = Captor()
 
         # assert
+        with self.tdd_test("unit of work called"):
+            self.__sut._unit_of_work.assert_called_once()
+
+        # assert
         with self.tdd_test("brand repository was called"):
             self.__brand_repository.write_new_for_auth_user.assert_called_once_with(auth_user_id=brand_db.auth_user_id,
                                                                                     payload=payload_captor)
-        actual_payload = payload_captor.arg
+        actual_payload: Brand = payload_captor.arg
 
         # assert
         with self.tdd_test("response code was created"):
             assert response.status_code == 201
 
         # assert
-        with self.tdd_test("response was equal to brand in db"):
-            assert response.body == actual_payload.__dict__
+        with self.tdd_test("response was equal to brand in db and request"):
+            mapped_brand_body: BrandResponseDto = self.__object_mapper.map_from_dict(_from=response.body,
+                                                                                     to=BrandResponseDto)
+
+            # brand in db asserts
+            assert actual_payload.id == mapped_brand_body.id
+            assert actual_payload.created == mapped_brand_body.created
+            assert actual_payload.header_image == mapped_brand_body.header_image
+            assert actual_payload.logo == mapped_brand_body.logo
+
+            # brand response asserts
+            assert actual_payload.brand_description == brand_request.brand_description == mapped_brand_body.brand_description
+            assert actual_payload.brand_name == brand_request.brand_name == mapped_brand_body.brand_name
+            assert actual_payload.categories == brand_request.categories == mapped_brand_body.categories
+            assert actual_payload.insta_handle == brand_request.insta_handle == mapped_brand_body.insta_handle
+            assert actual_payload.values == brand_request.values == mapped_brand_body.values
+            assert actual_payload.website == brand_request.website == mapped_brand_body.website
 
     def test_create_when_exists(self):
         # arrange
@@ -361,32 +418,74 @@ class TestBrandController(PinfluencerTestCase):
         with self.tdd_test("middleware should short circuit"):
             assert context.short_circuit == True
 
-    def test_update(self):
+    def test_update_all(self):
         # arrange
-        brand_request: dict = AutoFixture().create_dict(dto=BrandRequestDto,
-                                                        list_limit=5)
-        brand_db: Brand = self.__object_mapper.map_from_dict(_from=brand_request,
-                                                             to=Brand)
+        brand_request: BrandRequestDto = AutoFixture().create(dto=BrandRequestDto,
+                                                              list_limit=5)
+        brand_db: Brand = AutoFixture().create(dto=Brand,
+                                               list_limit=5)
         auth_id = "12341"
         self.__brand_repository.load_for_auth_user = MagicMock(return_value=brand_db)
         response = PinfluencerResponse()
+        self.__sut._unit_of_work = MagicMock()
 
         # act
-        self.__sut.update(PinfluencerContext(body=brand_request,
+        self.__sut.update(PinfluencerContext(body=brand_request.__dict__,
                                              auth_user_id=auth_id,
                                              response=response))
 
         # assert
-        payload_captor = Captor()
-        self.__brand_repository.update_for_auth_user.assert_called_once_with(auth_user_id=auth_id,
-                                                                             payload=payload_captor)
-        actual_payload = payload_captor.arg
-        assert valid_uuid(actual_payload.id)
-        assert_brand_updatable_fields_are_equal(actual_payload.__dict__, brand_request)
-        assert actual_payload.values == expected_payload['values']
-        assert actual_payload.categories == expected_payload['categories']
+        with self.tdd_test(msg="repository was called"):
+            self.__brand_repository.load_for_auth_user.assert_called_once_with(auth_user_id=auth_id)
+
+        # assert
+        with self.tdd_test(msg="repository was called"):
+            assert response.status_code == 200
+
+        # assert
+        with self.tdd_test(msg="repository was called"):
+            mapped_brand_body: BrandResponseDto = self.__object_mapper.map_from_dict(_from=response.body,
+                                                                                     to=BrandResponseDto)
+
+            # brand in db asserts
+            assert brand_db.id == mapped_brand_body.id
+            assert brand_db.created == mapped_brand_body.created
+            assert brand_db.header_image == mapped_brand_body.header_image
+            assert brand_db.logo == mapped_brand_body.logo
+
+            # brand response asserts
+            assert brand_db.brand_description == brand_request.brand_description == mapped_brand_body.brand_description
+            assert brand_db.brand_name == brand_request.brand_name == mapped_brand_body.brand_name
+            assert brand_db.categories == brand_request.categories == mapped_brand_body.categories
+            assert brand_db.insta_handle == brand_request.insta_handle == mapped_brand_body.insta_handle
+            assert brand_db.values == brand_request.values == mapped_brand_body.values
+            assert brand_db.website == brand_request.website == mapped_brand_body.website
+
+    def test_update_brand_details(self):
+        # arrange
+        brand_request: BrandRequestDto = AutoFixture().create(dto=BrandRequestDto,
+                                                              list_limit=5)
+        del brand_request.first_name
+        del brand_request.last_name
+        del brand_request.email
+        brand_request_dict = brand_request.__dict__
+        brand_db: Brand = AutoFixture().create_dict(dto=Brand,
+                                                    list_limit=5)
+        auth_id = "12341"
+        self.__brand_repository.load_for_auth_user = MagicMock(return_value=brand_db)
+        response = PinfluencerResponse()
+        self.__sut._unit_of_work = MagicMock()
+
+        # act
+        self.__sut.update(PinfluencerContext(body=brand_request_dict,
+                                             auth_user_id=auth_id,
+                                             response=response))
+
+        # assert
+        self.__brand_repository.load_for_auth_user.assert_called_once_with(auth_user_id=auth_id)
         assert response.status_code == 200
-        assert response.body == brand_in_db.__dict__
+        actual_response: BrandRequestDto = self.__object_mapper.map_from_dict(_from=response.body, to=BrandRequestDto)
+        actual_response.last_name == brand_db
 
     def test_update_when_not_found(self):
         # arrange

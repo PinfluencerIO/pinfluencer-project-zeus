@@ -64,7 +64,7 @@ class BaseSqlAlchemyRepository:
             raise NotFoundException(f'{self._resource_dto.__name__} {id} could not be found')
 
     def commit(self):
-        ...
+        self._data_manager.session.commit()
 
 
 class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):

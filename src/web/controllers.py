@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from typing import Callable
 
 from src._types import BrandRepository, UserRepository, InfluencerRepository, Repository, CampaignRepository
@@ -5,7 +6,7 @@ from src.crosscutting import print_exception, PinfluencerObjectMapper
 from src.domain.models import ValueEnum, CategoryEnum, Brand, Influencer, Campaign, CampaignStateEnum
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.web import PinfluencerResponse, BRAND_ID_PATH_KEY, INFLUENCER_ID_PATH_KEY, PinfluencerContext
-from src.web.request_dtos import BrandRequestDto
+from src.web.views import BrandRequestDto, BrandResponseDto
 
 
 class BaseController:
@@ -46,6 +47,14 @@ class BaseController:
             context.response.status_code = 404
             context.response.body = {}
 
+    @contextmanager
+    def _unit_of_work(self):
+        try:
+            yield
+            self._repository.commit()
+        except Exception:
+            raise
+
 
 class BaseUserController(BaseController):
 
@@ -79,14 +88,15 @@ class BrandController(BaseUserController):
             brand = self._mapper.map(_from=self._mapper.map_from_dict(_from=payload_dict,
                                                                       to=BrandRequestDto),
                                      to=Brand)
-            self._repository.write_new_for_auth_user(auth_user_id=auth_user_id, payload=brand)
+            with self._unit_of_work():
+                brand_to_return = self._repository.write_new_for_auth_user(auth_user_id=auth_user_id, payload=brand)
         except (AlreadyExistsException) as e:
             print_exception(e)
             context.short_circuit = True
             context.response.body = {}
             context.response.status_code = 400
             return
-        context.response.body = brand.__dict__
+        context.response.body = self._mapper.map(_from=brand_to_return, to=BrandResponseDto).__dict__
         context.response.status_code = 201
 
     def update(self, context: PinfluencerContext) -> None:

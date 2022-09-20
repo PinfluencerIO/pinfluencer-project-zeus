@@ -3,7 +3,7 @@ from unittest import TestCase
 from src.crosscutting import JsonSnakeToCamelSerializer, AutoFixture
 from src.domain.models import Brand
 from src.web import PinfluencerResponse, RequestDtoMapper
-from src.web.request_dtos import BrandRequestDto
+from src.web.views import BrandRequestDto
 
 
 class TestRequestDtoMapper(TestCase):

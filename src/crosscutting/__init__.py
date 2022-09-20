@@ -66,52 +66,54 @@ class AutoFixture:
 
         is_predictable_data = seed is not None and num is not None
 
-        members = dto.__annotations__.items()
+        members = all_annotations(cls=dto).items()
         print(f"nest {nest}")
         for (key, _type) in members:
 
-            if _type is str:
-                self.__generate_string_field(is_predictable_data, key, new_value, seed)
+            if getattr(new_value, key) is None:
 
-            if _type is bool:
-                self.__generate_bool_field(is_predictable_data, key, new_value, num)
+                if _type is str:
+                    self.__generate_string_field(is_predictable_data, key, new_value, seed)
 
-            if _type == datetime.datetime:
-                self.__generate_datetime_field(is_predictable_data, key, new_value, num)
+                if _type is bool:
+                    self.__generate_bool_field(is_predictable_data, key, new_value, num)
 
-            if _type is int:
-                self.__generate_int_field(is_predictable_data, key, new_value, num)
+                if _type == datetime.datetime:
+                    self.__generate_datetime_field(is_predictable_data, key, new_value, num)
 
-            if _type is float:
-                self.__generate_float_field(is_predictable_data, key, new_value, num)
+                if _type is int:
+                    self.__generate_int_field(is_predictable_data, key, new_value, num)
 
-            if _type == list[str]:
-                self.__generate_str_list_field(is_predictable_data, key, new_value, num, seed, list_limit)
+                if _type is float:
+                    self.__generate_float_field(is_predictable_data, key, new_value, num)
 
-            if _type == list[int]:
-                self.__generate_int_list_field(is_predictable_data, key, new_value, num, list_limit)
+                if _type == list[str]:
+                    self.__generate_str_list_field(is_predictable_data, key, new_value, num, seed, list_limit)
 
-            if _type == list[bool]:
-                self.__generate_bool_list_field(is_predictable_data, key, new_value, num, list_limit)
+                if _type == list[int]:
+                    self.__generate_int_list_field(is_predictable_data, key, new_value, num, list_limit)
 
-            if _type == list[datetime.datetime]:
-                self.__generate_datetime_list_field(is_predictable_data, key, new_value, num, list_limit)
+                if _type == list[bool]:
+                    self.__generate_bool_list_field(is_predictable_data, key, new_value, num, list_limit)
 
-            if _type == list[float]:
-                self.__generate_float_list_field(is_predictable_data, key, new_value, num, list_limit)
+                if _type == list[datetime.datetime]:
+                    self.__generate_datetime_list_field(is_predictable_data, key, new_value, num, list_limit)
 
-            if type(_type) is type(Enum):
-                self.__generate_random_enum_field(_type, is_predictable_data, key, new_value, num)
+                if _type == list[float]:
+                    self.__generate_float_list_field(is_predictable_data, key, new_value, num, list_limit)
 
-            if bool(typing.get_type_hints(_type)):
-                self.__generate_class_field(_type, key, nest, new_value, num, seed)
+                if type(_type) is type(Enum):
+                    self.__generate_random_enum_field(_type, is_predictable_data, key, new_value, num)
 
-            if typing.get_origin(_type) is list:
-                arg = typing.get_args(_type)[0]
-                if type(arg) is type(Enum):
-                    self.__generate_list_of_enums_field(arg, is_predictable_data, key, new_value, num, list_limit)
-                if bool(typing.get_type_hints(arg)):
-                    self.__generate_class_list(arg, is_predictable_data, key, nest, new_value, num, seed, list_limit)
+                if bool(typing.get_type_hints(_type)):
+                    self.__generate_class_field(_type, key, nest, new_value, num, seed)
+
+                if typing.get_origin(_type) is list:
+                    arg = typing.get_args(_type)[0]
+                    if type(arg) is type(Enum):
+                        self.__generate_list_of_enums_field(arg, is_predictable_data, key, new_value, num, list_limit)
+                    if bool(typing.get_type_hints(arg)):
+                        self.__generate_class_list(arg, is_predictable_data, key, nest, new_value, num, seed, list_limit)
 
         return new_value
 
@@ -307,6 +309,16 @@ def print_exception(e):
     print(''.join(['Exception ', str(type(e))]))
     print(''.join(['Exception ', str(e)]))
 
+
+def all_annotations(cls):
+    d = {}
+    for c in cls.mro():
+        try:
+            d.update(**c.__annotations__)
+        except AttributeError:
+            # object, at least, has no __annotations__ attribute.
+            pass
+    return d
 
 class JsonSnakeToCamelSerializer:
 
