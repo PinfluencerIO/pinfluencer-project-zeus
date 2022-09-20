@@ -42,7 +42,7 @@ class TestBaseRepository(BrandRepositoryTestCase):
             .query(Brand) \
             .filter(Brand.id == expected_brand.id) \
             .first().brand_name = brand_names[1]
-        self._sut.commit()
+        self._sut.save()
         self._data_manager.session.close()
 
         # assert

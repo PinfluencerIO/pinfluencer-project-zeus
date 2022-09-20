@@ -4,7 +4,7 @@ from simple_injection import ServiceCollection
 from src._types import DataManager, BrandRepository, InfluencerRepository, CampaignRepository, ImageRepository, \
     ObjectMapperAdapter, Deserializer, Serializer, AuthUserRepository
 from src.crosscutting import print_exception, JsonCamelToSnakeCaseDeserializer, JsonSnakeToCamelSerializer, \
-    PinfluencerObjectMapper
+    PinfluencerObjectMapper, FlexiUpdater
 from src.data import SqlAlchemyDataManager
 from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository, \
     SqlAlchemyCampaignRepository, S3ImageRepository, CognitoAuthUserRepository, CognitoAuthService
@@ -82,6 +82,7 @@ def register_dependencies(cognito_auth_service, data_manager, ioc, middleware):
     register_auth(ioc)
     register_middleware(ioc)
     ioc.add_instance(MiddlewarePipeline, middleware)
+    ioc.add_singleton(FlexiUpdater)
 
 
 def register_middleware(ioc):

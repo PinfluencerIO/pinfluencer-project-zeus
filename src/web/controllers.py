@@ -2,7 +2,7 @@ from contextlib import contextmanager
 from typing import Callable
 
 from src._types import BrandRepository, UserRepository, InfluencerRepository, Repository, CampaignRepository
-from src.crosscutting import print_exception, PinfluencerObjectMapper
+from src.crosscutting import print_exception, PinfluencerObjectMapper, FlexiUpdater
 from src.domain.models import ValueEnum, CategoryEnum, Brand, Influencer, Campaign, CampaignStateEnum
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.web import PinfluencerResponse, BRAND_ID_PATH_KEY, INFLUENCER_ID_PATH_KEY, PinfluencerContext
@@ -12,7 +12,9 @@ from src.web.views import BrandRequestDto, BrandResponseDto
 class BaseController:
 
     def __init__(self, repository: Repository,
-                 mapper: PinfluencerObjectMapper):
+                 mapper: PinfluencerObjectMapper,
+                 flexi_updater: FlexiUpdater):
+        self._flexi_updater = flexi_updater
         self._mapper = mapper
         self._repository = repository
 
@@ -51,15 +53,16 @@ class BaseController:
     def _unit_of_work(self):
         try:
             yield
-            self._repository.commit()
+            self._repository.save()
         except Exception:
             raise
 
 
 class BaseUserController(BaseController):
 
-    def __init__(self, user_repository: UserRepository, resource_id: str, object_mapper: PinfluencerObjectMapper):
-        super().__init__(user_repository, object_mapper)
+    def __init__(self, user_repository: UserRepository, resource_id: str, object_mapper: PinfluencerObjectMapper,
+                 flexi_updater: FlexiUpdater):
+        super().__init__(user_repository, object_mapper, flexi_updater)
         self._resource_id = resource_id
 
     def get(self, context: PinfluencerContext) -> None:
@@ -78,8 +81,8 @@ class BaseUserController(BaseController):
 
 
 class BrandController(BaseUserController):
-    def __init__(self, brand_repository: BrandRepository, object_mapper: PinfluencerObjectMapper):
-        super().__init__(brand_repository, BRAND_ID_PATH_KEY, object_mapper)
+    def __init__(self, brand_repository: BrandRepository, object_mapper: PinfluencerObjectMapper, flexi_updater: FlexiUpdater):
+        super().__init__(brand_repository, BRAND_ID_PATH_KEY, object_mapper, flexi_updater)
 
     def create(self, context: PinfluencerContext) -> None:
         auth_user_id = context.auth_user_id
@@ -90,7 +93,7 @@ class BrandController(BaseUserController):
                                      to=Brand)
             with self._unit_of_work():
                 brand_to_return = self._repository.write_new_for_auth_user(auth_user_id=auth_user_id, payload=brand)
-        except (AlreadyExistsException) as e:
+        except AlreadyExistsException as e:
             print_exception(e)
             context.short_circuit = True
             context.response.body = {}
@@ -103,21 +106,20 @@ class BrandController(BaseUserController):
         auth_user_id = context.auth_user_id
         payload_dict = context.body
         try:
-            brand = Brand(brand_name=payload_dict["brand_name"],
-                          brand_description=payload_dict["brand_description"],
-                          website=payload_dict["website"],
-                          insta_handle=payload_dict["insta_handle"],
-                          values=payload_dict["values"],
-                          categories=payload_dict["categories"])
-            brand_to_return = self._repository.update_for_auth_user(auth_user_id=auth_user_id, payload=brand)
-            context.response.body = brand_to_return.__dict__
-            context.response.status_code = 200
-            return
+            brand_request: BrandRequestDto = self._mapper.map_from_dict(_from=payload_dict,
+                                                                to=BrandRequestDto)
+            brand_in_db: Brand = self._repository.load_for_auth_user(auth_user_id=auth_user_id)
+            with self._unit_of_work():
+                self._flexi_updater.update(request=brand_request,
+                                           object_to_update=brand_in_db)
         except NotFoundException as e:
             print_exception(e)
             context.short_circuit = True
             context.response.body = {}
             context.response.status_code = 404
+            return
+        context.response.body = self._mapper.map(_from=brand_in_db, to=BrandResponseDto).__dict__
+        context.response.status_code = 200
 
     def update_logo(self, context: PinfluencerContext) -> None:
         [response, short_circuit] = self._update_image(context=context,
@@ -144,8 +146,9 @@ class BrandController(BaseUserController):
 
 class InfluencerController(BaseUserController):
 
-    def __init__(self, influencer_repository: InfluencerRepository, object_mapper: PinfluencerObjectMapper):
-        super().__init__(influencer_repository, INFLUENCER_ID_PATH_KEY, object_mapper)
+    def __init__(self, influencer_repository: InfluencerRepository, object_mapper: PinfluencerObjectMapper,
+                 flexi_updater: FlexiUpdater):
+        super().__init__(influencer_repository, INFLUENCER_ID_PATH_KEY, object_mapper, flexi_updater)
 
     def create(self, context: PinfluencerContext) -> None:
         auth_user_id = context.auth_user_id
@@ -243,8 +246,8 @@ class InfluencerController(BaseUserController):
 
 class CampaignController(BaseController):
 
-    def __init__(self, repository: CampaignRepository, object_mapper: PinfluencerObjectMapper):
-        super().__init__(repository, object_mapper)
+    def __init__(self, repository: CampaignRepository, object_mapper: PinfluencerObjectMapper, flexi_updater: FlexiUpdater):
+        super().__init__(repository, object_mapper, flexi_updater)
 
     def create(self, context: PinfluencerContext) -> None:
         try:

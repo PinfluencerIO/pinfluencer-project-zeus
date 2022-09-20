@@ -45,7 +45,7 @@ class CampaignRepository(Protocol):
     def update_campaign_state(self, _id: str, payload: CampaignStateEnum) -> Campaign:
         ...
 
-    def commit(self):
+    def save(self):
         ...
 
 
@@ -72,7 +72,7 @@ class BrandRepository(Protocol):
     def update_header_image_for_auth_user(self, auth_user_id: str, image_bytes: str) -> Brand:
         ...
 
-    def commit(self):
+    def save(self):
         ...
 
 
@@ -96,7 +96,7 @@ class InfluencerRepository(Protocol):
     def update_image_for_auth_user(self, auth_user_id: str, image_bytes: str) -> Influencer:
         ...
 
-    def commit(self):
+    def save(self):
         ...
 
 

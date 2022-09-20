@@ -10,6 +10,20 @@ from typing import Union
 from src.exceptions import AutoFixtureException
 
 
+class FlexiUpdater:
+
+    def update(self, request, object_to_update):
+        values = vars(object_to_update).items()
+        for key, value in values:
+            try:
+                value_in_request = getattr(request, key)
+                if value_in_request is not None:
+                    setattr(object_to_update, key, getattr(request, key))
+            except AttributeError:
+                ...
+
+
+
 class AutoFixture:
 
     def create_many_dict(self, dto,
@@ -296,7 +310,7 @@ class PinfluencerObjectMapper:
 
     def __generic_map(self, _from, to, propValues):
         new_dto = to()
-        dict_to = to.__annotations__
+        dict_to = all_annotations(to)
         for property, value in propValues:
             if property in dict_to:
                 setattr(new_dto, property, value)
