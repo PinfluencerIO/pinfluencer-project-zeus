@@ -11,8 +11,7 @@ from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluence
 from src.domain.models import Campaign, CampaignStateEnum, Brand
 from src.exceptions import AlreadyExistsException, NotFoundException
 from tests import InMemorySqliteDataManager, brand_generator, brand_dto_generator, influencer_dto_generator, \
-    assert_brand_updatable_fields_are_equal_for_three, assert_brand_db_fields_are_equal, \
-    assert_collection_brand_db_fields_are_equal, assert_brand_db_fields_are_equal_for_three, influencer_generator, \
+    influencer_generator, \
     assert_influencer_db_fields_are_equal_for_three, campaign_dto_generator, campaign_generator, PinfluencerTestCase
 
 
@@ -55,30 +54,30 @@ class TestBaseRepository(BrandRepositoryTestCase):
 
     def test_load_by_id(self):
         # arrange
-        expected_brand = brand_dto_generator(1)
-        self._data_manager.create_fake_data([brand_generator(expected_brand, mapper=self._object_mapper)])
+        expected_brand = AutoFixture().create(dto=Brand, list_limit=5)
+        self._data_manager.create_fake_data([expected_brand])
 
         # act
         actual_brand = self._sut.load_by_id(id_=expected_brand.id)
 
         # assert
-        assert_brand_db_fields_are_equal(brand1=expected_brand.__dict__, brand2=actual_brand.__dict__)
+        with self.tdd_test(msg="brands match"):
+            assert expected_brand == actual_brand
 
     def test_load_by_id_when_brand_cannot_be_found(self):
         self.assertRaises(NotFoundException, lambda: self._sut.load_by_id(id_="1234"))
 
     def test_load_collection(self):
         # arrange
-        expected_brands = [brand_dto_generator(1), brand_dto_generator(2), brand_dto_generator(3)]
-        self._data_manager.create_fake_data(
-            list(map(lambda x: brand_generator(x, mapper=self._object_mapper), expected_brands)))
+        expected_brands = AutoFixture().create_many(dto=Brand, list_limit=5, ammount=10)
+        self._data_manager.create_fake_data(expected_brands)
 
         # act
         actual_brands = self._sut.load_collection()
 
         # assert
-        assert_collection_brand_db_fields_are_equal(list(map(lambda x: x.__dict__, expected_brands)),
-                                                    list(map(lambda x: x.__dict__, actual_brands)))
+        with self.tdd_test(msg="brands match"):
+            assert expected_brands == actual_brands
 
     def test_load_collection_when_no_brands_exist(self):
         # arrange/act
@@ -92,138 +91,64 @@ class TestUserRepository(BrandRepositoryTestCase):
 
     def test_load_for_auth_user(self):
         # arrange
-        expected = brand_dto_generator(num=1)
-        self._data_manager.create_fake_data([brand_generator(expected, mapper=self._object_mapper)])
+        expected = AutoFixture().create(dto=Brand, list_limit=5)
+        self._data_manager.create_fake_data([expected])
 
         # act
-        actual = self._sut.load_for_auth_user(auth_user_id="12341")
+        actual = self._sut.load_for_auth_user(auth_user_id=expected.auth_user_id)
 
         # assert
-        assert_brand_db_fields_are_equal(brand1=expected.__dict__, brand2=actual.__dict__)
+        with self.tdd_test(msg="brands match"):
+            assert actual == expected
 
     def test_load_for_auth_user_when_brand_not_found(self):
         self.assertRaises(NotFoundException, lambda: self._sut.load_for_auth_user(auth_user_id="12341"))
 
     def test_write_new_for_auth_user(self):
         # arrange
-        expected = brand_dto_generator(num=1)
-        returned_user = self._sut.write_new_for_auth_user(auth_user_id="12341",
-                                                          payload=expected)
+        expected = AutoFixture().create(dto=Brand, list_limit=5)
 
         # act
+        returned_user = self._sut.write_new_for_auth_user(auth_user_id=expected.auth_user_id,
+                                                          payload=expected)
         actual = self._sut.load_by_id(id_=expected.id)
 
         # assert
-        assert_brand_db_fields_are_equal_for_three(brand1=actual.__dict__, brand2=expected.__dict__,
-                                                   brand3=returned_user.__dict__)
+        with self.tdd_test(msg="brand in db matches returned brand, which also matches brand loaded by id"):
+            assert expected == returned_user == actual
 
     def test_write_new_for_auth_user_when_already_exists(self):
         # arrange
-        expected = brand_dto_generator(num=1)
-        brand_to_create = brand_dto_generator(num=2)
+        expected = AutoFixture().create(dto=Brand, list_limit=5)
+        brand_to_create = AutoFixture().create(dto=Brand, list_limit=5)
         brand_to_create.auth_user_id = expected.auth_user_id
-        self._data_manager.create_fake_data([brand_generator(expected, mapper=self._object_mapper)])
+        self._data_manager.create_fake_data([expected])
 
         # act/assert
-        self.assertRaises(AlreadyExistsException, lambda: self._sut.write_new_for_auth_user(auth_user_id="12341",
-                                                                                            payload=brand_to_create))
+        with self.tdd_test(msg="repo raises an error"):
+            self.assertRaises(AlreadyExistsException, lambda: self._sut.write_new_for_auth_user(auth_user_id=expected.auth_user_id,
+                                                                                                payload=brand_to_create))
         actual = self._sut.load_for_auth_user(auth_user_id=brand_to_create.auth_user_id)
-        assert actual.__dict__ != brand_to_create.__dict__
+
+        # assert
+        with self.tdd_test(msg="brands do not match"):
+            assert actual != brand_to_create
+            assert actual == expected
 
 
 class TestBrandRepository(BrandRepositoryTestCase):
 
     def test_write_new_for_auth_user(self):
         # arrange
-        expected = brand_dto_generator(num=1)
+        expected = AutoFixture().create(dto=Brand, list_limit=5)
 
         # act
-        self._sut.write_new_for_auth_user(auth_user_id="12341",
+        self._sut.write_new_for_auth_user(auth_user_id=expected.auth_user_id,
                                           payload=expected)
         actual = self._sut.load_by_id(id_=expected.id)
 
         # assert
-        assert actual.id == expected.id
-
-    def test_something(self):
-        # arrange
-        expected = brand_dto_generator(num=1)
-
-        # act
-        self._data_manager.create_fake_data([expected])
-        brand = self._data_manager.session.query(Brand).first()
-
-        # assert
-        assert brand == expected
-
-    def test_update_for_auth_user(self):
-        # arrange
-        existing_brand = brand_dto_generator(num=1)
-        expected = brand_dto_generator(num=2)
-        expected.auth_user_id = existing_brand.auth_user_id
-        self._data_manager.create_fake_data([brand_generator(existing_brand, mapper=self._object_mapper)])
-
-        # act
-        returned_brand = self._sut.update_for_auth_user(auth_user_id=existing_brand.auth_user_id,
-                                                        payload=expected)
-        actual = self._sut.load_by_id(id_=existing_brand.id)
-
-        # assert
-        assert_brand_updatable_fields_are_equal_for_three(actual.__dict__, expected.__dict__, returned_brand.__dict__)
-        assert actual.values == expected.values
-        assert actual.categories == expected.categories
-
-    def test_update_for_auth_user_when_not_found(self):
-        # arrange
-        expected = brand_dto_generator(num=1)
-
-        # act/assert
-        self.assertRaises(NotFoundException, lambda: self._sut.update_for_auth_user(auth_user_id=expected.auth_user_id,
-                                                                                    payload=expected))
-
-    def test_update_logo_for_auth_user(self):
-        # arrange
-        image_bytes = "bytes"
-        brand = brand_dto_generator(num=1)
-        expected_logo = "test.png"
-        self._image_repository.upload = MagicMock(return_value=expected_logo)
-        self._data_manager.create_fake_data([brand_generator(brand, mapper=self._object_mapper)])
-
-        # act
-        returned_brand = self._sut.update_logo_for_auth_user(auth_user_id=brand.auth_user_id,
-                                                             image_bytes=image_bytes)
-
-        # assert
-        self._image_repository.upload.assert_called_once_with(path=brand.id,
-                                                              image_base64_encoded=image_bytes)
-        actual_logo = self._sut.load_by_id(id_=brand.id).logo
-        assert returned_brand.logo == expected_logo == actual_logo
-
-    def test_update_logo_for_auth_user_when_not_found(self):
-        self.assertRaises(NotFoundException, lambda: self._sut.update_logo_for_auth_user(auth_user_id="12345",
-                                                                                         image_bytes="imagebytes"))
-
-    def test_update_header_image_for_auth_user(self):
-        # arrange
-        image_bytes = "bytes"
-        brand = brand_dto_generator(num=1)
-        expected_header_image = "test.png"
-        self._image_repository.upload = MagicMock(return_value=expected_header_image)
-        self._data_manager.create_fake_data([brand_generator(brand, mapper=self._object_mapper)])
-
-        # act
-        returned_brand = self._sut.update_header_image_for_auth_user(auth_user_id=brand.auth_user_id,
-                                                                     image_bytes=image_bytes)
-
-        # assert
-        self._image_repository.upload.assert_called_once_with(path=brand.id,
-                                                              image_base64_encoded=image_bytes)
-        actual_header_image = self._sut.load_by_id(id_=brand.id).header_image
-        assert returned_brand.header_image == expected_header_image == actual_header_image
-
-    def test_update_header_image_for_auth_user_when_not_found(self):
-        self.assertRaises(NotFoundException, lambda: self._sut.update_header_image_for_auth_user(auth_user_id="12345",
-                                                                                                 image_bytes="imagebytes"))
+        assert actual == expected
 
 
 class TestInfluencerRepository(TestCase):

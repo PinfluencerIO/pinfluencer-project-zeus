@@ -18,26 +18,25 @@ from src.exceptions import AlreadyExistsException, ImageException, NotFoundExcep
 class BaseSqlAlchemyRepository:
     def __init__(self,
                  data_manager: DataManager,
-                 resource_entity,
+                 model,
                  object_mapper: ObjectMapperAdapter,
                  resource_dto,
                  image_repository: ImageRepository):
         self._image_repository = image_repository
         self._object_mapper = object_mapper
         self._data_manager = data_manager
-        self._resource_entity = resource_entity
+        self._model = model
         self._resource_dto = resource_dto
 
         create_mappings(mapper=self._object_mapper)
 
     def load_collection(self) -> list[Model]:
-        return list(map(lambda x: self._object_mapper.map(from_obj=x, to_type=self._resource_dto),
-                        self._data_manager.session.query(self._resource_entity).all()))
+        return self._data_manager.session.query(self._model).all()
 
     def load_by_id(self, id_) -> Model:
-        entity = self._data_manager.session.query(self._resource_entity).filter(self._resource_entity.id == id_).first()
+        entity = self._data_manager.session.query(self._model).filter(self._model.id == id_).first()
         if entity:
-            return self._object_mapper.map(from_obj=entity, to_type=self._resource_dto)
+            return entity
         else:
             raise NotFoundException(f'model {id} was not found')
 
@@ -45,8 +44,8 @@ class BaseSqlAlchemyRepository:
                             image_bytes: str,
                             field_setter: Callable[[str, Model], None]):
         print(f"query: <update_image_by_id> for <{self._resource_dto.__name__}||{id}>")
-        model = self._data_manager.session.query(self._resource_entity).filter(
-            self._resource_entity.id == id).first()
+        model = self._data_manager.session.query(self._model).filter(
+            self._model.id == id).first()
         if model:
             image = self._image_repository.upload(path=model.id,
                                                   image_base64_encoded=image_bytes)
@@ -56,8 +55,8 @@ class BaseSqlAlchemyRepository:
             print(
                 f'Repository Event: user after image set \n{self._object_mapper.map(from_obj=model, to_type=self._resource_dto).__dict__}')
             first = self._data_manager.session \
-                .query(self._resource_entity) \
-                .filter(self._resource_entity.id == id) \
+                .query(self._model) \
+                .filter(self._model.id == id) \
                 .first()
             return self._object_mapper.map(from_obj=first, to_type=self._resource_dto)
         else:
@@ -69,46 +68,43 @@ class BaseSqlAlchemyRepository:
 
 class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):
     def __init__(self, data_manager: DataManager,
-                 resource_entity,
+                 model,
                  image_repository: ImageRepository,
                  object_mapper: ObjectMapperAdapter,
                  resource_dto):
         super().__init__(data_manager=data_manager,
-                         resource_entity=resource_entity,
+                         model=model,
                          object_mapper=object_mapper,
                          resource_dto=resource_dto,
                          image_repository=image_repository)
 
     def load_for_auth_user(self, auth_user_id) -> UserModel:
-        print(f"QUERY: <load for auth user> ENTITY: {self._resource_entity.__name__}")
+        print(f"QUERY: <load for auth user> ENTITY: {self._model.__name__}")
         first = self._data_manager.session \
-            .query(self._resource_entity) \
-            .filter(self._resource_entity.auth_user_id == auth_user_id) \
+            .query(self._model) \
+            .filter(self._model.auth_user_id == auth_user_id) \
             .first()
         if first:
-            return self._object_mapper.map(from_obj=first, to_type=self._resource_dto)
+            return first
         raise NotFoundException(f'user {auth_user_id} not found')
 
-    def write_new_for_auth_user(self, auth_user_id, payload) -> UserModel:
+    def write_new_for_auth_user(self, auth_user_id, payload: UserModel) -> UserModel:
         try:
             entity = self.load_for_auth_user(auth_user_id)
-            raise AlreadyExistsException(f'{self._resource_entity.__name__}'
+            raise AlreadyExistsException(f'{self._model.__name__}'
                                          f'{entity.id} already associated with {auth_user_id}')
         except NotFoundException:
             try:
                 payload.auth_user_id = auth_user_id
-                entity = self._object_mapper.map(from_obj=payload, to_type=self._resource_entity)
-                self._data_manager.session.add(entity)
-                self._data_manager.session.commit()
-                return self._object_mapper.map(from_obj=entity, to_type=self._resource_dto)
+                self._data_manager.session.add(payload)
+                return payload
             except Exception as e:
-                print(f'Failed to write_new_{self._resource_entity.__class__.__name__}_for_auth_user {e}')
-                self._data_manager.session.rollback()
+                print(f'Failed to write_new_{self._model.__class__.__name__}_for_auth_user {e}')
                 raise e
 
     def _update_image(self, auth_user_id, image_bytes, field_setter: Callable[[str, Model], None]):
-        user = self._data_manager.session.query(self._resource_entity).filter(
-            self._resource_entity.auth_user_id == auth_user_id).first()
+        user = self._data_manager.session.query(self._model).filter(
+            self._model.auth_user_id == auth_user_id).first()
         if user:
             image = self._image_repository.upload(path=user.id,
                                                   image_base64_encoded=image_bytes)
@@ -118,8 +114,8 @@ class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):
             print(
                 f'Repository Event: user after image set \n{self._object_mapper.map(from_obj=user, to_type=self._resource_dto).__dict__}')
             first = self._data_manager.session \
-                .query(self._resource_entity) \
-                .filter(self._resource_entity.auth_user_id == auth_user_id) \
+                .query(self._model) \
+                .filter(self._model.auth_user_id == auth_user_id) \
                 .first()
             return self._object_mapper.map(from_obj=first, to_type=self._resource_dto)
         else:
@@ -132,14 +128,14 @@ class SqlAlchemyBrandRepository(BaseSqlAlchemyUserRepository):
                  image_repository: ImageRepository,
                  object_mapper: ObjectMapperAdapter):
         super().__init__(data_manager=data_manager,
-                         resource_entity=SqlAlchemyBrandEntity,
+                         model=Brand,
                          image_repository=image_repository,
                          object_mapper=object_mapper,
                          resource_dto=Brand)
 
     def update_for_auth_user(self, auth_user_id, payload: Brand) -> Brand:
-        entity = self._data_manager.session.query(self._resource_entity).filter(
-            self._resource_entity.auth_user_id == auth_user_id).first()
+        entity = self._data_manager.session.query(self._model).filter(
+            self._model.auth_user_id == auth_user_id).first()
         if entity:
             entity.brand_name = payload.brand_name
             entity.brand_description = payload.brand_description
@@ -177,15 +173,15 @@ class SqlAlchemyInfluencerRepository(BaseSqlAlchemyUserRepository):
                  image_repository: ImageRepository,
                  object_mapper: ObjectMapperAdapter):
         super().__init__(data_manager=data_manager,
-                         resource_entity=SqlAlchemyInfluencerEntity,
+                         model=SqlAlchemyInfluencerEntity,
                          image_repository=image_repository,
                          object_mapper=object_mapper,
                          resource_dto=Influencer)
 
     def update_for_auth_user(self, auth_user_id: str, payload: Influencer) -> Influencer:
         entity: SqlAlchemyInfluencerEntity = self._data_manager.session \
-            .query(self._resource_entity) \
-            .filter(self._resource_entity.auth_user_id == auth_user_id) \
+            .query(self._model) \
+            .filter(self._model.auth_user_id == auth_user_id) \
             .first()
         if entity:
             entity.values = payload.values
