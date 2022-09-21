@@ -15,19 +15,6 @@ class SqlAlchemyBaseUserEntity(SqlAlchemyBaseEntity):
     auth_user_id = Column(type_=String(length=64), nullable=False, unique=True)
 
 
-class SqlAlchemyBrandEntity(SqlAlchemyBaseUserEntity):
-    __tablename__ = 'brand'
-
-    brand_name = Column(type_=String(length=120), nullable=False)
-    brand_description = Column(type_=String(length=500), nullable=False)
-    header_image = Column(type_=String(length=360), nullable=True)
-    values = Column(type_=PickleType, nullable=False)
-    categories = Column(type_=PickleType, nullable=False)
-    insta_handle = Column(type_=String(length=30), nullable=True)
-    website = Column(type_=String(length=120), nullable=False)
-    logo = Column(type_=String(length=360), nullable=True)
-
-
 brand_table = Table('brand', Base.metadata,
                     Column('id', String(length=36), primary_key=True),
                     Column('created', DateTime),
@@ -41,62 +28,51 @@ brand_table = Table('brand', Base.metadata,
                     Column('website', String(length=120)),
                     Column('logo', String(length=360)))
 
+influencer_table = Table('influencer', Base.metadata,
+                         Column('id', String(length=36), primary_key=True),
+                         Column('created', DateTime),
+                         Column('auth_user_id', String(length=64)),
+                         Column('website', String(length=120)),
+                         Column('bio', String(length=500)),
+                         Column('image', String(length=360)),
+                         Column('audience_age_13_to_17_split', Float),
+                         Column('audience_age_18_to_24_split', Float),
+                         Column('audience_age_25_to_34_split', Float),
+                         Column('audience_age_35_to_44_split', Float),
+                         Column('audience_age_45_to_54_split', Float),
+                         Column('audience_age_55_to_64_split', Float),
+                         Column('audience_age_65_plus_split', Float),
+                         Column('audience_male_split', Float),
+                         Column('audience_female_split', Float),
+                         Column('insta_handle', String(length=30)),
+                         Column('address', String(length=500)),
+                         Column('values', PickleType),
+                         Column('categories', PickleType))
 
-class SqlAlchemyInfluencerEntity(Base, SqlAlchemyBaseUserEntity):
-    __tablename__ = 'influencer'
-
-    website = Column(type_=String(length=120), nullable=False)
-    bio = Column(type_=String(length=500), nullable=False)
-    image = Column(type_=String(length=360), nullable=True)
-    audience_age_13_to_17_split = Column(type_=Float, nullable=True)
-    audience_age_18_to_24_split = Column(type_=Float, nullable=True)
-    audience_age_25_to_34_split = Column(type_=Float, nullable=True)
-    audience_age_35_to_44_split = Column(type_=Float, nullable=True)
-    audience_age_45_to_54_split = Column(type_=Float, nullable=True)
-    audience_age_55_to_64_split = Column(type_=Float, nullable=True)
-    audience_age_65_plus_split = Column(type_=Float, nullable=True)
-    audience_male_split = Column(type_=Float, nullable=True)
-    audience_female_split = Column(type_=Float, nullable=True)
-    insta_handle = Column(type_=String(length=30), nullable=True)
-    address = Column(type_=String(length=500), nullable=True)
-    values = Column(type_=PickleType, nullable=False)
-    categories = Column(type_=PickleType, nullable=False)
-
-
-class SqlAlchemyCampaignEntity(Base, SqlAlchemyBaseEntity):
-    __tablename__ = 'campaign'
-
-    brand_id = Column(type_=String(length=360), nullable=False)
-    objective = Column(type_=String(length=120), nullable=False)
-    success_description = Column(type_=String(length=500), nullable=False)
-    campaign_title = Column(type_=String(length=120), nullable=False)
-    campaign_description = Column(type_=String(length=500), nullable=False)
-    campaign_categories = Column(type_=PickleType, nullable=False)
-    campaign_values = Column(type_=PickleType, nullable=False)
-    campaign_state = Column(type_=PickleType, nullable=False)
-    campaign_product_link = Column(type_=String(length=120), nullable=False)
-    campaign_hashtag = Column(type_=String(length=120), nullable=False)
-    campaign_discount_code = Column(type_=String(length=120), nullable=False)
-    product_title = Column(type_=String(length=120), nullable=False)
-    product_description = Column(type_=String(length=500), nullable=False)
-    product_image1 = Column(type_=String(length=360), nullable=False)
-    product_image2 = Column(type_=String(length=360), nullable=False)
-    product_image3 = Column(type_=String(length=360), nullable=False)
+campaign_table = Table('campaign', Base.metadata,
+                       Column('id', String(length=36), primary_key=True),
+                       Column('created', DateTime),
+                       Column('brand_id', String(length=360)),
+                       Column('objective', String(length=120)),
+                       Column('success_description', String(length=500)),
+                       Column('campaign_title', String(length=120)),
+                       Column('campaign_description', String(length=500)),
+                       Column('campaign_categories', PickleType),
+                       Column('campaign_values', PickleType),
+                       Column('campaign_state', PickleType),
+                       Column('campaign_product_link', String(length=120)),
+                       Column('campaign_hashtag', String(length=120)),
+                       Column('campaign_discount_code', String(length=120)),
+                       Column('product_title', String(length=120)),
+                       Column('product_description', String(length=500)),
+                       Column('product_image', String(length=360)))
 
 
 def create_mappings(mapper: ObjectMapperAdapter):
     try:
         # sqlalchemy mappings
         sqlalchemy.orm.mapper(Brand, brand_table)
-
-        # old legacy mappings
-        mapper.create_map(Brand, SqlAlchemyBrandEntity)
-
-        # TODO: replace with classical map
-        # mapper.create_map(SqlAlchemyBrandEntity, Brand)
-        mapper.create_map(Influencer, SqlAlchemyInfluencerEntity)
-        mapper.create_map(SqlAlchemyInfluencerEntity, Influencer)
-        mapper.create_map(Campaign, SqlAlchemyCampaignEntity)
-        mapper.create_map(SqlAlchemyCampaignEntity, Campaign)
+        sqlalchemy.orm.mapper(Influencer, influencer_table)
+        sqlalchemy.orm.mapper(Campaign, campaign_table)
     except Exception as e:
         print(f"mappings tried to be created more than once {e}")

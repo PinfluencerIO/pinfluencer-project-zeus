@@ -8,8 +8,7 @@ from sqlalchemy.orm import sessionmaker
 
 from src.crosscutting import JsonSnakeToCamelSerializer
 from src.data import Base
-from src.data.entities import SqlAlchemyBrandEntity, SqlAlchemyBaseEntity, SqlAlchemyInfluencerEntity, \
-    SqlAlchemyCampaignEntity
+from src.data.entities import SqlAlchemyBaseEntity
 from src.domain.models import Brand, Influencer, ValueEnum, CategoryEnum, Campaign, User
 
 TEST_DEFAULT_PRODUCT_IMAGE1 = "default_product_image1.png"
@@ -24,21 +23,6 @@ def get_entity_dict(entity: SqlAlchemyBaseEntity) -> dict:
     dict = entity.__dict__
     dict.pop('_sa_instance_state')
     return dict
-
-
-def campaign_generator(dto, mapper):
-    campaign = mapper.map(dto, SqlAlchemyCampaignEntity)
-    return campaign
-
-
-def brand_generator(dto, mapper):
-    brand = mapper.map(dto, SqlAlchemyBrandEntity)
-    return brand
-
-
-def influencer_generator(dto, mapper):
-    influencer = mapper.map(dto, SqlAlchemyInfluencerEntity)
-    return influencer
 
 
 def get_as_json(status_code: int,

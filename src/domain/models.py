@@ -61,7 +61,7 @@ class User:
     auth_user_id: str = None
 
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class Influencer(DataModel):
     insta_handle: str = None
     website: str = None
@@ -89,8 +89,8 @@ class CampaignStateEnum(Enum):
     DELETED = "DELETED"
 
 
-@dataclass
-class Campaign:
+@dataclass(unsafe_hash=True)
+class Campaign(DataModel):
     brand_id: str = None
     objective: str = None
     success_description: str = None
@@ -104,8 +104,4 @@ class Campaign:
     campaign_discount_code: str = None
     product_title: str = None
     product_description: str = None
-    product_image1: str = None
-    product_image2: str = None
-    product_image3: str = None
-    id: str = None
-    created: datetime = None
+    product_image: str = None

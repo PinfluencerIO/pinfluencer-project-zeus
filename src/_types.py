@@ -1,6 +1,6 @@
 from typing import Protocol, Optional, Union
 
-from src.domain.models import Brand, Influencer, Campaign, CampaignStateEnum, User
+from src.domain.models import Brand, Influencer, Campaign, User
 
 
 class AuthUserRepository(Protocol):
@@ -30,21 +30,6 @@ class CampaignRepository(Protocol):
     def load_for_auth_brand(self, auth_user_id: str) -> list[Campaign]:
         ...
 
-    def update_product_image1(self, id: str, image_bytes: str) -> Campaign:
-        ...
-
-    def update_product_image2(self, id: str, image_bytes: str) -> Campaign:
-        ...
-
-    def update_product_image3(self, id: str, image_bytes: str) -> Campaign:
-        ...
-
-    def update_campaign(self, _id: str, payload: Campaign) -> Campaign:
-        ...
-
-    def update_campaign_state(self, _id: str, payload: CampaignStateEnum) -> Campaign:
-        ...
-
     def save(self):
         ...
 
@@ -57,19 +42,10 @@ class BrandRepository(Protocol):
     def load_by_id(self, id_: str) -> Brand:
         ...
 
-    def update_for_auth_user(self, auth_user_id: str, payload: Brand) -> Brand:
-        ...
-
     def write_new_for_auth_user(self, auth_user_id: str, payload: Brand) -> Brand:
         ...
 
     def load_for_auth_user(self, auth_user_id: str) -> Brand:
-        ...
-
-    def update_logo_for_auth_user(self, auth_user_id: str, image_bytes: str) -> Brand:
-        ...
-
-    def update_header_image_for_auth_user(self, auth_user_id: str, image_bytes: str) -> Brand:
         ...
 
     def save(self):
@@ -88,12 +64,6 @@ class InfluencerRepository(Protocol):
         ...
 
     def write_new_for_auth_user(self, auth_user_id: str, payload: Influencer) -> Influencer:
-        ...
-
-    def update_for_auth_user(self, auth_user_id: str, payload: Influencer) -> Influencer:
-        ...
-
-    def update_image_for_auth_user(self, auth_user_id: str, image_bytes: str) -> Influencer:
         ...
 
     def save(self):
