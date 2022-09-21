@@ -6,15 +6,15 @@ from callee import Captor
 from ddt import data, ddt
 
 from src._types import AuthUserRepository, BrandRepository, ImageRepository
-from src.crosscutting import JsonCamelToSnakeCaseDeserializer, PinfluencerObjectMapper
+from src.crosscutting import JsonCamelToSnakeCaseDeserializer, PinfluencerObjectMapper, AutoFixture
 from src.domain.models import User, ValueEnum, CategoryEnum, CampaignStateEnum
 from src.domain.validation import InfluencerValidator, BrandValidator, CampaignValidator
 from src.exceptions import NotFoundException
 from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, CommonBeforeHooks, \
     InfluencerBeforeHooks, BrandBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, CommonAfterHooks
-from src.web.views import ImageRequestDto
-from tests import brand_dto_generator, RepoEnum, get_auth_user_event, create_for_auth_user_event, get_brand_id_event, \
+from src.web.views import ImageRequestDto, BrandResponseDto
+from tests import get_auth_user_event, create_for_auth_user_event, get_brand_id_event, \
     get_influencer_id_event, get_campaign_id_event, PinfluencerTestCase
 
 TEST_S3_URL = "https://pinfluencer-product-images.s3.eu-west-2.amazonaws.com"
@@ -568,6 +568,18 @@ class TestCommonHooks(PinfluencerTestCase):
         # assert
         assert context.body["value"] == ValueEnum.ORGANIC
 
+    def test_map_enum_when_field_doesnt_exist(self):
+        # arrange
+        context = PinfluencerContext(body={})
+
+        # act/assert
+        with self.tdd_test(msg="does not throw exception"):
+            self.__sut.map_enum(context=context,
+                                key="value",
+                                enum_value=ValueEnum)
+
+
+
     def test_map_enums(self):
         # arrange
         context = PinfluencerContext(body={"values": ["SUSTAINABLE", "ORGANIC"]})
@@ -580,6 +592,16 @@ class TestCommonHooks(PinfluencerTestCase):
         # assert
         assert context.body["values"][0] == ValueEnum.SUSTAINABLE
         assert context.body["values"][1] == ValueEnum.ORGANIC
+
+    def test_map_enums_when_field_does_not_exist(self):
+        # arrange
+        context = PinfluencerContext(body={})
+
+        # act/assert
+        with self.tdd_test(msg="does not throw"):
+            self.__sut.map_enums(context=context,
+                                 key="values",
+                                 enum_value=ValueEnum)
 
     def test_set_body(self):
         # arrange
@@ -854,7 +876,7 @@ class TestUserAfterHooks(TestCase):
 
     def test_tag_auth_user_claims_to_response(self):
         # arrange
-        brand = brand_dto_generator(num=1, repo=RepoEnum.STD_REPO)
+        brand = AutoFixture().create(dto=BrandResponseDto, list_limit=5)
         response = PinfluencerResponse(body=brand.__dict__)
         auth_user = User(first_name="cognito_first_name",
                          last_name="cognito_last_name",
@@ -873,22 +895,8 @@ class TestUserAfterHooks(TestCase):
 
     def test_tag_auth_user_claims_to_response_collection(self):
         # arrange
-        users = [
-            User(first_name="cognito_first_name1",
-                 last_name="cognito_last_name1",
-                 email="cognito_email1"),
-            User(first_name="cognito_first_name2",
-                 last_name="cognito_last_name2",
-                 email="cognito_email2"),
-            User(first_name="cognito_first_name3",
-                 last_name="cognito_last_name3",
-                 email="cognito_email3")
-        ]
-        brands = [
-            brand_dto_generator(num=1).__dict__,
-            brand_dto_generator(num=2).__dict__,
-            brand_dto_generator(num=3).__dict__
-        ]
+        users = AutoFixture().create_many(dto=User, list_limit=5, ammount=10)
+        brands = AutoFixture().create_many_dict(dto=BrandResponseDto, list_limit=5, ammount=10)
         self.__auth_user_repository.get_by_id = MagicMock(side_effect=users)
         response = PinfluencerResponse(body=brands)
 

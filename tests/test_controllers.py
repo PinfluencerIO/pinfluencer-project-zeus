@@ -23,7 +23,8 @@ class TestInfluencerController(PinfluencerTestCase):
         self.__object_mapper = PinfluencerObjectMapper()
         self.__sut = InfluencerController(influencer_repository=self.__influencer_repository,
                                           object_mapper=self.__object_mapper,
-                                          flexi_updater=self.__flexi_updater)
+                                          flexi_updater=self.__flexi_updater,
+                                          logger=Mock())
 
     def test_get_by_id(self):
         # arrange
@@ -111,7 +112,8 @@ class TestBrandController(PinfluencerTestCase):
         self.__object_mapper = PinfluencerObjectMapper()
         self.__sut = BrandController(brand_repository=self.__brand_repository,
                                      object_mapper=self.__object_mapper,
-                                     flexi_updater=self.__flexi_updater)
+                                     flexi_updater=self.__flexi_updater,
+                                     logger=Mock())
 
     @data("logo", "header_image")
     def test_update_image_field(self, image_field):
@@ -138,6 +140,14 @@ class TestBrandController(PinfluencerTestCase):
         # assert
         with self.tdd_test(msg="image field was updated"):
             assert getattr(brand_in_db, image_field) == image_request.image_path
+
+        # assert
+        with self.tdd_test(msg="200 was returned"):
+            assert context.response.status_code == 200
+
+        # assert
+        with self.tdd_test(msg="200 was returned"):
+            assert context.response.body == self.__object_mapper.map(_from=brand_in_db, to=BrandResponseDto)
 
     def test_unit_of_work(self):
         # arrange
@@ -495,7 +505,8 @@ class TestCampaignController(PinfluencerTestCase):
         self.__object_mapper = PinfluencerObjectMapper()
         self.__sut = CampaignController(repository=self.__campaign_repository,
                                         object_mapper=self.__object_mapper,
-                                        flexi_updater=self.__flexi_updater)
+                                        flexi_updater=self.__flexi_updater,
+                                        logger=Mock())
 
     def test_write_for_campaign(self):
         # arrange

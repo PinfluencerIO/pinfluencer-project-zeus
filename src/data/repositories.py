@@ -7,7 +7,7 @@ import boto3
 from botocore.exceptions import ClientError, ParamValidationError
 from filetype import filetype
 
-from src._types import DataManager, ImageRepository, Model, ObjectMapperAdapter, UserModel
+from src._types import DataManager, ImageRepository, Model, ObjectMapperAdapter, UserModel, Logger
 from src.data.entities import create_mappings
 from src.domain.models import Brand, Influencer, Campaign, User
 from src.exceptions import AlreadyExistsException, ImageException, NotFoundException
@@ -18,7 +18,9 @@ class BaseSqlAlchemyRepository:
                  data_manager: DataManager,
                  model,
                  object_mapper: ObjectMapperAdapter,
-                 image_repository: ImageRepository):
+                 image_repository: ImageRepository,
+                 logger: Logger):
+        self._logger = logger
         self._image_repository = image_repository
         self._object_mapper = object_mapper
         self._data_manager = data_manager
@@ -37,24 +39,26 @@ class BaseSqlAlchemyRepository:
             raise NotFoundException(f'model {id} was not found')
 
     def save(self):
-        print("status committing")
+        self._logger.log_debug("starting commit ...")
         self._data_manager.session.flush()
         self._data_manager.session.commit()
-        print("status committed")
+        self._logger.log_debug("status committed ...")
 
 
 class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):
     def __init__(self, data_manager: DataManager,
                  model,
                  image_repository: ImageRepository,
-                 object_mapper: ObjectMapperAdapter):
+                 object_mapper: ObjectMapperAdapter,
+                 logger: Logger):
         super().__init__(data_manager=data_manager,
                          model=model,
                          object_mapper=object_mapper,
-                         image_repository=image_repository)
+                         image_repository=image_repository,
+                         logger=logger)
 
     def load_for_auth_user(self, auth_user_id) -> UserModel:
-        print(f"QUERY: <load for auth user> ENTITY: {self._model.__name__}")
+        self._logger.log_debug(f"query load for auth user for {self._model.__name__}")
         first = self._data_manager.session \
             .query(self._model) \
             .filter(self._model.auth_user_id == auth_user_id) \
@@ -65,6 +69,7 @@ class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):
 
     def write_new_for_auth_user(self, auth_user_id, payload: UserModel) -> UserModel:
         try:
+            self._logger.log_debug(f"write for auth user for {self._model.__name__}")
             entity = self.load_for_auth_user(auth_user_id)
             raise AlreadyExistsException(f'{self._model.__name__}'
                                          f'{entity.id} already associated with {auth_user_id}')
@@ -72,10 +77,9 @@ class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):
             try:
                 payload.auth_user_id = auth_user_id
                 self._data_manager.session.add(payload)
-                print(f"{payload} from data.write_new_for_auth_user")
                 return payload
             except Exception as e:
-                print(f'Failed to write_new_{self._model.__class__.__name__}_for_auth_user {e}')
+                self._logger.log_error(f"failed to write for auth user for {self._model.__name__}")
                 raise e
 
 
@@ -83,33 +87,39 @@ class SqlAlchemyBrandRepository(BaseSqlAlchemyUserRepository):
     def __init__(self,
                  data_manager: DataManager,
                  image_repository: ImageRepository,
-                 object_mapper: ObjectMapperAdapter):
+                 object_mapper: ObjectMapperAdapter,
+                 logger: Logger):
         super().__init__(data_manager=data_manager,
                          model=Brand,
                          image_repository=image_repository,
-                         object_mapper=object_mapper)
+                         object_mapper=object_mapper,
+                         logger=logger)
 
 
 class SqlAlchemyInfluencerRepository(BaseSqlAlchemyUserRepository):
     def __init__(self,
                  data_manager: DataManager,
                  image_repository: ImageRepository,
-                 object_mapper: ObjectMapperAdapter):
+                 object_mapper: ObjectMapperAdapter,
+                 logger: Logger):
         super().__init__(data_manager=data_manager,
                          model=Influencer,
                          image_repository=image_repository,
-                         object_mapper=object_mapper)
+                         object_mapper=object_mapper,
+                         logger=logger)
 
 
 class SqlAlchemyCampaignRepository(BaseSqlAlchemyRepository):
 
     def __init__(self, data_manager: DataManager,
                  object_mapper: ObjectMapperAdapter,
-                 image_repository: ImageRepository):
+                 image_repository: ImageRepository,
+                 logger: Logger):
         super().__init__(data_manager,
                          Campaign,
                          object_mapper,
-                         image_repository=image_repository)
+                         image_repository=image_repository,
+                         logger=logger)
 
     def write_new_for_brand(self, payload: Campaign,
                             auth_user_id: str) -> Campaign:
@@ -124,7 +134,7 @@ class SqlAlchemyCampaignRepository(BaseSqlAlchemyRepository):
             return payload
         else:
             error_message = f"brand <{auth_user_id}> not found"
-            print(error_message)
+            self._logger.log_error(error_message)
             raise NotFoundException(error_message)
 
     def load_for_auth_brand(self, auth_user_id: str) -> list[Campaign]:
@@ -146,32 +156,31 @@ class SqlAlchemyCampaignRepository(BaseSqlAlchemyRepository):
 
 class S3ImageRepository:
 
-    def __init__(self):
+    def __init__(self, logger: Logger):
+        self.__logger = logger
         self.__bucket_name = 'pinfluencer-product-images'
         self.__s3_client = boto3.client('s3')
 
     def upload(self, path, image_base64_encoded):
-        print(f"uploading image to S3 repo {image_base64_encoded}")
+        self.__logger.log_debug(f"uploading image to S3 repo {image_base64_encoded}")
         image = base64.b64decode(image_base64_encoded)
-        print(f"uploading image to S3 repo bytes64 encoded {image}")
         f = io.BytesIO(image)
-        print(f"bytesIO file {f}")
         file_type = filetype.get_type(ext='jpg')
         try:
             file_type = filetype.guess(f)
         except Exception:
             ...
-        print(f'image uploading to {path}/ of {file_type}')
+        self.__logger.log_debug(f'image uploading to {path}/ of {file_type}')
         if file_type is not None:
-            print(f"file type {file_type}")
+            self.__logger.log_trace(f"file type {file_type}")
             mime = file_type.MIME
         else:
             mime = 'image/jpg'
         image_id = str(uuid.uuid4())
         file = f'{image_id}.{file_type.EXTENSION}'
-        print(f'image {file}')
+        self.__logger.log_trace(f'image {file}')
         key = f'{path}/{file}'
-        print(f'key {key}')
+        self.__logger.log_trace(f'key {key}')
         try:
             self.__s3_client.put_object(Bucket=self.__bucket_name,
                                         Key=key, Body=image,
@@ -184,8 +193,9 @@ class S3ImageRepository:
 
 class CognitoAuthService:
 
-    def __init__(self):
-        print(f"user pool id: {os.environ['USER_POOL_ID']}")
+    def __init__(self, logger: Logger):
+        self.__logger = logger
+        self.__logger.log_trace(f"user pool id: {os.environ['USER_POOL_ID']}")
         self.__client = boto3.client('cognito-idp')
 
     def update_user_claims(self, username: str, attributes: list[dict]) -> None:
@@ -196,8 +206,8 @@ class CognitoAuthService:
         )
 
     def get_user(self, username: str) -> dict:
-        print(f"username is {username}")
-        print(f"userpool is {os.environ['USER_POOL_ID']}")
+        self.__logger.log_trace(f"username is {username}")
+        self.__logger.log_trace(f"userpool is {os.environ['USER_POOL_ID']}")
         return self.__client.admin_get_user(
             UserPoolId=os.environ["USER_POOL_ID"],
             Username=username
@@ -206,11 +216,13 @@ class CognitoAuthService:
 
 class CognitoAuthUserRepository:
 
-    def __init__(self, auth_service: CognitoAuthService):
+    def __init__(self, auth_service: CognitoAuthService,
+                 logger: Logger):
+        self.__logger = logger
         self.__auth_service = auth_service
 
     def get_by_id(self, _id: str) -> User:
-        print(f"username is {_id}")
+        self.__logger.log_trace(f"username is {_id}")
         auth_user = self.__auth_service.get_user(username=_id)
         first_name = self.__get_cognito_attribute(user=auth_user,
                                                   attribute_name='given_name')

@@ -21,7 +21,8 @@ class BrandRepositoryTestCase(PinfluencerTestCase):
         self._object_mapper = ObjectMapper()
         self._sut = SqlAlchemyBrandRepository(data_manager=self._data_manager,
                                               image_repository=self._image_repository,
-                                              object_mapper=self._object_mapper)
+                                              object_mapper=self._object_mapper,
+                                              logger=Mock())
 
 
 class TestBaseRepository(BrandRepositoryTestCase):
@@ -158,7 +159,8 @@ class TestInfluencerRepository(TestCase):
         self._object_mapper = ObjectMapper()
         self.__sut = SqlAlchemyInfluencerRepository(data_manager=self.__data_manager,
                                                     image_repository=self.__image_repository,
-                                                    object_mapper=self._object_mapper)
+                                                    object_mapper=self._object_mapper,
+                                                    logger=Mock())
 
     def test_write_new_for_auth_user(self):
         # arrange
@@ -177,7 +179,8 @@ class TestAuthUserRepository(PinfluencerTestCase):
 
     def setUp(self) -> None:
         self.__auth_user_service: CognitoAuthService = Mock()
-        self.__sut = CognitoAuthUserRepository(self.__auth_user_service)
+        self.__sut = CognitoAuthUserRepository(self.__auth_user_service,
+                                               logger=Mock())
 
     def test_update_brand_claims(self):
         # arrange
@@ -303,7 +306,8 @@ class TestCampaignRepository(PinfluencerTestCase):
         self.__image_repository: ImageRepository = Mock()
         self.__sut = SqlAlchemyCampaignRepository(data_manager=self.__data_manager,
                                                   object_mapper=self.__object_mapper,
-                                                  image_repository=self.__image_repository)
+                                                  image_repository=self.__image_repository,
+                                                  logger=Mock())
 
     def test_write_for_new_brand(self):
         # arrange

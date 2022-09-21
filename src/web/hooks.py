@@ -93,12 +93,14 @@ class CommonBeforeHooks:
     def map_enum(self, context: PinfluencerContext,
                  key: str,
                  enum_value):
-        context.body[key] = enum_value[context.body[key]]
+        if key in context.body:
+            context.body[key] = enum_value[context.body[key]]
 
     def map_enums(self, context: PinfluencerContext,
                   key: str,
                   enum_value):
-        context.body[key] = list(map(lambda x: enum_value[x], context.body[key]))
+        if key in context.body:
+            context.body[key] = list(map(lambda x: enum_value[x], context.body[key]))
 
     def set_body(self, context: PinfluencerContext):
         context.body = self.__deserializer.deserialize(data=context.event["body"])

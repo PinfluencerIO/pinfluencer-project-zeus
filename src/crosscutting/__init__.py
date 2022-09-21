@@ -1,4 +1,5 @@
 import datetime
+import inspect
 import json
 import random
 import re
@@ -20,23 +21,30 @@ def fullname(o):
 
 # TODO
 class ConsoleLogger:
-    def __init__(self):
-        self.__class = None
 
-    def log(self, type: str, message: str):
-        print(f"{type}: {self.__class}: {message}")
+    def __log(self, _type: str, message: str):
+        _function = inspect.stack()[2].function
+        _class = "None"
+        _module = "Unknown"
+        try:
+            _class = type(inspect.stack()[2].frame.f_locals['self']).__name__
+            _module = type(inspect.stack()[2].frame.f_locals['self']).__module__
+        except:
+            ...
+        name = f"{_module}.{_class}.{_function}"
+        print(f"{_type}: {name}: {message}")
 
     def log_error(self, message: str):
-        self.log(type="ERROR", message=message)
+        self.__log(_type="ERROR", message=message)
 
     def log_info(self, message: str):
-        self.log(type="INFO", message=message)
+        self.__log(_type="INFO", message=message)
 
     def log_debug(self, message: str):
-        self.log(type="DEBUG", message=message)
+        self.__log(_type="DEBUG", message=message)
 
     def log_trace(self, message: str):
-        self.log(type="TRACE", message=message)
+        self.__log(_type="TRACE", message=message)
 
 
 class FlexiUpdater:
@@ -60,12 +68,13 @@ class AutoFixture:
                          num=None,
                          nest=0,
                          list_limit=100):
-        return self.create_many(dto=dto,
+        many = self.create_many(dto=dto,
                                 ammount=ammount,
                                 seed=seed,
                                 num=num,
                                 nest=nest,
-                                list_limit=list_limit).__dict__
+                                list_limit=list_limit)
+        return list(map(lambda x: x.__dict__, many))
 
     def create_dict(self, dto,
                     seed=None,

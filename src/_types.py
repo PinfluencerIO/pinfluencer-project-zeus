@@ -161,9 +161,6 @@ class Deserializer(Protocol):
 
 class Logger(Protocol):
 
-    def log(self, type: str, message: str):
-        ...
-
     def log_error(self, message: str):
         ...
 
