@@ -499,6 +499,7 @@ class TestCampaignController(PinfluencerTestCase):
 
     def test_write_for_campaign(self):
         # arrange
+        self.__sut._unit_of_work = MagicMock()
         campaign_from_db = AutoFixture().create(dto=Campaign, list_limit=5)
         campaign_request: CampaignRequestDto = self.__object_mapper.map(_from=campaign_from_db, to=CampaignRequestDto)
         context = PinfluencerContext(response=PinfluencerResponse(),
@@ -514,6 +515,10 @@ class TestCampaignController(PinfluencerTestCase):
         payload_captor = Captor()
 
         # assert
+        with self.tdd_test(msg="work was done in unit of work"):
+            self.__sut._unit_of_work.assert_called_once()
+
+        # assert
         with self.tdd_test(msg="repo was called"):
             self.__campaign_repository.write_new_for_brand.assert_called_once_with(
                 payload=payload_captor,
@@ -526,7 +531,8 @@ class TestCampaignController(PinfluencerTestCase):
 
         # assert
         with self.tdd_test(msg="body equals returned campaign"):
-            assert context.response.body == self.__object_mapper.map(_from=campaign_from_db, to=CampaignResponseDto).__dict__
+            assert self.__object_mapper.map_from_dict(_from=context.response.body, to=CampaignResponseDto) ==\
+                   self.__object_mapper.map(_from=campaign_from_db, to=CampaignResponseDto)
 
         # assert
         with self.tdd_test(msg="success response is returned"):

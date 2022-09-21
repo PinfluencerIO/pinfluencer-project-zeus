@@ -4,7 +4,7 @@ import os
 import uuid
 
 import boto3
-from botocore.exceptions import ClientError
+from botocore.exceptions import ClientError, ParamValidationError
 from filetype import filetype
 
 from src._types import DataManager, ImageRepository, Model, ObjectMapperAdapter, UserModel
@@ -37,7 +37,10 @@ class BaseSqlAlchemyRepository:
             raise NotFoundException(f'model {id} was not found')
 
     def save(self):
+        print("status committing")
+        self._data_manager.session.flush()
         self._data_manager.session.commit()
+        print("status committed")
 
 
 class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):
@@ -69,6 +72,7 @@ class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):
             try:
                 payload.auth_user_id = auth_user_id
                 self._data_manager.session.add(payload)
+                print(f"{payload} from data.write_new_for_auth_user")
                 return payload
             except Exception as e:
                 print(f'Failed to write_new_{self._model.__class__.__name__}_for_auth_user {e}')
@@ -192,6 +196,8 @@ class CognitoAuthService:
         )
 
     def get_user(self, username: str) -> dict:
+        print(f"username is {username}")
+        print(f"userpool is {os.environ['USER_POOL_ID']}")
         return self.__client.admin_get_user(
             UserPoolId=os.environ["USER_POOL_ID"],
             Username=username
@@ -204,6 +210,7 @@ class CognitoAuthUserRepository:
         self.__auth_service = auth_service
 
     def get_by_id(self, _id: str) -> User:
+        print(f"username is {_id}")
         auth_user = self.__auth_service.get_user(username=_id)
         first_name = self.__get_cognito_attribute(user=auth_user,
                                                   attribute_name='given_name')
@@ -225,21 +232,24 @@ class CognitoAuthUserRepository:
         self.__update_user_claims(user=user, type='influencer')
 
     def __update_user_claims(self, user: User, type: str):
-        self.__auth_service.update_user_claims(username=user.auth_user_id, attributes=[
-            {
-                'Name': 'custom:usertype',
-                'Value': type
-            },
-            {
-                'Name': 'email',
-                'Value': user.email
-            },
-            {
-                'Name': 'family_name',
-                'Value': user.last_name
-            },
-            {
-                'Name': 'given_name',
-                'Value': user.first_name
-            }
-        ])
+        try:
+            self.__auth_service.update_user_claims(username=user.auth_user_id, attributes=[
+                {
+                    'Name': 'custom:usertype',
+                    'Value': type
+                },
+                {
+                    'Name': 'email',
+                    'Value': user.email
+                },
+                {
+                    'Name': 'family_name',
+                    'Value': user.last_name
+                },
+                {
+                    'Name': 'given_name',
+                    'Value': user.first_name
+                }
+            ])
+        except ParamValidationError:
+            ...

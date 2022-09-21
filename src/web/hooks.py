@@ -279,7 +279,10 @@ class BrandAfterHooks:
         self.__auth_user_repository = auth_user_repository
 
     def set_brand_claims(self, context: PinfluencerContext):
-        user = User(auth_user_id=context.auth_user_id)
+        user = User(auth_user_id=context.auth_user_id,
+                    first_name=context.body["first_name"],
+                    last_name=context.body["last_name"],
+                    email=context.body["email"])
         self.__auth_user_repository.update_brand_claims(user=user)
 
     def tag_bucket_url_to_images(self, context: PinfluencerContext):
@@ -303,7 +306,10 @@ class InfluencerAfterHooks:
         self.__auth_user_repository = auth_user_repository
 
     def set_influencer_claims(self, context: PinfluencerContext):
-        user = User(auth_user_id=context.auth_user_id)
+        user = User(auth_user_id=context.auth_user_id,
+                    first_name=context.body["first_name"],
+                    last_name=context.body["last_name"],
+                    email=context.body["email"])
         self.__auth_user_repository.update_influencer_claims(user=user)
 
     def tag_bucket_url_to_images(self, context: PinfluencerContext):
@@ -324,6 +330,7 @@ class UserBeforeHooks:
 
     def set_auth_user_id(self, context: PinfluencerContext):
         context.auth_user_id = context.event['requestContext']['authorizer']['jwt']['claims']['username']
+        print(f"username {context.auth_user_id}")
 
     def set_categories_and_values(self, context: PinfluencerContext):
         self.__common_before_hooks.map_enums(context=context,

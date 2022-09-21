@@ -10,6 +10,35 @@ from typing import Union
 from src.exceptions import AutoFixtureException
 
 
+def fullname(o):
+    klass = o.__class__
+    module = klass.__module__
+    if module == 'builtins':
+        return klass.__qualname__  # avoid outputs like 'builtins.str'
+    return module + '.' + klass.__qualname__
+
+
+# TODO
+class ConsoleLogger:
+    def __init__(self):
+        self.__class = None
+
+    def log(self, type: str, message: str):
+        print(f"{type}: {self.__class}: {message}")
+
+    def log_error(self, message: str):
+        self.log(type="ERROR", message=message)
+
+    def log_info(self, message: str):
+        self.log(type="INFO", message=message)
+
+    def log_debug(self, message: str):
+        self.log(type="DEBUG", message=message)
+
+    def log_trace(self, message: str):
+        self.log(type="TRACE", message=message)
+
+
 class FlexiUpdater:
 
     def update(self, request, object_to_update):
@@ -21,7 +50,6 @@ class FlexiUpdater:
                     setattr(object_to_update, key, getattr(request, key))
             except AttributeError:
                 ...
-
 
 
 class AutoFixture:
@@ -127,7 +155,8 @@ class AutoFixture:
                     if type(arg) is type(Enum):
                         self.__generate_list_of_enums_field(arg, is_predictable_data, key, new_value, num, list_limit)
                     if bool(typing.get_type_hints(arg)):
-                        self.__generate_class_list(arg, is_predictable_data, key, nest, new_value, num, seed, list_limit)
+                        self.__generate_class_list(arg, is_predictable_data, key, nest, new_value, num, seed,
+                                                   list_limit)
 
         return new_value
 
@@ -299,11 +328,13 @@ class AutoFixture:
 class PinfluencerObjectMapper:
 
     def map(self, _from, to):
+        print(vars(_from).items())
         return self.__generic_map(_from=_from,
                                   to=to,
                                   propValues=vars(_from).items())
 
     def map_from_dict(self, _from, to):
+        print(_from.items())
         return self.__generic_map(_from=_from,
                                   to=to,
                                   propValues=_from.items())
@@ -311,11 +342,15 @@ class PinfluencerObjectMapper:
     def __generic_map(self, _from, to, propValues):
         new_dto = to()
         dict_to = all_annotations(to)
+        print("START MAPPING")
+        print(f"all annotations from DTO {dict_to}")
+        print(f"all props from _from {propValues}")
         for property, value in propValues:
             if property in dict_to:
                 setattr(new_dto, property, value)
                 if bool(typing.get_type_hints(dict_to[property])):
                     setattr(new_dto, property, self.map(_from=value, to=dict_to[property]))
+        print(f"__generic_map from {type(_from)} {to} and mapped {_from} out -> {new_dto}")
         return new_dto
 
 
@@ -333,6 +368,7 @@ def all_annotations(cls):
             # object, at least, has no __annotations__ attribute.
             pass
     return d
+
 
 class JsonSnakeToCamelSerializer:
 

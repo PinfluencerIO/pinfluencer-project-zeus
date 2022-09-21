@@ -157,3 +157,21 @@ class Deserializer(Protocol):
 
     def deserialize(self, data: str) -> Union[dict, list]:
         ...
+
+
+class Logger(Protocol):
+
+    def log(self, type: str, message: str):
+        ...
+
+    def log_error(self, message: str):
+        ...
+
+    def log_info(self, message: str):
+        ...
+
+    def log_debug(self, message: str):
+        ...
+
+    def log_trace(self, message: str):
+        ...

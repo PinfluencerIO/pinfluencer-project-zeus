@@ -45,20 +45,18 @@ class Dispatcher:
 
                 'POST /brands/me': self.create_brand(),
 
-                'PUT /brands/me': self.update_brand(),
+                'PATCH /brands/me': self.update_brand(),
 
-                'POST /brands/me/header-image': self.update_brand_header_image(),
-
-                'POST /brands/me/logo': self.update_brand_logo(),
+                'POST /brands/me/images/{image_field}': self.update_brand_image(),
 
                 # authenticated influencer endpoints
                 'GET /influencers/me': self.get_auth_influencer(),
 
                 'POST /influencers/me': self.create_influencer(),
 
-                'PUT /influencers/me': self.update_influencer(),
+                'PATCH /influencers/me': self.update_influencer(),
 
-                'POST /influencers/me/image': self.update_influencer_image(),
+                'POST /influencers/me/images/{image_field}': self.update_influencer_image(),
             }
         )
 
@@ -73,13 +71,9 @@ class Dispatcher:
 
                 'POST /brands/me/campaigns': self.create_campaign(),
 
-                'PATCH /brands/me/campaigns/{campaign_id}': self.update_campaign(),
+                'PATCH /brands/me/campaigns/{campaign_id}': self.update_campgin_bulk(),
 
-                'PUT /brands/me/campaigns/{campaign_id}': self.update_campgin_bulk(),
-
-                'POST /brands/me/campaigns/{campaign_id}/product-image1': self.update_prod1_image_for_campaign(),
-                'POST /brands/me/campaigns/{campaign_id}/product-image2': self.update_prod2_image_for_campaign(),
-                'POST /brands/me/campaigns/{campaign_id}/product-image3': self.update_prod3_image_for_campaign()
+                'POST /brands/me/campaigns/{campaign_id}/images/{image_field}': self.update_image_for_campaign()
             }
         )
         routes = {}
@@ -96,7 +90,7 @@ class Dispatcher:
                 self.__hooks_facade.get_campaign_before_hooks().validate_id,
                 self.__hooks_facade.get_brand_before_hooks().validate_auth_brand
             ],
-            action=self.__campaign_ctr.update_product_image3,
+            action=self.__campaign_ctr.update_image_field,
             after_hooks=[
                 self.__hooks_facade.get_campaign_after_hooks().format_values_and_categories,
                 self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images,
@@ -112,7 +106,7 @@ class Dispatcher:
                 self.__hooks_facade.get_campaign_before_hooks().validate_id,
                 self.__hooks_facade.get_brand_before_hooks().validate_auth_brand
             ],
-            action=self.__campaign_ctr.update_product_image2,
+            action=self.__campaign_ctr.update_image_field,
             after_hooks=[
                 self.__hooks_facade.get_campaign_after_hooks().format_values_and_categories,
                 self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images,
@@ -120,15 +114,17 @@ class Dispatcher:
             ]
         )
 
-    def update_prod1_image_for_campaign(self):
+    def update_image_for_campaign(self):
         return Route(
             before_hooks=[
                 self.__hooks_facade.get_before_common_hooks().set_body,
                 self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
                 self.__hooks_facade.get_campaign_before_hooks().validate_id,
-                self.__hooks_facade.get_brand_before_hooks().validate_auth_brand
+                self.__hooks_facade.get_brand_before_hooks().validate_auth_brand,
+                self.__hooks_facade.get_campaign_before_hooks().validate_image_key,
+                self.__hooks_facade.get_campaign_before_hooks().upload_image
             ],
-            action=self.__campaign_ctr.update_product_image1,
+            action=self.__campaign_ctr.update_image_field,
             after_hooks=[
                 self.__hooks_facade.get_campaign_after_hooks().format_values_and_categories,
                 self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images,
@@ -143,25 +139,11 @@ class Dispatcher:
                 self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
                 self.__hooks_facade.get_campaign_before_hooks().validate_id,
                 self.__hooks_facade.get_campaign_before_hooks().validate_campaign,
-                self.__hooks_facade.get_brand_before_hooks().validate_auth_brand
+                self.__hooks_facade.get_brand_before_hooks().validate_auth_brand,
+                self.__hooks_facade.get_campaign_before_hooks().map_campaign_state,
+                self.__hooks_facade.get_campaign_before_hooks().map_campaign_categories_and_values
             ],
             action=self.__campaign_ctr.update,
-            after_hooks=[
-                self.__hooks_facade.get_campaign_after_hooks().format_values_and_categories,
-                self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images,
-                self.__hooks_facade.get_campaign_after_hooks().format_campaign_state
-            ]
-        )
-
-    def update_campaign(self):
-        return Route(
-            before_hooks=[
-                self.__hooks_facade.get_before_common_hooks().set_body,
-                self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
-                self.__hooks_facade.get_campaign_before_hooks().validate_id,
-                self.__hooks_facade.get_brand_before_hooks().validate_auth_brand
-            ],
-            action=self.__campaign_ctr.update_campaign_state,
             after_hooks=[
                 self.__hooks_facade.get_campaign_after_hooks().format_values_and_categories,
                 self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images,
@@ -174,7 +156,9 @@ class Dispatcher:
             before_hooks=[
                 self.__hooks_facade.get_before_common_hooks().set_body,
                 self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
-                self.__hooks_facade.get_campaign_before_hooks().validate_campaign
+                self.__hooks_facade.get_campaign_before_hooks().validate_campaign,
+                self.__hooks_facade.get_campaign_before_hooks().map_campaign_state,
+                self.__hooks_facade.get_campaign_before_hooks().map_campaign_categories_and_values
             ],
             action=self.__campaign_ctr.create,
             after_hooks=[
@@ -218,8 +202,10 @@ class Dispatcher:
             before_hooks=[
                 self.__hooks_facade.get_before_common_hooks().set_body,
                 self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
+                self.__hooks_facade.get_influencer_before_hooks().validate_image_key,
+                self.__hooks_facade.get_influencer_before_hooks().upload_image
             ],
-            action=self.__influencer_ctr.update_profile_image,
+            action=self.__influencer_ctr.update_image_field,
             after_hooks=[
                 self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
                 self.__hooks_facade.get_influencer_after_hooks().tag_bucket_url_to_images,
@@ -232,7 +218,8 @@ class Dispatcher:
             before_hooks=[
                 self.__hooks_facade.get_before_common_hooks().set_body,
                 self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
-                self.__hooks_facade.get_influencer_before_hooks().validate_influencer
+                self.__hooks_facade.get_influencer_before_hooks().validate_influencer,
+                self.__hooks_facade.get_user_before_hooks().set_categories_and_values,
             ],
             action=self.__influencer_ctr.update,
             after_hooks=[
@@ -247,7 +234,8 @@ class Dispatcher:
             before_hooks=[
                 self.__hooks_facade.get_before_common_hooks().set_body,
                 self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
-                self.__hooks_facade.get_influencer_before_hooks().validate_influencer
+                self.__hooks_facade.get_influencer_before_hooks().validate_influencer,
+                self.__hooks_facade.get_user_before_hooks().set_categories_and_values
             ],
             action=self.__influencer_ctr.create,
             after_hooks=[
@@ -271,27 +259,15 @@ class Dispatcher:
             ]
         )
 
-    def update_brand_logo(self):
+    def update_brand_image(self):
         return Route(
             before_hooks=[
                 self.__hooks_facade.get_before_common_hooks().set_body,
-                self.__hooks_facade.get_user_before_hooks().set_auth_user_id
+                self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
+                self.__hooks_facade.get_brand_before_hooks().validate_image_key,
+                self.__hooks_facade.get_brand_before_hooks().upload_image
             ],
-            action=self.__brand_ctr.update_logo,
-            after_hooks=[
-                self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
-                self.__hooks_facade.get_brand_after_hooks().tag_bucket_url_to_images,
-                self.__hooks_facade.get_user_after_hooks().format_values_and_categories
-            ]
-        )
-
-    def update_brand_header_image(self):
-        return Route(
-            before_hooks=[
-                self.__hooks_facade.get_before_common_hooks().set_body,
-                self.__hooks_facade.get_user_before_hooks().set_auth_user_id
-            ],
-            action=self.__brand_ctr.update_header_image,
+            action=self.__brand_ctr.update_image_field,
             after_hooks=[
                 self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
                 self.__hooks_facade.get_brand_after_hooks().tag_bucket_url_to_images,
@@ -304,7 +280,8 @@ class Dispatcher:
             before_hooks=[
                 self.__hooks_facade.get_before_common_hooks().set_body,
                 self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
-                self.__hooks_facade.get_brand_before_hooks().validate_brand
+                self.__hooks_facade.get_brand_before_hooks().validate_brand,
+                self.__hooks_facade.get_user_before_hooks().set_categories_and_values
             ],
             action=self.__brand_ctr.update,
             after_hooks=[

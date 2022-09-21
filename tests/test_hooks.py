@@ -598,7 +598,7 @@ class TestCommonHooks(PinfluencerTestCase):
         assert pinfluencer_context.body == body
 
 
-class TestBrandAfterHooks(TestCase):
+class TestBrandAfterHooks(PinfluencerTestCase):
 
     def setUp(self) -> None:
         self.__auth_user_repository: AuthUserRepository = Mock()

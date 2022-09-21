@@ -67,21 +67,22 @@ class BaseController:
     def _update(self, context: PinfluencerContext, request, response):
         auth_user_id = context.auth_user_id
         payload_dict = context.body
-        try:
-            request = self._mapper.map_from_dict(_from=payload_dict,
-                                                                        to=request)
-            entity_in_db = self._repository.load_for_auth_user(auth_user_id=auth_user_id)
-            with self._unit_of_work():
+        with self._unit_of_work():
+            try:
+                request = self._mapper.map_from_dict(_from=payload_dict,
+                                                                            to=request)
+                entity_in_db = self._repository.load_for_auth_user(auth_user_id=auth_user_id)
                 self._flexi_updater.update(request=request,
                                            object_to_update=entity_in_db)
-        except NotFoundException as e:
-            print_exception(e)
-            context.short_circuit = True
-            context.response.body = {}
-            context.response.status_code = 404
-            return
-        context.response.body = self._mapper.map(_from=entity_in_db, to=response).__dict__
-        context.response.status_code = 200
+            except NotFoundException as e:
+                print_exception(e)
+                context.short_circuit = True
+                context.response.body = {}
+                context.response.status_code = 404
+                return
+            mapped_response = self._mapper.map(_from=entity_in_db, to=response)
+            context.response.body = mapped_response.__dict__
+            context.response.status_code = 200
 
 
 class BaseUserController(BaseController):
@@ -108,20 +109,25 @@ class BaseUserController(BaseController):
     def _create(self, context: PinfluencerContext, model, request, response):
         auth_user_id = context.auth_user_id
         payload_dict = context.body
-        try:
-            entity = self._mapper.map(_from=self._mapper.map_from_dict(_from=payload_dict,
-                                                                      to=request),
-                                     to=model)
-            with self._unit_of_work():
+        with self._unit_of_work():
+            try:
+                entity = self._mapper.map(_from=self._mapper.map_from_dict(_from=payload_dict,
+                                                                          to=request),
+                                         to=model)
+
                 entity_to_return = self._repository.write_new_for_auth_user(auth_user_id=auth_user_id, payload=entity)
-        except AlreadyExistsException as e:
-            print_exception(e)
-            context.short_circuit = True
-            context.response.body = {}
-            context.response.status_code = 400
-            return
-        context.response.body = self._mapper.map(_from=entity_to_return, to=response).__dict__
-        context.response.status_code = 201
+            except AlreadyExistsException as e:
+                print_exception(e)
+                context.short_circuit = True
+                context.response.body = {}
+                context.response.status_code = 400
+                return
+            print(f"web layer: entity to return {entity_to_return}")
+            print(f"mapping {model.__name__} to {response.__name__}")
+            response = self._mapper.map(_from=entity_to_return, to=response)
+            print(f"mapped response: {response}")
+            context.response.body = response.__dict__
+            context.response.status_code = 201
 
 
 class BrandController(BaseUserController):
@@ -160,21 +166,25 @@ class CampaignController(BaseController):
         super().__init__(repository, object_mapper, flexi_updater)
 
     def create(self, context: PinfluencerContext) -> None:
-        try:
-            campaign = self._repository.write_new_for_brand(payload=self._mapper.map(
-                _from=self._mapper.map_from_dict(
-                    _from=context.body,
-                    to=CampaignRequestDto),
-                to=Campaign),
-                auth_user_id=context.auth_user_id)
-            context.response.body = campaign.__dict__
-            context.response.status_code = 201
-            return
-        except NotFoundException as e:
-            print_exception(e)
-            context.response.body = {}
-            context.response.status_code = 404
-            context.short_circuit = True
+        with self._unit_of_work():
+            try:
+
+                campaign = self._repository.write_new_for_brand(payload=self._mapper.map(
+                    _from=self._mapper.map_from_dict(
+                        _from=context.body,
+                        to=CampaignRequestDto),
+                    to=Campaign),
+                    auth_user_id=context.auth_user_id)
+                print(campaign)
+                print(campaign.__dict__)
+                context.response.body = campaign.__dict__
+                context.response.status_code = 201
+                return
+            except NotFoundException as e:
+                print_exception(e)
+                context.response.body = {}
+                context.response.status_code = 404
+                context.short_circuit = True
 
     def get_for_brand(self, context: PinfluencerContext) -> None:
         try:
