@@ -3,11 +3,11 @@ from typing import Callable
 
 from src._types import BrandRepository, UserRepository, InfluencerRepository, Repository, CampaignRepository
 from src.crosscutting import print_exception, PinfluencerObjectMapper, FlexiUpdater
-from src.domain.models import ValueEnum, CategoryEnum, Brand, Influencer, Campaign
+from src.domain.models import Brand, Influencer, Campaign
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.web import PinfluencerResponse, BRAND_ID_PATH_KEY, INFLUENCER_ID_PATH_KEY, PinfluencerContext
 from src.web.views import BrandRequestDto, BrandResponseDto, ImageRequestDto, InfluencerRequestDto, \
-    InfluencerResponseDto
+    InfluencerResponseDto, CampaignRequestDto, CampaignResponseDto
 
 
 class BaseController:
@@ -64,6 +64,25 @@ class BaseController:
         except Exception:
             raise
 
+    def _update(self, context: PinfluencerContext, request, response):
+        auth_user_id = context.auth_user_id
+        payload_dict = context.body
+        try:
+            request = self._mapper.map_from_dict(_from=payload_dict,
+                                                                        to=request)
+            entity_in_db = self._repository.load_for_auth_user(auth_user_id=auth_user_id)
+            with self._unit_of_work():
+                self._flexi_updater.update(request=request,
+                                           object_to_update=entity_in_db)
+        except NotFoundException as e:
+            print_exception(e)
+            context.short_circuit = True
+            context.response.body = {}
+            context.response.status_code = 404
+            return
+        context.response.body = self._mapper.map(_from=entity_in_db, to=response).__dict__
+        context.response.status_code = 200
+
 
 class BaseUserController(BaseController):
 
@@ -104,25 +123,6 @@ class BaseUserController(BaseController):
         context.response.body = self._mapper.map(_from=entity_to_return, to=response).__dict__
         context.response.status_code = 201
 
-    def _update(self, context: PinfluencerContext, request, response):
-        auth_user_id = context.auth_user_id
-        payload_dict = context.body
-        try:
-            request = self._mapper.map_from_dict(_from=payload_dict,
-                                                                        to=request)
-            entity_in_db = self._repository.load_for_auth_user(auth_user_id=auth_user_id)
-            with self._unit_of_work():
-                self._flexi_updater.update(request=request,
-                                           object_to_update=entity_in_db)
-        except NotFoundException as e:
-            print_exception(e)
-            context.short_circuit = True
-            context.response.body = {}
-            context.response.status_code = 404
-            return
-        context.response.body = self._mapper.map(_from=entity_in_db, to=response).__dict__
-        context.response.status_code = 200
-
 
 class BrandController(BaseUserController):
     def __init__(self, brand_repository: BrandRepository, object_mapper: PinfluencerObjectMapper, flexi_updater: FlexiUpdater):
@@ -161,19 +161,12 @@ class CampaignController(BaseController):
 
     def create(self, context: PinfluencerContext) -> None:
         try:
-            campaign = self._repository.write_new_for_brand(payload=Campaign(
-                objective=context.body["objective"],
-                success_description=context.body["success_description"],
-                campaign_title=context.body["campaign_title"],
-                campaign_description=context.body["campaign_description"],
-                campaign_categories=list(map(lambda x: CategoryEnum[x], context.body["campaign_categories"])),
-                campaign_values=list(map(lambda x: ValueEnum[x], context.body["campaign_values"])),
-                campaign_product_link=context.body["campaign_product_link"],
-                campaign_hashtag=context.body["campaign_hashtag"],
-                campaign_discount_code=context.body["campaign_discount_code"],
-                product_title=context.body["product_title"],
-                product_description=context.body["product_description"]
-            ), auth_user_id=context.auth_user_id)
+            campaign = self._repository.write_new_for_brand(payload=self._mapper.map(
+                _from=self._mapper.map_from_dict(
+                    _from=context.body,
+                    to=CampaignRequestDto),
+                to=Campaign),
+                auth_user_id=context.auth_user_id)
             context.response.body = campaign.__dict__
             context.response.status_code = 201
             return
@@ -195,4 +188,4 @@ class CampaignController(BaseController):
             context.short_circuit = True
 
     def update(self, context: PinfluencerContext) -> None:
-        ...
+        self._update(context=context, request=CampaignRequestDto, response=CampaignResponseDto)

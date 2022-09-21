@@ -1,7 +1,7 @@
 import datetime
 from dataclasses import dataclass
 
-from src.domain.models import ValueEnum, CategoryEnum
+from src.domain.models import ValueEnum, CategoryEnum, CampaignStateEnum
 
 
 @dataclass(unsafe_hash=True)
@@ -26,6 +26,22 @@ class BrandRequestDto:
     first_name: str = None
     last_name: str = None
     email: str = None
+
+
+@dataclass(unsafe_hash=True)
+class CampaignRequestDto:
+    objective: str = None
+    success_description: str = None
+    campaign_title: str = None
+    campaign_description: str = None
+    campaign_categories: list[CategoryEnum] = None
+    campaign_values: list[ValueEnum] = None
+    campaign_state: CampaignStateEnum = None
+    campaign_product_link: str = None
+    campaign_hashtag: str = None
+    campaign_discount_code: str = None
+    product_title: str = None
+    product_description: str = None
 
 
 @dataclass(unsafe_hash=True)
@@ -91,3 +107,21 @@ class InfluencerResponseDto(BaseResponseDto):
     categories: list[CategoryEnum] = None
     address: str = None
     auth_user_id: str = None
+
+
+@dataclass(unsafe_hash=True)
+class CampaignResponseDto(BaseResponseDto):
+    brand_id: str = None
+    objective: str = None
+    success_description: str = None
+    campaign_title: str = None
+    campaign_description: str = None
+    campaign_categories: list[CategoryEnum] = None
+    campaign_values: list[ValueEnum] = None
+    campaign_state: CampaignStateEnum = None
+    campaign_product_link: str = None
+    campaign_hashtag: str = None
+    campaign_discount_code: str = None
+    product_title: str = None
+    product_description: str = None
+    product_image: str = None

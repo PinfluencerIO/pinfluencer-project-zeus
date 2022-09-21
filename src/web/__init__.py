@@ -77,9 +77,3 @@ def valid_path_resource_id(event, resource_key):
         print(f'Missing key in event pathParameters.{resource_key}')
 
     return None
-
-
-class RequestDtoMapper:
-
-    def map(self, _from, to):
-        ...
