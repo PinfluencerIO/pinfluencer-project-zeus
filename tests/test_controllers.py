@@ -3,6 +3,7 @@ from unittest import TestCase
 from unittest.mock import Mock, MagicMock
 
 from callee import Captor
+from ddt import ddt, data
 
 from src._types import BrandRepository, InfluencerRepository, CampaignRepository
 from src.crosscutting import valid_uuid, PinfluencerObjectMapper, AutoFixture, FlexiUpdater
@@ -10,7 +11,7 @@ from src.domain.models import Influencer, Campaign, CategoryEnum, ValueEnum, Cam
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.controllers import BrandController, InfluencerController, CampaignController
-from src.web.views import BrandRequestDto, BrandResponseDto
+from src.web.views import BrandRequestDto, BrandResponseDto, ImageRequestDto
 from tests import brand_dto_generator, influencer_dto_generator, RepoEnum, \
     assert_influencer_creatable_generated_fields_are_equal, \
     assert_influencer_update_fields_are_equal, \
@@ -177,6 +178,7 @@ class TestInfluencerController(TestCase):
         assert context.short_circuit == True
 
 
+@ddt
 class TestBrandController(PinfluencerTestCase):
 
     def setUp(self):
@@ -186,6 +188,32 @@ class TestBrandController(PinfluencerTestCase):
         self.__sut = BrandController(brand_repository=self.__brand_repository,
                                      object_mapper=self.__object_mapper,
                                      flexi_updater=self.__flexi_updater)
+
+    @data("logo", "header_image")
+    def test_update_image_field(self, image_field):
+        # arrange
+        brand_in_db: Brand = AutoFixture().create(dto=Brand,
+                                           list_limit=5)
+        self.__brand_repository.load_for_auth_user = MagicMock(return_value=brand_in_db)
+        self.__sut._unit_of_work = MagicMock()
+        image_request: ImageRequestDto = AutoFixture().create(dto=ImageRequestDto)
+        image_request.image_field = image_field
+        context = PinfluencerContext(body=image_request.__dict__,
+                                     auth_user_id=brand_in_db.auth_user_id)
+
+        self.__sut.update_image_field(context=context)
+
+        # assert
+        with self.tdd_test(msg="work was done in UoW"):
+            self.__sut._unit_of_work.assert_called_once()
+
+        # assert
+        with self.tdd_test(msg="repo was called"):
+            self.__brand_repository.load_for_auth_user.assert_called_once_with(auth_user_id=brand_in_db.auth_user_id)
+
+        # assert
+        with self.tdd_test(msg="image field was updated"):
+            assert getattr(brand_in_db, image_field) == image_request.image_path
 
     def test_unit_of_work(self):
         # arrange

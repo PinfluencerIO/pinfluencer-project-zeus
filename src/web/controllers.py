@@ -6,7 +6,7 @@ from src.crosscutting import print_exception, PinfluencerObjectMapper, FlexiUpda
 from src.domain.models import ValueEnum, CategoryEnum, Brand, Influencer, Campaign, CampaignStateEnum
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.web import PinfluencerResponse, BRAND_ID_PATH_KEY, INFLUENCER_ID_PATH_KEY, PinfluencerContext
-from src.web.views import BrandRequestDto, BrandResponseDto
+from src.web.views import BrandRequestDto, BrandResponseDto, ImageRequestDto
 
 
 class BaseController:
@@ -36,6 +36,12 @@ class BaseController:
         except NotFoundException as e:
             print_exception(e)
             return [PinfluencerResponse(status_code=404, body={}), True]
+
+    def update_image_field(self, context: PinfluencerContext):
+        request: ImageRequestDto = self._mapper.map_from_dict(_from=context.body, to=ImageRequestDto)
+        with self._unit_of_work():
+            brand = self._repository.load_for_auth_user(auth_user_id=context.auth_user_id)
+            setattr(brand, request.image_field, request.image_path)
 
     def get_by_id(self, context: PinfluencerContext) -> None:
         try:

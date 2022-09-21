@@ -5,6 +5,17 @@ from src.domain.models import ValueEnum, CategoryEnum
 
 
 @dataclass(unsafe_hash=True)
+class ImageRequestDto:
+    image_path: str = None
+    image_field: str = None
+
+
+@dataclass(unsafe_hash=True)
+class RawImageRequestDto:
+    image_bytes: str = None
+
+
+@dataclass(unsafe_hash=True)
 class BrandRequestDto:
     brand_name: str = None
     brand_description: str = None
