@@ -28,52 +28,36 @@ class TestInfluencerController(PinfluencerTestCase):
 
     def test_get_by_id(self):
         # arrange
-        influencer_in_db = AutoFixture().create(dto=Influencer, list_limit=5)
-        self.__influencer_repository.load_by_id = MagicMock(return_value=influencer_in_db)
-        pinfluencer_response = PinfluencerResponse()
+        self.__sut._get_by_id = MagicMock()
+        context = PinfluencerContext()
 
         # act
-        self.__sut.get_by_id(PinfluencerContext(response=pinfluencer_response,
-                                                id=influencer_in_db.id))
+        self.__sut.get_by_id(context)
 
         # assert
-        assert pinfluencer_response.body == influencer_in_db.__dict__
+        self.__sut._get_by_id.assert_called_once_with(context=context, response=InfluencerResponseDto)
 
     def test_get(self):
         # arrange
-        db_influencer = AutoFixture().create(dto=Influencer, list_limit=5)
-        self.__influencer_repository.load_for_auth_user = MagicMock(return_value=db_influencer)
-        response = PinfluencerResponse()
+        self.__sut._get = MagicMock()
+        context = PinfluencerContext()
 
         # act
-        self.__sut.get(PinfluencerContext(response=response,
-                                          auth_user_id=db_influencer.auth_user_id))
+        self.__sut.get(context)
 
         # assert
-        with self.tdd_test(msg="influencer is returned"):
-            assert response.body == db_influencer.__dict__
-
-        # assert
-        with self.tdd_test(msg="200 response is returned"):
-            assert response.status_code == 200
+        self.__sut._get.assert_called_once_with(context=context, response=InfluencerResponseDto)
 
     def test_get_all(self):
         # arrange
-        influencers_from_db = AutoFixture().create_many(dto=Influencer, list_limit=5, ammount=10)
-        self.__influencer_repository.load_collection = MagicMock(return_value=influencers_from_db)
-        pinfluencer_response = PinfluencerResponse()
+        self.__sut._get_all = MagicMock()
+        context = PinfluencerContext()
 
         # act
-        self.__sut.get_all(PinfluencerContext(response=pinfluencer_response,
-                                              event={}))
+        self.__sut.get_all(context)
 
         # assert
-        with self.tdd_test(msg="influencers are returned"):
-            assert pinfluencer_response.body == list(map(lambda x: x.__dict__, influencers_from_db))
-
-        # assert
-        with self.tdd_test(msg="200 status is returned"):
-            assert pinfluencer_response.status_code == 200
+        self.__sut._get_all.assert_called_once_with(context=context, response=InfluencerResponseDto)
 
     def test_create(self):
         # arrange
@@ -245,7 +229,7 @@ class TestBrandController(PinfluencerTestCase):
 
         # assert
         with self.tdd_test("returned brand is the same as brand in db"):
-            assert pinfluencer_response.body == brand_from_db.__dict__
+            assert pinfluencer_response.body == self.__object_mapper.map(_from=brand_from_db, to=BrandResponseDto).__dict__
 
         # assert
         with self.tdd_test("response is ok"):
@@ -295,7 +279,7 @@ class TestBrandController(PinfluencerTestCase):
 
         # assert
         with self.tdd_test("response body is equal to list of brands in db"):
-            assert pinfluencer_response.body == list(map(lambda x: x.__dict__, brands_from_db))
+            assert pinfluencer_response.body == list(map(lambda x: self.__object_mapper.map(_from=x, to=BrandResponseDto).__dict__, brands_from_db))
 
         # assert
         with self.tdd_test("response status code is 200"):
@@ -318,7 +302,7 @@ class TestBrandController(PinfluencerTestCase):
 
         # assert
         with self.tdd_test("response body is equal to brand in db"):
-            assert response.body == db_brand.__dict__
+            assert response.body == self.__object_mapper.map(_from=db_brand, to=BrandResponseDto).__dict__
 
         # assert
         with self.tdd_test("response status code is 200"):
@@ -631,16 +615,14 @@ class TestCampaignController(PinfluencerTestCase):
 
     def test_get_by_id(self):
         # arrange
-        campaign = AutoFixture().create(dto=Campaign, list_limit=5)
-        context = PinfluencerContext(id=campaign.id,
-                                     response=PinfluencerResponse())
-        self.__campaign_repository.load_by_id = MagicMock(return_value=campaign)
+        self.__sut._get_by_id = MagicMock()
+        context = PinfluencerContext()
 
         # act
-        self.__sut.get_by_id(context=context)
+        self.__sut.get_by_id(context)
 
         # assert
-        assert context.response.body == campaign.__dict__
+        self.__sut._get_by_id.assert_called_once_with(context=context, response=CampaignResponseDto)
 
     def test_get_for_brand(self):
         # arrange
@@ -664,7 +646,7 @@ class TestCampaignController(PinfluencerTestCase):
 
         # assert
         with self.tdd_test(msg="campaigns are returned"):
-            assert context.response.body == list(map(lambda x: x.__dict__, campaigns))
+            assert context.response.body == list(map(lambda x: self.__object_mapper.map(_from=x, to=CampaignResponseDto).__dict__, campaigns))
 
         # assert
         with self.tdd_test(msg="response is success"):

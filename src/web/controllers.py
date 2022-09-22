@@ -25,10 +25,13 @@ class BaseController:
         self._mapper = mapper
         self._repository = repository
 
-    def get_all(self, context: PinfluencerContext) -> None:
+    def _get_all(self, context: PinfluencerContext, response) -> None:
         users = self._repository.load_collection()
         context.response.status_code = 200
-        context.response.body = list(map(lambda x: x.__dict__, users))
+        context.response.body = list(map(lambda x: self._mapper.map(_from=x, to=response).__dict__, users))
+
+    def get_all(self, context: PinfluencerContext) -> None:
+        self._get_all(context=context, response=self._response)
 
     def _update_image(self,
                       context: PinfluencerContext,
@@ -58,10 +61,13 @@ class BaseController:
                 context.response.status_code = 404
 
     def get_by_id(self, context: PinfluencerContext) -> None:
+        self._get_by_id(context=context, response=self._response)
+
+    def _get_by_id(self, context: PinfluencerContext, response) -> None:
         try:
             user = self._repository.load_by_id(id_=context.id)
             context.response.status_code = 200
-            context.response.body = user.__dict__
+            context.response.body = self._mapper.map(_from=user, to=response).__dict__
             return
         except NotFoundException as e:
             print_exception(e)
@@ -116,19 +122,22 @@ class BaseUserController(BaseController):
         self._model = model
         self._resource_id = resource_id
 
-    def get(self, context: PinfluencerContext) -> None:
+    def _get(self, context: PinfluencerContext, response) -> None:
         auth_user_id = context.auth_user_id
         if auth_user_id:
             try:
                 brand = self._repository.load_for_auth_user(auth_user_id=auth_user_id)
                 context.response.status_code = 200
-                context.response.body = brand.__dict__
+                context.response.body = self._mapper.map(_from=brand, to=response).__dict__
                 return
             except NotFoundException as e:
                 print_exception(e)
         context.short_circuit = True
         context.response.status_code = 404
         context.response.body = {}
+
+    def get(self, context: PinfluencerContext) -> None:
+        self._get(context=context, response=self._response)
 
     def _create(self, context: PinfluencerContext, model, request, response):
         auth_user_id = context.auth_user_id
@@ -210,7 +219,7 @@ class CampaignController(BaseController):
         try:
             campaigns = self._repository.load_for_auth_brand(auth_user_id=context.auth_user_id)
             context.response.status_code = 200
-            context.response.body = list(map(lambda x: x.__dict__, campaigns))
+            context.response.body = list(map(lambda x: self._mapper.map(_from=x, to=CampaignResponseDto).__dict__, campaigns))
         except NotFoundException as e:
             print_exception(e)
             context.response.status_code = 404
