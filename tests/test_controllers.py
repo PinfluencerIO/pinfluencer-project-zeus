@@ -112,7 +112,7 @@ class TestInfluencerController(PinfluencerTestCase):
 
         # assert
         self.__sut._update_image_field.assert_called_once_with(context=context,
-                                                   response=InfluencerResponseDto)
+                                                               response=InfluencerResponseDto)
 
 
 @ddt
@@ -131,7 +131,7 @@ class TestBrandController(PinfluencerTestCase):
     def test_update_image_field(self, image_field):
         # arrange
         brand_in_db: Brand = AutoFixture().create(dto=Brand,
-                                           list_limit=5)
+                                                  list_limit=5)
         self.__brand_repository.load_for_auth_user = MagicMock(return_value=brand_in_db)
         self.__sut._unit_of_work = MagicMock()
         image_request: ImageRequestDto = AutoFixture().create(dto=ImageRequestDto)
@@ -165,8 +165,7 @@ class TestBrandController(PinfluencerTestCase):
 
         # assert
         with self.tdd_test(msg="brand was returned"):
-            assert context.response.body == self.__object_mapper.map(_from=brand_in_db, to=BrandResponseDto)
-
+            assert context.response.body == self.__object_mapper.map(_from=brand_in_db, to=BrandResponseDto).__dict__
 
     def test_update_image_field_when_not_found(self):
         # arrange
@@ -585,7 +584,7 @@ class TestCampaignController(PinfluencerTestCase):
 
         # assert
         with self.tdd_test(msg="body equals returned campaign"):
-            assert self.__object_mapper.map_from_dict(_from=context.response.body, to=CampaignResponseDto) ==\
+            assert self.__object_mapper.map_from_dict(_from=context.response.body, to=CampaignResponseDto) == \
                    self.__object_mapper.map(_from=campaign_from_db, to=CampaignResponseDto)
 
         # assert
@@ -702,8 +701,8 @@ class TestCampaignController(PinfluencerTestCase):
         self.__sut.update(context=context)
 
         # assert
-        self.__sut._update.assert_called_once_with(context=context, request=CampaignRequestDto, response=CampaignResponseDto)
-
+        self.__sut._update.assert_called_once_with(context=context, request=CampaignRequestDto,
+                                                   response=CampaignResponseDto)
 
     def test_update_image_field(self):
         # arrange
@@ -715,4 +714,4 @@ class TestCampaignController(PinfluencerTestCase):
 
         # assert
         self.__sut._update_image_field.assert_called_once_with(context=context,
-                                                   response=CampaignResponseDto)
+                                                               response=CampaignResponseDto)

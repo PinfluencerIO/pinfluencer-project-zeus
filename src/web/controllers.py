@@ -46,7 +46,7 @@ class BaseController:
             try:
                 brand = self._repository.load_for_auth_user(auth_user_id=context.auth_user_id)
                 setattr(brand, request.image_field, request.image_path)
-                context.response.body = self._mapper.map(_from=brand, to=BrandResponseDto)
+                context.response.body = self._mapper.map(_from=brand, to=BrandResponseDto).__dict__
             except NotFoundException as e:
                 self._logger.log_error(str(e))
                 context.short_circuit = True
