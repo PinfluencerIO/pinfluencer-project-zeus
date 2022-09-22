@@ -15,7 +15,11 @@ class BaseController:
     def __init__(self, repository: Repository,
                  mapper: PinfluencerObjectMapper,
                  flexi_updater: FlexiUpdater,
-                 logger: Logger):
+                 logger: Logger,
+                 response,
+                 request):
+        self._request = request
+        self._response = response
         self._logger = logger
         self._flexi_updater = flexi_updater
         self._mapper = mapper
@@ -46,7 +50,7 @@ class BaseController:
             try:
                 brand = self._repository.load_for_auth_user(auth_user_id=context.auth_user_id)
                 setattr(brand, request.image_field, request.image_path)
-                context.response.body = self._mapper.map(_from=brand, to=BrandResponseDto).__dict__
+                context.response.body = self._mapper.map(_from=brand, to=response).__dict__
             except NotFoundException as e:
                 self._logger.log_error(str(e))
                 context.short_circuit = True
@@ -93,13 +97,23 @@ class BaseController:
             context.response.body = mapped_response.__dict__
             context.response.status_code = 200
 
+    def update(self, context: PinfluencerContext) -> None:
+        self._update(context=context, request=self._request, response=self._response)
+
+    def update_image_field(self, context: PinfluencerContext):
+        self._update_image_field(context=context, response=self._response)
+
 
 class BaseUserController(BaseController):
 
     def __init__(self, user_repository: UserRepository, resource_id: str, object_mapper: PinfluencerObjectMapper,
                  flexi_updater: FlexiUpdater,
-                 logger: Logger):
-        super().__init__(user_repository, object_mapper, flexi_updater, logger=logger)
+                 logger: Logger,
+                 response,
+                 request,
+                 model):
+        super().__init__(user_repository, object_mapper, flexi_updater, logger=logger, response=response, request=request)
+        self._model = model
         self._resource_id = resource_id
 
     def get(self, context: PinfluencerContext) -> None:
@@ -139,47 +153,37 @@ class BaseUserController(BaseController):
             context.response.body = response.__dict__
             context.response.status_code = 201
 
+    def create(self, context: PinfluencerContext) -> None:
+        self._create(context=context,
+                     model=self._model,
+                     request=self._request,
+                     response=self._response)
+
 
 class BrandController(BaseUserController):
     def __init__(self, brand_repository: BrandRepository, object_mapper: PinfluencerObjectMapper, flexi_updater: FlexiUpdater, logger: Logger):
-        super().__init__(brand_repository, BRAND_ID_PATH_KEY, object_mapper, flexi_updater, logger)
-
-    def create(self, context: PinfluencerContext) -> None:
-        self._create(context=context,
-                     model=Brand,
-                     request=BrandRequestDto,
-                     response=BrandResponseDto)
-
-    def update(self, context: PinfluencerContext) -> None:
-        self._update(context=context, request=BrandRequestDto, response=BrandResponseDto)
-
-    def update_image_field(self, context: PinfluencerContext):
-        self._update_image_field(context=context, response=BrandResponseDto)
+        super().__init__(brand_repository, BRAND_ID_PATH_KEY, object_mapper, flexi_updater, logger,
+                         response=BrandResponseDto,
+                         request=BrandRequestDto,
+                         model=Brand)
 
 
 class InfluencerController(BaseUserController):
 
     def __init__(self, influencer_repository: InfluencerRepository, object_mapper: PinfluencerObjectMapper,
                  flexi_updater: FlexiUpdater, logger: Logger):
-        super().__init__(influencer_repository, INFLUENCER_ID_PATH_KEY, object_mapper, flexi_updater, logger)
-
-    def create(self, context: PinfluencerContext) -> None:
-        self._create(context=context,
-                     model=Influencer,
-                     request=InfluencerRequestDto,
-                     response=InfluencerResponseDto)
-
-    def update(self, context: PinfluencerContext) -> None:
-        self._update(context=context, request=InfluencerRequestDto, response=InfluencerResponseDto)
-
-    def update_image_field(self, context: PinfluencerContext):
-        self._update_image_field(context=context, response=InfluencerResponseDto)
+        super().__init__(influencer_repository, INFLUENCER_ID_PATH_KEY, object_mapper, flexi_updater, logger,
+                         response=InfluencerResponseDto,
+                         request=InfluencerRequestDto,
+                         model=Influencer)
 
 
 class CampaignController(BaseController):
 
     def __init__(self, repository: CampaignRepository, object_mapper: PinfluencerObjectMapper, flexi_updater: FlexiUpdater, logger: Logger):
-        super().__init__(repository, object_mapper, flexi_updater, logger)
+        super().__init__(repository, object_mapper, flexi_updater, logger,
+                         response=CampaignResponseDto,
+                         request=CampaignRequestDto)
 
     def create(self, context: PinfluencerContext) -> None:
         with self._unit_of_work():
@@ -193,7 +197,7 @@ class CampaignController(BaseController):
                     auth_user_id=context.auth_user_id)
                 print(campaign)
                 print(campaign.__dict__)
-                context.response.body = campaign.__dict__
+                context.response.body = self._mapper.map(_from=campaign, to=CampaignResponseDto).__dict__
                 context.response.status_code = 201
                 return
             except NotFoundException as e:
@@ -212,9 +216,3 @@ class CampaignController(BaseController):
             context.response.status_code = 404
             context.response.body = {}
             context.short_circuit = True
-
-    def update(self, context: PinfluencerContext) -> None:
-        self._update(context=context, request=CampaignRequestDto, response=CampaignResponseDto)
-
-    def update_image_field(self, context: PinfluencerContext):
-        self._update_image_field(context=context, response=CampaignResponseDto)

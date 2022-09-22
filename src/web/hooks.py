@@ -150,7 +150,7 @@ class CampaignBeforeHooks:
         })
 
     def validate_image_key(self, context: PinfluencerContext):
-        self.__common_before_hooks.validate_image_path(context=context, possible_paths=["product_image"])
+        self.__common_before_hooks.validate_image_path(context=context, possible_paths=["product-image"])
 
 
 class CampaignAfterHooks:
@@ -160,9 +160,7 @@ class CampaignAfterHooks:
 
     def tag_bucket_url_to_images(self, context: PinfluencerContext):
         self.__common_after_hooks.set_image_url(context=context,
-                                                image_fields=["product_image1",
-                                                              "product_image2",
-                                                              "product_image3"],
+                                                image_fields=["product_image"],
                                                 collection=False)
 
     def format_values_and_categories(self, context: PinfluencerContext):
@@ -173,9 +171,7 @@ class CampaignAfterHooks:
 
     def tag_bucket_url_to_images_collection(self, context: PinfluencerContext):
         self.__common_after_hooks.set_image_url(context=context,
-                                                image_fields=["product_image1",
-                                                              "product_image2",
-                                                              "product_image3"],
+                                                image_fields=["product_image"],
                                                 collection=True)
 
     def format_values_and_categories_collection(self, context: PinfluencerContext):
@@ -270,7 +266,7 @@ class BrandBeforeHooks:
         })
 
     def validate_image_key(self, context: PinfluencerContext):
-        self.__common_before_hooks.validate_image_path(context=context, possible_paths=["logo", "header_image"])
+        self.__common_before_hooks.validate_image_path(context=context, possible_paths=["logo", "header-image"])
 
 
 class BrandAfterHooks:

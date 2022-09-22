@@ -252,7 +252,7 @@ class TestBrandBeforeHooks(PinfluencerTestCase):
         # assert
         with self.tdd_test(msg="keys were validated"):
             self.__common_before_hooks.validate_image_path.assert_called_once_with(context=context,
-                                                                                   possible_paths=["logo", "header_image"])
+                                                                                   possible_paths=["logo", "header-image"])
 
 
 class TestInfluencerBeforeHooks(PinfluencerTestCase):
@@ -462,7 +462,7 @@ class TestCampaignBeforeHooks(PinfluencerTestCase):
         # assert
         with self.tdd_test(msg="keys were validated"):
             self.__common_before_hooks.validate_image_path.assert_called_once_with(context=context,
-                                                                                   possible_paths=["product_image"])
+                                                                                   possible_paths=["product-image"])
 
 
 @ddt
@@ -762,9 +762,7 @@ class TestCampaignAfterHooks(TestCase):
 
         # assert
         self.__common_after_hooks.set_image_url.assert_called_once_with(context=context,
-                                                                        image_fields=["product_image1",
-                                                                                      "product_image2",
-                                                                                      "product_image3"],
+                                                                        image_fields=["product_image"],
                                                                         collection=False)
 
     def test_format_values_and_categories(self):
@@ -801,9 +799,7 @@ class TestCampaignAfterHooks(TestCase):
 
         # assert
         self.__common_after_hooks.set_image_url.assert_called_once_with(context=context,
-                                                                        image_fields=["product_image1",
-                                                                                      "product_image2",
-                                                                                      "product_image3"],
+                                                                        image_fields=["product_image"],
                                                                         collection=True)
 
     def test_format_campaign_state(self):
