@@ -56,8 +56,8 @@ class TestRoutes(TestCase):
                   context={},
                   middleware=self.__mock_middleware_pipeline,
                   ioc=self.__ioc,
-                  data_manager=Mock,
-                  cognito_auth_service=Mock)
+                  data_manager=Mock(),
+                  cognito_auth_service=Mock())
 
         # assert
         self.__mock_middleware_pipeline \
@@ -214,7 +214,7 @@ class TestRoutes(TestCase):
                                          self.__ioc.resolve(UserBeforeHooks).set_auth_user_id,
                                          self.__ioc.resolve(BrandBeforeHooks).validate_brand,
                                          self.__ioc.resolve(UserBeforeHooks).set_categories_and_values,
-                                         self.__ioc.resolve(BrandController).update,
+                                         self.__ioc.resolve(BrandController).update_for_user,
                                          self.__ioc.resolve(UserAfterHooks).tag_auth_user_claims_to_response,
                                          self.__ioc.resolve(BrandAfterHooks).tag_bucket_url_to_images,
                                          self.__ioc.resolve(UserAfterHooks).format_values_and_categories
@@ -241,7 +241,7 @@ class TestRoutes(TestCase):
                                          self.__ioc.resolve(UserBeforeHooks).set_auth_user_id,
                                          self.__ioc.resolve(BrandBeforeHooks).validate_image_key,
                                          self.__ioc.resolve(BrandBeforeHooks).upload_image,
-                                         self.__ioc.resolve(BrandController).update_image_field,
+                                         self.__ioc.resolve(BrandController).update_image_field_for_user,
                                          self.__ioc.resolve(UserAfterHooks).tag_auth_user_claims_to_response,
                                          self.__ioc.resolve(BrandAfterHooks).tag_bucket_url_to_images,
                                          self.__ioc.resolve(UserAfterHooks).format_values_and_categories
@@ -320,7 +320,7 @@ class TestRoutes(TestCase):
                                          self.__ioc.resolve(UserBeforeHooks).set_auth_user_id,
                                          self.__ioc.resolve(InfluencerBeforeHooks).validate_image_key,
                                          self.__ioc.resolve(InfluencerBeforeHooks).upload_image,
-                                         self.__ioc.resolve(InfluencerController).update_image_field,
+                                         self.__ioc.resolve(InfluencerController).update_image_field_for_user,
                                          self.__ioc.resolve(UserAfterHooks).tag_auth_user_claims_to_response,
                                          self.__ioc.resolve(InfluencerAfterHooks).tag_bucket_url_to_images,
                                          self.__ioc.resolve(UserAfterHooks).format_values_and_categories
@@ -347,7 +347,7 @@ class TestRoutes(TestCase):
                                          self.__ioc.resolve(UserBeforeHooks).set_auth_user_id,
                                          self.__ioc.resolve(InfluencerBeforeHooks).validate_influencer,
                                          self.__ioc.resolve(UserBeforeHooks).set_categories_and_values,
-                                         self.__ioc.resolve(InfluencerController).update,
+                                         self.__ioc.resolve(InfluencerController).update_for_user,
                                          self.__ioc.resolve(UserAfterHooks).tag_auth_user_claims_to_response,
                                          self.__ioc.resolve(InfluencerAfterHooks).tag_bucket_url_to_images,
                                          self.__ioc.resolve(UserAfterHooks).format_values_and_categories
@@ -452,7 +452,7 @@ class TestRoutes(TestCase):
                                          self.__ioc.resolve(BrandBeforeHooks).validate_auth_brand,
                                          self.__ioc.resolve(CampaignBeforeHooks).map_campaign_state,
                                          self.__ioc.resolve(CampaignBeforeHooks).map_campaign_categories_and_values,
-                                         self.__ioc.resolve(CampaignController).update,
+                                         self.__ioc.resolve(CampaignController).update_campaign,
                                          self.__ioc.resolve(CampaignAfterHooks).format_values_and_categories,
                                          self.__ioc.resolve(CampaignAfterHooks).tag_bucket_url_to_images,
                                          self.__ioc.resolve(CampaignAfterHooks).format_campaign_state
@@ -484,7 +484,7 @@ class TestRoutes(TestCase):
                                          self.__ioc.resolve(BrandBeforeHooks).validate_auth_brand,
                                          self.__ioc.resolve(CampaignBeforeHooks).validate_image_key,
                                          self.__ioc.resolve(CampaignBeforeHooks).upload_image,
-                                         self.__ioc.resolve(CampaignController).update_image_field,
+                                         self.__ioc.resolve(CampaignController).update_campaign_image,
                                          self.__ioc.resolve(CampaignAfterHooks).format_values_and_categories,
                                          self.__ioc.resolve(CampaignAfterHooks).tag_bucket_url_to_images,
                                          self.__ioc.resolve(CampaignAfterHooks).format_campaign_state

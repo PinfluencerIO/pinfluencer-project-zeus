@@ -79,7 +79,7 @@ class TestInfluencerController(PinfluencerTestCase):
         self.__sut._update = MagicMock()
 
         # act
-        self.__sut.update(context=context)
+        self.__sut.update_for_user(context=context)
 
         # assert
         self.__sut._update.assert_called_once_with(context=context,
@@ -92,7 +92,7 @@ class TestInfluencerController(PinfluencerTestCase):
         self.__sut._update_image_field = MagicMock()
 
         # act
-        self.__sut.update_image_field(context=context)
+        self.__sut.update_image_field_for_user(context=context)
 
         # assert
         self.__sut._update_image_field.assert_called_once_with(context=context,
@@ -125,7 +125,7 @@ class TestBrandController(PinfluencerTestCase):
                                      response=PinfluencerResponse(body={}),
                                      short_circuit=False)
 
-        self.__sut.update_image_field(context=context)
+        self.__sut.update_image_field_for_user(context=context)
 
         # assert
         with self.tdd_test(msg="work was done in UoW"):
@@ -161,7 +161,7 @@ class TestBrandController(PinfluencerTestCase):
                                      auth_user_id="1234",
                                      response=PinfluencerResponse(body={}))
 
-        self.__sut.update_image_field(context=context)
+        self.__sut.update_image_field_for_user(context=context)
 
         # assert
         with self.tdd_test(msg="404 was returned"):
@@ -229,7 +229,8 @@ class TestBrandController(PinfluencerTestCase):
 
         # assert
         with self.tdd_test("returned brand is the same as brand in db"):
-            assert pinfluencer_response.body == self.__object_mapper.map(_from=brand_from_db, to=BrandResponseDto).__dict__
+            assert pinfluencer_response.body == self.__object_mapper.map(_from=brand_from_db,
+                                                                         to=BrandResponseDto).__dict__
 
         # assert
         with self.tdd_test("response is ok"):
@@ -279,7 +280,8 @@ class TestBrandController(PinfluencerTestCase):
 
         # assert
         with self.tdd_test("response body is equal to list of brands in db"):
-            assert pinfluencer_response.body == list(map(lambda x: self.__object_mapper.map(_from=x, to=BrandResponseDto).__dict__, brands_from_db))
+            assert pinfluencer_response.body == list(
+                map(lambda x: self.__object_mapper.map(_from=x, to=BrandResponseDto).__dict__, brands_from_db))
 
         # assert
         with self.tdd_test("response status code is 200"):
@@ -423,9 +425,9 @@ class TestBrandController(PinfluencerTestCase):
         self.__sut._unit_of_work = MagicMock()
 
         # act
-        self.__sut.update(PinfluencerContext(body=brand_request.__dict__,
-                                             auth_user_id=brand_db.auth_user_id,
-                                             response=response))
+        self.__sut.update_for_user(PinfluencerContext(body=brand_request.__dict__,
+                                                      auth_user_id=brand_db.auth_user_id,
+                                                      response=response))
 
         # assert
         with self.tdd_test(msg="repository was called"):
@@ -471,9 +473,9 @@ class TestBrandController(PinfluencerTestCase):
         self.__sut._unit_of_work = MagicMock()
 
         # act
-        self.__sut.update(PinfluencerContext(body=brand_request.__dict__,
-                                             auth_user_id=brand_db.auth_user_id,
-                                             response=response))
+        self.__sut.update_for_user(PinfluencerContext(body=brand_request.__dict__,
+                                                      auth_user_id=brand_db.auth_user_id,
+                                                      response=response))
 
         mapped_brand_body: BrandResponseDto = self.__object_mapper.map_from_dict(_from=response.body,
                                                                                  to=BrandResponseDto)
@@ -508,7 +510,7 @@ class TestBrandController(PinfluencerTestCase):
         context = PinfluencerContext(body=payload.__dict__,
                                      auth_user_id=auth_id,
                                      response=response)
-        self.__sut.update(context)
+        self.__sut.update_for_user(context)
 
         # assert
         with self.tdd_test(msg="status code is 404"):
@@ -646,7 +648,8 @@ class TestCampaignController(PinfluencerTestCase):
 
         # assert
         with self.tdd_test(msg="campaigns are returned"):
-            assert context.response.body == list(map(lambda x: self.__object_mapper.map(_from=x, to=CampaignResponseDto).__dict__, campaigns))
+            assert context.response.body == list(
+                map(lambda x: self.__object_mapper.map(_from=x, to=CampaignResponseDto).__dict__, campaigns))
 
         # assert
         with self.tdd_test(msg="response is success"):
@@ -676,24 +679,42 @@ class TestCampaignController(PinfluencerTestCase):
 
     def test_update(self):
         # arrange
-        context = PinfluencerContext()
-        self.__sut._update = MagicMock()
+        context = PinfluencerContext(id="12345")
+        self.__sut._generic_update = MagicMock()
+        self.__campaign_repository.load_by_id = MagicMock()
 
         # act
-        self.__sut.update(context=context)
+        self.__sut.update_campaign(context=context)
 
         # assert
-        self.__sut._update.assert_called_once_with(context=context, request=CampaignRequestDto,
-                                                   response=CampaignResponseDto)
+        captor = Captor()
+
+        with self.tdd_test(msg="generic update was made"):
+            self.__sut._generic_update.assert_called_once_with(context=context, request=CampaignRequestDto,
+                                                               response=CampaignResponseDto,
+                                                               repo_func=captor)
+
+        with self.tdd_test(msg="repo was called"):
+            captor.arg()
+            self.__campaign_repository.load_by_id.assert_called_once_with(id_=context.id)
 
     def test_update_image_field(self):
         # arrange
-        context = PinfluencerContext()
-        self.__sut._update_image_field = MagicMock()
+        context = PinfluencerContext(id="12345")
+        self.__sut._generic_update_image_field = MagicMock()
+        self.__campaign_repository.load_by_id = MagicMock()
 
         # act
-        self.__sut.update_image_field(context=context)
+        self.__sut.update_campaign_image(context=context)
 
         # assert
-        self.__sut._update_image_field.assert_called_once_with(context=context,
-                                                               response=CampaignResponseDto)
+        captor = Captor()
+
+        with self.tdd_test(msg="generic update was made"):
+            self.__sut._generic_update_image_field.assert_called_once_with(context=context,
+                                                                           response=CampaignResponseDto,
+                                                                           repo_func=captor)
+
+        with self.tdd_test(msg="repo was called"):
+            captor.arg()
+            self.__campaign_repository.load_by_id.assert_called_once_with(id_=context.id)
