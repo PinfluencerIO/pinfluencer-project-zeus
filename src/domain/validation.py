@@ -27,7 +27,7 @@ brand_payload_schema = {
                 "pattern": "^.{1,30}$"
             }
         },
-    "required": ["brand_name", "brand_description", "website"]
+    "required": []
 }
 
 
@@ -52,7 +52,7 @@ influencer_payload_schema = {
                 "pattern": "^.{1,30}$"
             }
         },
-    "required": ["bio", "website"]
+    "required": []
 }
 
 

@@ -13,3 +13,5 @@ mysql-connector-python
 boto3
 punq
 simple-injection
+ddt
+Flask

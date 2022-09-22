@@ -1,11 +1,12 @@
 from jsonschema.exceptions import ValidationError
 
-from src._types import AuthUserRepository, Deserializer, BrandRepository
-from src.crosscutting import print_exception
-from src.domain.models import Brand, Influencer, CategoryEnum, ValueEnum, CampaignStateEnum
+from src._types import AuthUserRepository, Deserializer, BrandRepository, ImageRepository
+from src.crosscutting import print_exception, PinfluencerObjectMapper
+from src.domain.models import CategoryEnum, ValueEnum, CampaignStateEnum, User
 from src.domain.validation import BrandValidator, InfluencerValidator, CampaignValidator
 from src.exceptions import NotFoundException
 from src.web import PinfluencerContext, valid_path_resource_id
+from src.web.views import RawImageRequestDto, ImageRequestDto
 
 S3_URL = "https://pinfluencer-product-images.s3.eu-west-2.amazonaws.com"
 
@@ -66,18 +67,40 @@ class CommonAfterHooks:
 
 class CommonBeforeHooks:
 
-    def __init__(self, deserializer: Deserializer):
+    def __init__(self, deserializer: Deserializer,
+                 image_repo: ImageRepository,
+                 object_mapper: PinfluencerObjectMapper):
+        self.__object_mapper = object_mapper
+        self.__image_repo = image_repo
         self.__deserializer = deserializer
 
+    def validate_image_path(self, context: PinfluencerContext,
+                            possible_paths: list[str]):
+        if not possible_paths.__contains__(context.event['pathParameters']["image_field"]):
+            context.response.status_code = 400
+            context.response.body = {}
+            context.short_circuit = True
+            print(f"{context.event['pathParameters']['image_field']} is not a valid image field")
+
+
+    def upload_image(self, context: PinfluencerContext,
+                     path: str,
+                     map_list: dict):
+        request: RawImageRequestDto = self.__object_mapper.map_from_dict(_from=context.body, to=RawImageRequestDto)
+        key = self.__image_repo.upload(path=path, image_base64_encoded=request.image_bytes)
+        context.body = ImageRequestDto(image_path=key, image_field=map_list[context.event['pathParameters']['image_field']]).__dict__
+
     def map_enum(self, context: PinfluencerContext,
-                  key: str,
-                  enum_value):
-        context.body[key] = enum_value[context.body[key]]
+                 key: str,
+                 enum_value):
+        if key in context.body:
+            context.body[key] = enum_value[context.body[key]]
 
     def map_enums(self, context: PinfluencerContext,
                   key: str,
                   enum_value):
-        context.body[key] = list(map(lambda x: enum_value[x], context.body[key]))
+        if key in context.body:
+            context.body[key] = list(map(lambda x: enum_value[x], context.body[key]))
 
     def set_body(self, context: PinfluencerContext):
         context.body = self.__deserializer.deserialize(data=context.event["body"])
@@ -100,8 +123,8 @@ class CampaignBeforeHooks:
 
     def map_campaign_state(self, context: PinfluencerContext):
         self.__common_before_hooks.map_enum(context=context,
-                                             key="campaign_state",
-                                             enum_value=CampaignStateEnum)
+                                            key="campaign_state",
+                                            enum_value=CampaignStateEnum)
 
     def validate_campaign(self, context: PinfluencerContext):
         try:
@@ -121,6 +144,14 @@ class CampaignBeforeHooks:
         else:
             context.id = id
 
+    def upload_image(self, context: PinfluencerContext):
+        self.__common_before_hooks.upload_image(path=f"campaigns/{context.auth_user_id}", context=context, map_list={
+            "product-image": "product_image"
+        })
+
+    def validate_image_key(self, context: PinfluencerContext):
+        self.__common_before_hooks.validate_image_path(context=context, possible_paths=["product-image"])
+
 
 class CampaignAfterHooks:
 
@@ -129,9 +160,7 @@ class CampaignAfterHooks:
 
     def tag_bucket_url_to_images(self, context: PinfluencerContext):
         self.__common_after_hooks.set_image_url(context=context,
-                                                image_fields=["product_image1",
-                                                              "product_image2",
-                                                              "product_image3"],
+                                                image_fields=["product_image"],
                                                 collection=False)
 
     def format_values_and_categories(self, context: PinfluencerContext):
@@ -142,9 +171,7 @@ class CampaignAfterHooks:
 
     def tag_bucket_url_to_images_collection(self, context: PinfluencerContext):
         self.__common_after_hooks.set_image_url(context=context,
-                                                image_fields=["product_image1",
-                                                              "product_image2",
-                                                              "product_image3"],
+                                                image_fields=["product_image"],
                                                 collection=True)
 
     def format_values_and_categories_collection(self, context: PinfluencerContext):
@@ -164,7 +191,9 @@ class CampaignAfterHooks:
 
 class InfluencerBeforeHooks:
 
-    def __init__(self, influencer_validator: InfluencerValidator):
+    def __init__(self, influencer_validator: InfluencerValidator,
+                 common_before_hooks: CommonBeforeHooks):
+        self.__common_before_hooks = common_before_hooks
         self.__influencer_validator = influencer_validator
 
     def validate_uuid(self, context: PinfluencerContext):
@@ -185,11 +214,21 @@ class InfluencerBeforeHooks:
             context.response.body = {}
             context.response.status_code = 400
 
+    def upload_image(self, context: PinfluencerContext):
+        self.__common_before_hooks.upload_image(path=f"influencers/{context.auth_user_id}", context=context, map_list={
+            "image": "image"
+        })
+
+    def validate_image_key(self, context: PinfluencerContext):
+        self.__common_before_hooks.validate_image_path(context=context, possible_paths=["image"])
+
 
 class BrandBeforeHooks:
 
     def __init__(self, brand_validator: BrandValidator,
-                 brand_repository: BrandRepository):
+                 brand_repository: BrandRepository,
+                 common_before_hooks: CommonBeforeHooks):
+        self.__common_before_hooks = common_before_hooks
         self.__brand_repository = brand_repository
         self.__brand_validator = brand_validator
 
@@ -220,6 +259,15 @@ class BrandBeforeHooks:
             context.response.body = {}
             context.response.status_code = 400
 
+    def upload_image(self, context: PinfluencerContext):
+        self.__common_before_hooks.upload_image(path=f"brands/{context.auth_user_id}", context=context, map_list={
+            "logo": "logo",
+            "header-image": "header_image"
+        })
+
+    def validate_image_key(self, context: PinfluencerContext):
+        self.__common_before_hooks.validate_image_path(context=context, possible_paths=["logo", "header-image"])
+
 
 class BrandAfterHooks:
 
@@ -229,10 +277,10 @@ class BrandAfterHooks:
         self.__auth_user_repository = auth_user_repository
 
     def set_brand_claims(self, context: PinfluencerContext):
-        user = Brand(first_name=context.body["first_name"],
-                     last_name=context.body["last_name"],
-                     email=context.body["email"],
-                     auth_user_id=context.auth_user_id)
+        user = User(auth_user_id=context.auth_user_id,
+                    first_name=context.body["first_name"],
+                    last_name=context.body["last_name"],
+                    email=context.body["email"])
         self.__auth_user_repository.update_brand_claims(user=user)
 
     def tag_bucket_url_to_images(self, context: PinfluencerContext):
@@ -256,10 +304,10 @@ class InfluencerAfterHooks:
         self.__auth_user_repository = auth_user_repository
 
     def set_influencer_claims(self, context: PinfluencerContext):
-        user = Influencer(first_name=context.body["first_name"],
-                          last_name=context.body["last_name"],
-                          email=context.body["email"],
-                          auth_user_id=context.auth_user_id)
+        user = User(auth_user_id=context.auth_user_id,
+                    first_name=context.body["first_name"],
+                    last_name=context.body["last_name"],
+                    email=context.body["email"])
         self.__auth_user_repository.update_influencer_claims(user=user)
 
     def tag_bucket_url_to_images(self, context: PinfluencerContext):
@@ -280,6 +328,7 @@ class UserBeforeHooks:
 
     def set_auth_user_id(self, context: PinfluencerContext):
         context.auth_user_id = context.event['requestContext']['authorizer']['jwt']['claims']['username']
+        print(f"username {context.auth_user_id}")
 
     def set_categories_and_values(self, context: PinfluencerContext):
         self.__common_before_hooks.map_enums(context=context,

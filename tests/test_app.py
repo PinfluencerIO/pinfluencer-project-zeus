@@ -198,7 +198,7 @@ class TestRoutes(TestCase):
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
 
         # act
-        bootstrap(event={"routeKey": "PUT /brands/me"},
+        bootstrap(event={"routeKey": "PATCH /brands/me"},
                   context={},
                   middleware=self.__mock_middleware_pipeline,
                   ioc=self.__ioc,
@@ -213,18 +213,19 @@ class TestRoutes(TestCase):
                                          self.__ioc.resolve(CommonBeforeHooks).set_body,
                                          self.__ioc.resolve(UserBeforeHooks).set_auth_user_id,
                                          self.__ioc.resolve(BrandBeforeHooks).validate_brand,
-                                         self.__ioc.resolve(BrandController).update,
+                                         self.__ioc.resolve(UserBeforeHooks).set_categories_and_values,
+                                         self.__ioc.resolve(BrandController).update_for_user,
                                          self.__ioc.resolve(UserAfterHooks).tag_auth_user_claims_to_response,
                                          self.__ioc.resolve(BrandAfterHooks).tag_bucket_url_to_images,
                                          self.__ioc.resolve(UserAfterHooks).format_values_and_categories
                                      ])
 
-    def test_create_or_replace_auth_brand_header_image(self):
+    def test_create_or_replace_auth_brand_image(self):
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
 
         # act
-        bootstrap(event={"routeKey": "POST /brands/me/header-image"},
+        bootstrap(event={"routeKey": "POST /brands/me/images/{image_field}"},
                   context={},
                   middleware=self.__mock_middleware_pipeline,
                   ioc=self.__ioc,
@@ -238,32 +239,9 @@ class TestRoutes(TestCase):
                                      middleware=[
                                          self.__ioc.resolve(CommonBeforeHooks).set_body,
                                          self.__ioc.resolve(UserBeforeHooks).set_auth_user_id,
-                                         self.__ioc.resolve(BrandController).update_header_image,
-                                         self.__ioc.resolve(UserAfterHooks).tag_auth_user_claims_to_response,
-                                         self.__ioc.resolve(BrandAfterHooks).tag_bucket_url_to_images,
-                                         self.__ioc.resolve(UserAfterHooks).format_values_and_categories
-                                     ])
-
-    def test_create_or_replace_auth_brand_logo(self):
-        # arrange
-        self.__mock_middleware_pipeline.execute_middleware = MagicMock()
-
-        # act
-        bootstrap(event={"routeKey": "POST /brands/me/logo"},
-                  context={},
-                  middleware=self.__mock_middleware_pipeline,
-                  ioc=self.__ioc,
-                  data_manager=Mock(),
-                  cognito_auth_service=Mock())
-
-        # assert
-        self.__mock_middleware_pipeline \
-            .execute_middleware \
-            .assert_called_once_with(context=Any(),
-                                     middleware=[
-                                         self.__ioc.resolve(CommonBeforeHooks).set_body,
-                                         self.__ioc.resolve(UserBeforeHooks).set_auth_user_id,
-                                         self.__ioc.resolve(BrandController).update_logo,
+                                         self.__ioc.resolve(BrandBeforeHooks).validate_image_key,
+                                         self.__ioc.resolve(BrandBeforeHooks).upload_image,
+                                         self.__ioc.resolve(BrandController).update_image_field_for_user,
                                          self.__ioc.resolve(UserAfterHooks).tag_auth_user_claims_to_response,
                                          self.__ioc.resolve(BrandAfterHooks).tag_bucket_url_to_images,
                                          self.__ioc.resolve(UserAfterHooks).format_values_and_categories
@@ -313,6 +291,7 @@ class TestRoutes(TestCase):
                                          self.__ioc.resolve(CommonBeforeHooks).set_body,
                                          self.__ioc.resolve(UserBeforeHooks).set_auth_user_id,
                                          self.__ioc.resolve(InfluencerBeforeHooks).validate_influencer,
+                                         self.__ioc.resolve(UserBeforeHooks).set_categories_and_values,
                                          self.__ioc.resolve(InfluencerController).create,
                                          self.__ioc.resolve(InfluencerAfterHooks).set_influencer_claims,
                                          self.__ioc.resolve(UserAfterHooks).tag_auth_user_claims_to_response,
@@ -325,7 +304,7 @@ class TestRoutes(TestCase):
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
 
         # act
-        bootstrap(event={"routeKey": "POST /influencers/me/image"},
+        bootstrap(event={"routeKey": "POST /influencers/me/images/{image_field}"},
                   context={},
                   middleware=self.__mock_middleware_pipeline,
                   ioc=self.__ioc,
@@ -339,7 +318,9 @@ class TestRoutes(TestCase):
                                      middleware=[
                                          self.__ioc.resolve(CommonBeforeHooks).set_body,
                                          self.__ioc.resolve(UserBeforeHooks).set_auth_user_id,
-                                         self.__ioc.resolve(InfluencerController).update_profile_image,
+                                         self.__ioc.resolve(InfluencerBeforeHooks).validate_image_key,
+                                         self.__ioc.resolve(InfluencerBeforeHooks).upload_image,
+                                         self.__ioc.resolve(InfluencerController).update_image_field_for_user,
                                          self.__ioc.resolve(UserAfterHooks).tag_auth_user_claims_to_response,
                                          self.__ioc.resolve(InfluencerAfterHooks).tag_bucket_url_to_images,
                                          self.__ioc.resolve(UserAfterHooks).format_values_and_categories
@@ -350,7 +331,7 @@ class TestRoutes(TestCase):
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
 
         # act
-        bootstrap(event={"routeKey": "PUT /influencers/me"},
+        bootstrap(event={"routeKey": "PATCH /influencers/me"},
                   context={},
                   middleware=self.__mock_middleware_pipeline,
                   ioc=self.__ioc,
@@ -365,14 +346,14 @@ class TestRoutes(TestCase):
                                          self.__ioc.resolve(CommonBeforeHooks).set_body,
                                          self.__ioc.resolve(UserBeforeHooks).set_auth_user_id,
                                          self.__ioc.resolve(InfluencerBeforeHooks).validate_influencer,
-                                         self.__ioc.resolve(InfluencerController).update,
+                                         self.__ioc.resolve(UserBeforeHooks).set_categories_and_values,
+                                         self.__ioc.resolve(InfluencerController).update_for_user,
                                          self.__ioc.resolve(UserAfterHooks).tag_auth_user_claims_to_response,
                                          self.__ioc.resolve(InfluencerAfterHooks).tag_bucket_url_to_images,
                                          self.__ioc.resolve(UserAfterHooks).format_values_and_categories
                                      ])
 
-    def test_create_auth_brand_campaign(self):
-        # arrange
+    def test_create_auth_brand_campaign(self):# arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
 
         # act
@@ -391,6 +372,8 @@ class TestRoutes(TestCase):
                                          self.__ioc.resolve(CommonBeforeHooks).set_body,
                                          self.__ioc.resolve(UserBeforeHooks).set_auth_user_id,
                                          self.__ioc.resolve(CampaignBeforeHooks).validate_campaign,
+                                         self.__ioc.resolve(CampaignBeforeHooks).map_campaign_state,
+                                         self.__ioc.resolve(CampaignBeforeHooks).map_campaign_categories_and_values,
                                          self.__ioc.resolve(CampaignController).create,
                                          self.__ioc.resolve(CampaignAfterHooks).format_values_and_categories,
                                          self.__ioc.resolve(CampaignAfterHooks).tag_bucket_url_to_images,
@@ -450,7 +433,7 @@ class TestRoutes(TestCase):
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
 
         # act
-        bootstrap(event={"routeKey": "PUT /brands/me/campaigns/{campaign_id}"},
+        bootstrap(event={"routeKey": "PATCH /brands/me/campaigns/{campaign_id}"},
                   context={},
                   middleware=self.__mock_middleware_pipeline,
                   ioc=self.__ioc,
@@ -467,34 +450,9 @@ class TestRoutes(TestCase):
                                          self.__ioc.resolve(CampaignBeforeHooks).validate_id,
                                          self.__ioc.resolve(CampaignBeforeHooks).validate_campaign,
                                          self.__ioc.resolve(BrandBeforeHooks).validate_auth_brand,
-                                         self.__ioc.resolve(CampaignController).update,
-                                         self.__ioc.resolve(CampaignAfterHooks).format_values_and_categories,
-                                         self.__ioc.resolve(CampaignAfterHooks).tag_bucket_url_to_images,
-                                         self.__ioc.resolve(CampaignAfterHooks).format_campaign_state
-                                     ])
-
-    def test_update_brand_auth_campaign_state_by_id(self):
-        # arrange
-        self.__mock_middleware_pipeline.execute_middleware = MagicMock()
-
-        # act
-        bootstrap(event={"routeKey": "PATCH /brands/me/campaigns/{campaign_id}"},
-                  context={},
-                  middleware=self.__mock_middleware_pipeline,
-                  ioc=self.__ioc,
-                  data_manager=Mock(),
-                  cognito_auth_service=Mock())
-
-        # assert
-        self.__mock_middleware_pipeline \
-            .execute_middleware \
-            .assert_called_once_with(context=Any(),
-                                     middleware=[
-                                         self.__ioc.resolve(CommonBeforeHooks).set_body,
-                                         self.__ioc.resolve(UserBeforeHooks).set_auth_user_id,
-                                         self.__ioc.resolve(CampaignBeforeHooks).validate_id,
-                                         self.__ioc.resolve(BrandBeforeHooks).validate_auth_brand,
-                                         self.__ioc.resolve(CampaignController).update_campaign_state,
+                                         self.__ioc.resolve(CampaignBeforeHooks).map_campaign_state,
+                                         self.__ioc.resolve(CampaignBeforeHooks).map_campaign_categories_and_values,
+                                         self.__ioc.resolve(CampaignController).update_campaign,
                                          self.__ioc.resolve(CampaignAfterHooks).format_values_and_categories,
                                          self.__ioc.resolve(CampaignAfterHooks).tag_bucket_url_to_images,
                                          self.__ioc.resolve(CampaignAfterHooks).format_campaign_state
@@ -503,12 +461,12 @@ class TestRoutes(TestCase):
     def test_delete_brand_auth_campaign_by_id(self):
         self.__assert_not_implemented(route="DELETE /brands/me/campaigns/{campaign_id}")
 
-    def test_create_campaign_product_image1(self):
+    def test_create_campaign_product_image(self):
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
 
         # act
-        bootstrap(event={"routeKey": "POST /brands/me/campaigns/{campaign_id}/product-image1"},
+        bootstrap(event={"routeKey": "POST /brands/me/campaigns/{campaign_id}/images/{image_field}"},
                   context={},
                   middleware=self.__mock_middleware_pipeline,
                   ioc=self.__ioc,
@@ -524,61 +482,9 @@ class TestRoutes(TestCase):
                                          self.__ioc.resolve(UserBeforeHooks).set_auth_user_id,
                                          self.__ioc.resolve(CampaignBeforeHooks).validate_id,
                                          self.__ioc.resolve(BrandBeforeHooks).validate_auth_brand,
-                                         self.__ioc.resolve(CampaignController).update_product_image1,
-                                         self.__ioc.resolve(CampaignAfterHooks).format_values_and_categories,
-                                         self.__ioc.resolve(CampaignAfterHooks).tag_bucket_url_to_images,
-                                         self.__ioc.resolve(CampaignAfterHooks).format_campaign_state
-                                     ])
-
-    def test_create_campaign_product_image2(self):
-        # arrange
-        self.__mock_middleware_pipeline.execute_middleware = MagicMock()
-
-        # act
-        bootstrap(event={"routeKey": "POST /brands/me/campaigns/{campaign_id}/product-image2"},
-                  context={},
-                  middleware=self.__mock_middleware_pipeline,
-                  ioc=self.__ioc,
-                  data_manager=Mock(),
-                  cognito_auth_service=Mock())
-
-        # assert
-        self.__mock_middleware_pipeline \
-            .execute_middleware \
-            .assert_called_once_with(context=Any(),
-                                     middleware=[
-                                         self.__ioc.resolve(CommonBeforeHooks).set_body,
-                                         self.__ioc.resolve(UserBeforeHooks).set_auth_user_id,
-                                         self.__ioc.resolve(CampaignBeforeHooks).validate_id,
-                                         self.__ioc.resolve(BrandBeforeHooks).validate_auth_brand,
-                                         self.__ioc.resolve(CampaignController).update_product_image2,
-                                         self.__ioc.resolve(CampaignAfterHooks).format_values_and_categories,
-                                         self.__ioc.resolve(CampaignAfterHooks).tag_bucket_url_to_images,
-                                         self.__ioc.resolve(CampaignAfterHooks).format_campaign_state
-                                     ])
-
-    def test_create_campaign_product_image3(self):
-        # arrange
-        self.__mock_middleware_pipeline.execute_middleware = MagicMock()
-
-        # act
-        bootstrap(event={"routeKey": "POST /brands/me/campaigns/{campaign_id}/product-image3"},
-                  context={},
-                  middleware=self.__mock_middleware_pipeline,
-                  ioc=self.__ioc,
-                  data_manager=Mock(),
-                  cognito_auth_service=Mock())
-
-        # assert
-        self.__mock_middleware_pipeline \
-            .execute_middleware \
-            .assert_called_once_with(context=Any(),
-                                     middleware=[
-                                         self.__ioc.resolve(CommonBeforeHooks).set_body,
-                                         self.__ioc.resolve(UserBeforeHooks).set_auth_user_id,
-                                         self.__ioc.resolve(CampaignBeforeHooks).validate_id,
-                                         self.__ioc.resolve(BrandBeforeHooks).validate_auth_brand,
-                                         self.__ioc.resolve(CampaignController).update_product_image3,
+                                         self.__ioc.resolve(CampaignBeforeHooks).validate_image_key,
+                                         self.__ioc.resolve(CampaignBeforeHooks).upload_image,
+                                         self.__ioc.resolve(CampaignController).update_campaign_image,
                                          self.__ioc.resolve(CampaignAfterHooks).format_values_and_categories,
                                          self.__ioc.resolve(CampaignAfterHooks).tag_bucket_url_to_images,
                                          self.__ioc.resolve(CampaignAfterHooks).format_campaign_state

@@ -2,8 +2,9 @@ from mapper.object_mapper import ObjectMapper
 from simple_injection import ServiceCollection
 
 from src._types import DataManager, BrandRepository, InfluencerRepository, CampaignRepository, ImageRepository, \
-    ObjectMapperAdapter, Deserializer, Serializer, AuthUserRepository
-from src.crosscutting import print_exception, JsonCamelToSnakeCaseDeserializer, JsonSnakeToCamelSerializer
+    ObjectMapperAdapter, Deserializer, Serializer, AuthUserRepository, Logger
+from src.crosscutting import JsonCamelToSnakeCaseDeserializer, JsonSnakeToCamelSerializer, \
+    PinfluencerObjectMapper, FlexiUpdater, ConsoleLogger
 from src.data import SqlAlchemyDataManager
 from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository, \
     SqlAlchemyCampaignRepository, S3ImageRepository, CognitoAuthUserRepository, CognitoAuthService
@@ -21,10 +22,15 @@ def lambda_handler(event, context):
                      context=context,
 
                      # infra for testability
-                     middleware=MiddlewarePipeline(),
+                     middleware=MiddlewarePipeline(logger=logger_factory()),
                      ioc=ServiceCollection(),
                      data_manager=SqlAlchemyDataManager(),
-                     cognito_auth_service=CognitoAuthService())
+                     cognito_auth_service=CognitoAuthService(logger=logger_factory()))
+
+
+# TODO: use DI
+def logger_factory():
+    return ConsoleLogger()
 
 
 def bootstrap(event: dict,
@@ -41,8 +47,8 @@ def bootstrap(event: dict,
 
         dispatcher = ioc.resolve(Dispatcher)
         route = event['routeKey']
-        print(f'Route: {route}')
-        print(f'Event: {event}')
+        logger_factory().log_debug(f'Route: {route}')
+        logger_factory().log_debug(f'Event: {event}')
         routes = dispatcher.dispatch_route_to_ctr
         response = PinfluencerResponse()
         if route not in routes:
@@ -62,10 +68,10 @@ def bootstrap(event: dict,
             ioc.resolve(MiddlewarePipeline).execute_middleware(context=pinfluencer_context,
                                                                             middleware=middleware_pipeline)
     except Exception as e:
-        print_exception(e)
+        logger_factory().log_error(str(e))
         response = PinfluencerResponse.as_500_error()
-    print(f"status: {response.status_code}")
-    print(f"output body: {response.body}")
+    logger_factory().log_debug(f"status: {response.status_code}")
+    logger_factory().log_debug(f"output body: {response.body}")
     return response.as_json(serializer=ioc.resolve(Serializer))
 
 
@@ -81,6 +87,8 @@ def register_dependencies(cognito_auth_service, data_manager, ioc, middleware):
     register_auth(ioc)
     register_middleware(ioc)
     ioc.add_instance(MiddlewarePipeline, middleware)
+    ioc.add_singleton(FlexiUpdater)
+    ioc.add_singleton(Logger, ConsoleLogger)
 
 
 def register_middleware(ioc):
@@ -115,6 +123,7 @@ def register_controllers(ioc):
 def register_object_mapping(ioc):
     mapper = ObjectMapper()
     ioc.add_instance(ObjectMapperAdapter, mapper)
+    ioc.add_singleton(PinfluencerObjectMapper)
 
 
 def register_domain(ioc):

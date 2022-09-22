@@ -3,17 +3,19 @@ from unittest.mock import Mock, MagicMock, call
 from uuid import uuid4
 
 from callee import Captor
+from ddt import data, ddt
 
-from src._types import AuthUserRepository, BrandRepository
-from src.crosscutting import JsonCamelToSnakeCaseDeserializer
-from src.domain.models import User, Brand, Influencer, ValueEnum, CategoryEnum, CampaignStateEnum
+from src._types import AuthUserRepository, BrandRepository, ImageRepository
+from src.crosscutting import JsonCamelToSnakeCaseDeserializer, PinfluencerObjectMapper, AutoFixture
+from src.domain.models import User, ValueEnum, CategoryEnum, CampaignStateEnum
 from src.domain.validation import InfluencerValidator, BrandValidator, CampaignValidator
 from src.exceptions import NotFoundException
 from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, CommonBeforeHooks, \
     InfluencerBeforeHooks, BrandBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, CommonAfterHooks
-from tests import brand_dto_generator, RepoEnum, get_auth_user_event, create_for_auth_user_event, get_brand_id_event, \
-    get_influencer_id_event, get_campaign_id_event
+from src.web.views import ImageRequestDto, BrandResponseDto
+from tests import get_auth_user_event, create_for_auth_user_event, get_brand_id_event, \
+    get_influencer_id_event, get_campaign_id_event, PinfluencerTestCase
 
 TEST_S3_URL = "https://pinfluencer-product-images.s3.eu-west-2.amazonaws.com"
 
@@ -128,13 +130,15 @@ class TestCommonAfterHooks(TestCase):
         assert context.response.body["image"] is None
 
 
-class TestBrandBeforeHooks(TestCase):
+class TestBrandBeforeHooks(PinfluencerTestCase):
 
     def setUp(self) -> None:
+        self.__common_before_hooks: CommonBeforeHooks = Mock()
         self.__brand_repository: BrandRepository = Mock()
         self.__brand_validator = BrandValidator()
         self.__sut = BrandBeforeHooks(brand_validator=self.__brand_validator,
-                                      brand_repository=self.__brand_repository)
+                                      brand_repository=self.__brand_repository,
+                                      common_before_hooks=self.__common_before_hooks)
 
     def test_validate_uuid(self):
         # arrange
@@ -223,12 +227,41 @@ class TestBrandBeforeHooks(TestCase):
         assert context.response.body == {}
         assert context.response.status_code == 404
 
+    def test_upload_image(self):
+        # arrange
+        context = PinfluencerContext(auth_user_id="12345")
+        self.__common_before_hooks.upload_image = MagicMock()
 
-class TestInfluencerBeforeHooks(TestCase):
+        # act
+        self.__sut.upload_image(context=context)
+
+        # assert
+        with self.tdd_test(msg="image was uploaded once"):
+            self.__common_before_hooks.upload_image.assert_called_once_with(path="brands/12345",
+                                                                            context=context,
+                                                                            map_list={
+                                                                                "logo": "logo",
+                                                                                "header-image": "header_image"
+                                                                            })
+
+    def test_validate_image_key(self):
+        context = PinfluencerContext()
+        self.__common_before_hooks.validate_image_path = MagicMock()
+        self.__sut.validate_image_key(context=context)
+
+        # assert
+        with self.tdd_test(msg="keys were validated"):
+            self.__common_before_hooks.validate_image_path.assert_called_once_with(context=context,
+                                                                                   possible_paths=["logo", "header-image"])
+
+
+class TestInfluencerBeforeHooks(PinfluencerTestCase):
 
     def setUp(self) -> None:
+        self.__common_before_hooks: CommonBeforeHooks = Mock()
         self.__influencer_validator = InfluencerValidator()
-        self.__sut = InfluencerBeforeHooks(influencer_validator=self.__influencer_validator)
+        self.__sut = InfluencerBeforeHooks(influencer_validator=self.__influencer_validator,
+                                           common_before_hooks=self.__common_before_hooks)
 
     def test_validate_uuid(self):
         # arrange
@@ -287,8 +320,34 @@ class TestInfluencerBeforeHooks(TestCase):
         assert context.response.status_code == 400
         assert context.response.body == {}
 
+    def test_upload_image(self):
+        # arrange
+        context = PinfluencerContext(auth_user_id="12345")
+        self.__common_before_hooks.upload_image = MagicMock()
 
-class TestCampaignBeforeHooks(TestCase):
+        # act
+        self.__sut.upload_image(context=context)
+
+        # assert
+        with self.tdd_test(msg="image was uploaded once"):
+            self.__common_before_hooks.upload_image.assert_called_once_with(path="influencers/12345",
+                                                                            context=context,
+                                                                            map_list={
+                                                                                "image": "image"
+                                                                            })
+
+    def test_validate_image_key(self):
+        context = PinfluencerContext()
+        self.__common_before_hooks.validate_image_path = MagicMock()
+        self.__sut.validate_image_key(context=context)
+
+        # assert
+        with self.tdd_test(msg="keys were validated"):
+            self.__common_before_hooks.validate_image_path.assert_called_once_with(context=context,
+                                                                                   possible_paths=["image"])
+
+
+class TestCampaignBeforeHooks(PinfluencerTestCase):
 
     def setUp(self) -> None:
         self.__campaign_validator = CampaignValidator()
@@ -361,8 +420,8 @@ class TestCampaignBeforeHooks(TestCase):
 
         # assert
         self.__common_before_hooks.map_enum.assert_any_call(context=context,
-                                                             key="campaign_state",
-                                                             enum_value=CampaignStateEnum)
+                                                            key="campaign_state",
+                                                            enum_value=CampaignStateEnum)
 
     def test_validate_id_when_invalid(self):
         # arrange
@@ -379,12 +438,123 @@ class TestCampaignBeforeHooks(TestCase):
         assert context.response.status_code == 400
         assert context.response.body == {}
 
+    def test_upload_image(self):
+        # arrange
+        context = PinfluencerContext(auth_user_id="12345")
+        self.__common_before_hooks.upload_image = MagicMock()
 
-class TestCommonHooks(TestCase):
+        # act
+        self.__sut.upload_image(context=context)
+
+        # assert
+        with self.tdd_test(msg="image was uploaded once"):
+            self.__common_before_hooks.upload_image.assert_called_once_with(path="campaigns/12345",
+                                                                            context=context,
+                                                                            map_list={
+                                                                                "product-image": "product_image"
+                                                                            })
+
+    def test_validate_image_key(self):
+        context = PinfluencerContext()
+        self.__common_before_hooks.validate_image_path = MagicMock()
+        self.__sut.validate_image_key(context=context)
+
+        # assert
+        with self.tdd_test(msg="keys were validated"):
+            self.__common_before_hooks.validate_image_path.assert_called_once_with(context=context,
+                                                                                   possible_paths=["product-image"])
+
+
+@ddt
+class TestCommonHooks(PinfluencerTestCase):
 
     def setUp(self) -> None:
+        self.__object_mapper = PinfluencerObjectMapper()
+        self.__image_repo: ImageRepository = Mock()
         self.__deserializer = JsonCamelToSnakeCaseDeserializer()
-        self.__sut = CommonBeforeHooks(deserializer=self.__deserializer)
+        self.__sut = CommonBeforeHooks(deserializer=self.__deserializer,
+                                       image_repo=self.__image_repo,
+                                       object_mapper=self.__object_mapper)
+
+    @data("logo", "header-image")
+    def test_validate_image_path_valid(self, image):
+        # arrage
+        context = PinfluencerContext(event={
+            "pathParameters": {
+                "image_field": image
+            }
+        },
+            response=PinfluencerResponse(),
+            short_circuit=False)
+
+        # act
+        self.__sut.validate_image_path(context=context,
+                                       possible_paths=["logo", "header-image"])
+
+        # assert
+        with self.tdd_test(msg="response is 200"):
+            assert context.response.status_code == 200
+
+        # assert
+        with self.tdd_test(msg="middleware does not short"):
+            assert context.short_circuit == False
+
+    @data("logos", "header-images")
+    def test_validate_image_path_invalid(self, image):
+        # arrage
+        context = PinfluencerContext(event={
+            "pathParameters": {
+                "image_field": image
+            }
+        },
+            response=PinfluencerResponse(),
+            short_circuit=False)
+
+        # act
+        self.__sut.validate_image_path(context=context,
+                                       possible_paths=["logo", "header-image"])
+
+        # assert
+        with self.tdd_test(msg="response is 400"):
+            assert context.response.status_code == 400
+
+        # assert
+        with self.tdd_test(msg="middleware shorts"):
+            assert context.short_circuit == True
+
+    def test_upload_image(self):
+        # arrange
+        key = "some/key.png"
+        path = "some/path"
+        bytes = "bytes"
+        context = PinfluencerContext(body={
+            "image_bytes": bytes
+        },
+        event={
+            "pathParameters": {
+                "image_field": "logo"
+            }
+        })
+        self.__image_repo.upload = MagicMock(return_value=key)
+        map_list = {
+            "logo": "logo_"
+        }
+
+        # act
+        self.__sut.upload_image(path=path, context=context, map_list=map_list)
+
+        # assert
+        with self.tdd_test(msg="image repo was called"):
+            self.__image_repo.upload.assert_called_once_with(path=path, image_base64_encoded=bytes)
+
+        image_request: ImageRequestDto = self.__object_mapper.map_from_dict(_from=context.body, to=ImageRequestDto)
+
+        # assert
+        with self.tdd_test(msg="key was added to request body"):
+            assert image_request.image_path == key
+
+        with self.tdd_test(msg="field was added to request body"):
+            assert image_request.image_field == map_list[context.event["pathParameters"]['image_field']]
 
     def test_map_enum(self):
         # arrange
@@ -398,6 +568,18 @@ class TestCommonHooks(TestCase):
         # assert
         assert context.body["value"] == ValueEnum.ORGANIC
 
+    def test_map_enum_when_field_doesnt_exist(self):
+        # arrange
+        context = PinfluencerContext(body={})
+
+        # act/assert
+        with self.tdd_test(msg="does not throw exception"):
+            self.__sut.map_enum(context=context,
+                                key="value",
+                                enum_value=ValueEnum)
+
+
+
     def test_map_enums(self):
         # arrange
         context = PinfluencerContext(body={"values": ["SUSTAINABLE", "ORGANIC"]})
@@ -410,6 +592,16 @@ class TestCommonHooks(TestCase):
         # assert
         assert context.body["values"][0] == ValueEnum.SUSTAINABLE
         assert context.body["values"][1] == ValueEnum.ORGANIC
+
+    def test_map_enums_when_field_does_not_exist(self):
+        # arrange
+        context = PinfluencerContext(body={})
+
+        # act/assert
+        with self.tdd_test(msg="does not throw"):
+            self.__sut.map_enums(context=context,
+                                 key="values",
+                                 enum_value=ValueEnum)
 
     def test_set_body(self):
         # arrange
@@ -428,7 +620,7 @@ class TestCommonHooks(TestCase):
         assert pinfluencer_context.body == body
 
 
-class TestBrandAfterHooks(TestCase):
+class TestBrandAfterHooks(PinfluencerTestCase):
 
     def setUp(self) -> None:
         self.__auth_user_repository: AuthUserRepository = Mock()
@@ -457,7 +649,7 @@ class TestBrandAfterHooks(TestCase):
         # assert
         captor = Captor()
         self.__auth_user_repository.update_brand_claims.assert_called_once_with(user=captor)
-        user_payload_arg: Brand = captor.arg
+        user_payload_arg: User = captor.arg
         assert user_payload_arg.first_name == first_name
         assert user_payload_arg.last_name == last_name
         assert user_payload_arg.email == email
@@ -521,7 +713,7 @@ class TestInfluencerAfterHooks(TestCase):
         # assert
         captor = Captor()
         self.__auth_user_repository.update_influencer_claims.assert_called_once_with(user=captor)
-        user_payload_arg: Influencer = captor.arg
+        user_payload_arg: User = captor.arg
         assert user_payload_arg.first_name == first_name
         assert user_payload_arg.last_name == last_name
         assert user_payload_arg.email == email
@@ -570,9 +762,7 @@ class TestCampaignAfterHooks(TestCase):
 
         # assert
         self.__common_after_hooks.set_image_url.assert_called_once_with(context=context,
-                                                                        image_fields=["product_image1",
-                                                                                      "product_image2",
-                                                                                      "product_image3"],
+                                                                        image_fields=["product_image"],
                                                                         collection=False)
 
     def test_format_values_and_categories(self):
@@ -609,9 +799,7 @@ class TestCampaignAfterHooks(TestCase):
 
         # assert
         self.__common_after_hooks.set_image_url.assert_called_once_with(context=context,
-                                                                        image_fields=["product_image1",
-                                                                                      "product_image2",
-                                                                                      "product_image3"],
+                                                                        image_fields=["product_image"],
                                                                         collection=True)
 
     def test_format_campaign_state(self):
@@ -684,7 +872,7 @@ class TestUserAfterHooks(TestCase):
 
     def test_tag_auth_user_claims_to_response(self):
         # arrange
-        brand = brand_dto_generator(num=1, repo=RepoEnum.STD_REPO)
+        brand = AutoFixture().create(dto=BrandResponseDto, list_limit=5)
         response = PinfluencerResponse(body=brand.__dict__)
         auth_user = User(first_name="cognito_first_name",
                          last_name="cognito_last_name",
@@ -703,22 +891,8 @@ class TestUserAfterHooks(TestCase):
 
     def test_tag_auth_user_claims_to_response_collection(self):
         # arrange
-        users = [
-            User(first_name="cognito_first_name1",
-                 last_name="cognito_last_name1",
-                 email="cognito_email1"),
-            User(first_name="cognito_first_name2",
-                 last_name="cognito_last_name2",
-                 email="cognito_email2"),
-            User(first_name="cognito_first_name3",
-                 last_name="cognito_last_name3",
-                 email="cognito_email3")
-        ]
-        brands = [
-            brand_dto_generator(num=1).__dict__,
-            brand_dto_generator(num=2).__dict__,
-            brand_dto_generator(num=3).__dict__
-        ]
+        users = AutoFixture().create_many(dto=User, list_limit=5, ammount=10)
+        brands = AutoFixture().create_many_dict(dto=BrandResponseDto, list_limit=5, ammount=10)
         self.__auth_user_repository.get_by_id = MagicMock(side_effect=users)
         response = PinfluencerResponse(body=brands)
 

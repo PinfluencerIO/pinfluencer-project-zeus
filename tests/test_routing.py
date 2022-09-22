@@ -1,14 +1,27 @@
+from sys import _getframe
 from unittest import TestCase
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
 
-from src.web import PinfluencerContext
+from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.middleware import MiddlewarePipeline
+
+
+def class_meta(frame):
+    class_context = '__module__' in frame.f_locals
+    assert class_context, 'Frame is not a class context'
+
+    module_name = frame.f_locals['__module__']
+    class_name = frame.f_code.co_name
+    return module_name, class_name
+
+def print_class_path():
+    print('%s.%s' % class_meta(_getframe(1)))
 
 
 class TestMiddlewarePipeline(TestCase):
 
     def setUp(self) -> None:
-        self.__sut = MiddlewarePipeline()
+        self.__sut = MiddlewarePipeline(logger=Mock())
 
     def test_execute(self):
         # arrange
@@ -16,7 +29,7 @@ class TestMiddlewarePipeline(TestCase):
             "invocations": [
 
             ]
-        }, short_circuit=False)
+        }, short_circuit=False, response=PinfluencerResponse())
         middlware = [MagicMock(side_effect=lambda x: x.body["invocations"].append(1)),
                      MagicMock(side_effect=lambda x: x.body["invocations"].append(2)),
                      MagicMock(side_effect=lambda x: x.body["invocations"].append(3)),
@@ -42,7 +55,7 @@ class TestMiddlewarePipeline(TestCase):
             "invocations": [
 
             ]
-        }, short_circuit=False)
+        }, short_circuit=False, response=PinfluencerResponse())
         middlware = [MagicMock(side_effect=lambda x: x.body["invocations"].append(1)),
                      MagicMock(side_effect=lambda x: x.body["invocations"].append(2)),
                      MagicMock(side_effect=lambda x: self.__short_middlware(context=x, invoc_num=3)),
