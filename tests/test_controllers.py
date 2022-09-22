@@ -102,6 +102,18 @@ class TestInfluencerController(PinfluencerTestCase):
                                                    request=InfluencerRequestDto,
                                                    response=InfluencerResponseDto)
 
+    def test_update_image_field(self):
+        # arrange
+        context = PinfluencerContext()
+        self.__sut._update_image_field = MagicMock()
+
+        # act
+        self.__sut.update_image_field(context=context)
+
+        # assert
+        self.__sut._update_image_field.assert_called_once_with(context=context,
+                                                   response=InfluencerResponseDto)
+
 
 @ddt
 class TestBrandController(PinfluencerTestCase):
@@ -691,3 +703,16 @@ class TestCampaignController(PinfluencerTestCase):
 
         # assert
         self.__sut._update.assert_called_once_with(context=context, request=CampaignRequestDto, response=CampaignResponseDto)
+
+
+    def test_update_image_field(self):
+        # arrange
+        context = PinfluencerContext()
+        self.__sut._update_image_field = MagicMock()
+
+        # act
+        self.__sut.update_image_field(context=context)
+
+        # assert
+        self.__sut._update_image_field.assert_called_once_with(context=context,
+                                                   response=CampaignResponseDto)
