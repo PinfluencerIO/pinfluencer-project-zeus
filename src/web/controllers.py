@@ -43,8 +43,15 @@ class BaseController:
     def _update_image_field(self, context: PinfluencerContext, response):
         request: ImageRequestDto = self._mapper.map_from_dict(_from=context.body, to=ImageRequestDto)
         with self._unit_of_work():
-            brand = self._repository.load_for_auth_user(auth_user_id=context.auth_user_id)
-            setattr(brand, request.image_field, request.image_path)
+            try:
+                brand = self._repository.load_for_auth_user(auth_user_id=context.auth_user_id)
+                setattr(brand, request.image_field, request.image_path)
+                context.response.body = self._mapper.map(_from=brand, to=BrandResponseDto)
+            except NotFoundException as e:
+                self._logger.log_error(str(e))
+                context.short_circuit = True
+                context.response.body = {}
+                context.response.status_code = 404
 
     def get_by_id(self, context: PinfluencerContext) -> None:
         try:

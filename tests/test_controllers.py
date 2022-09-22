@@ -125,7 +125,9 @@ class TestBrandController(PinfluencerTestCase):
         image_request: ImageRequestDto = AutoFixture().create(dto=ImageRequestDto)
         image_request.image_field = image_field
         context = PinfluencerContext(body=image_request.__dict__,
-                                     auth_user_id=brand_in_db.auth_user_id)
+                                     auth_user_id=brand_in_db.auth_user_id,
+                                     response=PinfluencerResponse(body={}),
+                                     short_circuit=False)
 
         self.__sut.update_image_field(context=context)
 
@@ -150,18 +152,19 @@ class TestBrandController(PinfluencerTestCase):
             assert context.short_circuit == False
 
         # assert
-        with self.tdd_test(msg="empty body was returned"):
+        with self.tdd_test(msg="brand was returned"):
             assert context.response.body == self.__object_mapper.map(_from=brand_in_db, to=BrandResponseDto)
 
 
-    def test_update_image_field_when_not_found(self, image_field):
+    def test_update_image_field_when_not_found(self):
         # arrange
         self.__brand_repository.load_for_auth_user = MagicMock(side_effect=NotFoundException())
         self.__sut._unit_of_work = MagicMock()
         image_request: ImageRequestDto = AutoFixture().create(dto=ImageRequestDto)
-        image_request.image_field = image_field
+        image_request.image_field = "logo"
         context = PinfluencerContext(body=image_request.__dict__,
-                                     auth_user_id="1234")
+                                     auth_user_id="1234",
+                                     response=PinfluencerResponse(body={}))
 
         self.__sut.update_image_field(context=context)
 
