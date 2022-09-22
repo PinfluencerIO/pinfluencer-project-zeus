@@ -146,8 +146,36 @@ class TestBrandController(PinfluencerTestCase):
             assert context.response.status_code == 200
 
         # assert
-        with self.tdd_test(msg="200 was returned"):
+        with self.tdd_test(msg="middleware does not short"):
+            assert context.short_circuit == False
+
+        # assert
+        with self.tdd_test(msg="empty body was returned"):
             assert context.response.body == self.__object_mapper.map(_from=brand_in_db, to=BrandResponseDto)
+
+
+    def test_update_image_field_when_not_found(self, image_field):
+        # arrange
+        self.__brand_repository.load_for_auth_user = MagicMock(side_effect=NotFoundException())
+        self.__sut._unit_of_work = MagicMock()
+        image_request: ImageRequestDto = AutoFixture().create(dto=ImageRequestDto)
+        image_request.image_field = image_field
+        context = PinfluencerContext(body=image_request.__dict__,
+                                     auth_user_id="1234")
+
+        self.__sut.update_image_field(context=context)
+
+        # assert
+        with self.tdd_test(msg="404 was returned"):
+            assert context.response.status_code == 404
+
+        # assert
+        with self.tdd_test(msg="middleware shorts"):
+            assert context.short_circuit == True
+
+        # assert
+        with self.tdd_test(msg="empty body is returned"):
+            assert context.response.body == {}
 
     def test_unit_of_work(self):
         # arrange
