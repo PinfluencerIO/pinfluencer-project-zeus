@@ -12,6 +12,7 @@ jobs:
           python-version: "3.9"
       - name: Install pip
         run: python -m pip install --upgrade pip
+      - name: AWS build and deploy
       - uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}

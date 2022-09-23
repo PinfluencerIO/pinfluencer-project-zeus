@@ -13,6 +13,8 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: "3.10"
+    - name: Flake8 lint
+      uses: py-actions/flake8@v2
     - name: Test with pytest
       env:
         REMOTE_BUILD: true
@@ -21,7 +23,8 @@ jobs:
         pip install -r requirements.txt
         cp template.yaml tests/template.yaml
         pytest
-    - uses: aws-actions/configure-aws-credentials@v1
+    - name: AWS build and deploy
+      uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
