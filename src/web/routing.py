@@ -60,7 +60,6 @@ class Dispatcher:
             }
         )
 
-
         campaigns = OrderedDict(
             {
                 'GET /brands/me/campaigns': self.get_campaigns_for_brand(),

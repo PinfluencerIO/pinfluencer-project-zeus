@@ -30,7 +30,6 @@ brand_payload_schema = {
     "required": []
 }
 
-
 influencer_payload_schema = {
     "type": "object",
     "properties":
@@ -54,7 +53,6 @@ influencer_payload_schema = {
         },
     "required": []
 }
-
 
 campaign_payload_schema = {
     "type": "object",

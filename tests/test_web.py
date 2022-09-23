@@ -23,14 +23,15 @@ class TestPinfluencerResponse(TestCase):
         assert PinfluencerResponse(status_code=404).is_ok() == False
 
     def test_to_json(self):
-
         # arrange
         pinf_response = PinfluencerResponse(body={
             "first_name": "Aidan",
             "last_name": "Gannon",
             "years_old": 22
         })
-        expected_json = {"statusCode": 200, "body": """{"firstName": "Aidan", "lastName": "Gannon", "yearsOld": 22}""", "headers": {"Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Methods": "*"}}
+        expected_json = {"statusCode": 200, "body": """{"firstName": "Aidan", "lastName": "Gannon", "yearsOld": 22}""",
+                         "headers": {"Content-Type": "application/json", "Access-Control-Allow-Origin": "*",
+                                     "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Methods": "*"}}
 
         # act/assert
         assert pinf_response.as_json(serializer=JsonSnakeToCamelSerializer()) == expected_json

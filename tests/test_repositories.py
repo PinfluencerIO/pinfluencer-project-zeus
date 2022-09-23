@@ -310,7 +310,7 @@ class TestCampaignRepository(PinfluencerTestCase):
         # act
         self.__data_manager.create_fake_data(objects=[brand_in_db])
         returned_campaign: Campaign = self.__sut.write_new_for_brand(payload=campaign_payload,
-                                                           auth_user_id=brand_in_db.auth_user_id)
+                                                                     auth_user_id=brand_in_db.auth_user_id)
 
         campaign_loaded_from_db: Campaign = self.__sut.load_by_id(id_=campaign_payload.id)
 

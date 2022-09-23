@@ -84,13 +84,13 @@ class CommonBeforeHooks:
             context.short_circuit = True
             self.__logger.log_error(f"{context.event['pathParameters']['image_field']} is not a valid image field")
 
-
     def upload_image(self, context: PinfluencerContext,
                      path: str,
                      map_list: dict):
         request: RawImageRequestDto = self.__object_mapper.map_from_dict(_from=context.body, to=RawImageRequestDto)
         key = self.__image_repo.upload(path=path, image_base64_encoded=request.image_bytes)
-        context.body = ImageRequestDto(image_path=key, image_field=map_list[context.event['pathParameters']['image_field']]).__dict__
+        context.body = ImageRequestDto(image_path=key,
+                                       image_field=map_list[context.event['pathParameters']['image_field']]).__dict__
 
     def map_enum(self, context: PinfluencerContext,
                  key: str,

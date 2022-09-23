@@ -62,6 +62,7 @@ class RepoEnum(Enum):
     STD_REPO = 'STD_REPO',
     AUTH_REPO = 'AUTH_REPO'
 
+
 def get_influencer_id_event(id):
     return {'pathParameters': {'influencer_id': id}}
 

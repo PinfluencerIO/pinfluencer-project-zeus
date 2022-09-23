@@ -221,8 +221,8 @@ class CognitoAuthUserRepository:
         email = self.__get_cognito_attribute(user=auth_user,
                                              attribute_name='email')
         return User(first_name=first_name,
-                         last_name=last_name,
-                         email=email)
+                    last_name=last_name,
+                    email=email)
 
     def __get_cognito_attribute(self, user: dict, attribute_name: str) -> str:
         return next(filter(lambda x: x['Name'] == attribute_name, user['UserAttributes']))['Value']

@@ -63,9 +63,10 @@ def bootstrap(event: dict,
             route_desc: Route = routes[route]
 
             # middleware execution
-            middleware_pipeline: list[PinfluencerAction] = [*route_desc.before_hooks, route_desc.action, *route_desc.after_hooks]
+            middleware_pipeline: list[PinfluencerAction] = [*route_desc.before_hooks, route_desc.action,
+                                                            *route_desc.after_hooks]
             ioc.resolve(MiddlewarePipeline).execute_middleware(context=pinfluencer_context,
-                                                                            middleware=middleware_pipeline)
+                                                               middleware=middleware_pipeline)
     except Exception as e:
         logger_factory().log_error(str(e))
         response = PinfluencerResponse.as_500_error()
@@ -130,7 +131,6 @@ def register_domain(ioc):
 
 
 def register_data_layer(ioc):
-
     # sql alchemy
     ioc.add_singleton(BrandRepository, SqlAlchemyBrandRepository)
     ioc.add_singleton(InfluencerRepository, SqlAlchemyInfluencerRepository)

@@ -353,7 +353,7 @@ class TestRoutes(TestCase):
                                          self.__ioc.resolve(UserAfterHooks).format_values_and_categories
                                      ])
 
-    def test_create_auth_brand_campaign(self):# arrange
+    def test_create_auth_brand_campaign(self):  # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
 
         # act

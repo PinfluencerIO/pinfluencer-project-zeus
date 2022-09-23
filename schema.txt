@@ -1,7 +1,7 @@
 COGNITO-USER:
-    firstName:                  str
-    lastName:                   str
-    email:                      str email
+firstName:                  str
+lastName:                   str
+email:                      str email
     custom:usertype:            str allowed-values{null, "influencer", "brand"}
 
 ONBOARDING-BRAND:

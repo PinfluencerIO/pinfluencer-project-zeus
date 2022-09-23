@@ -18,6 +18,7 @@ from tests import PinfluencerTestCase
 def test_damn():
     ConsoleLogger().log_debug(message="fdsafsda")
 
+
 class TestInfluencerController(PinfluencerTestCase):
 
     def setUp(self):

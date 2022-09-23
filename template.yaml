@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
   Pinfluencer backend stack
-  
+
 Parameters:
   UserPoolId:
     Type: String
@@ -65,12 +65,12 @@ Resources:
             JwtConfiguration:
               issuer:
                 !Join
-                  - ''
-                  - - 'https://cognito-idp.'
-                    - !Sub ${AWS::Region}
-                    - '.amazonaws.com/'
-                    - !Sub ${UserPoolId}
-              audience: 
+                - ''
+                - - 'https://cognito-idp.'
+                  - !Sub ${AWS::Region}
+                  - '.amazonaws.com/'
+                  - !Sub ${UserPoolId}
+              audience:
                 - !Sub ${ClientIdAudienceLegacy}
                 - !Sub ${ClientIdAudienceWeb}
 
