@@ -8,3 +8,4 @@ simple-injection==0.2.5
 ddt==1.6.0
 Flask==2.2.2
 cfn_flip==1.3.0
+wheel==0.37.1
