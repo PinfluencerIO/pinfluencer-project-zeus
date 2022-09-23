@@ -7,7 +7,7 @@ import boto3
 from botocore.exceptions import ClientError, ParamValidationError
 from filetype import filetype
 
-from src._types import DataManager, ImageRepository, Model, ObjectMapperAdapter, UserModel, Logger
+from src._types import DataManager, ImageRepository, Model, UserModel, Logger
 from src.data.entities import create_mappings
 from src.domain.models import Brand, Influencer, Campaign, User
 from src.exceptions import AlreadyExistsException, ImageException, NotFoundException
@@ -17,16 +17,14 @@ class BaseSqlAlchemyRepository:
     def __init__(self,
                  data_manager: DataManager,
                  model,
-                 object_mapper: ObjectMapperAdapter,
                  image_repository: ImageRepository,
                  logger: Logger):
         self._logger = logger
         self._image_repository = image_repository
-        self._object_mapper = object_mapper
         self._data_manager = data_manager
         self._model = model
 
-        create_mappings(mapper=self._object_mapper)
+        create_mappings(logger=self._logger)
 
     def load_collection(self) -> list[Model]:
         return self._data_manager.session.query(self._model).all()
@@ -49,11 +47,9 @@ class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):
     def __init__(self, data_manager: DataManager,
                  model,
                  image_repository: ImageRepository,
-                 object_mapper: ObjectMapperAdapter,
                  logger: Logger):
         super().__init__(data_manager=data_manager,
                          model=model,
-                         object_mapper=object_mapper,
                          image_repository=image_repository,
                          logger=logger)
 
@@ -87,12 +83,10 @@ class SqlAlchemyBrandRepository(BaseSqlAlchemyUserRepository):
     def __init__(self,
                  data_manager: DataManager,
                  image_repository: ImageRepository,
-                 object_mapper: ObjectMapperAdapter,
                  logger: Logger):
         super().__init__(data_manager=data_manager,
                          model=Brand,
                          image_repository=image_repository,
-                         object_mapper=object_mapper,
                          logger=logger)
 
 
@@ -100,24 +94,20 @@ class SqlAlchemyInfluencerRepository(BaseSqlAlchemyUserRepository):
     def __init__(self,
                  data_manager: DataManager,
                  image_repository: ImageRepository,
-                 object_mapper: ObjectMapperAdapter,
                  logger: Logger):
         super().__init__(data_manager=data_manager,
                          model=Influencer,
                          image_repository=image_repository,
-                         object_mapper=object_mapper,
                          logger=logger)
 
 
 class SqlAlchemyCampaignRepository(BaseSqlAlchemyRepository):
 
     def __init__(self, data_manager: DataManager,
-                 object_mapper: ObjectMapperAdapter,
                  image_repository: ImageRepository,
                  logger: Logger):
         super().__init__(data_manager,
                          Campaign,
-                         object_mapper,
                          image_repository=image_repository,
                          logger=logger)
 

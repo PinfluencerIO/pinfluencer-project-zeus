@@ -24,7 +24,7 @@ def lambda_handler(event, context):
                      # infra for testability
                      middleware=MiddlewarePipeline(logger=logger_factory()),
                      ioc=ServiceCollection(),
-                     data_manager=SqlAlchemyDataManager(),
+                     data_manager=SqlAlchemyDataManager(logger=logger_factory()),
                      cognito_auth_service=CognitoAuthService(logger=logger_factory()))
 
 

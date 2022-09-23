@@ -21,7 +21,6 @@ class BrandRepositoryTestCase(PinfluencerTestCase):
         self._object_mapper = ObjectMapper()
         self._sut = SqlAlchemyBrandRepository(data_manager=self._data_manager,
                                               image_repository=self._image_repository,
-                                              object_mapper=self._object_mapper,
                                               logger=Mock())
 
 
@@ -159,7 +158,6 @@ class TestInfluencerRepository(TestCase):
         self._object_mapper = ObjectMapper()
         self.__sut = SqlAlchemyInfluencerRepository(data_manager=self.__data_manager,
                                                     image_repository=self.__image_repository,
-                                                    object_mapper=self._object_mapper,
                                                     logger=Mock())
 
     def test_write_new_for_auth_user(self):
@@ -305,7 +303,6 @@ class TestCampaignRepository(PinfluencerTestCase):
         self.__data_manager = InMemorySqliteDataManager()
         self.__image_repository: ImageRepository = Mock()
         self.__sut = SqlAlchemyCampaignRepository(data_manager=self.__data_manager,
-                                                  object_mapper=self.__object_mapper,
                                                   image_repository=self.__image_repository,
                                                   logger=Mock())
 

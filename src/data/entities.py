@@ -1,7 +1,6 @@
 import sqlalchemy.orm
 from sqlalchemy import Column, String, DateTime, Float, PickleType, Table
 
-from src._types import ObjectMapperAdapter
 from src.data import Base
 from src.domain.models import Brand, Influencer, Campaign
 
@@ -68,11 +67,12 @@ campaign_table = Table('campaign', Base.metadata,
                        Column('product_image', String(length=360)))
 
 
-def create_mappings(mapper: ObjectMapperAdapter):
+def create_mappings(logger):
     try:
         # sqlalchemy mappings
         sqlalchemy.orm.mapper(Brand, brand_table)
         sqlalchemy.orm.mapper(Influencer, influencer_table)
         sqlalchemy.orm.mapper(Campaign, campaign_table)
     except Exception as e:
-        print(f"mappings tried to be created more than once {e}")
+        logger.log_error(f"mappings tried to be created more than once")
+        logger.log_exception(e)

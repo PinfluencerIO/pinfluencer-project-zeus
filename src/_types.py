@@ -164,6 +164,9 @@ class Logger(Protocol):
     def log_error(self, message: str):
         ...
 
+    def log_exception(self, exception: Exception):
+        ...
+
     def log_info(self, message: str):
         ...
 

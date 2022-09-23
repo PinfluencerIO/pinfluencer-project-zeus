@@ -1,21 +1,8 @@
-from sys import _getframe
 from unittest import TestCase
 from unittest.mock import MagicMock, Mock
 
 from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.middleware import MiddlewarePipeline
-
-
-def class_meta(frame):
-    class_context = '__module__' in frame.f_locals
-    assert class_context, 'Frame is not a class context'
-
-    module_name = frame.f_locals['__module__']
-    class_name = frame.f_code.co_name
-    return module_name, class_name
-
-def print_class_path():
-    print('%s.%s' % class_meta(_getframe(1)))
 
 
 class TestMiddlewarePipeline(TestCase):
@@ -41,7 +28,6 @@ class TestMiddlewarePipeline(TestCase):
                                       middleware=middlware)
 
         # assert
-        print(context.body["invocations"])
         assert context.body["invocations"] == [1, 2, 3, 4, 5]
 
     @staticmethod
@@ -67,5 +53,4 @@ class TestMiddlewarePipeline(TestCase):
                                       middleware=middlware)
 
         # assert
-        print(context.body["invocations"])
         assert context.body["invocations"] == [1, 2, 3]

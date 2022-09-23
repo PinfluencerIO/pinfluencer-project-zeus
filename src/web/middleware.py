@@ -1,3 +1,5 @@
+import inspect
+
 from src._types import Logger
 from src.web import PinfluencerContext, PinfluencerAction
 
@@ -12,7 +14,7 @@ class MiddlewarePipeline:
         for action in middleware:
             name = "anonymous"
             try:
-                name = action.__name__
+                name = f"{inspect.getmodule(action)}.{action.__name__}"
             except Exception:
                 ...
             self.__logger.log_debug(f"begin middleware {name}")

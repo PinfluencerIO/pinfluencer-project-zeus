@@ -3,7 +3,7 @@ from typing import Callable
 
 from src._types import BrandRepository, UserRepository, InfluencerRepository, Repository, CampaignRepository, Logger, \
     Model
-from src.crosscutting import print_exception, PinfluencerObjectMapper, FlexiUpdater
+from src.crosscutting import PinfluencerObjectMapper, FlexiUpdater
 from src.domain.models import Brand, Influencer, Campaign
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.web import BRAND_ID_PATH_KEY, INFLUENCER_ID_PATH_KEY, PinfluencerContext
@@ -64,7 +64,7 @@ class BaseController:
             context.response.body = self._mapper.map(_from=user, to=response).__dict__
             return
         except NotFoundException as e:
-            print_exception(e)
+            self._logger.log_exception(e)
             context.short_circuit = True
             context.response.status_code = 404
             context.response.body = {}
@@ -95,7 +95,7 @@ class BaseController:
                 self._flexi_updater.update(request=request,
                                            object_to_update=entity_in_db)
             except NotFoundException as e:
-                print_exception(e)
+                self._logger.log_exception(e)
                 context.short_circuit = True
                 context.response.body = {}
                 context.response.status_code = 404
@@ -127,7 +127,7 @@ class BaseUserController(BaseController):
                 context.response.body = self._mapper.map(_from=brand, to=response).__dict__
                 return
             except NotFoundException as e:
-                print_exception(e)
+                self._logger.log_exception(e)
         context.short_circuit = True
         context.response.status_code = 404
         context.response.body = {}
@@ -146,15 +146,15 @@ class BaseUserController(BaseController):
 
                 entity_to_return = self._repository.write_new_for_auth_user(auth_user_id=auth_user_id, payload=entity)
             except AlreadyExistsException as e:
-                print_exception(e)
+                self._logger.log_exception(e)
                 context.short_circuit = True
                 context.response.body = {}
                 context.response.status_code = 400
                 return
-            print(f"web layer: entity to return {entity_to_return}")
-            print(f"mapping {model.__name__} to {response.__name__}")
+            self._logger.log_trace(f"entity to return {entity_to_return}")
+            self._logger.log_trace(f"mapping {model.__name__} to {response.__name__}")
             response = self._mapper.map(_from=entity_to_return, to=response)
-            print(f"mapped response: {response}")
+            self._logger.log_trace(f"mapped response: {response}")
             context.response.body = response.__dict__
             context.response.status_code = 201
 
@@ -208,13 +208,13 @@ class CampaignController(BaseController):
                         to=CampaignRequestDto),
                     to=Campaign),
                     auth_user_id=context.auth_user_id)
-                print(campaign)
-                print(campaign.__dict__)
+                self._logger.log_trace(f"{campaign}")
+                self._logger.log_trace(f"{campaign.__dict__}")
                 context.response.body = self._mapper.map(_from=campaign, to=CampaignResponseDto).__dict__
                 context.response.status_code = 201
                 return
             except NotFoundException as e:
-                print_exception(e)
+                self._logger.log_exception(e)
                 context.response.body = {}
                 context.response.status_code = 404
                 context.short_circuit = True
@@ -226,7 +226,7 @@ class CampaignController(BaseController):
             context.response.body = list(
                 map(lambda x: self._mapper.map(_from=x, to=CampaignResponseDto).__dict__, campaigns))
         except NotFoundException as e:
-            print_exception(e)
+            self._logger.log_exception(e)
             context.response.status_code = 404
             context.response.body = {}
             context.short_circuit = True

@@ -1,7 +1,7 @@
 from jsonschema.exceptions import ValidationError
 
-from src._types import AuthUserRepository, Deserializer, BrandRepository, ImageRepository
-from src.crosscutting import print_exception, PinfluencerObjectMapper
+from src._types import AuthUserRepository, Deserializer, BrandRepository, ImageRepository, Logger
+from src.crosscutting import PinfluencerObjectMapper
 from src.domain.models import CategoryEnum, ValueEnum, CampaignStateEnum, User
 from src.domain.validation import BrandValidator, InfluencerValidator, CampaignValidator
 from src.exceptions import NotFoundException
@@ -69,7 +69,9 @@ class CommonBeforeHooks:
 
     def __init__(self, deserializer: Deserializer,
                  image_repo: ImageRepository,
-                 object_mapper: PinfluencerObjectMapper):
+                 object_mapper: PinfluencerObjectMapper,
+                 logger: Logger):
+        self.__logger = logger
         self.__object_mapper = object_mapper
         self.__image_repo = image_repo
         self.__deserializer = deserializer
@@ -80,7 +82,7 @@ class CommonBeforeHooks:
             context.response.status_code = 400
             context.response.body = {}
             context.short_circuit = True
-            print(f"{context.event['pathParameters']['image_field']} is not a valid image field")
+            self.__logger.log_error(f"{context.event['pathParameters']['image_field']} is not a valid image field")
 
 
     def upload_image(self, context: PinfluencerContext,
@@ -109,7 +111,9 @@ class CommonBeforeHooks:
 class CampaignBeforeHooks:
 
     def __init__(self, campaign_validator: CampaignValidator,
-                 common_before_hooks: CommonBeforeHooks):
+                 common_before_hooks: CommonBeforeHooks,
+                 logger: Logger):
+        self.__logger = logger
         self.__common_before_hooks = common_before_hooks
         self.__campaign_validator = campaign_validator
 
@@ -130,13 +134,13 @@ class CampaignBeforeHooks:
         try:
             self.__campaign_validator.validate_campaign(payload=context.body)
         except ValidationError as e:
-            print_exception(e)
+            self.__logger.log_exception(e)
             context.short_circuit = True
             context.response.body = {}
             context.response.status_code = 400
 
     def validate_id(self, context: PinfluencerContext):
-        id = valid_path_resource_id(event=context.event, resource_key="campaign_id")
+        id = valid_path_resource_id(event=context.event, resource_key="campaign_id", logger=self.__logger)
         if not id:
             context.short_circuit = True
             context.response.body = {}
@@ -192,12 +196,14 @@ class CampaignAfterHooks:
 class InfluencerBeforeHooks:
 
     def __init__(self, influencer_validator: InfluencerValidator,
-                 common_before_hooks: CommonBeforeHooks):
+                 common_before_hooks: CommonBeforeHooks,
+                 logger: Logger):
+        self.__logger = logger
         self.__common_before_hooks = common_before_hooks
         self.__influencer_validator = influencer_validator
 
     def validate_uuid(self, context: PinfluencerContext):
-        id = valid_path_resource_id(event=context.event, resource_key="influencer_id")
+        id = valid_path_resource_id(event=context.event, resource_key="influencer_id", logger=self.__logger)
         if not id:
             context.short_circuit = True
             context.response.body = {}
@@ -209,7 +215,7 @@ class InfluencerBeforeHooks:
         try:
             self.__influencer_validator.validate_influencer(payload=context.body)
         except ValidationError as e:
-            print_exception(e)
+            self.__logger.log_exception(e)
             context.short_circuit = True
             context.response.body = {}
             context.response.status_code = 400
@@ -227,7 +233,9 @@ class BrandBeforeHooks:
 
     def __init__(self, brand_validator: BrandValidator,
                  brand_repository: BrandRepository,
-                 common_before_hooks: CommonBeforeHooks):
+                 common_before_hooks: CommonBeforeHooks,
+                 logger: Logger):
+        self.__logger = logger
         self.__common_before_hooks = common_before_hooks
         self.__brand_repository = brand_repository
         self.__brand_validator = brand_validator
@@ -236,13 +244,13 @@ class BrandBeforeHooks:
         try:
             self.__brand_repository.load_for_auth_user(auth_user_id=context.auth_user_id)
         except NotFoundException as e:
-            print_exception(e)
+            self.__logger.log_exception(e)
             context.short_circuit = True
             context.response.status_code = 404
             context.body = {}
 
     def validate_uuid(self, context: PinfluencerContext):
-        id = valid_path_resource_id(event=context.event, resource_key="brand_id")
+        id = valid_path_resource_id(event=context.event, resource_key="brand_id", logger=self.__logger)
         if not id:
             context.short_circuit = True
             context.response.body = {}
@@ -254,7 +262,7 @@ class BrandBeforeHooks:
         try:
             self.__brand_validator.validate_brand(payload=context.body)
         except ValidationError as e:
-            print_exception(e)
+            self.__logger.log_exception(e)
             context.short_circuit = True
             context.response.body = {}
             context.response.status_code = 400
@@ -323,12 +331,14 @@ class InfluencerAfterHooks:
 
 class UserBeforeHooks:
 
-    def __init__(self, common_before_hooks: CommonBeforeHooks):
+    def __init__(self, common_before_hooks: CommonBeforeHooks,
+                 logger: Logger):
+        self.__logger = logger
         self.__common_before_hooks = common_before_hooks
 
     def set_auth_user_id(self, context: PinfluencerContext):
         context.auth_user_id = context.event['requestContext']['authorizer']['jwt']['claims']['username']
-        print(f"username {context.auth_user_id}")
+        self.__logger.log_trace(f"username {context.auth_user_id}")
 
     def set_categories_and_values(self, context: PinfluencerContext):
         self.__common_before_hooks.map_enums(context=context,

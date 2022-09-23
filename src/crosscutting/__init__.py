@@ -8,6 +8,7 @@ import uuid
 from enum import Enum
 from typing import Union
 
+from src._types import Logger
 from src.exceptions import AutoFixtureException
 
 
@@ -36,6 +37,9 @@ class ConsoleLogger:
 
     def log_error(self, message: str):
         self.__log(_type="ERROR", message=message)
+
+    def log_exception(self, exception: Exception):
+        self.__log(_type="ERROR", message=f"EXCEPTION: {str(exception)}")
 
     def log_info(self, message: str):
         self.__log(_type="INFO", message=message)
@@ -118,7 +122,6 @@ class AutoFixture:
         is_predictable_data = seed is not None and num is not None
 
         members = all_annotations(cls=dto).items()
-        print(f"nest {nest}")
         for (key, _type) in members:
 
             if getattr(new_value, key) is None:
@@ -336,14 +339,17 @@ class AutoFixture:
 
 class PinfluencerObjectMapper:
 
+    def __int__(self, logger: Logger):
+        self.__logger = logger
+
     def map(self, _from, to):
-        print(vars(_from).items())
+        self.__logger.log_trace(f"{vars(_from).items()}")
         return self.__generic_map(_from=_from,
                                   to=to,
                                   propValues=vars(_from).items())
 
     def map_from_dict(self, _from, to):
-        print(_from.items())
+        self.__logger.log_trace(_from.items())
         return self.__generic_map(_from=_from,
                                   to=to,
                                   propValues=_from.items())
@@ -351,21 +357,16 @@ class PinfluencerObjectMapper:
     def __generic_map(self, _from, to, propValues):
         new_dto = to()
         dict_to = all_annotations(to)
-        print("START MAPPING")
-        print(f"all annotations from DTO {dict_to}")
-        print(f"all props from _from {propValues}")
+        self.__logger.log_trace("START MAPPING")
+        self.__logger.log_trace(f"all annotations from DTO {dict_to}")
+        self.__logger.log_trace(f"all props from _from {propValues}")
         for property, value in propValues:
             if property in dict_to:
                 setattr(new_dto, property, value)
                 if bool(typing.get_type_hints(dict_to[property])):
                     setattr(new_dto, property, self.map(_from=value, to=dict_to[property]))
-        print(f"__generic_map from {type(_from)} {to} and mapped {_from} out -> {new_dto}")
+        self.__logger.log_trace(f"__generic_map from {type(_from)} {to} and mapped {_from} out -> {new_dto}")
         return new_dto
-
-
-def print_exception(e):
-    print(''.join(['Exception ', str(type(e))]))
-    print(''.join(['Exception ', str(e)]))
 
 
 def all_annotations(cls):
@@ -414,7 +415,7 @@ class JsonCamelToSnakeCaseDeserializer:
         return '_'.join(map(str.lower, words))
 
 
-def valid_uuid(id_):
+def valid_uuid(id_, logger: Logger):
     try:
         val = uuid.UUID(id_, version=4)
         # If uuid_string is valid hex, but invalid uuid4, UUID.__init__ converts to valid uuid4.
@@ -422,10 +423,10 @@ def valid_uuid(id_):
         if str(val) == id_:
             return True
         else:
-            print_exception(f'equality failed {val} {id_}')
+            logger.log_error(f'equality failed {val} {id_}')
     except ValueError as ve:
-        print_exception(ve)
+        logger.log_exception(ve)
     except AttributeError as e:
-        print_exception(e)
+        logger.log_exception(e)
 
     return False

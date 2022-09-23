@@ -138,7 +138,8 @@ class TestBrandBeforeHooks(PinfluencerTestCase):
         self.__brand_validator = BrandValidator()
         self.__sut = BrandBeforeHooks(brand_validator=self.__brand_validator,
                                       brand_repository=self.__brand_repository,
-                                      common_before_hooks=self.__common_before_hooks)
+                                      common_before_hooks=self.__common_before_hooks,
+                                      logger=Mock())
 
     def test_validate_uuid(self):
         # arrange
@@ -252,7 +253,8 @@ class TestBrandBeforeHooks(PinfluencerTestCase):
         # assert
         with self.tdd_test(msg="keys were validated"):
             self.__common_before_hooks.validate_image_path.assert_called_once_with(context=context,
-                                                                                   possible_paths=["logo", "header-image"])
+                                                                                   possible_paths=["logo",
+                                                                                                   "header-image"])
 
 
 class TestInfluencerBeforeHooks(PinfluencerTestCase):
@@ -261,7 +263,8 @@ class TestInfluencerBeforeHooks(PinfluencerTestCase):
         self.__common_before_hooks: CommonBeforeHooks = Mock()
         self.__influencer_validator = InfluencerValidator()
         self.__sut = InfluencerBeforeHooks(influencer_validator=self.__influencer_validator,
-                                           common_before_hooks=self.__common_before_hooks)
+                                           common_before_hooks=self.__common_before_hooks,
+                                           logger=Mock())
 
     def test_validate_uuid(self):
         # arrange
@@ -353,7 +356,8 @@ class TestCampaignBeforeHooks(PinfluencerTestCase):
         self.__campaign_validator = CampaignValidator()
         self.__common_before_hooks: CommonBeforeHooks = Mock()
         self.__sut = CampaignBeforeHooks(campaign_validator=self.__campaign_validator,
-                                         common_before_hooks=self.__common_before_hooks)
+                                         common_before_hooks=self.__common_before_hooks,
+                                         logger=Mock())
 
     def test_validate_campaign_when_valid(self):
         # arrange
@@ -474,7 +478,8 @@ class TestCommonHooks(PinfluencerTestCase):
         self.__deserializer = JsonCamelToSnakeCaseDeserializer()
         self.__sut = CommonBeforeHooks(deserializer=self.__deserializer,
                                        image_repo=self.__image_repo,
-                                       object_mapper=self.__object_mapper)
+                                       object_mapper=self.__object_mapper,
+                                       logger=Mock())
 
     @data("logo", "header-image")
     def test_validate_image_path_valid(self, image):
@@ -530,11 +535,11 @@ class TestCommonHooks(PinfluencerTestCase):
         context = PinfluencerContext(body={
             "image_bytes": bytes
         },
-        event={
-            "pathParameters": {
-                "image_field": "logo"
-            }
-        })
+            event={
+                "pathParameters": {
+                    "image_field": "logo"
+                }
+            })
         self.__image_repo.upload = MagicMock(return_value=key)
         map_list = {
             "logo": "logo_"
@@ -577,8 +582,6 @@ class TestCommonHooks(PinfluencerTestCase):
             self.__sut.map_enum(context=context,
                                 key="value",
                                 enum_value=ValueEnum)
-
-
 
     def test_map_enums(self):
         # arrange
@@ -831,7 +834,8 @@ class TestUserBeforeHooks(TestCase):
 
     def setUp(self) -> None:
         self.__common_before_hooks: CommonBeforeHooks = Mock()
-        self.__sut = UserBeforeHooks(self.__common_before_hooks)
+        self.__sut = UserBeforeHooks(self.__common_before_hooks,
+                                     logger=Mock())
 
     def test_map_categories_and_values(self):
         # arrange

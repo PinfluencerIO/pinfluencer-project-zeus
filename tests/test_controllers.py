@@ -5,7 +5,7 @@ from callee import Captor
 from ddt import ddt, data
 
 from src._types import BrandRepository, InfluencerRepository, CampaignRepository
-from src.crosscutting import PinfluencerObjectMapper, AutoFixture, FlexiUpdater
+from src.crosscutting import PinfluencerObjectMapper, AutoFixture, FlexiUpdater, ConsoleLogger
 from src.domain.models import Influencer, Campaign, Brand
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.web import PinfluencerContext, PinfluencerResponse
@@ -14,6 +14,9 @@ from src.web.views import BrandRequestDto, BrandResponseDto, ImageRequestDto, In
     InfluencerResponseDto, CampaignRequestDto, CampaignResponseDto
 from tests import PinfluencerTestCase
 
+
+def test_damn():
+    ConsoleLogger().log_debug(message="fdsafsda")
 
 class TestInfluencerController(PinfluencerTestCase):
 
