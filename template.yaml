@@ -81,7 +81,7 @@ Resources:
       Role: !Ref LambdaRole
       CodeUri: ./
       Handler: src/app.lambda_handler
-      Runtime: python3.10
+      Runtime: python3.9
       Events:
         #PUBLIC Endpoints START
         Feed:
