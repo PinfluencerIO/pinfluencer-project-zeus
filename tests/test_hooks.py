@@ -473,7 +473,7 @@ class TestCampaignBeforeHooks(PinfluencerTestCase):
 class TestCommonHooks(PinfluencerTestCase):
 
     def setUp(self) -> None:
-        self.__object_mapper = PinfluencerObjectMapper()
+        self.__object_mapper = PinfluencerObjectMapper(logger=Mock())
         self.__image_repo: ImageRepository = Mock()
         self.__deserializer = JsonCamelToSnakeCaseDeserializer()
         self.__sut = CommonBeforeHooks(deserializer=self.__deserializer,

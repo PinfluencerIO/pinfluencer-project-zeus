@@ -1,6 +1,7 @@
 import datetime
 from dataclasses import dataclass, field
 from unittest import TestCase
+from unittest.mock import Mock
 
 from src.crosscutting import JsonSnakeToCamelSerializer, JsonCamelToSnakeCaseDeserializer, AutoFixture, \
     PinfluencerObjectMapper
@@ -113,7 +114,7 @@ class TestPinfluencerMapper:
                                         list_limit=5)
 
         # act
-        test_other_dto: TestOtherDto = PinfluencerObjectMapper().map(_from=test_dto, to=TestOtherDto)
+        test_other_dto: TestOtherDto = PinfluencerObjectMapper(logger=Mock()).map(_from=test_dto, to=TestOtherDto)
 
         # assert
         assert test_other_dto.id == "default_id"

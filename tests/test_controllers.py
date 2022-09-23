@@ -23,7 +23,7 @@ class TestInfluencerController(PinfluencerTestCase):
     def setUp(self):
         self.__flexi_updater = FlexiUpdater()
         self.__influencer_repository: InfluencerRepository = Mock()
-        self.__object_mapper = PinfluencerObjectMapper()
+        self.__object_mapper = PinfluencerObjectMapper(logger=Mock())
         self.__sut = InfluencerController(influencer_repository=self.__influencer_repository,
                                           object_mapper=self.__object_mapper,
                                           flexi_updater=self.__flexi_updater,
@@ -108,7 +108,7 @@ class TestBrandController(PinfluencerTestCase):
     def setUp(self):
         self.__flexi_updater = FlexiUpdater()
         self.__brand_repository: BrandRepository = Mock()
-        self.__object_mapper = PinfluencerObjectMapper()
+        self.__object_mapper = PinfluencerObjectMapper(logger=Mock())
         self.__sut = BrandController(brand_repository=self.__brand_repository,
                                      object_mapper=self.__object_mapper,
                                      flexi_updater=self.__flexi_updater,
@@ -533,7 +533,7 @@ class TestCampaignController(PinfluencerTestCase):
     def setUp(self) -> None:
         self.__flexi_updater = FlexiUpdater()
         self.__campaign_repository: CampaignRepository = Mock()
-        self.__object_mapper = PinfluencerObjectMapper()
+        self.__object_mapper = PinfluencerObjectMapper(logger=Mock())
         self.__sut = CampaignController(repository=self.__campaign_repository,
                                         object_mapper=self.__object_mapper,
                                         flexi_updater=self.__flexi_updater,

@@ -60,7 +60,7 @@ def generic_handler(routeKey: str, params: dict, auth_user: str):
         "routeKey": routeKey,
         "pathParameters": params
     }, context={})
-    response_object: PinfResponse = PinfluencerObjectMapper().map_from_dict(_from=response, to=PinfResponse)
+    response_object: PinfResponse = PinfluencerObjectMapper(logger=Mock()).map_from_dict(_from=response, to=PinfResponse)
     return Response(response_object.body,
                     status=response_object.statusCode,
                     mimetype='application/json')

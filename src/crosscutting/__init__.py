@@ -20,6 +20,38 @@ def fullname(o):
     return module + '.' + klass.__qualname__
 
 
+class PinfluencerObjectMapper:
+
+    def __init__(self, logger: Logger):
+        self.__logger = logger
+
+    def map(self, _from, to):
+        self.__logger.log_trace(f"{vars(_from).items()}")
+        return self.__generic_map(_from=_from,
+                                  to=to,
+                                  propValues=vars(_from).items())
+
+    def map_from_dict(self, _from, to):
+        self.__logger.log_trace(_from.items())
+        return self.__generic_map(_from=_from,
+                                  to=to,
+                                  propValues=_from.items())
+
+    def __generic_map(self, _from, to, propValues):
+        new_dto = to()
+        dict_to = all_annotations(to)
+        self.__logger.log_trace("START MAPPING")
+        self.__logger.log_trace(f"all annotations from DTO {dict_to}")
+        self.__logger.log_trace(f"all props from _from {propValues}")
+        for property, value in propValues:
+            if property in dict_to:
+                setattr(new_dto, property, value)
+                if bool(typing.get_type_hints(dict_to[property])):
+                    setattr(new_dto, property, self.map(_from=value, to=dict_to[property]))
+        self.__logger.log_trace(f"__generic_map from {type(_from)} {to} and mapped {_from} out -> {new_dto}")
+        return new_dto
+
+
 # TODO
 class ConsoleLogger:
 
@@ -335,38 +367,6 @@ class AutoFixture:
         else:
             value_for_given_member = f'{value_for_given_member}{self.__generate_random_seed()}'
         setattr(new_value, key, value_for_given_member)
-
-
-class PinfluencerObjectMapper:
-
-    def __int__(self, logger: Logger):
-        self.__logger = logger
-
-    def map(self, _from, to):
-        self.__logger.log_trace(f"{vars(_from).items()}")
-        return self.__generic_map(_from=_from,
-                                  to=to,
-                                  propValues=vars(_from).items())
-
-    def map_from_dict(self, _from, to):
-        self.__logger.log_trace(_from.items())
-        return self.__generic_map(_from=_from,
-                                  to=to,
-                                  propValues=_from.items())
-
-    def __generic_map(self, _from, to, propValues):
-        new_dto = to()
-        dict_to = all_annotations(to)
-        self.__logger.log_trace("START MAPPING")
-        self.__logger.log_trace(f"all annotations from DTO {dict_to}")
-        self.__logger.log_trace(f"all props from _from {propValues}")
-        for property, value in propValues:
-            if property in dict_to:
-                setattr(new_dto, property, value)
-                if bool(typing.get_type_hints(dict_to[property])):
-                    setattr(new_dto, property, self.map(_from=value, to=dict_to[property]))
-        self.__logger.log_trace(f"__generic_map from {type(_from)} {to} and mapped {_from} out -> {new_dto}")
-        return new_dto
 
 
 def all_annotations(cls):
