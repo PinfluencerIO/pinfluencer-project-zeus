@@ -2,7 +2,6 @@ from unittest import TestCase
 from unittest.mock import Mock, MagicMock
 
 from callee import Captor
-from mapper.object_mapper import ObjectMapper
 
 from src._types import ImageRepository
 from src.crosscutting import AutoFixture
@@ -18,7 +17,6 @@ class BrandRepositoryTestCase(PinfluencerTestCase):
     def setUp(self):
         self._data_manager = InMemorySqliteDataManager()
         self._image_repository: ImageRepository = Mock()
-        self._object_mapper = ObjectMapper()
         self._sut = SqlAlchemyBrandRepository(data_manager=self._data_manager,
                                               image_repository=self._image_repository,
                                               logger=Mock())
@@ -155,7 +153,6 @@ class TestInfluencerRepository(TestCase):
     def setUp(self):
         self.__data_manager = InMemorySqliteDataManager()
         self.__image_repository = Mock()
-        self._object_mapper = ObjectMapper()
         self.__sut = SqlAlchemyInfluencerRepository(data_manager=self.__data_manager,
                                                     image_repository=self.__image_repository,
                                                     logger=Mock())
@@ -299,7 +296,6 @@ class TestAuthUserRepository(PinfluencerTestCase):
 class TestCampaignRepository(PinfluencerTestCase):
 
     def setUp(self) -> None:
-        self.__object_mapper = ObjectMapper()
         self.__data_manager = InMemorySqliteDataManager()
         self.__image_repository: ImageRepository = Mock()
         self.__sut = SqlAlchemyCampaignRepository(data_manager=self.__data_manager,

@@ -130,23 +130,6 @@ UserModel = Union[Brand, Influencer]
 Model = Union[UserModel, Campaign]
 
 
-class ObjectMapperAdapter(Protocol):
-
-    def create_map(self,
-                   type_from: type,
-                   type_to: type,
-                   mapping: dict = None) -> None:
-        pass
-
-    def map(self,
-            from_obj,
-            to_type: type,
-            ignore_case=False,
-            allow_none=False,
-            excluded=None):
-        pass
-
-
 class Serializer(Protocol):
 
     def serialize(self, data: Union[dict, list]) -> str:

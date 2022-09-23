@@ -1,8 +1,7 @@
-from mapper.object_mapper import ObjectMapper
 from simple_injection import ServiceCollection
 
 from src._types import DataManager, BrandRepository, InfluencerRepository, CampaignRepository, ImageRepository, \
-    ObjectMapperAdapter, Deserializer, Serializer, AuthUserRepository, Logger
+    Deserializer, Serializer, AuthUserRepository, Logger
 from src.crosscutting import JsonCamelToSnakeCaseDeserializer, JsonSnakeToCamelSerializer, \
     PinfluencerObjectMapper, FlexiUpdater, ConsoleLogger
 from src.data import SqlAlchemyDataManager
@@ -121,8 +120,6 @@ def register_controllers(ioc):
 
 
 def register_object_mapping(ioc):
-    mapper = ObjectMapper()
-    ioc.add_instance(ObjectMapperAdapter, mapper)
     ioc.add_singleton(PinfluencerObjectMapper)
 
 
