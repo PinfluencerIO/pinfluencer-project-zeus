@@ -10,11 +10,8 @@ from src.crosscutting import PinfluencerObjectMapper
 os.environ["ENVIRONMENT"] = "DEV"
 
 if "AWS_DEFAULT_REGION" not in os.environ: logger_factory().log_error("environment var AWS_DEFAULT_REGION is not set")
-if "AWS_SAM_STACK_NAME" not in os.environ: logger_factory().log_error("environment var AWS_SAM_STACK_NAME is not set")
 if "DB_USER" not in os.environ: logger_factory().log_error("environment var DB_USER is not set")
 if "DB_PASSWORD" not in os.environ: logger_factory().log_error("environment var DB_PASSWORD is not set")
-if "DB_CLUSTER_ARN" not in os.environ: logger_factory().log_error("environment var DB_CLUSTER_ARN is not set")
-if "DB_SECRET_ARN" not in os.environ: logger_factory().log_error("environment var DB_SECRET_ARN is not set")
 if "DB_NAME" not in os.environ: logger_factory().log_error("environment var DB_NAME is not set")
 if "DB_URL" not in os.environ: logger_factory().log_error("environment var DB_URL is not set")
 if "USER_POOL_ID" not in os.environ: logger_factory().log_error("environment var USER_POOL_ID is not set")

@@ -52,7 +52,7 @@ def bootstrap(event: dict,
         dispatcher = ioc.resolve(Dispatcher)
         route = event['routeKey']
         logger_factory().log_debug(f'Route: {route}')
-        logger_factory().log_debug(f'Event: {event}')
+        logger_factory().log_trace(f'Event: {event}')
         routes = dispatcher.dispatch_route_to_ctr
         response = PinfluencerResponse()
         if route not in routes:
@@ -76,7 +76,7 @@ def bootstrap(event: dict,
         logger_factory().log_error(str(e))
         response = PinfluencerResponse.as_500_error()
     logger_factory().log_debug(f"status: {response.status_code}")
-    logger_factory().log_debug(f"output body: {response.body}")
+    logger_factory().log_trace(f"output body: {response.body}")
     return response.as_json(serializer=ioc.resolve(Serializer))
 
 
