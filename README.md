@@ -25,6 +25,8 @@
     * pip install -r /requirements.txt
     * pip install -r /requirements-test.txt
   * Enter command **'python test_runner.py'**
+  * Make sure you're **NOT USING PYTEST** test runner, use **unittest** instead
+    * Because the project uses subTests which do not run with pytest
 # View CloudWatch Logs 🔎
 ## Steps 🕹️
   * Install aws CLI
