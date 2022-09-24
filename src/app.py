@@ -1,9 +1,11 @@
+import os
+
 from simple_injection import ServiceCollection
 
 from src._types import DataManager, BrandRepository, InfluencerRepository, CampaignRepository, ImageRepository, \
     Deserializer, Serializer, AuthUserRepository, Logger
 from src.crosscutting import JsonCamelToSnakeCaseDeserializer, JsonSnakeToCamelSerializer, \
-    PinfluencerObjectMapper, FlexiUpdater, ConsoleLogger
+    PinfluencerObjectMapper, FlexiUpdater, ConsoleLogger, DummyLogger
 from src.data import SqlAlchemyDataManager
 from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository, \
     SqlAlchemyCampaignRepository, S3ImageRepository, CognitoAuthUserRepository, CognitoAuthService
@@ -29,7 +31,11 @@ def lambda_handler(event, context):
 
 # TODO: use DI
 def logger_factory():
+    if "ENVIRONMENT" in os.environ:
+        if os.environ["ENVIRONMENT"] == "TEST":
+            return DummyLogger()
     return ConsoleLogger()
+
 
 
 def bootstrap(event: dict,
@@ -88,7 +94,8 @@ def register_dependencies(cognito_auth_service, data_manager, ioc, middleware):
     register_middleware(ioc)
     ioc.add_instance(MiddlewarePipeline, middleware)
     ioc.add_singleton(FlexiUpdater)
-    ioc.add_singleton(Logger, ConsoleLogger)
+
+    ioc.add_instance(Logger, logger_factory())
 
 
 def register_middleware(ioc):

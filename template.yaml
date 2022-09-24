@@ -39,6 +39,7 @@ Globals:
         DB_PASSWORD: !Ref DatabasePassword
         DB_URL: !Ref DatabaseUrl
         DB_NAME: !Ref DatabaseName
+        ENVIRONMENT: PROD
 
 Resources:
   PinfluencerHttpApi:

@@ -1,4 +1,5 @@
 import json
+import os
 from dataclasses import dataclass
 
 from flask import Flask, request, Response
@@ -6,6 +7,7 @@ from flask import Flask, request, Response
 from src.app import lambda_handler
 from src.crosscutting import PinfluencerObjectMapper
 
+os.environ["ENVIRONMENT"] = "DEV"
 app = Flask(__name__)
 
 
