@@ -25,3 +25,10 @@
     * pip install -r /requirements.txt
     * pip install -r /requirements-test.txt
   * Enter command **'python test_runner.py'**
+# View CloudWatch Logs 🔎
+## Steps 🕹️
+  * Install aws CLI
+  * Run command **'aws logs tail /aws/lambda/pinfluencer-api-staging-PinfluencerFunction-AMRq3Jv7jD4M --follow --filter-pattern <pattern>'**
+    * Filter pattern can be anything that the log contains such as:
+      * The log type: **'ERROR'**, **'EXCEPTION'**, **'TRACE'**, **'DEBUG'**, **'INFO'**
+      * The module name: **'src.web.middleware.MiddlewarePipeline.execute_middleware'**
