@@ -13,14 +13,6 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: "3.9"
-      - name: Lint src code
-        uses: sunnysid3up/python-linter@master
-        with:
-          source: "src"
-      - name: Lint test code
-        uses: sunnysid3up/python-linter@master
-        with:
-          source: "tests"
       - name: Test with unittest
         env:
           REMOTE_BUILD: true
