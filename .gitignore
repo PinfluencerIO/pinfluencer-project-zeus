@@ -257,3 +257,6 @@ sandbox.py
 
 # aws
 awssecrets.secrets
+
+# test runenr artifacts
+/tests/template.yaml

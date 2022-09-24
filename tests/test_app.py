@@ -1,4 +1,5 @@
 import os
+from os.path import exists
 from typing import Union
 from unittest import TestCase
 from unittest.mock import Mock, MagicMock
@@ -492,7 +493,7 @@ class TestRoutes(TestCase):
 
     def test_template_matches_routes(self):
         template_file_path = f"./../template.yaml"
-        if "REMOTE_BUILD" in os.environ:
+        if not exists(template_file_path):
             template_file_path = f"./template.yaml"
         with open(template_file_path) as file:
             yaml_str = file.read()
