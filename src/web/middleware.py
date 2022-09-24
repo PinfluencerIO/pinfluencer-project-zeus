@@ -14,7 +14,7 @@ class MiddlewarePipeline:
         for action in middleware:
             name = "anonymous"
             try:
-                name = f"{inspect.getmodule(action)}.{action.__name__}"
+                name = f"{inspect.getmodule(action).__name__}.{action.__name__}"
             except Exception:
                 ...
             self.__logger.log_debug(f"begin middleware {name}")

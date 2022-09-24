@@ -29,7 +29,6 @@ def lambda_handler(event, context):
                      cognito_auth_service=CognitoAuthService(logger=logger_factory()))
 
 
-# TODO: use DI
 def logger_factory():
     if "ENVIRONMENT" in os.environ:
         if os.environ["ENVIRONMENT"] == "TEST":
