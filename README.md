@@ -3,8 +3,11 @@
 * Manual deploy of head of main branch
 ## GitHub Event Triggered 🤖
 * On push to main branch runs ci tests and deploys
-# Run Locally 💻
+# Run API Locally 💻
 ## Steps 🕹️
+  * Set up dependencies with:
+    * pip install -r /requirements.txt
+    * pip install -r /requirements-test.txt
   * Set env vars:
     * AWS_DEFAULT_REGION
     * AWS_SAM_STACK_NAME
@@ -15,7 +18,10 @@
     * DB_CLUSTER_ARN
     * DB_PASSWORD
     * DB_USER
-  * Enter command **'python local_api.py'**
-# Run Tests 🧪
+  * Run **'local_api.py'** with **'Flask'**
+# Run Tests Locally 🧪
 ## Steps 🕹️
+  * Set up dependencies with:
+    * pip install -r /requirements.txt
+    * pip install -r /requirements-test.txt
   * Enter command **'python test_runner.py'**
