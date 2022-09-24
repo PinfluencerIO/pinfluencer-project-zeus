@@ -21,7 +21,7 @@ jobs:
           pip install -r requirements.txt
           pip install -r requirements-test.txt
           cp template.yaml tests/template.yaml
-          pytest
+          python -m unittest
       - name: AWS build and deploy
         uses: aws-actions/configure-aws-credentials@v1
         with:
