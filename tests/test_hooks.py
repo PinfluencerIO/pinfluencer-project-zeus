@@ -15,7 +15,7 @@ from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks, Infl
     InfluencerBeforeHooks, BrandBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, CommonAfterHooks
 from src.web.views import ImageRequestDto, BrandResponseDto
 from tests import get_auth_user_event, create_for_auth_user_event, get_brand_id_event, \
-    get_influencer_id_event, get_campaign_id_event, PinfluencerTestCase
+    get_influencer_id_event, get_campaign_id_event
 
 TEST_S3_URL = "https://pinfluencer-product-images.s3.eu-west-2.amazonaws.com"
 
@@ -130,7 +130,7 @@ class TestCommonAfterHooks(TestCase):
         assert context.response.body["image"] is None
 
 
-class TestBrandBeforeHooks(PinfluencerTestCase):
+class TestBrandBeforeHooks(TestCase):
 
     def setUp(self) -> None:
         self.__common_before_hooks: CommonBeforeHooks = Mock()
@@ -237,7 +237,7 @@ class TestBrandBeforeHooks(PinfluencerTestCase):
         self.__sut.upload_image(context=context)
 
         # assert
-        with self.tdd_test(msg="image was uploaded once"):
+        with self.subTest(msg="image was uploaded once"):
             self.__common_before_hooks.upload_image.assert_called_once_with(path="brands/12345",
                                                                             context=context,
                                                                             map_list={
@@ -251,13 +251,13 @@ class TestBrandBeforeHooks(PinfluencerTestCase):
         self.__sut.validate_image_key(context=context)
 
         # assert
-        with self.tdd_test(msg="keys were validated"):
+        with self.subTest(msg="keys were validated"):
             self.__common_before_hooks.validate_image_path.assert_called_once_with(context=context,
                                                                                    possible_paths=["logo",
                                                                                                    "header-image"])
 
 
-class TestInfluencerBeforeHooks(PinfluencerTestCase):
+class TestInfluencerBeforeHooks(TestCase):
 
     def setUp(self) -> None:
         self.__common_before_hooks: CommonBeforeHooks = Mock()
@@ -332,7 +332,7 @@ class TestInfluencerBeforeHooks(PinfluencerTestCase):
         self.__sut.upload_image(context=context)
 
         # assert
-        with self.tdd_test(msg="image was uploaded once"):
+        with self.subTest(msg="image was uploaded once"):
             self.__common_before_hooks.upload_image.assert_called_once_with(path="influencers/12345",
                                                                             context=context,
                                                                             map_list={
@@ -345,12 +345,12 @@ class TestInfluencerBeforeHooks(PinfluencerTestCase):
         self.__sut.validate_image_key(context=context)
 
         # assert
-        with self.tdd_test(msg="keys were validated"):
+        with self.subTest(msg="keys were validated"):
             self.__common_before_hooks.validate_image_path.assert_called_once_with(context=context,
                                                                                    possible_paths=["image"])
 
 
-class TestCampaignBeforeHooks(PinfluencerTestCase):
+class TestCampaignBeforeHooks(TestCase):
 
     def setUp(self) -> None:
         self.__campaign_validator = CampaignValidator()
@@ -451,7 +451,7 @@ class TestCampaignBeforeHooks(PinfluencerTestCase):
         self.__sut.upload_image(context=context)
 
         # assert
-        with self.tdd_test(msg="image was uploaded once"):
+        with self.subTest(msg="image was uploaded once"):
             self.__common_before_hooks.upload_image.assert_called_once_with(path="campaigns/12345",
                                                                             context=context,
                                                                             map_list={
@@ -464,13 +464,13 @@ class TestCampaignBeforeHooks(PinfluencerTestCase):
         self.__sut.validate_image_key(context=context)
 
         # assert
-        with self.tdd_test(msg="keys were validated"):
+        with self.subTest(msg="keys were validated"):
             self.__common_before_hooks.validate_image_path.assert_called_once_with(context=context,
                                                                                    possible_paths=["product-image"])
 
 
 @ddt
-class TestCommonHooks(PinfluencerTestCase):
+class TestCommonHooks(TestCase):
 
     def setUp(self) -> None:
         self.__object_mapper = PinfluencerObjectMapper(logger=Mock())
@@ -497,11 +497,11 @@ class TestCommonHooks(PinfluencerTestCase):
                                        possible_paths=["logo", "header-image"])
 
         # assert
-        with self.tdd_test(msg="response is 200"):
+        with self.subTest(msg="response is 200"):
             assert context.response.status_code == 200
 
         # assert
-        with self.tdd_test(msg="middleware does not short"):
+        with self.subTest(msg="middleware does not short"):
             assert context.short_circuit == False
 
     @data("logos", "header-images")
@@ -520,11 +520,11 @@ class TestCommonHooks(PinfluencerTestCase):
                                        possible_paths=["logo", "header-image"])
 
         # assert
-        with self.tdd_test(msg="response is 400"):
+        with self.subTest(msg="response is 400"):
             assert context.response.status_code == 400
 
         # assert
-        with self.tdd_test(msg="middleware shorts"):
+        with self.subTest(msg="middleware shorts"):
             assert context.short_circuit == True
 
     def test_upload_image(self):
@@ -549,16 +549,16 @@ class TestCommonHooks(PinfluencerTestCase):
         self.__sut.upload_image(path=path, context=context, map_list=map_list)
 
         # assert
-        with self.tdd_test(msg="image repo was called"):
+        with self.subTest(msg="image repo was called"):
             self.__image_repo.upload.assert_called_once_with(path=path, image_base64_encoded=bytes)
 
         image_request: ImageRequestDto = self.__object_mapper.map_from_dict(_from=context.body, to=ImageRequestDto)
 
         # assert
-        with self.tdd_test(msg="key was added to request body"):
+        with self.subTest(msg="key was added to request body"):
             assert image_request.image_path == key
 
-        with self.tdd_test(msg="field was added to request body"):
+        with self.subTest(msg="field was added to request body"):
             assert image_request.image_field == map_list[context.event["pathParameters"]['image_field']]
 
     def test_map_enum(self):
@@ -578,7 +578,7 @@ class TestCommonHooks(PinfluencerTestCase):
         context = PinfluencerContext(body={})
 
         # act/assert
-        with self.tdd_test(msg="does not throw exception"):
+        with self.subTest(msg="does not throw exception"):
             self.__sut.map_enum(context=context,
                                 key="value",
                                 enum_value=ValueEnum)
@@ -601,7 +601,7 @@ class TestCommonHooks(PinfluencerTestCase):
         context = PinfluencerContext(body={})
 
         # act/assert
-        with self.tdd_test(msg="does not throw"):
+        with self.subTest(msg="does not throw"):
             self.__sut.map_enums(context=context,
                                  key="values",
                                  enum_value=ValueEnum)
@@ -623,7 +623,7 @@ class TestCommonHooks(PinfluencerTestCase):
         assert pinfluencer_context.body == body
 
 
-class TestBrandAfterHooks(PinfluencerTestCase):
+class TestBrandAfterHooks(TestCase):
 
     def setUp(self) -> None:
         self.__auth_user_repository: AuthUserRepository = Mock()

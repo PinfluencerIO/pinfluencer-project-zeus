@@ -1,4 +1,5 @@
 import uuid
+from unittest import TestCase
 from unittest.mock import Mock, MagicMock
 
 from callee import Captor
@@ -12,14 +13,13 @@ from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.controllers import BrandController, InfluencerController, CampaignController
 from src.web.views import BrandRequestDto, BrandResponseDto, ImageRequestDto, InfluencerRequestDto, \
     InfluencerResponseDto, CampaignRequestDto, CampaignResponseDto
-from tests import PinfluencerTestCase
 
 
 def test_damn():
     ConsoleLogger().log_debug(message="fdsafsda")
 
 
-class TestInfluencerController(PinfluencerTestCase):
+class TestInfluencerController(TestCase):
 
     def setUp(self):
         self.__flexi_updater = FlexiUpdater()
@@ -104,7 +104,7 @@ class TestInfluencerController(PinfluencerTestCase):
 
 
 @ddt
-class TestBrandController(PinfluencerTestCase):
+class TestBrandController(TestCase):
 
     def setUp(self):
         self.__flexi_updater = FlexiUpdater()
@@ -132,27 +132,27 @@ class TestBrandController(PinfluencerTestCase):
         self.__sut.update_image_field_for_user(context=context)
 
         # assert
-        with self.tdd_test(msg="work was done in UoW"):
+        with self.subTest(msg="work was done in UoW"):
             self.__sut._unit_of_work.assert_called_once()
 
         # assert
-        with self.tdd_test(msg="repo was called"):
+        with self.subTest(msg="repo was called"):
             self.__brand_repository.load_for_auth_user.assert_called_once_with(auth_user_id=brand_in_db.auth_user_id)
 
         # assert
-        with self.tdd_test(msg="image field was updated"):
+        with self.subTest(msg="image field was updated"):
             assert getattr(brand_in_db, image_field) == image_request.image_path
 
         # assert
-        with self.tdd_test(msg="200 was returned"):
+        with self.subTest(msg="200 was returned"):
             assert context.response.status_code == 200
 
         # assert
-        with self.tdd_test(msg="middleware does not short"):
+        with self.subTest(msg="middleware does not short"):
             assert context.short_circuit == False
 
         # assert
-        with self.tdd_test(msg="brand was returned"):
+        with self.subTest(msg="brand was returned"):
             assert context.response.body == self.__object_mapper.map(_from=brand_in_db, to=BrandResponseDto).__dict__
 
     def test_update_image_field_when_not_found(self):
@@ -168,15 +168,15 @@ class TestBrandController(PinfluencerTestCase):
         self.__sut.update_image_field_for_user(context=context)
 
         # assert
-        with self.tdd_test(msg="404 was returned"):
+        with self.subTest(msg="404 was returned"):
             assert context.response.status_code == 404
 
         # assert
-        with self.tdd_test(msg="middleware shorts"):
+        with self.subTest(msg="middleware shorts"):
             assert context.short_circuit == True
 
         # assert
-        with self.tdd_test(msg="empty body is returned"):
+        with self.subTest(msg="empty body is returned"):
             assert context.response.body == {}
 
     def test_unit_of_work(self):
@@ -188,11 +188,11 @@ class TestBrandController(PinfluencerTestCase):
         self.test_unit_of_work_call()
 
         # assert
-        with self.tdd_test(msg="brand repository is called"):
+        with self.subTest(msg="brand repository is called"):
             self.__brand_repository.load_by_id.assert_called_once()
 
         # assert
-        with self.tdd_test(msg="commit is called"):
+        with self.subTest(msg="commit is called"):
             self.__brand_repository.save.assert_called_once()
 
     def test_unit_of_work_when_error_occurs(self):
@@ -201,15 +201,15 @@ class TestBrandController(PinfluencerTestCase):
         self.__brand_repository.save = MagicMock()
 
         # act/assert
-        with self.tdd_test(msg="unit of work still throws"):
+        with self.subTest(msg="unit of work still throws"):
             self.assertRaises(NotFoundException, lambda: self.test_unit_of_work_call())
 
         # assert
-        with self.tdd_test(msg="brand repository is called"):
+        with self.subTest(msg="brand repository is called"):
             self.__brand_repository.load_by_id.assert_called_once()
 
         # assert
-        with self.tdd_test(msg="commit is not called"):
+        with self.subTest(msg="commit is not called"):
             self.__brand_repository.save.assert_not_called()
 
     def test_unit_of_work_call(self):
@@ -228,16 +228,16 @@ class TestBrandController(PinfluencerTestCase):
                                                 response=pinfluencer_response))
 
         # assert
-        with self.tdd_test("brand repository was called"):
+        with self.subTest(msg="brand repository was called"):
             self.__brand_repository.load_by_id.assert_called_once_with(id_=brand_from_db.id)
 
         # assert
-        with self.tdd_test("returned brand is the same as brand in db"):
+        with self.subTest(msg="returned brand is the same as brand in db"):
             assert pinfluencer_response.body == self.__object_mapper.map(_from=brand_from_db,
                                                                          to=BrandResponseDto).__dict__
 
         # assert
-        with self.tdd_test("response is ok"):
+        with self.subTest(msg="response is ok"):
             assert pinfluencer_response.is_ok() is True
 
     def test_get_by_id_when_not_found(self):
@@ -251,19 +251,19 @@ class TestBrandController(PinfluencerTestCase):
         self.__sut.get_by_id(context)
 
         # assert
-        with self.tdd_test("brand repository was called"):
+        with self.subTest(msg="brand repository was called"):
             self.__brand_repository.load_by_id.assert_called_once_with(id_=field)
 
         # assert
-        with self.tdd_test("body is empty"):
+        with self.subTest(msg="body is empty"):
             assert pinfluencer_response.body == {}
 
         # assert
-        with self.tdd_test("response code is 404"):
+        with self.subTest(msg="response code is 404"):
             assert pinfluencer_response.status_code == 404
 
         # assert
-        with self.tdd_test("middleware will short circuit"):
+        with self.subTest(msg="middleware will short circuit"):
             assert context.short_circuit == True
 
     def test_get_all(self):
@@ -279,16 +279,16 @@ class TestBrandController(PinfluencerTestCase):
                                               response=pinfluencer_response))
 
         # assert
-        with self.tdd_test("brand repository was called"):
+        with self.subTest(msg="brand repository was called"):
             self.__brand_repository.load_collection.assert_called_once()
 
         # assert
-        with self.tdd_test("response body is equal to list of brands in db"):
+        with self.subTest(msg="response body is equal to list of brands in db"):
             assert pinfluencer_response.body == list(
                 map(lambda x: self.__object_mapper.map(_from=x, to=BrandResponseDto).__dict__, brands_from_db))
 
         # assert
-        with self.tdd_test("response status code is 200"):
+        with self.subTest(msg="response status code is 200"):
             assert pinfluencer_response.status_code == 200
 
     def test_get(self):
@@ -303,15 +303,15 @@ class TestBrandController(PinfluencerTestCase):
                                           response=response))
 
         # assert
-        with self.tdd_test("brand repository is called"):
+        with self.subTest(msg="brand repository is called"):
             self.__brand_repository.load_for_auth_user.assert_called_once_with(auth_user_id=db_brand.auth_user_id)
 
         # assert
-        with self.tdd_test("response body is equal to brand in db"):
+        with self.subTest(msg="response body is equal to brand in db"):
             assert response.body == self.__object_mapper.map(_from=db_brand, to=BrandResponseDto).__dict__
 
         # assert
-        with self.tdd_test("response status code is 200"):
+        with self.subTest(msg="response status code is 200"):
             assert response.status_code == 200
 
     def test_get_when_not_found(self):
@@ -325,19 +325,19 @@ class TestBrandController(PinfluencerTestCase):
         self.__sut.get(context)
 
         # assert
-        with self.tdd_test("brand repository is called"):
+        with self.subTest(msg="brand repository is called"):
             self.__brand_repository.load_for_auth_user.assert_called_once_with(auth_user_id=auth_id)
 
         # assert
-        with self.tdd_test("response body is empty"):
+        with self.subTest(msg="response body is empty"):
             assert response.body == {}
 
         # assert
-        with self.tdd_test("response status code is 404"):
+        with self.subTest(msg="response status code is 404"):
             assert response.status_code == 404
 
         # assert
-        with self.tdd_test("middleware short circuits"):
+        with self.subTest(msg="middleware short circuits"):
             assert context.short_circuit == True
 
     def test_create(self):
@@ -358,24 +358,24 @@ class TestBrandController(PinfluencerTestCase):
         payload_captor = Captor()
 
         # assert
-        with self.tdd_test("unit of work called"):
+        with self.subTest(msg="unit of work called"):
             self.__sut._unit_of_work.assert_called_once()
 
         # assert
-        with self.tdd_test("brand repository was called"):
+        with self.subTest(msg="brand repository was called"):
             self.__brand_repository.write_new_for_auth_user.assert_called_once_with(auth_user_id=brand_db.auth_user_id,
                                                                                     payload=payload_captor)
         actual_payload: Brand = payload_captor.arg
 
         # assert
-        with self.tdd_test("response code was created"):
+        with self.subTest(msg="response code was created"):
             assert response.status_code == 201
 
         mapped_brand_body: BrandResponseDto = self.__object_mapper.map_from_dict(_from=response.body,
                                                                                  to=BrandResponseDto)
 
         # assert
-        with self.tdd_test("response was equal to brand in db and body"):
+        with self.subTest(msg="response was equal to brand in db and body"):
             # brand in db asserts
             assert brand_db.id == mapped_brand_body.id
             assert brand_db.created == mapped_brand_body.created
@@ -383,7 +383,7 @@ class TestBrandController(PinfluencerTestCase):
             assert brand_db.logo == mapped_brand_body.logo
 
         # assert
-        with self.tdd_test("response was equal to brand in db and request and body"):
+        with self.subTest(msg="response was equal to brand in db and request and body"):
             # brand response asserts
             assert actual_payload.brand_description == brand_request.brand_description == mapped_brand_body.brand_description == brand_db.brand_description
             assert actual_payload.brand_name == brand_request.brand_name == mapped_brand_body.brand_name == brand_db.brand_name
@@ -407,15 +407,15 @@ class TestBrandController(PinfluencerTestCase):
         self.__sut.create(context)
 
         # assert
-        with self.tdd_test("response status code is 400"):
+        with self.subTest(msg="response status code is 400"):
             assert response.status_code == 400
 
         # assert
-        with self.tdd_test("response body is empty"):
+        with self.subTest(msg="response body is empty"):
             assert response.body == {}
 
         # assert
-        with self.tdd_test("middleware should short circuit"):
+        with self.subTest(msg="middleware should short circuit"):
             assert context.short_circuit == True
 
     def test_update_all(self):
@@ -434,18 +434,18 @@ class TestBrandController(PinfluencerTestCase):
                                                       response=response))
 
         # assert
-        with self.tdd_test(msg="repository was called"):
+        with self.subTest(msg="repository was called"):
             self.__brand_repository.load_for_auth_user.assert_called_once_with(auth_user_id=brand_db.auth_user_id)
 
         # assert
-        with self.tdd_test(msg="repository was called"):
+        with self.subTest(msg="repository was called"):
             assert response.status_code == 200
 
         mapped_brand_body: BrandResponseDto = self.__object_mapper.map_from_dict(_from=response.body,
                                                                                  to=BrandResponseDto)
 
         # assert
-        with self.tdd_test(msg="brand in db, request and response body match"):
+        with self.subTest(msg="brand in db, request and response body match"):
             # brand response asserts
             assert brand_db.brand_description == brand_request.brand_description == mapped_brand_body.brand_description
             assert brand_db.brand_name == brand_request.brand_name == mapped_brand_body.brand_name
@@ -455,7 +455,7 @@ class TestBrandController(PinfluencerTestCase):
             assert brand_db.website == brand_request.website == mapped_brand_body.website
 
         # assert
-        with self.tdd_test(msg="brand in db and response body match"):
+        with self.subTest(msg="brand in db and response body match"):
             # brand in db asserts
             assert brand_db.id == mapped_brand_body.id
             assert brand_db.created == mapped_brand_body.created
@@ -485,7 +485,7 @@ class TestBrandController(PinfluencerTestCase):
                                                                                  to=BrandResponseDto)
 
         # assert
-        with self.tdd_test(msg="brand in db, request and response body match"):
+        with self.subTest(msg="brand in db, request and response body match"):
             # brand response asserts
             assert deep_copy_of_brand_db.brand_description == mapped_brand_body.brand_description
             assert brand_db.brand_name == brand_request.brand_name == mapped_brand_body.brand_name
@@ -495,7 +495,7 @@ class TestBrandController(PinfluencerTestCase):
             assert deep_copy_of_brand_db.website == mapped_brand_body.website
 
         # assert
-        with self.tdd_test(msg="brand in db and response body match"):
+        with self.subTest(msg="brand in db and response body match"):
             # brand in db asserts
             assert brand_db.id == mapped_brand_body.id
             assert brand_db.created == mapped_brand_body.created
@@ -517,19 +517,19 @@ class TestBrandController(PinfluencerTestCase):
         self.__sut.update_for_user(context)
 
         # assert
-        with self.tdd_test(msg="status code is 404"):
+        with self.subTest(msg="status code is 404"):
             assert response.status_code == 404
 
         # assert
-        with self.tdd_test(msg="response body is empty"):
+        with self.subTest(msg="response body is empty"):
             assert response.body == {}
 
         # assert
-        with self.tdd_test(msg="middleware short circuits"):
+        with self.subTest(msg="middleware short circuits"):
             assert context.short_circuit == True
 
 
-class TestCampaignController(PinfluencerTestCase):
+class TestCampaignController(TestCase):
 
     def setUp(self) -> None:
         self.__flexi_updater = FlexiUpdater()
@@ -558,31 +558,31 @@ class TestCampaignController(PinfluencerTestCase):
         payload_captor = Captor()
 
         # assert
-        with self.tdd_test(msg="work was done in unit of work"):
+        with self.subTest(msg="work was done in unit of work"):
             self.__sut._unit_of_work.assert_called_once()
 
         # assert
-        with self.tdd_test(msg="repo was called"):
+        with self.subTest(msg="repo was called"):
             self.__campaign_repository.write_new_for_brand.assert_called_once_with(
                 payload=payload_captor,
                 auth_user_id="12341")
         payload_campaign: Campaign = payload_captor.arg
 
         # assert
-        with self.tdd_test(msg="middleware does not short"):
+        with self.subTest(msg="middleware does not short"):
             assert context.short_circuit == False
 
         # assert
-        with self.tdd_test(msg="body equals returned campaign"):
+        with self.subTest(msg="body equals returned campaign"):
             assert self.__object_mapper.map_from_dict(_from=context.response.body, to=CampaignResponseDto) == \
                    self.__object_mapper.map(_from=campaign_from_db, to=CampaignResponseDto)
 
         # assert
-        with self.tdd_test(msg="success response is returned"):
+        with self.subTest(msg="success response is returned"):
             assert context.response.status_code == 201
 
         # assert
-        with self.tdd_test(msg="campaign fields match"):
+        with self.subTest(msg="campaign fields match"):
             assert payload_campaign.campaign_hashtag == campaign_request.campaign_hashtag
             assert payload_campaign.campaign_categories == campaign_request.campaign_categories
             assert payload_campaign.campaign_values == campaign_request.campaign_values
@@ -608,15 +608,15 @@ class TestCampaignController(PinfluencerTestCase):
         self.__sut.create(context=context)
 
         # assert
-        with self.tdd_test(msg="middleware shorts"):
+        with self.subTest(msg="middleware shorts"):
             assert context.short_circuit == True
 
         # assert
-        with self.tdd_test(msg="body is empty"):
+        with self.subTest(msg="body is empty"):
             assert context.response.body == {}
 
         # assert
-        with self.tdd_test(msg="response is not found"):
+        with self.subTest(msg="response is not found"):
             assert context.response.status_code == 404
 
     def test_get_by_id(self):
@@ -643,20 +643,20 @@ class TestCampaignController(PinfluencerTestCase):
         self.__sut.get_for_brand(context=context)
 
         # assert
-        with self.tdd_test(msg="repo is called"):
+        with self.subTest(msg="repo is called"):
             self.__campaign_repository.load_for_auth_brand.assert_called_once_with(auth_user_id=auth_user_id)
 
         # assert
-        with self.tdd_test(msg="middleware shorts"):
+        with self.subTest(msg="middleware shorts"):
             assert context.short_circuit == False
 
         # assert
-        with self.tdd_test(msg="campaigns are returned"):
+        with self.subTest(msg="campaigns are returned"):
             assert context.response.body == list(
                 map(lambda x: self.__object_mapper.map(_from=x, to=CampaignResponseDto).__dict__, campaigns))
 
         # assert
-        with self.tdd_test(msg="response is success"):
+        with self.subTest(msg="response is success"):
             assert context.response.status_code == 200
 
     def test_get_for_brand_when_brand_not_found(self):
@@ -670,15 +670,15 @@ class TestCampaignController(PinfluencerTestCase):
         self.__sut.get_for_brand(context=context)
 
         # assert
-        with self.tdd_test(msg="middleware shorts"):
+        with self.subTest(msg="middleware shorts"):
             assert context.short_circuit == True
 
         # assert
-        with self.tdd_test(msg="body is empty"):
+        with self.subTest(msg="body is empty"):
             assert context.response.body == {}
 
         # assert
-        with self.tdd_test(msg="response is not found"):
+        with self.subTest(msg="response is not found"):
             assert context.response.status_code == 404
 
     def test_update(self):
@@ -693,12 +693,12 @@ class TestCampaignController(PinfluencerTestCase):
         # assert
         captor = Captor()
 
-        with self.tdd_test(msg="generic update was made"):
+        with self.subTest(msg="generic update was made"):
             self.__sut._generic_update.assert_called_once_with(context=context, request=CampaignRequestDto,
                                                                response=CampaignResponseDto,
                                                                repo_func=captor)
 
-        with self.tdd_test(msg="repo was called"):
+        with self.subTest(msg="repo was called"):
             captor.arg()
             self.__campaign_repository.load_by_id.assert_called_once_with(id_=context.id)
 
@@ -714,11 +714,11 @@ class TestCampaignController(PinfluencerTestCase):
         # assert
         captor = Captor()
 
-        with self.tdd_test(msg="generic update was made"):
+        with self.subTest(msg="generic update was made"):
             self.__sut._generic_update_image_field.assert_called_once_with(context=context,
                                                                            response=CampaignResponseDto,
                                                                            repo_func=captor)
 
-        with self.tdd_test(msg="repo was called"):
+        with self.subTest(msg="repo was called"):
             captor.arg()
             self.__campaign_repository.load_by_id.assert_called_once_with(id_=context.id)

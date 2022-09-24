@@ -9,10 +9,10 @@ from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluence
     CognitoAuthService, SqlAlchemyCampaignRepository
 from src.domain.models import Brand, Influencer, User, Campaign
 from src.exceptions import AlreadyExistsException, NotFoundException
-from tests import InMemorySqliteDataManager, PinfluencerTestCase
+from tests import InMemorySqliteDataManager
 
 
-class BrandRepositoryTestCase(PinfluencerTestCase):
+class BrandRepositoryTestCase(TestCase):
 
     def setUp(self):
         self._data_manager = InMemorySqliteDataManager()
@@ -41,7 +41,7 @@ class TestBaseRepository(BrandRepositoryTestCase):
         self._data_manager.session.close()
 
         # assert
-        with self.tdd_test(msg="brand name has been changed in db"):
+        with self.subTest(msg="brand name has been changed in db"):
             assert self._data_manager \
                        .session \
                        .query(Brand) \
@@ -57,7 +57,7 @@ class TestBaseRepository(BrandRepositoryTestCase):
         actual_brand = self._sut.load_by_id(id_=expected_brand.id)
 
         # assert
-        with self.tdd_test(msg="brands match"):
+        with self.subTest(msg="brands match"):
             assert expected_brand == actual_brand
 
     def test_load_by_id_when_brand_cannot_be_found(self):
@@ -72,7 +72,7 @@ class TestBaseRepository(BrandRepositoryTestCase):
         actual_brands = self._sut.load_collection()
 
         # assert
-        with self.tdd_test(msg="brands match"):
+        with self.subTest(msg="brands match"):
             assert expected_brands == actual_brands
 
     def test_load_collection_when_no_brands_exist(self):
@@ -94,7 +94,7 @@ class TestUserRepository(BrandRepositoryTestCase):
         actual = self._sut.load_for_auth_user(auth_user_id=expected.auth_user_id)
 
         # assert
-        with self.tdd_test(msg="brands match"):
+        with self.subTest(msg="brands match"):
             assert actual == expected
 
     def test_load_for_auth_user_when_brand_not_found(self):
@@ -110,7 +110,7 @@ class TestUserRepository(BrandRepositoryTestCase):
         actual = self._sut.load_by_id(id_=expected.id)
 
         # assert
-        with self.tdd_test(msg="brand in db matches returned brand, which also matches brand loaded by id"):
+        with self.subTest(msg="brand in db matches returned brand, which also matches brand loaded by id"):
             assert expected == returned_user == actual
 
     def test_write_new_for_auth_user_when_already_exists(self):
@@ -121,14 +121,14 @@ class TestUserRepository(BrandRepositoryTestCase):
         self._data_manager.create_fake_data([expected])
 
         # act/assert
-        with self.tdd_test(msg="repo raises an error"):
+        with self.subTest(msg="repo raises an error"):
             self.assertRaises(AlreadyExistsException,
                               lambda: self._sut.write_new_for_auth_user(auth_user_id=expected.auth_user_id,
                                                                         payload=brand_to_create))
         actual = self._sut.load_for_auth_user(auth_user_id=brand_to_create.auth_user_id)
 
         # assert
-        with self.tdd_test(msg="brands do not match"):
+        with self.subTest(msg="brands do not match"):
             assert actual != brand_to_create
             assert actual == expected
 
@@ -170,7 +170,7 @@ class TestInfluencerRepository(TestCase):
         assert actual == expected == returned_influencer
 
 
-class TestAuthUserRepository(PinfluencerTestCase):
+class TestAuthUserRepository(TestCase):
 
     def setUp(self) -> None:
         self.__auth_user_service: CognitoAuthService = Mock()
@@ -187,7 +187,7 @@ class TestAuthUserRepository(PinfluencerTestCase):
         self.__sut.update_brand_claims(user=expected_user)
 
         # assert
-        with self.tdd_test(msg="auth service was called"):
+        with self.subTest(msg="auth service was called"):
             self.__auth_user_service.update_user_claims.assert_called_once_with(username=expected_user.auth_user_id,
                                                                                 attributes=payload_captor)
         expected_attributes = [
@@ -213,7 +213,7 @@ class TestAuthUserRepository(PinfluencerTestCase):
         expected_attributes = sorted(expected_attributes, key=lambda d: d['Name'])
 
         # assert
-        with self.tdd_test(msg="attributes match"):
+        with self.subTest(msg="attributes match"):
             self.assertListEqual(expected_attributes, actual_attributes)
 
     def test_update_influencer_claims(self):
@@ -226,7 +226,7 @@ class TestAuthUserRepository(PinfluencerTestCase):
         self.__sut.update_influencer_claims(user=expected_influencer)
 
         # assert
-        with self.tdd_test(msg="auth repo was called"):
+        with self.subTest(msg="auth repo was called"):
             self.__auth_user_service.update_user_claims.assert_called_once_with(
                 username=expected_influencer.auth_user_id,
                 attributes=payload_captor)
@@ -253,7 +253,7 @@ class TestAuthUserRepository(PinfluencerTestCase):
         expected_attributes = sorted(expected_attributes, key=lambda d: d['Name'])
 
         # assert
-        with self.tdd_test(msg="attributes match"):
+        with self.subTest(msg="attributes match"):
             self.assertListEqual(expected_attributes, actual_attributes)
 
     def test_get_user_by_id(self):
@@ -281,19 +281,19 @@ class TestAuthUserRepository(PinfluencerTestCase):
         actual_brand = self.__sut.get_by_id(_id=expected_brand.auth_user_id)
 
         # assert
-        with self.tdd_test(msg="first name matches"):
+        with self.subTest(msg="first name matches"):
             assert actual_brand.first_name == expected_brand.first_name
 
         # assert
-        with self.tdd_test(msg="last name matches"):
+        with self.subTest(msg="last name matches"):
             assert actual_brand.last_name == expected_brand.last_name
 
         # assert
-        with self.tdd_test(msg="email matches"):
+        with self.subTest(msg="email matches"):
             assert actual_brand.email == expected_brand.email
 
 
-class TestCampaignRepository(PinfluencerTestCase):
+class TestCampaignRepository(TestCase):
 
     def setUp(self) -> None:
         self.__data_manager = InMemorySqliteDataManager()
@@ -315,11 +315,11 @@ class TestCampaignRepository(PinfluencerTestCase):
         campaign_loaded_from_db: Campaign = self.__sut.load_by_id(id_=campaign_payload.id)
 
         # assert
-        with self.tdd_test(msg="brand ids match"):
+        with self.subTest(msg="brand ids match"):
             assert returned_campaign.brand_id == campaign_loaded_from_db.brand_id == brand_in_db.id
 
         # assert
-        with self.tdd_test(msg="campaign fields match"):
+        with self.subTest(msg="campaign fields match"):
             assert campaign_payload == campaign_loaded_from_db == returned_campaign
 
     def test_write_for_new_brand_when_brand_does_not_exist(self):

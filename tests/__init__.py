@@ -180,32 +180,3 @@ def update_influencer_payload():
         "audience_age_65_plus_split": 0.143,
         "address": "69 beans road"
     }
-
-
-class PinfluencerTestCase(TestCase):
-
-    def __init__(self, methodName: str = ...):
-        super().__init__(methodName)
-        self.results = []
-
-    @contextmanager
-    def tdd_test(self, msg):
-        try:
-            yield
-            print("\n===================================================================")
-            print(f"TEST {msg} PASSED!!")
-            print("===================================================================")
-        except Exception as e:
-            self.results.append((str(e), msg))
-
-    def tearDown(self) -> None:
-        message = ""
-        passed = self.results == []
-        for (result, test) in self.results:
-            message = f"\n{message}===================================================================\n"
-            message = f"{message}TEST {test} FAILED!!\n"
-            message = f"{message}==================================================================="
-            message = f"{message}\n{result}\n\n"
-        self.results = []
-        if not passed:
-            raise Exception(message)
