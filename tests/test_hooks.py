@@ -22,6 +22,9 @@ TEST_S3_URL = "https://pinfluencer-product-images.s3.eu-west-2.amazonaws.com"
 
 class TestCommonAfterHooks(TestCase):
 
+    def test_fail(self):
+        self.assertTrue(False)
+
     def setUp(self) -> None:
         self.__sut = CommonAfterHooks()
 
