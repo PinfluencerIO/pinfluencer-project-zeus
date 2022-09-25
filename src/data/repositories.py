@@ -220,22 +220,24 @@ class CognitoAuthUserRepository:
                                                  attribute_name='family_name')
         email = self.__get_cognito_attribute(user=auth_user,
                                              attribute_name='email')
-        return User(first_name=first_name,
-                    last_name=last_name,
+        return User(given_name=first_name,
+                    family_name=last_name,
                     email=email)
 
     def __get_cognito_attribute(self, user: dict, attribute_name: str) -> str:
         return next(filter(lambda x: x['Name'] == attribute_name, user['UserAttributes']))['Value']
 
-    def update_brand_claims(self, user: User):
-        self.__update_user_claims(user=user, type='brand')
+    def update_brand_claims(self, user: User, auth_user_id: str):
+        self.__update_user_claims(user=user, type='brand',
+                                  auth_user_id=auth_user_id)
 
-    def update_influencer_claims(self, user: User):
-        self.__update_user_claims(user=user, type='influencer')
+    def update_influencer_claims(self, user: User, auth_user_id: str):
+        self.__update_user_claims(user=user, type='influencer',
+                                  auth_user_id=auth_user_id)
 
-    def __update_user_claims(self, user: User, type: str):
+    def __update_user_claims(self, user: User, type: str, auth_user_id: str):
         try:
-            self.__auth_service.update_user_claims(username=user.auth_user_id, attributes=[
+            self.__auth_service.update_user_claims(username=auth_user_id, attributes=[
                 {
                     'Name': 'custom:usertype',
                     'Value': type
@@ -246,12 +248,27 @@ class CognitoAuthUserRepository:
                 },
                 {
                     'Name': 'family_name',
-                    'Value': user.last_name
+                    'Value': user.family_name
                 },
                 {
                     'Name': 'given_name',
-                    'Value': user.first_name
+                    'Value': user.given_name
                 }
             ])
         except ParamValidationError:
             ...
+
+    def __flexi_update_claims(self, user: User) -> list[dict]:
+        attributes = []
+        values = vars(user).items()
+        for key, value in values:
+            try:
+                value_in_request = getattr(user, key)
+                if value_in_request is not None and key is not "auth_user_id":
+                    attributes.append({
+                        "Name": key,
+                        "Value": value
+                    })
+            except AttributeError:
+                ...
+        return attributes

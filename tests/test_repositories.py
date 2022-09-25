@@ -183,24 +183,24 @@ class TestAuthUserRepository(TestCase):
     def test_update_brand_claims(self):
         # arrange
         payload_captor = Captor()
-        expected_user = AutoFixture().create(dto=User, list_limit=5)
+        expected_user: User = AutoFixture().create(dto=User, list_limit=5)
         self.__auth_user_service.update_user_claims = MagicMock()
 
         # act
-        self.__sut.update_brand_claims(user=expected_user)
+        self.__sut.update_brand_claims(user=expected_user, auth_user_id="1234")
 
         # assert
         with self.subTest(msg="auth service was called"):
-            self.__auth_user_service.update_user_claims.assert_called_once_with(username=expected_user.auth_user_id,
+            self.__auth_user_service.update_user_claims.assert_called_once_with(username="1234",
                                                                                 attributes=payload_captor)
         expected_attributes = [
             {
                 "Name": "family_name",
-                "Value": expected_user.last_name
+                "Value": expected_user.family_name
             },
             {
                 "Name": "given_name",
-                "Value": expected_user.first_name
+                "Value": expected_user.given_name
             },
             {
                 "Name": "email",
@@ -222,25 +222,25 @@ class TestAuthUserRepository(TestCase):
     def test_update_influencer_claims(self):
         # arrange
         payload_captor = Captor()
-        expected_influencer = AutoFixture().create(dto=User, list_limit=5)
+        expected_influencer: User = AutoFixture().create(dto=User, list_limit=5)
         self.__auth_user_service.update_user_claims = MagicMock()
 
         # act
-        self.__sut.update_influencer_claims(user=expected_influencer)
+        self.__sut.update_influencer_claims(user=expected_influencer, auth_user_id="1234")
 
         # assert
         with self.subTest(msg="auth repo was called"):
             self.__auth_user_service.update_user_claims.assert_called_once_with(
-                username=expected_influencer.auth_user_id,
+                username="1234",
                 attributes=payload_captor)
         expected_attributes = [
             {
                 "Name": "family_name",
-                "Value": expected_influencer.last_name
+                "Value": expected_influencer.family_name
             },
             {
                 "Name": "given_name",
-                "Value": expected_influencer.first_name
+                "Value": expected_influencer.given_name
             },
             {
                 "Name": "email",
@@ -267,11 +267,11 @@ class TestAuthUserRepository(TestCase):
             'UserAttributes': [
                 {
                     'Name': 'given_name',
-                    'Value': expected_brand.first_name
+                    'Value': expected_brand.given_name
                 },
                 {
                     'Name': 'family_name',
-                    'Value': expected_brand.last_name
+                    'Value': expected_brand.family_name
                 },
                 {
                     'Name': 'email',
@@ -285,11 +285,11 @@ class TestAuthUserRepository(TestCase):
 
         # assert
         with self.subTest(msg="first name matches"):
-            assert actual_brand.first_name == expected_brand.first_name
+            assert actual_brand.given_name == expected_brand.given_name
 
         # assert
         with self.subTest(msg="last name matches"):
-            assert actual_brand.last_name == expected_brand.last_name
+            assert actual_brand.family_name == expected_brand.family_name
 
         # assert
         with self.subTest(msg="email matches"):

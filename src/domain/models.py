@@ -55,10 +55,9 @@ class Brand(DataModel):
 
 @dataclass(unsafe_hash=True)
 class User:
-    first_name: str = None
-    last_name: str = None
+    given_name: str = None
+    family_name: str = None
     email: str = None
-    auth_user_id: str = None
 
 
 @dataclass(unsafe_hash=True)

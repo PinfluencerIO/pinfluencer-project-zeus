@@ -1,4 +1,3 @@
-import os
 from os.path import exists
 from typing import Union
 from unittest import TestCase

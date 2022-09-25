@@ -657,8 +657,10 @@ class TestBrandAfterHooks(TestCase):
     def setUp(self) -> None:
         self.__auth_user_repository: AuthUserRepository = Mock()
         self.__common_after_hooks: CommonAfterHooks = Mock()
+        self.__mapper = PinfluencerObjectMapper(logger=Mock())
         self.__sut = BrandAfterHooks(auth_user_repository=self.__auth_user_repository,
-                                     common_after_common_hooks=self.__common_after_hooks)
+                                     common_after_common_hooks=self.__common_after_hooks,
+                                     mapper=self.__mapper)
 
     def test_set_brand_claims(self):
         # arrange
@@ -670,8 +672,8 @@ class TestBrandAfterHooks(TestCase):
         context = PinfluencerContext(response=PinfluencerResponse(),
                                      auth_user_id=auth_user_id,
                                      body={
-                                         "first_name": first_name,
-                                         "last_name": last_name,
+                                         "given_name": first_name,
+                                         "family_name": last_name,
                                          "email": email
                                      })
 
@@ -680,12 +682,11 @@ class TestBrandAfterHooks(TestCase):
 
         # assert
         captor = Captor()
-        self.__auth_user_repository.update_brand_claims.assert_called_once_with(user=captor)
+        self.__auth_user_repository.update_brand_claims.assert_called_once_with(user=captor, auth_user_id=auth_user_id)
         user_payload_arg: User = captor.arg
-        assert user_payload_arg.first_name == first_name
-        assert user_payload_arg.last_name == last_name
+        assert user_payload_arg.given_name == first_name
+        assert user_payload_arg.family_name == last_name
         assert user_payload_arg.email == email
-        assert user_payload_arg.auth_user_id == auth_user_id
 
     def test_tag_bucket_url_to_images(self):
         # arrange
@@ -744,12 +745,12 @@ class TestInfluencerAfterHooks(TestCase):
 
         # assert
         captor = Captor()
-        self.__auth_user_repository.update_influencer_claims.assert_called_once_with(user=captor)
+        self.__auth_user_repository.update_influencer_claims.assert_called_once_with(user=captor,
+                                                                                     auth_user_id=auth_user_id)
         user_payload_arg: User = captor.arg
-        assert user_payload_arg.first_name == first_name
-        assert user_payload_arg.last_name == last_name
+        assert user_payload_arg.given_name == first_name
+        assert user_payload_arg.family_name == last_name
         assert user_payload_arg.email == email
-        assert user_payload_arg.auth_user_id == auth_user_id
 
     def test_tag_bucket_url_to_images(self):
         # arrange
@@ -907,8 +908,8 @@ class TestUserAfterHooks(TestCase):
         # arrange
         brand = AutoFixture().create(dto=BrandResponseDto, list_limit=5)
         response = PinfluencerResponse(body=brand.__dict__)
-        auth_user = User(first_name="cognito_first_name",
-                         last_name="cognito_last_name",
+        auth_user = User(given_name="cognito_first_name",
+                         family_name="cognito_last_name",
                          email="cognito_email")
         self.__auth_user_repository.get_by_id = MagicMock(return_value=auth_user)
 
@@ -917,8 +918,8 @@ class TestUserAfterHooks(TestCase):
                                                                                event={}))
 
         # assert
-        assert response.body["first_name"] == auth_user.first_name
-        assert response.body["last_name"] == auth_user.last_name
+        assert response.body["first_name"] == auth_user.given_name
+        assert response.body["last_name"] == auth_user.family_name
         assert response.body["email"] == auth_user.email
         self.__auth_user_repository.get_by_id.assert_called_once_with(_id=brand.auth_user_id)
 
@@ -934,16 +935,16 @@ class TestUserAfterHooks(TestCase):
                                                                                           event={}))
 
         # assert
-        assert response.body[0]["first_name"] == users[0].first_name
-        assert response.body[0]["last_name"] == users[0].last_name
+        assert response.body[0]["first_name"] == users[0].given_name
+        assert response.body[0]["last_name"] == users[0].family_name
         assert response.body[0]["email"] == users[0].email
 
-        assert response.body[1]["first_name"] == users[1].first_name
-        assert response.body[1]["last_name"] == users[1].last_name
+        assert response.body[1]["first_name"] == users[1].given_name
+        assert response.body[1]["last_name"] == users[1].family_name
         assert response.body[1]["email"] == users[1].email
 
-        assert response.body[2]["first_name"] == users[2].first_name
-        assert response.body[2]["last_name"] == users[2].last_name
+        assert response.body[2]["first_name"] == users[2].given_name
+        assert response.body[2]["last_name"] == users[2].family_name
         assert response.body[2]["email"] == users[2].email
 
         self.__auth_user_repository.get_by_id.assert_has_calls(calls=[

@@ -280,16 +280,17 @@ class BrandBeforeHooks:
 class BrandAfterHooks:
 
     def __init__(self, auth_user_repository: AuthUserRepository,
-                 common_after_common_hooks: CommonAfterHooks):
+                 common_after_common_hooks: CommonAfterHooks,
+                 mapper: PinfluencerObjectMapper):
+        self.__mapper = mapper
         self.__common_after_common_hooks = common_after_common_hooks
         self.__auth_user_repository = auth_user_repository
 
     def set_brand_claims(self, context: PinfluencerContext):
-        user = User(auth_user_id=context.auth_user_id,
-                    first_name=context.body["first_name"],
-                    last_name=context.body["last_name"],
+        user = User(given_name=context.body["first_name"],
+                    family_name=context.body["last_name"],
                     email=context.body["email"])
-        self.__auth_user_repository.update_brand_claims(user=user)
+        self.__auth_user_repository.update_brand_claims(user=user, auth_user_id=context.auth_user_id)
 
     def tag_bucket_url_to_images(self, context: PinfluencerContext):
         self.__common_after_common_hooks.set_image_url(context=context,
@@ -312,11 +313,11 @@ class InfluencerAfterHooks:
         self.__auth_user_repository = auth_user_repository
 
     def set_influencer_claims(self, context: PinfluencerContext):
-        user = User(auth_user_id=context.auth_user_id,
-                    first_name=context.body["first_name"],
-                    last_name=context.body["last_name"],
+        user = User(given_name=context.body["first_name"],
+                    family_name=context.body["last_name"],
                     email=context.body["email"])
-        self.__auth_user_repository.update_influencer_claims(user=user)
+        self.__auth_user_repository.update_influencer_claims(user=user,
+                                                             auth_user_id=context.auth_user_id)
 
     def tag_bucket_url_to_images(self, context: PinfluencerContext):
         self.__common_after_hooks.set_image_url(context=context,
@@ -358,15 +359,15 @@ class UserAfterHooks:
 
     def tag_auth_user_claims_to_response(self, context: PinfluencerContext):
         auth_user = self.__auth_user_repository.get_by_id(_id=context.response.body["auth_user_id"])
-        context.response.body["first_name"] = auth_user.first_name
-        context.response.body["last_name"] = auth_user.last_name
+        context.response.body["first_name"] = auth_user.given_name
+        context.response.body["last_name"] = auth_user.family_name
         context.response.body["email"] = auth_user.email
 
     def tag_auth_user_claims_to_response_collection(self, context: PinfluencerContext):
         for user in context.response.body:
             auth_user = self.__auth_user_repository.get_by_id(_id=user["auth_user_id"])
-            user["first_name"] = auth_user.first_name
-            user["last_name"] = auth_user.last_name
+            user["first_name"] = auth_user.given_name
+            user["last_name"] = auth_user.family_name
             user["email"] = auth_user.email
 
     def format_values_and_categories(self, context: PinfluencerContext):

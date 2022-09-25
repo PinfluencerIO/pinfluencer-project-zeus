@@ -5,10 +5,10 @@ from src.domain.models import Brand, Influencer, Campaign, User
 
 class AuthUserRepository(Protocol):
 
-    def update_brand_claims(self, user: User) -> None:
+    def update_brand_claims(self, user: User, auth_user_id: str) -> None:
         ...
 
-    def update_influencer_claims(self, user: User) -> None:
+    def update_influencer_claims(self, user: User, auth_user_id: str) -> None:
         ...
 
     def get_by_id(self, _id: str) -> User:

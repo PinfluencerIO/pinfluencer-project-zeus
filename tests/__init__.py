@@ -1,6 +1,4 @@
-from contextlib import contextmanager
 from enum import Enum
-from unittest import TestCase
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -94,8 +92,8 @@ def update_brand_payload():
 
 
 def update_user_dto():
-    return User(first_name="first_name",
-                last_name="last_name",
+    return User(given_name="first_name",
+                family_name="last_name",
                 email="email@gmail.com")
 
 
