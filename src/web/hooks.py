@@ -351,15 +351,20 @@ class UserBeforeHooks:
 class UserAfterHooks:
 
     def __init__(self, auth_user_repository: AuthUserRepository,
-                 common_after_hooks: CommonAfterHooks):
+                 common_after_hooks: CommonAfterHooks,
+                 mapper: PinfluencerObjectMapper):
+        self.__mapper = mapper
         self.__common_after_hooks = common_after_hooks
         self.__auth_user_repository = auth_user_repository
 
     def tag_auth_user_claims_to_response(self, context: PinfluencerContext):
-        auth_user = self.__auth_user_repository.get_by_id(_id=context.response.body["auth_user_id"])
-        context.response.body["given_name"] = auth_user.given_name
-        context.response.body["family_name"] = auth_user.family_name
-        context.response.body["email"] = auth_user.email
+        self._generic_claims_tagger(context.response.body)
+
+    def _generic_claims_tagger(self, entity):
+        auth_user = self.__auth_user_repository.get_by_id(_id=entity["auth_user_id"])
+        entity["given_name"] = auth_user.given_name
+        entity["family_name"] = auth_user.family_name
+        entity["email"] = auth_user.email
 
     def tag_auth_user_claims_to_response_collection(self, context: PinfluencerContext):
         for user in context.response.body:

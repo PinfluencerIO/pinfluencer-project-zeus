@@ -912,8 +912,10 @@ class TestUserAfterHooks(TestCase):
     def setUp(self) -> None:
         self.__common_after_hooks: CommonAfterHooks = Mock()
         self.__auth_user_repository: AuthUserRepository = Mock()
+        self.__mapper = PinfluencerObjectMapper(logger=Mock())
         self.__sut = UserAfterHooks(auth_user_repository=self.__auth_user_repository,
-                                    common_after_hooks=self.__common_after_hooks)
+                                    common_after_hooks=self.__common_after_hooks,
+                                    mapper=self.__mapper)
 
     def test_tag_auth_user_claims_to_response(self):
         # arrange
@@ -927,16 +929,8 @@ class TestUserAfterHooks(TestCase):
                                                                                event={}))
 
         # assert
-        with self.subTest(msg="first name matches"):
-            assert response.body["given_name"] == auth_user.given_name
-
-        # assert
-        with self.subTest(msg="last name matches"):
-            assert response.body["family_name"] == auth_user.family_name
-
-        # assert
-        with self.subTest(msg="email matches"):
-            assert response.body["email"] == auth_user.email
+        with self.subTest(msg="user matches"):
+            assert self.__mapper.map_from_dict(_from=response.body, to=User) == auth_user
 
         # assert
         with self.subTest(msg="repo was called"):
@@ -944,57 +938,21 @@ class TestUserAfterHooks(TestCase):
 
     def test_tag_auth_user_claims_to_response_collection(self):
         # arrange
-        users: list[User] = AutoFixture().create_many(dto=User, list_limit=5, ammount=10)
-        brands = AutoFixture().create_many_dict(dto=BrandResponseDto, list_limit=5, ammount=10)
-        self.__auth_user_repository.get_by_id = MagicMock(side_effect=users)
-        response = PinfluencerResponse(body=brands)
+        self.__sut._generic_claims_tagger = MagicMock()
+        users = AutoFixture().create_many(dto=User, ammount=3)
+        context = PinfluencerContext(response=PinfluencerResponse(
+            body=list(map(lambda x: x.__dict__, users))
+        ))
 
         # act
-        self.__sut.tag_auth_user_claims_to_response_collection(context=PinfluencerContext(response=response,
-                                                                                          event={}))
+        self.__sut.tag_auth_user_claims_to_response_collection(context=context)
 
         # assert
-        with self.subTest(msg="first name for first entity matched"):
-            assert response.body[0]["given_name"] == users[0].given_name
-
-        # assert
-        with self.subTest(msg="last name for first entity matched"):
-            assert response.body[0]["family_name"] == users[0].family_name
-
-        # assert
-        with self.subTest(msg="email for first entity matched"):
-            assert response.body[0]["email"] == users[0].email
-
-        # assert
-        with self.subTest(msg="first name for second entity matched"):
-            assert response.body[1]["given_name"] == users[1].given_name
-
-        # assert
-        with self.subTest(msg="last name for second entity matched"):
-            assert response.body[1]["family_name"] == users[1].family_name
-
-        # assert
-        with self.subTest(msg="email for second entity matched"):
-            assert response.body[1]["email"] == users[1].email
-
-        # assert
-        with self.subTest(msg="first name for third entity matched"):
-            assert response.body[2]["given_name"] == users[2].given_name
-
-        # assert
-        with self.subTest(msg="last name for third entity matched"):
-            assert response.body[2]["family_name"] == users[2].family_name
-
-        # assert
-        with self.subTest(msg="email for third entity matched"):
-            assert response.body[2]["email"] == users[2].email
-
-        # assert
-        with self.subTest(msg="repo was called"):
-            self.__auth_user_repository.get_by_id.assert_has_calls(calls=[
-                call(_id=brands[0]["auth_user_id"]),
-                call(_id=brands[1]["auth_user_id"]),
-                call(_id=brands[2]["auth_user_id"])
+        with self.subTest(msg="generic claims tagger was called"):
+            self.__sut._generic_claims_tagger.assert_has_calls(calls=[
+                call(entity=users[0].__dict__),
+                call(entity=users[1].__dict__),
+                call(entity=users[2].__dict__)
             ])
 
     def test_format_values_and_categories(self):
