@@ -182,42 +182,15 @@ class TestAuthUserRepository(TestCase):
 
     def test_update_brand_claims(self):
         # arrange
-        payload_captor = Captor()
         expected_user: User = AutoFixture().create(dto=User, list_limit=5)
-        self.__auth_user_service.update_user_claims = MagicMock()
+        self.__sut._update_user_claims = MagicMock()
 
         # act
         self.__sut.update_brand_claims(user=expected_user, auth_user_id="1234")
 
         # assert
-        with self.subTest(msg="auth service was called"):
-            self.__auth_user_service.update_user_claims.assert_called_once_with(username="1234",
-                                                                                attributes=payload_captor)
-        expected_attributes = [
-            {
-                "Name": "family_name",
-                "Value": expected_user.family_name
-            },
-            {
-                "Name": "given_name",
-                "Value": expected_user.given_name
-            },
-            {
-                "Name": "email",
-                "Value": expected_user.email
-            },
-            {
-                "Name": "custom:usertype",
-                "Value": "brand"
-            }
-        ]
-        actual_attributes = payload_captor.arg
-        actual_attributes = sorted(actual_attributes, key=lambda d: d['Name'])
-        expected_attributes = sorted(expected_attributes, key=lambda d: d['Name'])
-
-        # assert
-        with self.subTest(msg="attributes match"):
-            self.assertListEqual(expected_attributes, actual_attributes)
+        self.__sut._update_user_claims.assert_called_once_with(user=expected_user, type='brand',
+                                                               auth_user_id="1234")
 
     def test_update_influencer_claims(self):
         # arrange
@@ -259,11 +232,45 @@ class TestAuthUserRepository(TestCase):
         with self.subTest(msg="attributes match"):
             self.assertListEqual(expected_attributes, actual_attributes)
 
+    def test_update_influencer_claims_when_attributes_are_missing(self):
+        # arrange
+        payload_captor = Captor()
+        expected_influencer: User = AutoFixture().create(dto=User, list_limit=5)
+        expected_influencer.family_name = None
+        expected_influencer.email = None
+        self.__auth_user_service.update_user_claims = MagicMock()
+
+        # act
+        self.__sut.update_influencer_claims(user=expected_influencer, auth_user_id="1234")
+
+        # assert
+        with self.subTest(msg="auth repo was called"):
+            self.__auth_user_service.update_user_claims.assert_called_once_with(
+                username="1234",
+                attributes=payload_captor)
+        expected_attributes = [
+            {
+                "Name": "given_name",
+                "Value": expected_influencer.given_name
+            },
+            {
+                "Name": "custom:usertype",
+                "Value": "influencer"
+            }
+        ]
+        actual_attributes = payload_captor.arg
+        actual_attributes = sorted(actual_attributes, key=lambda d: d['Name'])
+        expected_attributes = sorted(expected_attributes, key=lambda d: d['Name'])
+
+        # assert
+        with self.subTest(msg="attributes match"):
+            self.assertListEqual(expected_attributes, actual_attributes)
+
     def test_get_user_by_id(self):
         # arrange
         expected_brand = AutoFixture().create(dto=User, list_limit=5)
         self.__auth_user_service.get_user = MagicMock(return_value={
-            'Username': expected_brand.auth_user_id,
+            'Username': "1234",
             'UserAttributes': [
                 {
                     'Name': 'given_name',
@@ -281,7 +288,7 @@ class TestAuthUserRepository(TestCase):
         })
 
         # act
-        actual_brand = self.__sut.get_by_id(_id=expected_brand.auth_user_id)
+        actual_brand = self.__sut.get_by_id(_id="1234")
 
         # assert
         with self.subTest(msg="first name matches"):

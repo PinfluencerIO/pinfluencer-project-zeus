@@ -665,28 +665,33 @@ class TestBrandAfterHooks(TestCase):
     def test_set_brand_claims(self):
         # arrange
         self.__auth_user_repository.update_brand_claims = MagicMock()
-        auth_user_id = "12341"
-        first_name = "aidan"
-        last_name = "gannon"
-        email = "aidanwilliamgannon@gmail.com"
+        auth_user_id = "1234"
+        user: User = AutoFixture().create(dto=User)
         context = PinfluencerContext(response=PinfluencerResponse(),
                                      auth_user_id=auth_user_id,
-                                     body={
-                                         "given_name": first_name,
-                                         "family_name": last_name,
-                                         "email": email
-                                     })
+                                     body=user.__dict__)
 
         # act
         self.__sut.set_brand_claims(context=context)
 
-        # assert
         captor = Captor()
-        self.__auth_user_repository.update_brand_claims.assert_called_once_with(user=captor, auth_user_id=auth_user_id)
-        user_payload_arg: User = captor.arg
-        assert user_payload_arg.given_name == first_name
-        assert user_payload_arg.family_name == last_name
-        assert user_payload_arg.email == email
+
+        # assert
+        with self.subTest(msg="repo was called"):
+            self.__auth_user_repository.update_brand_claims.assert_called_once_with(user=captor, auth_user_id=auth_user_id)
+
+        # assert
+        with self.subTest(msg="first name matches"):
+            user_payload_arg: User = captor.arg
+            assert user_payload_arg.given_name == user.given_name
+
+        # assert
+        with self.subTest(msg="last name matches"):
+            assert user_payload_arg.family_name == user.family_name
+
+        # assert
+        with self.subTest(msg="email matches"):
+            assert user_payload_arg.email == user.email
 
     def test_tag_bucket_url_to_images(self):
         # arrange
@@ -722,35 +727,41 @@ class TestInfluencerAfterHooks(TestCase):
     def setUp(self) -> None:
         self.__auth_user_repository: AuthUserRepository = Mock()
         self.__common_after_hooks: CommonAfterHooks = Mock()
+        self.__mapper = PinfluencerObjectMapper(logger=Mock())
         self.__sut = InfluencerAfterHooks(auth_user_repository=self.__auth_user_repository,
-                                          common_after_hooks=self.__common_after_hooks)
+                                          common_after_hooks=self.__common_after_hooks,
+                                          mapper=self.__mapper)
 
-    def test_set_brand_claims(self):
+    def test_set_influencer_claims(self):
         # arrange
         self.__auth_user_repository.update_influencer_claims = MagicMock()
-        auth_user_id = "12341"
-        first_name = "aidan"
-        last_name = "gannon"
-        email = "aidanwilliamgannon@gmail.com"
+        auth_user_id = "1234"
+        user: User = AutoFixture().create(dto=User)
         context = PinfluencerContext(response=PinfluencerResponse(),
                                      auth_user_id=auth_user_id,
-                                     body={
-                                         "first_name": first_name,
-                                         "last_name": last_name,
-                                         "email": email
-                                     })
+                                     body=user.__dict__)
 
         # act
         self.__sut.set_influencer_claims(context=context)
 
         # assert
         captor = Captor()
-        self.__auth_user_repository.update_influencer_claims.assert_called_once_with(user=captor,
-                                                                                     auth_user_id=auth_user_id)
-        user_payload_arg: User = captor.arg
-        assert user_payload_arg.given_name == first_name
-        assert user_payload_arg.family_name == last_name
-        assert user_payload_arg.email == email
+        with self.subTest(msg="repo was called"):
+            self.__auth_user_repository.update_influencer_claims.assert_called_once_with(user=captor,
+                                                                                        auth_user_id=auth_user_id)
+
+        # assert
+        with self.subTest(msg="first name matches"):
+            user_payload_arg: User = captor.arg
+            assert user_payload_arg.given_name == user.given_name
+
+        # assert
+        with self.subTest(msg="last name matches"):
+            assert user_payload_arg.family_name == user.family_name
+
+        # assert
+        with self.subTest(msg="email matches"):
+            assert user_payload_arg.email == user.email
 
     def test_tag_bucket_url_to_images(self):
         # arrange

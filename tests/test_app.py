@@ -215,6 +215,7 @@ class TestRoutes(TestCase):
                                          self.__ioc.resolve(BrandBeforeHooks).validate_brand,
                                          self.__ioc.resolve(UserBeforeHooks).set_categories_and_values,
                                          self.__ioc.resolve(BrandController).update_for_user,
+                                         self.__ioc.resolve(BrandAfterHooks).set_brand_claims,
                                          self.__ioc.resolve(UserAfterHooks).tag_auth_user_claims_to_response,
                                          self.__ioc.resolve(BrandAfterHooks).tag_bucket_url_to_images,
                                          self.__ioc.resolve(UserAfterHooks).format_values_and_categories
@@ -348,6 +349,7 @@ class TestRoutes(TestCase):
                                          self.__ioc.resolve(InfluencerBeforeHooks).validate_influencer,
                                          self.__ioc.resolve(UserBeforeHooks).set_categories_and_values,
                                          self.__ioc.resolve(InfluencerController).update_for_user,
+                                         self.__ioc.resolve(InfluencerAfterHooks).set_influencer_claims,
                                          self.__ioc.resolve(UserAfterHooks).tag_auth_user_claims_to_response,
                                          self.__ioc.resolve(InfluencerAfterHooks).tag_bucket_url_to_images,
                                          self.__ioc.resolve(UserAfterHooks).format_values_and_categories

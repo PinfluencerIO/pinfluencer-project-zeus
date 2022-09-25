@@ -287,9 +287,7 @@ class BrandAfterHooks:
         self.__auth_user_repository = auth_user_repository
 
     def set_brand_claims(self, context: PinfluencerContext):
-        user = User(given_name=context.body["first_name"],
-                    family_name=context.body["last_name"],
-                    email=context.body["email"])
+        user: User = self.__mapper.map_from_dict(_from=context.body, to=User)
         self.__auth_user_repository.update_brand_claims(user=user, auth_user_id=context.auth_user_id)
 
     def tag_bucket_url_to_images(self, context: PinfluencerContext):
@@ -308,14 +306,14 @@ class BrandAfterHooks:
 class InfluencerAfterHooks:
 
     def __init__(self, auth_user_repository: AuthUserRepository,
-                 common_after_hooks: CommonAfterHooks):
+                 common_after_hooks: CommonAfterHooks,
+                 mapper: PinfluencerObjectMapper):
+        self.__mapper = mapper
         self.__common_after_hooks = common_after_hooks
         self.__auth_user_repository = auth_user_repository
 
     def set_influencer_claims(self, context: PinfluencerContext):
-        user = User(given_name=context.body["first_name"],
-                    family_name=context.body["last_name"],
-                    email=context.body["email"])
+        user: User = self.__mapper.map_from_dict(_from=context.body, to=User)
         self.__auth_user_repository.update_influencer_claims(user=user,
                                                              auth_user_id=context.auth_user_id)
 

@@ -228,33 +228,21 @@ class CognitoAuthUserRepository:
         return next(filter(lambda x: x['Name'] == attribute_name, user['UserAttributes']))['Value']
 
     def update_brand_claims(self, user: User, auth_user_id: str):
-        self.__update_user_claims(user=user, type='brand',
-                                  auth_user_id=auth_user_id)
+        self._update_user_claims(user=user, type='brand',
+                                 auth_user_id=auth_user_id)
 
     def update_influencer_claims(self, user: User, auth_user_id: str):
-        self.__update_user_claims(user=user, type='influencer',
-                                  auth_user_id=auth_user_id)
+        self._update_user_claims(user=user, type='influencer',
+                                 auth_user_id=auth_user_id)
 
-    def __update_user_claims(self, user: User, type: str, auth_user_id: str):
+    def _update_user_claims(self, user: User, type: str, auth_user_id: str):
         try:
-            self.__auth_service.update_user_claims(username=auth_user_id, attributes=[
-                {
+            list_of_attributes = self.__flexi_update_claims(user=user)
+            list_of_attributes.append({
                     'Name': 'custom:usertype',
                     'Value': type
-                },
-                {
-                    'Name': 'email',
-                    'Value': user.email
-                },
-                {
-                    'Name': 'family_name',
-                    'Value': user.family_name
-                },
-                {
-                    'Name': 'given_name',
-                    'Value': user.given_name
-                }
-            ])
+                })
+            self.__auth_service.update_user_claims(username=auth_user_id, attributes=list_of_attributes)
         except ParamValidationError:
             ...
 
@@ -264,7 +252,7 @@ class CognitoAuthUserRepository:
         for key, value in values:
             try:
                 value_in_request = getattr(user, key)
-                if value_in_request is not None and key is not "auth_user_id":
+                if value_in_request is not None:
                     attributes.append({
                         "Name": key,
                         "Value": value
