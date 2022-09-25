@@ -2,8 +2,10 @@ from unittest import TestCase
 from unittest.mock import Mock, MagicMock, call
 from uuid import uuid4
 
+import faker
 from callee import Captor
 from ddt import data, ddt
+from faker import Factory
 
 from src._types import AuthUserRepository, BrandRepository, ImageRepository
 from src.crosscutting import JsonCamelToSnakeCaseDeserializer, PinfluencerObjectMapper, AutoFixture
@@ -13,7 +15,7 @@ from src.exceptions import NotFoundException
 from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, CommonBeforeHooks, \
     InfluencerBeforeHooks, BrandBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, CommonAfterHooks
-from src.web.views import ImageRequestDto, BrandResponseDto
+from src.web.views import ImageRequestDto, BrandResponseDto, BrandRequestDto
 from tests import get_auth_user_event, create_for_auth_user_event, get_brand_id_event, \
     get_influencer_id_event, get_campaign_id_event
 
@@ -155,12 +157,14 @@ class TestCommonAfterHooks(TestCase):
         assert context.response.body["image"] is None
 
 
+@ddt
 class TestBrandBeforeHooks(TestCase):
 
     def setUp(self) -> None:
         self.__common_before_hooks: CommonBeforeHooks = Mock()
         self.__brand_repository: BrandRepository = Mock()
         self.__brand_validator = BrandValidator()
+        self.__mapper = PinfluencerObjectMapper(logger=Mock())
         self.__sut = BrandBeforeHooks(brand_validator=self.__brand_validator,
                                       brand_repository=self.__brand_repository,
                                       common_before_hooks=self.__common_before_hooks,
@@ -193,18 +197,30 @@ class TestBrandBeforeHooks(TestCase):
         self.__sut.validate_uuid(context=context)
 
         # assert
-        assert context.short_circuit
-        assert context.response.status_code == 400
-        assert context.response.body == {}
-        assert context.id == ""
+        with self.subTest(msg="middleware shorts"):
+            assert context.short_circuit
 
-    def test_validate_brand_when_valid(self):
+        # assert
+        with self.subTest(msg="response status code is 400"):
+            assert context.response.status_code == 400
+
+        # assert
+        with self.subTest(msg="response body is empty"):
+            assert context.response.body == {}
+
+        # assert
+        with self.subTest(msg="id is set to empty string"):
+            assert context.id == ""
+
+    @data("aidan.gannon@gmail.com",
+          "aidangannon@hotmail.co.uk",
+          "something.or.nothing@beansmail.ac.uk")
+    def test_validate_brand_when_valid_email(self, email):
         # arrange
-        context = PinfluencerContext(body={
-            "brand_name": "my brand",
-            "brand_description": "this is my brand",
-            "website": "https://brand.com"
-        }, response=PinfluencerResponse(), short_circuit=False)
+        context = PinfluencerContext(body=self.__mapper.map_to_dict_and_ignore_none_fields(
+            _from=BrandRequestDto(email=email),
+            to=BrandRequestDto),
+            response=PinfluencerResponse(), short_circuit=False)
 
         # act
         self.__sut.validate_brand(context=context)
@@ -212,21 +228,82 @@ class TestBrandBeforeHooks(TestCase):
         # assert
         assert not context.short_circuit
 
-    def test_validate_brand_when_not_valid(self):
+    @data("aidan gannon@gmail.com",
+          "aidangannon*hotmail.co.uk",
+          "somethingnothing@beansmail.ac.",
+          "somethingnothing@beansmail",
+          "@",
+          "some@",
+          "@some",
+          "someemail",
+          "someemail.com",
+          "someemail.com."
+          "///@///")
+    def test_validate_brand_when_not_valid_email(self, email):
         # arrange
-        context = PinfluencerContext(body={
-            "brand_name": "my brand",
-            "brand_description": "this is my brand",
-            "website": "invalid website"
-        }, response=PinfluencerResponse(), short_circuit=False)
+        context = PinfluencerContext(response=PinfluencerResponse(),
+                                     short_circuit=False,
+                                     body=self.__mapper.map_to_dict_and_ignore_none_fields(
+                                         _from=BrandRequestDto(email=email),
+                                         to=BrandRequestDto))
 
         # act
         self.__sut.validate_brand(context=context)
 
         # assert
-        assert context.short_circuit == True
-        assert context.response.status_code == 400
-        assert context.response.body == {}
+        with self.subTest(msg="middleware shorts"):
+            assert context.short_circuit == True
+
+        # assert
+        with self.subTest(msg="status code is 400"):
+            assert context.response.status_code == 400
+
+        # assert
+        with self.subTest(msg="response body is empty"):
+            assert context.response.body == {}
+
+    @data("http://www.thisis-a-domain.com",
+          "https://www.thisis-a-domain.com",
+          "https://www.domain.com",
+          "https://www.thisis-a-domain.com/nested-path",
+          "https://www.thisis-a-domain.com/nested-path/",
+          "https://www.thisis-a-domain.com/nested-path/nested-path2",
+          "https://www.instagram.com/aidan_gannon_music/",
+          "https://stackoverflow.com/questions/11941817/how-to-avoid-runtimeerror-dictionary-changed-size-during-iteration-error",
+          "https://docs.aws.amazon.com/code-samples/latest/catalog/python-sqs-message_wrapper.py.html")
+    def test_validate_brand_when_valid_email(self, website):
+        # arrange
+        context = PinfluencerContext(body=self.__mapper.map_to_dict_and_ignore_none_fields(
+            _from=BrandRequestDto(website=website),
+            to=BrandRequestDto),
+            response=PinfluencerResponse(), short_circuit=False)
+
+        # act
+        self.__sut.validate_brand(context=context)
+
+        # assert
+        assert not context.short_circuit
+
+
+    @data("www.google.com",
+          "beans",
+          "http://http://www.www.google.com.com",
+          "http://http://www.www.google.com",
+          "http://http://www.google.com")
+    def test_validate_brand_when_not_valid_website(self, website):
+        # arrange
+        context = PinfluencerContext(response=PinfluencerResponse(),
+                                     short_circuit=False,
+                                     body=self.__mapper.map_to_dict_and_ignore_none_fields(
+                                         _from=BrandRequestDto(website=website),
+                                         to=BrandRequestDto))
+
+        # act
+        self.__sut.validate_brand(context=context)
+
+        # assert
+        with self.subTest(msg="middleware shorts"):
+            assert context.short_circuit == True
 
     def test_validate_auth_brand(self):
         # arrange
@@ -678,7 +755,8 @@ class TestBrandAfterHooks(TestCase):
 
         # assert
         with self.subTest(msg="repo was called"):
-            self.__auth_user_repository.update_brand_claims.assert_called_once_with(user=captor, auth_user_id=auth_user_id)
+            self.__auth_user_repository.update_brand_claims.assert_called_once_with(user=captor,
+                                                                                    auth_user_id=auth_user_id)
 
         # assert
         with self.subTest(msg="first name matches"):
@@ -748,7 +826,7 @@ class TestInfluencerAfterHooks(TestCase):
         captor = Captor()
         with self.subTest(msg="repo was called"):
             self.__auth_user_repository.update_influencer_claims.assert_called_once_with(user=captor,
-                                                                                        auth_user_id=auth_user_id)
+                                                                                         auth_user_id=auth_user_id)
 
         # assert
         with self.subTest(msg="first name matches"):

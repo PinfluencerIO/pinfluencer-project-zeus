@@ -25,6 +25,27 @@ class PinfluencerObjectMapper:
     def __init__(self, logger: Logger):
         self.__logger = logger
 
+    def map_to_dict_and_ignore_none_fields(self, _from, to) -> dict:
+        self.__logger.log_trace(f"{vars(_from).items()}")
+        mapped = self.__generic_map(_from=_from,
+                                  to=to,
+                                  propValues=vars(_from).items())
+        new_dict = mapped.__dict__
+        self.__to_dict_and_ignore_none_fields(new_dict=new_dict, mapped=mapped)
+        return new_dict
+
+    def __to_dict_and_ignore_none_fields(self, new_dict: dict, mapped):
+        for property, value in list(new_dict.items()):
+            try:
+                if bool(typing.get_type_hints(getattr(mapped, property))):
+                    self.__to_dict_and_ignore_none_fields(
+                        new_dict=value,
+                        mapped=getattr(mapped, property))
+            except TypeError:
+                self.__logger.log_trace(message=f"value {property} skipped")
+            if value is None:
+                new_dict.pop(property)
+
     def map(self, _from, to):
         self.__logger.log_trace(f"{vars(_from).items()}")
         return self.__generic_map(_from=_from,

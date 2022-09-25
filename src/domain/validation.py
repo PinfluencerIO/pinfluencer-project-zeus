@@ -1,6 +1,17 @@
+from urllib.parse import urlparse
+
+import validators
+from jsonschema.exceptions import ValidationError
 from jsonschema.validators import validate
 
 # TODO: do actual validation and write tests for it
+
+common_user_schema = {
+    "email": {
+        "type": "string",
+        "pattern": r"^[a-zA-Z0-9\._-]+[@]{1}[a-zA-Z0-9\._-]+[\.]+[a-zA-Z0-9]+$"
+    },
+}
 
 brand_payload_schema = {
     "type": "object",
@@ -13,14 +24,6 @@ brand_payload_schema = {
             "brand_description": {
                 "type": "string",
                 "pattern": "^[\s\S]{1,500}$"
-            },
-            "website": {
-                "type": "string",
-                "pattern": r"^(https?\:\/\/)?([\da-zA-Z\.-]+)\.([a-z\.]{2,6})(\/[\w]*)*$"
-            },
-            "email": {
-                "type": "string",
-                "pattern": r"^[a-zA-Z0-9\._-]+[@]{1}[a-zA-Z0-9\._-]+[\.]+[a-zA-Z0-9]+$"
             },
             "insta_handle": {
                 "type": "string",
@@ -37,14 +40,6 @@ influencer_payload_schema = {
             "bio": {
                 "type": "string",
                 "pattern": "^[\s\S]{1,500}$"
-            },
-            "website": {
-                "type": "string",
-                "pattern": r"^(https?\:\/\/)?([\da-zA-Z\.-]+)\.([a-z\.]{2,6})(\/[\w]*)*$"
-            },
-            "email": {
-                "type": "string",
-                "pattern": r"^[a-zA-Z0-9\._-]+[@]{1}[a-zA-Z0-9\._-]+[\.]+[a-zA-Z0-9]+$"
             },
             "insta_handle": {
                 "type": "string",
@@ -73,13 +68,24 @@ class CampaignValidator:
         validate(instance=payload, schema=campaign_payload_schema)
 
 
-class BrandValidator:
+class BaseValidator:
+    def _common_user_validate(self, payload, schema_input):
+        schema = schema_input
+        schema['properties'].update(common_user_schema)
+        if 'website' in payload:
+            website = payload['website']
+            if not validators.url(website):
+                raise ValidationError("email invalid")
+        validate(instance=payload, schema=schema)
+
+
+class BrandValidator(BaseValidator):
 
     def validate_brand(self, payload):
-        validate(instance=payload, schema=brand_payload_schema)
+        self._common_user_validate(payload=payload, schema_input=brand_payload_schema)
 
 
-class InfluencerValidator:
+class InfluencerValidator(BaseValidator):
 
     def validate_influencer(self, payload):
-        validate(instance=payload, schema=influencer_payload_schema)
+        self._common_user_validate(payload=payload, schema_input=influencer_payload_schema)
