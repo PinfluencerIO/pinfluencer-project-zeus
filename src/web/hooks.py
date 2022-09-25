@@ -362,16 +362,11 @@ class UserAfterHooks:
 
     def _generic_claims_tagger(self, entity):
         auth_user = self.__auth_user_repository.get_by_id(_id=entity["auth_user_id"])
-        entity["given_name"] = auth_user.given_name
-        entity["family_name"] = auth_user.family_name
-        entity["email"] = auth_user.email
+        entity.update(auth_user.__dict__)
 
     def tag_auth_user_claims_to_response_collection(self, context: PinfluencerContext):
         for user in context.response.body:
-            auth_user = self.__auth_user_repository.get_by_id(_id=user["auth_user_id"])
-            user["given_name"] = auth_user.given_name
-            user["family_name"] = auth_user.family_name
-            user["email"] = auth_user.email
+            self._generic_claims_tagger(entity=user)
 
     def format_values_and_categories(self, context: PinfluencerContext):
         self.__common_after_hooks.map_enums(context=context,
