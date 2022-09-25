@@ -566,7 +566,11 @@ class TestRoutes(TestCase):
 
         # assert
         captor = Captor()
-        self.__mock_middleware_pipeline.execute_middleware.assert_called_once_with(context=Any(),
+        with self.subTest(msg="pipeline executes once"):
+            self.__mock_middleware_pipeline.execute_middleware.assert_called_once_with(context=Any(),
                                                                                    middleware=captor)
-        captor.arg[0](context)
-        assert context.response.status_code == 405
+
+        # assert
+        with self.subTest(msg="response is not implemented"):
+            captor.arg[0](context)
+            assert context.response.status_code == 405

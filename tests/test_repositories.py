@@ -130,6 +130,9 @@ class TestUserRepository(BrandRepositoryTestCase):
         # assert
         with self.subTest(msg="brands do not match"):
             assert actual != brand_to_create
+
+        # assert
+        with self.subTest(msg="brand does not change"):
             assert actual == expected
 
 

@@ -106,7 +106,7 @@ class TestDto(InheritedDto):
     nested_list: list[NestedTestDto] = None
 
 
-class TestPinfluencerMapper:
+class TestPinfluencerMapper(TestCase):
 
     def test_map(self):
         # arrange
@@ -117,22 +117,68 @@ class TestPinfluencerMapper:
         test_other_dto: TestOtherDto = PinfluencerObjectMapper(logger=Mock()).map(_from=test_dto, to=TestOtherDto)
 
         # assert
-        assert test_other_dto.id == "default_id"
-        assert test_other_dto.date == test_dto.date
-        assert test_other_dto.list_of_dates == test_dto.list_of_dates
-        assert test_other_dto.name == test_dto.name
-        assert test_other_dto.nested_list == test_dto.nested_list
-        assert test_other_dto.nested.id == test_dto.nested.id
-        assert test_other_dto.nested.name == test_dto.nested.name
-        assert test_other_dto.list_of_dates == test_dto.list_of_dates
-        assert test_other_dto.list_of_bools == test_dto.list_of_bools
-        assert test_other_dto.list_of_ints == test_dto.list_of_ints
-        assert test_other_dto.bool_ == test_dto.bool_
-        assert test_other_dto.list_of_strings == test_dto.list_of_strings
-        assert test_other_dto.list_of_enums == test_dto.list_of_enums
-        assert test_other_dto.enum == test_dto.enum
-        assert test_other_dto.decimal_num == test_dto.decimal_num
-        assert test_other_dto.list_of_floats == test_dto.list_of_floats
+        with self.subTest(msg="id with default value matches"):
+            assert test_other_dto.id == "default_id"
+
+        # assert
+        with self.subTest(msg="date field matches"):
+            assert test_other_dto.date == test_dto.date
+
+        # assert
+        with self.subTest(msg="list of dates field matches"):
+            assert test_other_dto.list_of_dates == test_dto.list_of_dates
+
+        # assert
+        with self.subTest(msg="name field matches"):
+            assert test_other_dto.name == test_dto.name
+
+        # assert
+        with self.subTest(msg="nested list field matches"):
+            assert test_other_dto.nested_list == test_dto.nested_list
+
+        # assert
+        with self.subTest(msg="nested id field matches"):
+            assert test_other_dto.nested.id == test_dto.nested.id
+
+        # assert
+        with self.subTest(msg="nested name field matches"):
+            assert test_other_dto.nested.name == test_dto.nested.name
+
+        # assert
+        with self.subTest(msg="list of dates field matches"):
+            assert test_other_dto.list_of_dates == test_dto.list_of_dates
+
+        # assert
+        with self.subTest(msg="list of bools field matches"):
+            assert test_other_dto.list_of_bools == test_dto.list_of_bools
+
+        # assert
+        with self.subTest(msg="list of ints field matches"):
+            assert test_other_dto.list_of_ints == test_dto.list_of_ints
+
+        # assert
+        with self.subTest(msg="bool field matches"):
+            assert test_other_dto.bool_ == test_dto.bool_
+
+        # assert
+        with self.subTest(msg="list of strings field matches"):
+            assert test_other_dto.list_of_strings == test_dto.list_of_strings
+
+        # assert
+        with self.subTest(msg="list of enums field matches"):
+            assert test_other_dto.list_of_enums == test_dto.list_of_enums
+
+        # assert
+        with self.subTest(msg="enum field matches"):
+            assert test_other_dto.enum == test_dto.enum
+
+        # assert
+        with self.subTest(msg="decimal field matches"):
+            assert test_other_dto.decimal_num == test_dto.decimal_num
+
+        # assert
+        with self.subTest(msg="list of floats field matches"):
+            assert test_other_dto.list_of_floats == test_dto.list_of_floats
 
 
 class TestAutoFixture:

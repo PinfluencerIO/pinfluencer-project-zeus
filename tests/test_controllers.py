@@ -371,21 +371,43 @@ class TestBrandController(TestCase):
                                                                                  to=BrandResponseDto)
 
         # assert
-        with self.subTest(msg="response was equal to brand in db and body"):
-            # brand in db asserts
+        with self.subTest(msg="response id was equal to brand id in db and body"):
             assert brand_db.id == mapped_brand_body.id
+
+        # assert
+        with self.subTest(msg="response created was equal to brand created in db and body"):
             assert brand_db.created == mapped_brand_body.created
+
+        # assert
+        with self.subTest(msg="response header image was equal to brand header image in db and body"):
             assert brand_db.header_image == mapped_brand_body.header_image
+
+        # assert
+        with self.subTest(msg="response logo was equal to brand logo in db and body"):
             assert brand_db.logo == mapped_brand_body.logo
 
         # assert
-        with self.subTest(msg="response was equal to brand in db and request and body"):
-            # brand response asserts
+        with self.subTest(msg="response brand description was equal to brand brand description in db and request brand description and body brand description"):
             assert actual_payload.brand_description == brand_request.brand_description == mapped_brand_body.brand_description == brand_db.brand_description
+
+        # assert
+        with self.subTest(msg="response brand name was equal to brand brand name in db and request brand name and body brand name"):
             assert actual_payload.brand_name == brand_request.brand_name == mapped_brand_body.brand_name == brand_db.brand_name
+
+        # assert
+        with self.subTest(msg="response categories was equal to brand categories in db and request categories and body categories"):
             assert actual_payload.categories == brand_request.categories == mapped_brand_body.categories == brand_db.categories
+
+        # assert
+        with self.subTest(msg="response insta handle was equal to brand insta handle in db and request insta handle and body insta handle"):
             assert actual_payload.insta_handle == brand_request.insta_handle == mapped_brand_body.insta_handle == brand_db.insta_handle
+
+        # assert
+        with self.subTest(msg="response values was equal to brand values in db and request values and body values"):
             assert actual_payload.values == brand_request.values == mapped_brand_body.values == brand_db.values
+
+        # assert
+        with self.subTest(msg="response website was equal to brand website in db and request website and body website"):
             assert actual_payload.website == brand_request.website == mapped_brand_body.website == brand_db.website
 
     def test_create_when_exists(self):

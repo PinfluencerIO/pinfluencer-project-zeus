@@ -37,8 +37,12 @@ class TestCommonAfterHooks(TestCase):
                                        key="values")
 
         # assert
-        assert context.response.body[0]["values"] == "SUSTAINABLE"
-        assert context.response.body[1]["values"] == "VALUE7"
+        with self.subTest(msg="first value is correct"):
+            assert context.response.body[0]["values"] == "SUSTAINABLE"
+
+        # assert
+        with self.subTest(msg="first value is correct"):
+            assert context.response.body[1]["values"] == "VALUE7"
 
     def test_map_enum(self):
         # arrange
@@ -64,11 +68,24 @@ class TestCommonAfterHooks(TestCase):
                                         key="values")
 
         # assert
-        assert context.response.body[0]["values"][0] == "SUSTAINABLE"
-        assert context.response.body[0]["values"][1] == "ORGANIC"
-        assert context.response.body[1]["values"][0] == "VALUE7"
-        assert context.response.body[1]["values"][1] == "VALUE6"
-        assert context.response.body[1]["values"][2] == "RECYCLED"
+        with self.subTest(msg="first value of first entity is correct"):
+            assert context.response.body[0]["values"][0] == "SUSTAINABLE"
+
+        # assert
+        with self.subTest(msg="second value of first entity is correct"):
+            assert context.response.body[0]["values"][1] == "ORGANIC"
+
+        # assert
+        with self.subTest(msg="first value of second entity is correct"):
+            assert context.response.body[1]["values"][0] == "VALUE7"
+
+        # assert
+        with self.subTest(msg="second value of second entity is correct"):
+            assert context.response.body[1]["values"][1] == "VALUE6"
+
+        # assert
+        with self.subTest(msg="third value of second entity is correct"):
+            assert context.response.body[1]["values"][2] == "RECYCLED"
 
     def test_map_enums(self):
         # arrange
@@ -80,8 +97,12 @@ class TestCommonAfterHooks(TestCase):
                              key="values")
 
         # assert
-        assert context.response.body["values"][0] == "SUSTAINABLE"
-        assert context.response.body["values"][1] == "ORGANIC"
+        with self.subTest(msg="first value is correct"):
+            assert context.response.body["values"][0] == "SUSTAINABLE"
+
+        # assert
+        with self.subTest(msg="second value is correct"):
+            assert context.response.body["values"][1] == "ORGANIC"
 
     def test_set_image_url(self):
         # arrange
@@ -112,8 +133,12 @@ class TestCommonAfterHooks(TestCase):
                                  collection=True)
 
         # assert
-        assert context.response.body[0]["image"] == f'{TEST_S3_URL}/{path}'
-        assert context.response.body[1]["image"] == f'{TEST_S3_URL}/{path2}'
+        with self.subTest(msg="first image is tagged with aws s3 image url"):
+            assert context.response.body[0]["image"] == f'{TEST_S3_URL}/{path}'
+
+        # assert
+        with self.subTest(msg="second image is tagged with aws s3 image url"):
+            assert context.response.body[1]["image"] == f'{TEST_S3_URL}/{path2}'
 
     def test_set_image_url_where_image_is_none(self):
         # arrange
@@ -151,8 +176,12 @@ class TestBrandBeforeHooks(TestCase):
         self.__sut.validate_uuid(context=context)
 
         # assert
-        assert not context.short_circuit
-        assert context.id == id
+        with self.subTest(msg="middleware does not short"):
+            assert not context.short_circuit
+
+        # assert
+        with self.subTest(msg="id is set"):
+            assert context.id == id
 
     def test_validate_uuid_when_invalid(self):
         # arrange

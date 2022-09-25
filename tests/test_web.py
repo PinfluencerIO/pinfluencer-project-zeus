@@ -1,26 +1,31 @@
 from unittest import TestCase
 
+from ddt import ddt, data
+
 from src.crosscutting import JsonSnakeToCamelSerializer
 from src.web import PinfluencerResponse
 
-
+@ddt
 class TestPinfluencerResponse(TestCase):
 
-    def test_is_ok_when_response_is_200(self):
-        assert PinfluencerResponse().is_ok() == True
-        assert PinfluencerResponse(status_code=204).is_ok() == True
-        assert PinfluencerResponse(status_code=201).is_ok() == True
-        assert PinfluencerResponse(status_code=299).is_ok() == True
+    @data(200,
+          204,
+          201,
+          299)
+    def test_is_ok_when_response_is_200(self, status):
+        # assert
+        assert PinfluencerResponse(status_code=status).is_ok() == True
 
-    def test_is_ok_when_response_is_not_200(self):
-        assert PinfluencerResponse(status_code=100).is_ok() == False
-        assert PinfluencerResponse(status_code=199).is_ok() == False
-        assert PinfluencerResponse(status_code=400).is_ok() == False
-        assert PinfluencerResponse(status_code=300).is_ok() == False
-        assert PinfluencerResponse(status_code=301).is_ok() == False
-        assert PinfluencerResponse(status_code=401).is_ok() == False
-        assert PinfluencerResponse(status_code=500).is_ok() == False
-        assert PinfluencerResponse(status_code=404).is_ok() == False
+    @data(100,
+          199,
+          400,
+          300,
+          301,
+          401,
+          500,
+          404)
+    def test_is_ok_when_response_is_not_200(self, status):
+        assert PinfluencerResponse(status_code=status).is_ok() == False
 
     def test_to_json(self):
         # arrange
