@@ -23,8 +23,8 @@ class BrandRequestDto:
     insta_handle: str = None
     values: list[ValueEnum] = None
     categories: list[CategoryEnum] = None
-    first_name: str = None
-    last_name: str = None
+    given_name: str = None
+    family_name: str = None
     email: str = None
 
 
@@ -61,8 +61,8 @@ class InfluencerRequestDto:
     values: list[ValueEnum] = None
     categories: list[CategoryEnum] = None
     address: str = None
-    first_name: str = None
-    last_name: str = None
+    given_name: str = None
+    family_name: str = None
     email: str = None
 
 
@@ -80,8 +80,8 @@ class BrandResponseDto(BaseResponseDto):
     insta_handle: str = None
     values: list[ValueEnum] = None
     categories: list[CategoryEnum] = None
-    first_name: str = None
-    last_name: str = None
+    given_name: str = None
+    family_name: str = None
     email: str = None
     logo: str = None
     header_image: str = None

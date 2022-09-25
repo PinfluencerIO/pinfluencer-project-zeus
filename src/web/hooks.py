@@ -357,15 +357,15 @@ class UserAfterHooks:
 
     def tag_auth_user_claims_to_response(self, context: PinfluencerContext):
         auth_user = self.__auth_user_repository.get_by_id(_id=context.response.body["auth_user_id"])
-        context.response.body["first_name"] = auth_user.given_name
-        context.response.body["last_name"] = auth_user.family_name
+        context.response.body["given_name"] = auth_user.given_name
+        context.response.body["family_name"] = auth_user.family_name
         context.response.body["email"] = auth_user.email
 
     def tag_auth_user_claims_to_response_collection(self, context: PinfluencerContext):
         for user in context.response.body:
             auth_user = self.__auth_user_repository.get_by_id(_id=user["auth_user_id"])
-            user["first_name"] = auth_user.given_name
-            user["last_name"] = auth_user.family_name
+            user["given_name"] = auth_user.given_name
+            user["family_name"] = auth_user.family_name
             user["email"] = auth_user.email
 
     def format_values_and_categories(self, context: PinfluencerContext):

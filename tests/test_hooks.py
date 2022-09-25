@@ -919,9 +919,7 @@ class TestUserAfterHooks(TestCase):
         # arrange
         brand = AutoFixture().create(dto=BrandResponseDto, list_limit=5)
         response = PinfluencerResponse(body=brand.__dict__)
-        auth_user = User(given_name="cognito_first_name",
-                         family_name="cognito_last_name",
-                         email="cognito_email")
+        auth_user: User = AutoFixture().create(dto=User)
         self.__auth_user_repository.get_by_id = MagicMock(return_value=auth_user)
 
         # act
@@ -929,14 +927,24 @@ class TestUserAfterHooks(TestCase):
                                                                                event={}))
 
         # assert
-        assert response.body["first_name"] == auth_user.given_name
-        assert response.body["last_name"] == auth_user.family_name
-        assert response.body["email"] == auth_user.email
-        self.__auth_user_repository.get_by_id.assert_called_once_with(_id=brand.auth_user_id)
+        with self.subTest(msg="first name matches"):
+            assert response.body["given_name"] == auth_user.given_name
+
+        # assert
+        with self.subTest(msg="last name matches"):
+            assert response.body["family_name"] == auth_user.family_name
+
+        # assert
+        with self.subTest(msg="email matches"):
+            assert response.body["email"] == auth_user.email
+
+        # assert
+        with self.subTest(msg="repo was called"):
+            self.__auth_user_repository.get_by_id.assert_called_once_with(_id=brand.auth_user_id)
 
     def test_tag_auth_user_claims_to_response_collection(self):
         # arrange
-        users = AutoFixture().create_many(dto=User, list_limit=5, ammount=10)
+        users: list[User] = AutoFixture().create_many(dto=User, list_limit=5, ammount=10)
         brands = AutoFixture().create_many_dict(dto=BrandResponseDto, list_limit=5, ammount=10)
         self.__auth_user_repository.get_by_id = MagicMock(side_effect=users)
         response = PinfluencerResponse(body=brands)
@@ -946,23 +954,48 @@ class TestUserAfterHooks(TestCase):
                                                                                           event={}))
 
         # assert
-        assert response.body[0]["first_name"] == users[0].given_name
-        assert response.body[0]["last_name"] == users[0].family_name
-        assert response.body[0]["email"] == users[0].email
+        with self.subTest(msg="first name for first entity matched"):
+            assert response.body[0]["given_name"] == users[0].given_name
 
-        assert response.body[1]["first_name"] == users[1].given_name
-        assert response.body[1]["last_name"] == users[1].family_name
-        assert response.body[1]["email"] == users[1].email
+        # assert
+        with self.subTest(msg="last name for first entity matched"):
+            assert response.body[0]["family_name"] == users[0].family_name
 
-        assert response.body[2]["first_name"] == users[2].given_name
-        assert response.body[2]["last_name"] == users[2].family_name
-        assert response.body[2]["email"] == users[2].email
+        # assert
+        with self.subTest(msg="email for first entity matched"):
+            assert response.body[0]["email"] == users[0].email
 
-        self.__auth_user_repository.get_by_id.assert_has_calls(calls=[
-            call(_id=brands[0]["auth_user_id"]),
-            call(_id=brands[1]["auth_user_id"]),
-            call(_id=brands[2]["auth_user_id"])
-        ])
+        # assert
+        with self.subTest(msg="first name for second entity matched"):
+            assert response.body[1]["given_name"] == users[1].given_name
+
+        # assert
+        with self.subTest(msg="last name for second entity matched"):
+            assert response.body[1]["family_name"] == users[1].family_name
+
+        # assert
+        with self.subTest(msg="email for second entity matched"):
+            assert response.body[1]["email"] == users[1].email
+
+        # assert
+        with self.subTest(msg="first name for third entity matched"):
+            assert response.body[2]["given_name"] == users[2].given_name
+
+        # assert
+        with self.subTest(msg="last name for third entity matched"):
+            assert response.body[2]["family_name"] == users[2].family_name
+
+        # assert
+        with self.subTest(msg="email for third entity matched"):
+            assert response.body[2]["email"] == users[2].email
+
+        # assert
+        with self.subTest(msg="repo was called"):
+            self.__auth_user_repository.get_by_id.assert_has_calls(calls=[
+                call(_id=brands[0]["auth_user_id"]),
+                call(_id=brands[1]["auth_user_id"]),
+                call(_id=brands[2]["auth_user_id"])
+            ])
 
     def test_format_values_and_categories(self):
         # arrange
