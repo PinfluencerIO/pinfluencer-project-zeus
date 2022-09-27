@@ -1,5 +1,5 @@
 import sqlalchemy.orm
-from sqlalchemy import Column, String, DateTime, Float, PickleType, Table
+from sqlalchemy import Column, String, DateTime, Float, PickleType, Table, Integer, Boolean
 
 from src.data import Base
 from src.domain.models import Brand, Influencer, Campaign
@@ -65,6 +65,26 @@ campaign_table = Table('campaign', Base.metadata,
                        Column('product_title', String(length=120)),
                        Column('product_description', String(length=500)),
                        Column('product_image', String(length=360)))
+
+collaboration_table = Table('collaboration', Base.metadata,
+                            Column('id', String(length=36), primary_key=True),
+                            Column('created', DateTime),
+                            Column('brand_auth_user_id', String(length=64)),
+                            Column('influencer_auth_user_id', String(length=64)),
+                            Column('request_details', String(length=500)),
+                            Column('creative_idea', String(length=500)),
+                            Column('number_of_pictures', Integer),
+                            Column('number_of_videos', Integer),
+                            Column('number_of_stories', Integer),
+                            Column('campaign_id', PickleType),
+                            Column('collaboration_state', PickleType))
+
+notifications_table = Table('notifications', Base.metadata,
+                            Column('id', String(length=36), primary_key=True),
+                            Column('created', DateTime),
+                            Column('auth_user_id', String(length=64)),
+                            Column('payload_body', String(length=500)),
+                            Column('read', Boolean))
 
 
 def create_mappings(logger):

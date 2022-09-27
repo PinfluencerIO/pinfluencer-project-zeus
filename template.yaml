@@ -238,6 +238,74 @@ Resources:
             Method: delete
             ApiId: !Ref PinfluencerHttpApi
         #Authenticated Campaign endpoints END
+
+        #Public Collaboration endpoints START
+        GetCollaborationById:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /collaborations/{collaboration_id}
+            Method: get
+            ApiId: !Ref PinfluencerHttpApi
+        #Public Collaboration endpoints END
+
+        #Authenticated Collaboration endpoints START
+        CreateCollaborationForInfluencer:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /influencers/me/collaborations
+            Method: post
+            ApiId: !Ref PinfluencerHttpApi
+        GetCollaborationsForBrand:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /brands/me/collaborations
+            Method: get
+            ApiId: !Ref PinfluencerHttpApi
+        GetCollaborationsForInfluencer:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /influencers/me/collaborations
+            Method: get
+            ApiId: !Ref PinfluencerHttpApi
+        #Authenticated Collaboration endpoints START
+
+        #Public Notification endpoints START
+        GetNotificationById:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /notifications/{notification_id}
+            Method: get
+            ApiId: !Ref PinfluencerHttpApi
+        #Public Notification endpoints END
+
+        #Authenticated Notification endpoints START
+        CreateNotificationForUser:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /users/me/collaborations
+            Method: post
+            ApiId: !Ref PinfluencerHttpApi
+        GetNotificationForUser:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /users/me/notifications
+            Method: get
+            ApiId: !Ref PinfluencerHttpApi
+        #Authenticated Notification endpoints END
 Outputs:
   PinfluencerBaseUrl:
     Description: "Base URL for Pinfluencer API"
