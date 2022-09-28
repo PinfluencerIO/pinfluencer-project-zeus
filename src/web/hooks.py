@@ -6,7 +6,7 @@ from src.domain.models import CategoryEnum, ValueEnum, CampaignStateEnum, User
 from src.domain.validation import BrandValidator, InfluencerValidator, CampaignValidator
 from src.exceptions import NotFoundException
 from src.web import PinfluencerContext, valid_path_resource_id
-from src.web.views import RawImageRequestDto, ImageRequestDto
+from src.web.views import RawImageRequestDto, ImageRequestDto, BrandResponseDto, CampaignResponseDto
 
 S3_URL = "https://pinfluencer-product-images.s3.eu-west-2.amazonaws.com"
 
@@ -159,7 +159,9 @@ class CampaignBeforeHooks:
 
 class CampaignAfterHooks:
 
-    def __init__(self, common_after_hooks: CommonAfterHooks):
+    def __init__(self, common_after_hooks: CommonAfterHooks,
+                 mapper: PinfluencerObjectMapper):
+        self.__mapper = mapper
         self.__common_after_hooks = common_after_hooks
 
     def tag_bucket_url_to_images(self, context: PinfluencerContext):
@@ -191,6 +193,13 @@ class CampaignAfterHooks:
     def format_campaign_state(self, context: PinfluencerContext):
         self.__common_after_hooks.map_enum(context=context,
                                            key="campaign_state")
+
+    def validate_campaign_belongs_to_brand(self, context: PinfluencerContext):
+        brand_response: CampaignResponseDto = self.__mapper.map_from_dict(_from=context.response.body, to=CampaignResponseDto)
+        if not (brand_response.brand_auth_user_id == context.auth_user_id):
+            context.short_circuit = True
+            context.response.body = {}
+            context.response.status_code = 403
 
 
 class InfluencerBeforeHooks:

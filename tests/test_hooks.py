@@ -2,12 +2,11 @@ from unittest import TestCase
 from unittest.mock import Mock, MagicMock, call
 from uuid import uuid4
 
-import faker
 from callee import Captor
 from ddt import data, ddt
-from faker import Factory
 
 from src._types import AuthUserRepository, BrandRepository, ImageRepository
+from src.app import logger_factory
 from src.crosscutting import JsonCamelToSnakeCaseDeserializer, PinfluencerObjectMapper, AutoFixture
 from src.domain.models import User, ValueEnum, CategoryEnum, CampaignStateEnum
 from src.domain.validation import InfluencerValidator, BrandValidator, CampaignValidator
@@ -15,7 +14,7 @@ from src.exceptions import NotFoundException
 from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, CommonBeforeHooks, \
     InfluencerBeforeHooks, BrandBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, CommonAfterHooks
-from src.web.views import ImageRequestDto, BrandResponseDto, BrandRequestDto
+from src.web.views import ImageRequestDto, BrandResponseDto, BrandRequestDto, CampaignResponseDto
 from tests import get_auth_user_event, create_for_auth_user_event, get_brand_id_event, \
     get_influencer_id_event, get_campaign_id_event
 
@@ -872,7 +871,8 @@ class TestCampaignAfterHooks(TestCase):
 
     def setUp(self) -> None:
         self.__common_after_hooks: CommonAfterHooks = Mock()
-        self.__sut = CampaignAfterHooks(common_after_hooks=self.__common_after_hooks)
+        self.__mapper = PinfluencerObjectMapper(logger=logger_factory())
+        self.__sut = CampaignAfterHooks(common_after_hooks=self.__common_after_hooks, mapper=self.__mapper)
 
     def test_tag_bucket_url_to_images(self):
         # arrange
@@ -947,6 +947,50 @@ class TestCampaignAfterHooks(TestCase):
         # assert
         self.__common_after_hooks.map_enums(context=context,
                                             key="campaign_state")
+
+    def test_validate_campaign_belongs_to_brand(self):
+        # arrange
+        campaign_response: CampaignResponseDto = AutoFixture().create(dto=CampaignResponseDto, list_limit=5)
+        context = PinfluencerContext(auth_user_id=campaign_response.brand_auth_user_id,
+                                     response=PinfluencerResponse(body=campaign_response.__dict__),
+                                     short_circuit=False)
+
+        # act
+        self.__sut.validate_campaign_belongs_to_brand(context=context)
+
+        # assert
+        with self.subTest(msg="then mapped response stays the same"):
+            assert self.__mapper.map_from_dict(_from=context.response.body, to=CampaignResponseDto) == campaign_response
+
+        # assert
+        with self.subTest(msg="middleware does not short"):
+            assert context.short_circuit == False
+
+        # assert
+        with self.subTest(msg="response status code is 200"):
+            assert context.response.status_code == 200
+
+    def test_validate_campaign_belongs_to_brand_when_brand_doesnt_belong(self):
+        # arrange
+        campaign_response: CampaignResponseDto = AutoFixture().create(dto=CampaignResponseDto, list_limit=5)
+        context = PinfluencerContext(auth_user_id="12345",
+                                     response=PinfluencerResponse(body=campaign_response.__dict__),
+                                     short_circuit=False)
+
+        # act
+        self.__sut.validate_campaign_belongs_to_brand(context=context)
+
+        # assert
+        with self.subTest(msg="body is empty"):
+            assert context.response.body == {}
+
+        # assert
+        with self.subTest(msg="middleware shorts"):
+            assert context.short_circuit == True
+
+        # assert
+        with self.subTest(msg="response status code is 403"):
+            assert context.response.status_code == 403
 
 
 class TestUserBeforeHooks(TestCase):

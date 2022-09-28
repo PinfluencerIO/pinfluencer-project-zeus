@@ -90,7 +90,7 @@ class CampaignStateEnum(Enum):
 
 @dataclass(unsafe_hash=True)
 class Campaign(DataModel):
-    brand_id: str = None
+    brand_auth_user_id: str = None
     objective: str = None
     success_description: str = None
     campaign_title: str = None

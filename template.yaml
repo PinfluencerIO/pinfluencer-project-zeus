@@ -251,13 +251,21 @@ Resources:
         #Public Collaboration endpoints END
 
         #Authenticated Collaboration endpoints START
-        CreateCollaborationForInfluencer:
+        CreateCollaboration:
           Type: HttpApi
           Properties:
             Auth:
               Authorizer: UserAuth
             Path: /influencers/me/collaborations
             Method: post
+            ApiId: !Ref PinfluencerHttpApi
+        UpdateCollaboration:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /influencers/me/collaborations/{collaboration_id}
+            Method: patch
             ApiId: !Ref PinfluencerHttpApi
         GetCollaborationsForBrand:
           Type: HttpApi
@@ -294,15 +302,23 @@ Resources:
           Properties:
             Auth:
               Authorizer: UserAuth
-            Path: /users/me/collaborations
+            Path: /users/me/notifications
             Method: post
             ApiId: !Ref PinfluencerHttpApi
-        GetNotificationForUser:
+        GetNotificationsForSender:
           Type: HttpApi
           Properties:
             Auth:
               Authorizer: UserAuth
-            Path: /users/me/notifications
+            Path: /senders/me/notifications
+            Method: get
+            ApiId: !Ref PinfluencerHttpApi
+        GetNotificationsForReceiver:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /receivers/me/notifications
             Method: get
             ApiId: !Ref PinfluencerHttpApi
         #Authenticated Notification endpoints END

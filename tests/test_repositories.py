@@ -326,7 +326,7 @@ class TestCampaignRepository(TestCase):
 
         # assert
         with self.subTest(msg="brand ids match"):
-            assert returned_campaign.brand_id == campaign_loaded_from_db.brand_id == brand_in_db.id
+            assert returned_campaign.brand_auth_user_id == campaign_loaded_from_db.brand_auth_user_id == brand_in_db.auth_user_id
 
         # assert
         with self.subTest(msg="campaign fields match"):
@@ -357,7 +357,7 @@ class TestCampaignRepository(TestCase):
         brand = AutoFixture().create(dto=Brand, list_limit=5)
         campaigns = AutoFixture().create_many(dto=Campaign, list_limit=5, ammount=10)
         for campaign in campaigns:
-            campaign.brand_id = brand.id
+            campaign.brand_auth_user_id = brand.id
         self.__data_manager.create_fake_data([brand])
         self.__data_manager.create_fake_data(campaigns)
 

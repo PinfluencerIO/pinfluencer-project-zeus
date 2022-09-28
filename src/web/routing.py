@@ -75,10 +75,39 @@ class Dispatcher:
                 'POST /brands/me/campaigns/{campaign_id}/images/{image_field}': self.update_image_for_campaign()
             }
         )
+
+        collaborations = OrderedDict(
+            {
+                'GET /collaborations/{collaboration_id}': self.get_not_implemented_method('GET /collaborations/{collaboration_id}'),
+
+                'POST /influencers/me/collaborations': self.get_not_implemented_method('POST /influencers/me/collaborations'),
+
+                'PATCH /influencers/me/collaborations/{collaboration_id}': self.get_not_implemented_method('PATCH /influencers/me/collaborations/{collaboration_id}'),
+
+                'GET /influencers/me/collaborations': self.get_not_implemented_method('GET /influencers/me/collaborations'),
+
+                'GET /brands/me/collaborations': self.get_not_implemented_method('GET /brands/me/collaborations'),
+            }
+        )
+
+        notifications = OrderedDict(
+            {
+                'GET /notifications/{notification_id}': self.get_not_implemented_method('GET /notifications/{notification_id}'),
+
+                'POST /users/me/notifications': self.get_not_implemented_method('POST /users/me/notifications'),
+
+                'GET /receivers/me/notifications': self.get_not_implemented_method('GET /receivers/me/notifications'),
+
+                'GET /senders/me/notifications': self.get_not_implemented_method('GET /senders/me/notifications'),
+            }
+        )
+
         routes = {}
         routes.update(feed)
         routes.update(users)
         routes.update(campaigns)
+        routes.update(collaborations)
+        routes.update(notifications)
         return routes
 
     def update_image_for_campaign(self):
@@ -112,6 +141,7 @@ class Dispatcher:
             ],
             action=self.__campaign_ctr.update_campaign,
             after_hooks=[
+                self.__hooks_facade.get_campaign_after_hooks().validate_campaign_belongs_to_brand,
                 self.__hooks_facade.get_campaign_after_hooks().format_values_and_categories,
                 self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images,
                 self.__hooks_facade.get_campaign_after_hooks().format_campaign_state

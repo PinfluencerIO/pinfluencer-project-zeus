@@ -455,6 +455,7 @@ class TestRoutes(TestCase):
                                          self.__ioc.resolve(CampaignBeforeHooks).map_campaign_state,
                                          self.__ioc.resolve(CampaignBeforeHooks).map_campaign_categories_and_values,
                                          self.__ioc.resolve(CampaignController).update_campaign,
+                                         self.__ioc.resolve(CampaignAfterHooks).validate_campaign_belongs_to_brand,
                                          self.__ioc.resolve(CampaignAfterHooks).format_values_and_categories,
                                          self.__ioc.resolve(CampaignAfterHooks).tag_bucket_url_to_images,
                                          self.__ioc.resolve(CampaignAfterHooks).format_campaign_state
@@ -491,6 +492,33 @@ class TestRoutes(TestCase):
                                          self.__ioc.resolve(CampaignAfterHooks).tag_bucket_url_to_images,
                                          self.__ioc.resolve(CampaignAfterHooks).format_campaign_state
                                      ])
+
+    def test_get_notification_by_id(self):
+        self.__assert_not_implemented(route="GET /notifications/{notification_id}")
+
+    def test_get_collaboration_by_id(self):
+        self.__assert_not_implemented(route="GET /collaborations/{collaboration_id}")
+
+    def test_create_collaboration(self):
+        self.__assert_not_implemented(route="POST /influencers/me/collaborations")
+
+    def test_update_collaboration(self):
+        self.__assert_not_implemented(route="PATCH /influencers/me/collaborations/{collaboration_id}")
+
+    def test_get_collaborations_for_brand(self):
+        self.__assert_not_implemented(route="GET /brands/me/collaborations")
+
+    def test_get_collaborations_for_influencer(self):
+        self.__assert_not_implemented(route="GET /influencers/me/collaborations")
+
+    def test_get_notifications_for_sender(self):
+        self.__assert_not_implemented(route="GET /senders/me/notifications")
+
+    def test_get_notifications_for_receiver(self):
+        self.__assert_not_implemented(route="GET /receivers/me/notifications")
+
+    def test_create_notification_for_user(self):
+        self.__assert_not_implemented(route="POST /users/me/notifications")
 
     def test_template_matches_routes(self):
         template_file_path = f"./../template.yaml"
