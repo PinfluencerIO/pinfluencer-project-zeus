@@ -1,7 +1,7 @@
 import datetime
 from dataclasses import dataclass
 
-from src.domain.models import ValueEnum, CategoryEnum, CampaignStateEnum
+from src.domain.models import ValueEnum, CategoryEnum, CampaignStateEnum, CollaborationState
 
 
 @dataclass(unsafe_hash=True)
@@ -67,6 +67,40 @@ class InfluencerRequestDto:
 
 
 @dataclass(unsafe_hash=True)
+class CollaborationCreateRequestDto:
+    brand_auth_user_id: str = None
+    request_details: str = None
+    creative_idea: str = None
+    number_of_pictures: int = None
+    number_of_videos: int = None
+    number_of_stories: int = None
+    campaign_id: str = None
+
+
+@dataclass(unsafe_hash=True)
+class NotificationCreateRequestDto:
+    receiver_auth_user_id: str = None
+    payload_body: str = None
+
+
+@dataclass(unsafe_hash=True)
+class NotificationUpdateRequestDto:
+    payload_body: str = None
+    read: bool = None
+
+
+@dataclass(unsafe_hash=True)
+class CollaborationUpdateRequestDto:
+    request_details: str = None
+    creative_idea: str = None
+    number_of_pictures: int = None
+    number_of_videos: int = None
+    number_of_stories: int = None
+    campaign_id: str = None
+    collaboration_state: CollaborationState = None
+
+
+@dataclass(unsafe_hash=True)
 class BaseResponseDto:
     id: str = None
     created: datetime.datetime = None
@@ -125,3 +159,26 @@ class CampaignResponseDto(BaseResponseDto):
     product_title: str = None
     product_description: str = None
     product_image: str = None
+
+
+@dataclass(unsafe_hash=True)
+class CollaborationResponseDto(BaseResponseDto):
+    brand_auth_user_id: str = None
+    influencer_auth_user_id: str = None
+    request_details: str = None
+    creative_idea: str = None
+    number_of_pictures: int = None
+    number_of_videos: int = None
+    number_of_stories: int = None
+    campaign_id: str = None
+    collaboration_state: CollaborationState = None
+
+
+@dataclass(unsafe_hash=True)
+class NotificationResponseDto(BaseResponseDto):
+    receiver_auth_user_id: str = None
+    sender_auth_user_id: str = None
+    payload_body: str = None
+    read: bool = None
+
+

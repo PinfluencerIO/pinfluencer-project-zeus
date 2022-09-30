@@ -2,7 +2,7 @@ import sqlalchemy.orm
 from sqlalchemy import Column, String, DateTime, Float, PickleType, Table, Integer, Boolean
 
 from src.data import Base
-from src.domain.models import Brand, Influencer, Campaign
+from src.domain.models import Brand, Influencer, Campaign, Collaboration, Notification
 
 
 class SqlAlchemyBaseEntity:
@@ -94,6 +94,8 @@ def create_mappings(logger):
         sqlalchemy.orm.mapper(Brand, brand_table)
         sqlalchemy.orm.mapper(Influencer, influencer_table)
         sqlalchemy.orm.mapper(Campaign, campaign_table)
+        sqlalchemy.orm.mapper(Collaboration, collaboration_table)
+        sqlalchemy.orm.mapper(Notification, notifications_table)
     except Exception as e:
         logger.log_error(f"mappings tried to be created more than once")
         logger.log_exception(e)

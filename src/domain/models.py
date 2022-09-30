@@ -21,6 +21,14 @@ class ValueEnum(Enum):
     VALUE10 = "VALUE10"
 
 
+class CollaborationState(Enum):
+    SUBMITTED = "SUBMITTED"
+    ACCEPTED = "ACCEPTED"
+    REJECTED = "REJECTED"
+    RESUBMITTED = "RESUBMITTED"
+    COMPLETE = "COMPLETE"
+
+
 class CategoryEnum(Enum):
     FOOD = "FOOD"
     FASHION = "FASHION"
@@ -104,3 +112,24 @@ class Campaign(DataModel):
     product_title: str = None
     product_description: str = None
     product_image: str = None
+
+
+@dataclass(unsafe_hash=True)
+class Collaboration(DataModel):
+    brand_auth_user_id: str = None
+    influencer_auth_user_id: str = None
+    request_details: str = None
+    creative_idea: str = None
+    number_of_pictures: int = None
+    number_of_videos: int = None
+    number_of_stories: int = None
+    campaign_id: str = None
+    collaboration_state: CollaborationState = None
+
+
+@dataclass(unsafe_hash=True)
+class Notification(DataModel):
+    sender_auth_user_id: str = None
+    receiver_auth_user_id: str = None
+    payload_body: str = None
+    read: bool = None
