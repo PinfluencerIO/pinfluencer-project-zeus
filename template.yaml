@@ -305,6 +305,14 @@ Resources:
             Path: /users/me/notifications
             Method: post
             ApiId: !Ref PinfluencerHttpApi
+        UpdateNotificationForUser:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /users/me/notifications
+            Method: patch
+            ApiId: !Ref PinfluencerHttpApi
         GetNotificationsForSender:
           Type: HttpApi
           Properties:

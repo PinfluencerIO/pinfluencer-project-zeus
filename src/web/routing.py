@@ -96,6 +96,8 @@ class Dispatcher:
 
                 'POST /users/me/notifications': self.get_not_implemented_method('POST /users/me/notifications'),
 
+                'PATCH /users/me/notifications': self.get_not_implemented_method('PATCH /users/me/notifications'),
+
                 'GET /receivers/me/notifications': self.get_not_implemented_method('GET /receivers/me/notifications'),
 
                 'GET /senders/me/notifications': self.get_not_implemented_method('GET /senders/me/notifications'),

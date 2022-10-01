@@ -520,6 +520,9 @@ class TestRoutes(TestCase):
     def test_create_notification_for_user(self):
         self.__assert_not_implemented(route="POST /users/me/notifications")
 
+    def test_update_notification_for_user(self):
+        self.__assert_not_implemented(route="PATCH /users/me/notifications")
+
     def test_template_matches_routes(self):
         template_file_path = f"./../template.yaml"
         if not exists(template_file_path):
