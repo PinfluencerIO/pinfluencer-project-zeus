@@ -241,3 +241,6 @@ class CampaignController(BaseController):
         self._generic_update_image_field(context=context,
                                          response=CampaignResponseDto,
                                          repo_func=lambda: self._repository.load_by_id(id_=context.id))
+
+
+
