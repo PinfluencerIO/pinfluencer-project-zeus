@@ -68,13 +68,22 @@ class InfluencerRequestDto:
 
 @dataclass(unsafe_hash=True)
 class CollaborationCreateRequestDto:
-    brand_auth_user_id: str = None
     request_details: str = None
     creative_idea: str = None
     number_of_pictures: int = None
     number_of_videos: int = None
     number_of_stories: int = None
     campaign_id: str = None
+
+
+@dataclass(unsafe_hash=True)
+class CollaborationUpdateRequestDto:
+    request_details: str = None
+    creative_idea: str = None
+    number_of_pictures: int = None
+    number_of_videos: int = None
+    number_of_stories: int = None
+    collaboration_state: CollaborationState = None
 
 
 @dataclass(unsafe_hash=True)
@@ -87,17 +96,6 @@ class NotificationCreateRequestDto:
 class NotificationUpdateRequestDto:
     payload_body: str = None
     read: bool = None
-
-
-@dataclass(unsafe_hash=True)
-class CollaborationUpdateRequestDto:
-    request_details: str = None
-    creative_idea: str = None
-    number_of_pictures: int = None
-    number_of_videos: int = None
-    number_of_stories: int = None
-    campaign_id: str = None
-    collaboration_state: CollaborationState = None
 
 
 @dataclass(unsafe_hash=True)
