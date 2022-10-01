@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Union, Callable
+from typing import Union, Callable, OrderedDict
 
 from src._types import Serializer, Logger
 from src.crosscutting import valid_uuid
@@ -13,6 +13,12 @@ class PinfluencerRequest:
     body: dict
     id: str = ""
     auth_user_id: str = ""
+
+
+@dataclass(unsafe_hash=True)
+class ErrorCapsule:
+    message: str = "something went wrong",
+    status: int = 500
 
 
 class PinfluencerResponse:
@@ -54,6 +60,8 @@ class PinfluencerContext:
     auth_user_id: str = "",
     body: dict = field(default_factory=dict)
     id: str = ""
+    error_capsule: list[ErrorCapsule] = field(default_factory=list)
+    cached_values: OrderedDict = field(default_factory=dict)
 
 
 PinfluencerAction = Callable[[PinfluencerContext], None]
