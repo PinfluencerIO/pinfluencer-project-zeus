@@ -10,7 +10,7 @@ from src.data import SqlAlchemyDataManager
 from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository, \
     SqlAlchemyCampaignRepository, S3ImageRepository, CognitoAuthUserRepository, CognitoAuthService
 from src.domain.validation import BrandValidator, CampaignValidator, InfluencerValidator
-from src.web import PinfluencerResponse, PinfluencerContext, Route, PinfluencerAction
+from src.web import PinfluencerResponse, PinfluencerContext, Route, PinfluencerCommand
 from src.web.controllers import BrandController, InfluencerController, CampaignController
 from src.web.hooks import HooksFacade, CommonBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, UserBeforeHooks, \
     UserAfterHooks, InfluencerBeforeHooks, BrandBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, CommonAfterHooks
@@ -68,8 +68,8 @@ def bootstrap(event: dict,
             route_desc: Route = routes[route]
 
             # middleware execution
-            middleware_pipeline: list[PinfluencerAction] = [*route_desc.before_hooks, route_desc.action,
-                                                            *route_desc.after_hooks]
+            middleware_pipeline: list[PinfluencerCommand] = [*route_desc.before_hooks, route_desc.action,
+                                                             *route_desc.after_hooks]
             ioc.resolve(MiddlewarePipeline).execute_middleware(context=pinfluencer_context,
                                                                middleware=middleware_pipeline)
     except Exception as e:

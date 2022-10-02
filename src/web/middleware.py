@@ -1,7 +1,7 @@
 import inspect
 
 from src._types import Logger
-from src.web import PinfluencerContext, PinfluencerAction
+from src.web import PinfluencerContext, PinfluencerCommand, PinfluencerSequenceBuilder
 
 
 class MiddlewarePipeline:
@@ -10,7 +10,8 @@ class MiddlewarePipeline:
         self.__logger = logger
 
     def execute_middleware(self, context: PinfluencerContext,
-                           middleware: list[PinfluencerAction]):
+                           sequence: PinfluencerSequenceBuilder):
+        middleware = sequence.generate_sequence()
         for action in middleware:
             name = "anonymous"
             try:

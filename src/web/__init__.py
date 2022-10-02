@@ -1,8 +1,13 @@
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Union, Callable, OrderedDict
+from typing import Union, OrderedDict, Callable, Protocol
 
 from src._types import Serializer, Logger
 from src.crosscutting import valid_uuid
+
+SUBSEQUENCE = "subsequence"
+
+COMMAND = "command"
 
 BRAND_ID_PATH_KEY = 'brand_id'
 INFLUENCER_ID_PATH_KEY = 'influencer_id'
@@ -52,6 +57,8 @@ def get_cognito_user(event):
     return event['requestContext']['authorizer']['jwt']['claims']['cognito:username']
 
 
+
+
 @dataclass
 class PinfluencerContext:
     response: PinfluencerResponse = None,
@@ -64,14 +71,20 @@ class PinfluencerContext:
     cached_values: OrderedDict = field(default_factory=dict)
 
 
-PinfluencerAction = Callable[[PinfluencerContext], None]
+PinfluencerCommand = Callable[[PinfluencerContext], None]
+
+class PinfluencerSequenceBuilder(Protocol):
+
+    def generate_sequence(self) -> list[PinfluencerCommand]:
+        ...
+
+    def build(self):
+        ...
 
 
 @dataclass
 class Route:
-    action: PinfluencerAction
-    before_hooks: list[PinfluencerAction] = field(default_factory=list)
-    after_hooks: list[PinfluencerAction] = field(default_factory=list)
+    sequence_builder: PinfluencerSequenceBuilder
 
 
 def valid_path_resource_id(event, resource_key, logger: Logger):
@@ -84,3 +97,40 @@ def valid_path_resource_id(event, resource_key, logger: Logger):
     except KeyError:
         logger.log_error(f'Missing key in event pathParameters.{resource_key}')
     return None
+
+
+PinfluencerSequenceComponent = Union[PinfluencerCommand, PinfluencerSequenceBuilder]
+
+
+class FluentSequenceBuilder(ABC):
+
+    def __init__(self):
+        self.__components: list[(str, PinfluencerSequenceComponent)] = []
+
+    def add_command(self, command: PinfluencerCommand) -> 'FluentSequenceBuilder':
+        self.__components.append((COMMAND, command))
+        return self
+
+    def _add_sequence(self, sequence_builder: PinfluencerSequenceBuilder) -> 'FluentSequenceBuilder':
+        self.__components.append((SUBSEQUENCE, sequence_builder))
+        return self
+
+    def generate_sequence(self) -> list[PinfluencerCommand]:
+        self.build()
+        new_list = []
+        for (name, component) in self.__components:
+            if name == COMMAND:
+                new_list.append(component)
+            if name == SUBSEQUENCE:
+                sequence_component: PinfluencerSequenceBuilder = component
+                commands = sequence_component.generate_sequence()
+                new_list.extend(commands)
+        return new_list
+
+    @abstractmethod
+    def build(self):
+        ...
+
+    @property
+    def components(self) -> list[PinfluencerSequenceComponent]:
+        return list(map(lambda x: x[1], self.__components))

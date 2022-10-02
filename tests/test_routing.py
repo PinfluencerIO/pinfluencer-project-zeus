@@ -1,7 +1,8 @@
 from unittest import TestCase
 from unittest.mock import MagicMock, Mock
 
-from src.web import PinfluencerContext, PinfluencerResponse, ErrorCapsule
+from src.app import logger_factory
+from src.web import PinfluencerContext, PinfluencerResponse, ErrorCapsule, FluentSequenceBuilder
 from src.web.middleware import MiddlewarePipeline
 
 
@@ -97,3 +98,92 @@ class TestMiddlewarePipeline(TestCase):
         # assert
         with self.subTest(msg="body displays custom error code"):
             self.assertEqual(context.response.status_code, 418)
+
+
+
+class CommandContextClass:
+
+    def __init__(self):
+        self.__invocations: list[str] = []
+
+    def run1(self, context: PinfluencerContext):
+        self.__invocations.append("run1")
+
+    def run2(self, context: PinfluencerContext):
+        self.__invocations.append("run2")
+
+    def run_invalid(self, value: str):
+        ...
+
+
+    def run3(self, context: PinfluencerContext):
+        self.__invocations.append("run3")
+
+    def run4(self, context: PinfluencerContext):
+        self.__invocations.append("run4")
+
+    def run5(self, context: PinfluencerContext):
+        self.__invocations.append("run5")
+
+    def run6(self, context: PinfluencerContext):
+        self.__invocations.append("run6")
+
+    @property
+    def invocations(self) -> list[str]:
+        return self.__invocations
+
+
+class DummyNested2SequenceBuilder(FluentSequenceBuilder):
+
+    def __init__(self, context: CommandContextClass):
+        super().__init__()
+        self.__context = context
+
+    def build(self):
+        self.add_command(self.__context.run4)\
+            .add_command(self.__context.run5)\
+            .add_command(self.__context.run6)
+
+
+class DummyNestedSequenceBuilder(FluentSequenceBuilder):
+
+    def __init__(self, sequence: DummyNested2SequenceBuilder):
+        super().__init__()
+        self.__sequence = sequence
+
+    def build(self):
+        self._add_sequence(self.__sequence)
+
+
+class DummySequenceBuilder(FluentSequenceBuilder):
+
+    def __init__(self, context: CommandContextClass, sequence: DummyNestedSequenceBuilder):
+        super().__init__()
+        self.__sequence = sequence
+        self.__context = context
+
+    def build(self):
+        self.add_command(self.__context.run1)\
+            ._add_sequence(self.__sequence)\
+            .add_command(self.__context.run2)\
+            .add_command(self.__context.run3)
+
+
+class TestSequenceBuilder(TestCase):
+
+    def setUp(self) -> None:
+        self.__command_context = CommandContextClass()
+        self.__sut = DummySequenceBuilder(context=self.__command_context,
+                                          sequence=DummyNestedSequenceBuilder(
+                                              sequence=DummyNested2SequenceBuilder(context=self.__command_context)))
+        self.__middleware = MiddlewarePipeline(logger=logger_factory())
+
+    def test_build_and_run_sequence(self):
+        # act
+        self.__middleware.execute_middleware(context=PinfluencerContext(response=PinfluencerResponse(),
+                                                                        short_circuit=False),
+                                             sequence=self.__sut)
+
+        # assert
+        with self.subTest(msg="invocations match list"):
+            self.assertEqual(self.__command_context.invocations, ["run1", "run4", "run5", "run6", "run2", "run3"])
