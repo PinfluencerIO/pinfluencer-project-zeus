@@ -140,9 +140,9 @@ class DummyNested2SequenceBuilder(FluentSequenceBuilder):
         self.__context = context
 
     def build(self):
-        self.add_command(self.__context.run4)\
-            .add_command(self.__context.run5)\
-            .add_command(self.__context.run6)
+        self._add_command(self.__context.run4)\
+            ._add_command(self.__context.run5)\
+            ._add_command(self.__context.run6)
 
 
 class DummyNestedSequenceBuilder(FluentSequenceBuilder):
@@ -152,7 +152,7 @@ class DummyNestedSequenceBuilder(FluentSequenceBuilder):
         self.__sequence = sequence
 
     def build(self):
-        self._add_sequence(self.__sequence)
+        self._add_sequence_builder(self.__sequence)
 
 
 class DummySequenceBuilder(FluentSequenceBuilder):
@@ -163,10 +163,10 @@ class DummySequenceBuilder(FluentSequenceBuilder):
         self.__context = context
 
     def build(self):
-        self.add_command(self.__context.run1)\
-            ._add_sequence(self.__sequence)\
-            .add_command(self.__context.run2)\
-            .add_command(self.__context.run3)
+        self._add_command(self.__context.run1)\
+            ._add_sequence_builder(self.__sequence)\
+            ._add_command(self.__context.run2)\
+            ._add_command(self.__context.run3)
 
 
 class TestSequenceBuilder(TestCase):

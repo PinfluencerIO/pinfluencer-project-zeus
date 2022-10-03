@@ -2,6 +2,7 @@ import os
 
 from simple_injection import ServiceCollection
 
+from src import ServiceLocator
 from src._types import DataManager, BrandRepository, InfluencerRepository, CampaignRepository, ImageRepository, \
     Deserializer, Serializer, AuthUserRepository, Logger
 from src.crosscutting import JsonCamelToSnakeCaseDeserializer, JsonSnakeToCamelSerializer, \
@@ -10,12 +11,17 @@ from src.data import SqlAlchemyDataManager
 from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository, \
     SqlAlchemyCampaignRepository, S3ImageRepository, CognitoAuthUserRepository, CognitoAuthService
 from src.domain.validation import BrandValidator, CampaignValidator, InfluencerValidator
-from src.web import PinfluencerResponse, PinfluencerContext, Route, PinfluencerCommand
+from src.web import PinfluencerResponse, PinfluencerContext, Route
 from src.web.controllers import BrandController, InfluencerController, CampaignController
 from src.web.hooks import HooksFacade, CommonBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, UserBeforeHooks, \
     UserAfterHooks, InfluencerBeforeHooks, BrandBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, CommonAfterHooks
 from src.web.middleware import MiddlewarePipeline
 from src.web.routing import Dispatcher
+from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdateCreateCampaignSubsequenceBuilder, \
+    PostSingleCampaignSubsequenceBuilder, PostMultipleCampaignSubsequenceBuilder, PostSingleUserSubsequenceBuilder, \
+    PostMultipleUserSubsequenceBuilder, UpdateImageForCampaignSequenceBuilder, NotImplementedSequenceBuilder, \
+    UpdateCampaignSequenceBuilder, CreateCampaignSequenceBuilder, GetCampaignByIdSequenceBuilder, \
+    GetCampaignsForBrandSequenceBuilder
 
 
 def lambda_handler(event, context):
@@ -34,7 +40,6 @@ def logger_factory():
         if os.environ["ENVIRONMENT"] == "TEST":
             return DummyLogger()
     return ConsoleLogger()
-
 
 
 def bootstrap(event: dict,
@@ -68,10 +73,8 @@ def bootstrap(event: dict,
             route_desc: Route = routes[route]
 
             # middleware execution
-            middleware_pipeline: list[PinfluencerCommand] = [*route_desc.before_hooks, route_desc.action,
-                                                             *route_desc.after_hooks]
             ioc.resolve(MiddlewarePipeline).execute_middleware(context=pinfluencer_context,
-                                                               middleware=middleware_pipeline)
+                                                               sequence=route_desc.sequence_builder)
     except Exception as e:
         logger_factory().log_error(str(e))
         response = PinfluencerResponse.as_500_error()
@@ -91,10 +94,12 @@ def register_dependencies(cognito_auth_service, data_manager, ioc, middleware):
     register_serialization(ioc)
     register_auth(ioc)
     register_middleware(ioc)
+    register_sequences(ioc)
     ioc.add_instance(MiddlewarePipeline, middleware)
     ioc.add_singleton(FlexiUpdater)
 
     ioc.add_instance(Logger, logger_factory())
+    ioc.add_instance(ServiceLocator, ServiceLocator(ioc=ioc))
 
 
 def register_middleware(ioc):
@@ -144,3 +149,18 @@ def register_data_layer(ioc):
 
     # s3
     ioc.add_singleton(ImageRepository, S3ImageRepository)
+
+
+def register_sequences(ioc: ServiceCollection):
+    ioc.add_singleton(PreGenericUpdateCreateSubsequenceBuilder)
+    ioc.add_singleton(PreUpdateCreateCampaignSubsequenceBuilder)
+    ioc.add_singleton(PostSingleCampaignSubsequenceBuilder)
+    ioc.add_singleton(PostMultipleCampaignSubsequenceBuilder)
+    ioc.add_singleton(PostSingleUserSubsequenceBuilder)
+    ioc.add_singleton(PostMultipleUserSubsequenceBuilder)
+    ioc.add_singleton(UpdateImageForCampaignSequenceBuilder)
+    ioc.add_singleton(NotImplementedSequenceBuilder)
+    ioc.add_singleton(UpdateCampaignSequenceBuilder)
+    ioc.add_singleton(CreateCampaignSequenceBuilder)
+    ioc.add_singleton(GetCampaignByIdSequenceBuilder)
+    ioc.add_singleton(GetCampaignsForBrandSequenceBuilder)

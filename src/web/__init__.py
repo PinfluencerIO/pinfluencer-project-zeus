@@ -107,11 +107,11 @@ class FluentSequenceBuilder(ABC):
     def __init__(self):
         self.__components: list[(str, PinfluencerSequenceComponent)] = []
 
-    def add_command(self, command: PinfluencerCommand) -> 'FluentSequenceBuilder':
+    def _add_command(self, command: PinfluencerCommand) -> 'FluentSequenceBuilder':
         self.__components.append((COMMAND, command))
         return self
 
-    def _add_sequence(self, sequence_builder: PinfluencerSequenceBuilder) -> 'FluentSequenceBuilder':
+    def _add_sequence_builder(self, sequence_builder: PinfluencerSequenceBuilder) -> 'FluentSequenceBuilder':
         self.__components.append((SUBSEQUENCE, sequence_builder))
         return self
 

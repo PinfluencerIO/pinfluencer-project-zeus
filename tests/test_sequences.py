@@ -1,116 +1,237 @@
 from unittest import TestCase
 from unittest.mock import Mock
 
-from src.web.hooks import CommonBeforeHooks, UserBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, UserAfterHooks
-from src.web.sequences import PreGenericUpdateCreateSubsequence, PreUpdateCreateCampaignSubsequence, \
-    PostSingleCampaignSubsequence, PostMultipleCampaignSubsequence, PostSingleUserSubsequence, \
-    PostMultipleUserSubsequence
+from simple_injection import ServiceCollection
 
+from src.app import bootstrap
+from src.web.controllers import CampaignController
+from src.web.hooks import CommonBeforeHooks, UserBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, UserAfterHooks, \
+    BrandBeforeHooks
+from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdateCreateCampaignSubsequenceBuilder, \
+    PostSingleCampaignSubsequenceBuilder, PostMultipleCampaignSubsequenceBuilder, PostSingleUserSubsequenceBuilder, \
+    PostMultipleUserSubsequenceBuilder, UpdateImageForCampaignSequenceBuilder, UpdateCampaignSequenceBuilder, \
+    CreateCampaignSequenceBuilder, GetCampaignByIdSequenceBuilder, GetCampaignsForBrandSequenceBuilder
+
+
+def setup(ioc: ServiceCollection):
+    mock_middleware_pipeline = Mock()
+    bootstrap(event={"routeKey": "GET /brands"},
+              context={},
+              middleware=mock_middleware_pipeline,
+              ioc=ioc,
+              data_manager=Mock(),
+              cognito_auth_service=Mock())
 
 class TestPreGenericUpdateCreateSubsequence(TestCase):
 
     def test_sequence(self):
         # arrange
-        common_before_hooks = CommonBeforeHooks(deserializer=Mock(),
-                                                image_repo=Mock(),
-                                                object_mapper=Mock(),
-                                                logger=Mock())
-        user_before_hooks = UserBeforeHooks(common_before_hooks=Mock(),
-                                            logger=Mock())
-        sut = PreGenericUpdateCreateSubsequence(common_before_hooks=common_before_hooks,
-                                                user_before_hooks=user_before_hooks)
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(PreGenericUpdateCreateSubsequenceBuilder)
 
         # act
         sut.build()
 
         # assert
         with self.subTest(msg="components match"):
-            self.assertEqual(sut.components, [common_before_hooks.set_body, user_before_hooks.set_auth_user_id])
+            self.assertEqual(sut.components, [ioc.resolve(CommonBeforeHooks).set_body,
+                                              ioc.resolve(UserBeforeHooks).set_auth_user_id])
 
 
 class TestPreUpdateCreateCampaignSubsequence(TestCase):
 
     def test_sequence(self):
         # arrange
-        campaign_before_hooks = CampaignBeforeHooks(common_before_hooks=Mock(),
-                                                    logger=Mock(),
-                                                    campaign_validator=Mock())
-        sut = PreUpdateCreateCampaignSubsequence(campaign_before_hooks=campaign_before_hooks)
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(PreUpdateCreateCampaignSubsequenceBuilder)
 
         # act
         sut.build()
 
         # assert
         with self.subTest(msg="components match"):
-            self.assertEqual(sut.components, [campaign_before_hooks.map_campaign_state,
-                                              campaign_before_hooks.map_campaign_categories_and_values])
+            self.assertEqual(sut.components, [ioc.resolve(CampaignBeforeHooks).map_campaign_state,
+                                              ioc.resolve(CampaignBeforeHooks).map_campaign_categories_and_values])
 
 
 class TestPostSingleCampaignSubsequence(TestCase):
 
     def test_sequence(self):
         # arrange
-        campaign_after_hooks = CampaignAfterHooks(common_after_hooks=Mock(),
-                                                  mapper=Mock())
-        sut = PostSingleCampaignSubsequence(campaign_after_hooks=campaign_after_hooks)
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(PostSingleCampaignSubsequenceBuilder)
 
         # act
         sut.build()
 
         # assert
         with self.subTest(msg="components match"):
-            self.assertEqual(sut.components, [campaign_after_hooks.format_campaign_state,
-                                              campaign_after_hooks.format_values_and_categories])
+            self.assertEqual(sut.components, [ioc.resolve(CampaignAfterHooks).format_campaign_state,
+                                              ioc.resolve(CampaignAfterHooks).format_values_and_categories])
 
 
 class TestPostMultipleCampaignSubsequence(TestCase):
 
     def test_sequence(self):
         # arrange
-        campaign_after_hooks = CampaignAfterHooks(common_after_hooks=Mock(),
-                                                  mapper=Mock())
-        sut = PostMultipleCampaignSubsequence(campaign_after_hooks=campaign_after_hooks)
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(PostMultipleCampaignSubsequenceBuilder)
 
         # act
         sut.build()
 
         # assert
         with self.subTest(msg="components match"):
-            self.assertEqual(sut.components, [campaign_after_hooks.format_campaign_state_collection,
-                                              campaign_after_hooks.format_values_and_categories_collection])
+            self.assertEqual(sut.components, [ioc.resolve(CampaignAfterHooks).format_campaign_state_collection,
+                                              ioc.resolve(CampaignAfterHooks).format_values_and_categories_collection])
 
 
 class TestPostSingleUserSubsequence(TestCase):
 
     def test_sequence(self):
         # arrange
-        user_after_hooks = UserAfterHooks(common_after_hooks=Mock(),
-                                          mapper=Mock(),
-                                          auth_user_repository=Mock())
-        sut = PostSingleUserSubsequence(user_after_hooks=user_after_hooks)
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(PostSingleUserSubsequenceBuilder)
 
         # act
         sut.build()
 
         # assert
         with self.subTest(msg="components match"):
-            self.assertEqual(sut.components, [user_after_hooks.format_values_and_categories,
-                                              user_after_hooks.tag_auth_user_claims_to_response])
+            self.assertEqual(sut.components, [ioc.resolve(UserAfterHooks).format_values_and_categories,
+                                              ioc.resolve(UserAfterHooks).tag_auth_user_claims_to_response])
 
 
 class TestPostMultipleUserSubsequence(TestCase):
 
     def test_sequence(self):
         # arrange
-        user_after_hooks = UserAfterHooks(common_after_hooks=Mock(),
-                                          mapper=Mock(),
-                                          auth_user_repository=Mock())
-        sut = PostMultipleUserSubsequence(user_after_hooks=user_after_hooks)
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(PostMultipleUserSubsequenceBuilder)
 
         # act
         sut.build()
 
         # assert
         with self.subTest(msg="components match"):
-            self.assertEqual(sut.components, [user_after_hooks.format_values_and_categories_collection,
-                                              user_after_hooks.tag_auth_user_claims_to_response_collection])
+            self.assertEqual(sut.components, [ioc.resolve(UserAfterHooks).format_values_and_categories_collection,
+                                              ioc.resolve(UserAfterHooks).tag_auth_user_claims_to_response_collection])
+
+
+class TestUpdateImageForCampaignSequence(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(UpdateImageForCampaignSequenceBuilder)
+
+        # act
+        sut.build()
+
+        # assert
+        with self.subTest(msg="components match"):
+            self.maxDiff = None
+            self.assertEqual(sut.components, [ioc.resolve(PreGenericUpdateCreateSubsequenceBuilder),
+                                              ioc.resolve(CampaignBeforeHooks).validate_id,
+                                              ioc.resolve(BrandBeforeHooks).validate_auth_brand,
+                                              ioc.resolve(CampaignBeforeHooks).validate_image_key,
+                                              ioc.resolve(CampaignBeforeHooks).upload_image,
+                                              ioc.resolve(CampaignController).update_campaign_image,
+                                              ioc.resolve(PostSingleCampaignSubsequenceBuilder),
+                                              ioc.resolve(CampaignAfterHooks).tag_bucket_url_to_images])
+
+
+class TestUpdateCampaignSequenceBuilder(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(UpdateCampaignSequenceBuilder)
+
+        # act
+        sut.build()
+
+        # assert
+        with self.subTest(msg="components match"):
+            self.maxDiff = None
+            self.assertEqual(sut.components, [ioc.resolve(PreGenericUpdateCreateSubsequenceBuilder),
+                                              ioc.resolve(CampaignBeforeHooks).validate_id,
+                                              ioc.resolve(CampaignBeforeHooks).validate_campaign,
+                                              ioc.resolve(BrandBeforeHooks).validate_auth_brand,
+                                              ioc.resolve(CampaignBeforeHooks).map_campaign_state,
+                                              ioc.resolve(CampaignBeforeHooks).map_campaign_categories_and_values,
+                                              ioc.resolve(CampaignController).update_campaign,
+                                              ioc.resolve(PostSingleCampaignSubsequenceBuilder),
+                                              ioc.resolve(CampaignAfterHooks).tag_bucket_url_to_images])
+
+
+class TestCreateCampaignSequenceBuilder(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(CreateCampaignSequenceBuilder)
+
+        # act
+        sut.build()
+
+        # assert
+        with self.subTest(msg="components match"):
+            self.maxDiff = None
+            self.assertEqual(sut.components, [ioc.resolve(PreGenericUpdateCreateSubsequenceBuilder),
+                                              ioc.resolve(CampaignBeforeHooks).validate_campaign,
+                                              ioc.resolve(BrandBeforeHooks).validate_auth_brand,
+                                              ioc.resolve(CampaignBeforeHooks).map_campaign_state,
+                                              ioc.resolve(CampaignBeforeHooks).map_campaign_categories_and_values,
+                                              ioc.resolve(CampaignController).create,
+                                              ioc.resolve(PostSingleCampaignSubsequenceBuilder),
+                                              ioc.resolve(CampaignAfterHooks).tag_bucket_url_to_images])
+
+
+class TestGetCampaignByIdSequenceBuilder(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(GetCampaignByIdSequenceBuilder)
+
+        # act
+        sut.build()
+
+        # assert
+        with self.subTest(msg="components match"):
+            self.maxDiff = None
+            self.assertEqual(sut.components, [ioc.resolve(CampaignBeforeHooks).validate_id,
+                                              ioc.resolve(CampaignController).get_by_id,
+                                              ioc.resolve(PostSingleCampaignSubsequenceBuilder),
+                                              ioc.resolve(CampaignAfterHooks).tag_bucket_url_to_images])
+
+
+class TestGetCampaignsForBrandSequenceBuilder(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(GetCampaignsForBrandSequenceBuilder)
+
+        # act
+        sut.build()
+
+        # assert
+        with self.subTest(msg="components match"):
+            self.maxDiff = None
+            self.assertEqual(sut.components, [ioc.resolve(UserBeforeHooks).set_auth_user_id,
+                                              ioc.resolve(CampaignController).get_for_brand,
+                                              ioc.resolve(PostSingleCampaignSubsequenceBuilder),
+                                              ioc.resolve(CampaignAfterHooks).tag_bucket_url_to_images])

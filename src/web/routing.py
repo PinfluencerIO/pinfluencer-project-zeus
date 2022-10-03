@@ -1,28 +1,28 @@
 from collections import OrderedDict
 
-from src.web import Route, PinfluencerContext
+from src import ServiceLocator
+from src.web import Route
 from src.web.controllers import CampaignController, BrandController, InfluencerController
 from src.web.hooks import HooksFacade
+from src.web.sequences import UpdateCampaignSequenceBuilder, UpdateImageForCampaignSequenceBuilder, \
+    NotImplementedSequenceBuilder, CreateCampaignSequenceBuilder, GetCampaignByIdSequenceBuilder, \
+    GetCampaignsForBrandSequenceBuilder
 
 
 class Dispatcher:
     def __init__(self, campaign_ctr: CampaignController,
                  brand_ctr: BrandController,
                  influencer_ctr: InfluencerController,
-                 hooks_facade: HooksFacade):
+                 hooks_facade: HooksFacade,
+                 service_locator: ServiceLocator):
+        self.__service_locator = service_locator
         self.__campaign_ctr = campaign_ctr
         self.__brand_ctr = brand_ctr
         self.__influencer_ctr = influencer_ctr
         self.__hooks_facade = hooks_facade
 
     def get_not_implemented_method(self, route: str) -> Route:
-        return Route(action=lambda context: self.not_implemented(context=context,
-                                                                 route=route))
-
-    @staticmethod
-    def not_implemented(context: PinfluencerContext, route: str):
-        context.response.status_code = 405
-        context.response.body = {"message": f"{route} is not implemented"}
+        return Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder))
 
     @property
     def dispatch_route_to_ctr(self) -> dict[dict[str, Route]]:
@@ -62,17 +62,22 @@ class Dispatcher:
 
         campaigns = OrderedDict(
             {
-                'GET /brands/me/campaigns': self.get_campaigns_for_brand(),
+                'GET /brands/me/campaigns':
+                    Route(sequence_builder=self.__service_locator.locate(GetCampaignsForBrandSequenceBuilder)),
 
                 'DELETE /brands/me/campaigns/{campaign_id}': self.delete_campaign_for_brand(),
 
-                'GET /campaigns/{campaign_id}': self.get_campaign_by_id(),
+                'GET /campaigns/{campaign_id}':
+                    Route(sequence_builder=self.__service_locator.locate(GetCampaignByIdSequenceBuilder)),
 
-                'POST /brands/me/campaigns': self.create_campaign(),
+                'POST /brands/me/campaigns':
+                    Route(sequence_builder=self.__service_locator.locate(CreateCampaignSequenceBuilder)),
 
-                'PATCH /brands/me/campaigns/{campaign_id}': self.update_campgin_bulk(),
+                'PATCH /brands/me/campaigns/{campaign_id}':
+                    Route(sequence_builder=self.__service_locator.locate(UpdateCampaignSequenceBuilder)),
 
-                'POST /brands/me/campaigns/{campaign_id}/images/{image_field}': self.update_image_for_campaign()
+                'POST /brands/me/campaigns/{campaign_id}/images/{image_field}':
+                    Route(sequence_builder=self.__service_locator.locate(UpdateImageForCampaignSequenceBuilder))
             }
         )
 
@@ -112,254 +117,158 @@ class Dispatcher:
         routes.update(notifications)
         return routes
 
-    def update_image_for_campaign(self):
-        return Route(
-            before_hooks=[
-                self.__hooks_facade.get_before_common_hooks().set_body,
-                self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
-                self.__hooks_facade.get_campaign_before_hooks().validate_id,
-                self.__hooks_facade.get_brand_before_hooks().validate_auth_brand,
-                self.__hooks_facade.get_campaign_before_hooks().validate_image_key,
-                self.__hooks_facade.get_campaign_before_hooks().upload_image
-            ],
-            action=self.__campaign_ctr.update_campaign_image,
-            after_hooks=[
-                self.__hooks_facade.get_campaign_after_hooks().format_values_and_categories,
-                self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images,
-                self.__hooks_facade.get_campaign_after_hooks().format_campaign_state
-            ]
-        )
-
-    def update_campgin_bulk(self):
-        return Route(
-            before_hooks=[
-                self.__hooks_facade.get_before_common_hooks().set_body,
-                self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
-                self.__hooks_facade.get_campaign_before_hooks().validate_id,
-                self.__hooks_facade.get_campaign_before_hooks().validate_campaign,
-                self.__hooks_facade.get_brand_before_hooks().validate_auth_brand,
-                self.__hooks_facade.get_campaign_before_hooks().map_campaign_state,
-                self.__hooks_facade.get_campaign_before_hooks().map_campaign_categories_and_values
-            ],
-            action=self.__campaign_ctr.update_campaign,
-            after_hooks=[
-                self.__hooks_facade.get_campaign_after_hooks().validate_campaign_belongs_to_brand,
-                self.__hooks_facade.get_campaign_after_hooks().format_values_and_categories,
-                self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images,
-                self.__hooks_facade.get_campaign_after_hooks().format_campaign_state
-            ]
-        )
-
-    def create_campaign(self):
-        return Route(
-            before_hooks=[
-                self.__hooks_facade.get_before_common_hooks().set_body,
-                self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
-                self.__hooks_facade.get_campaign_before_hooks().validate_campaign,
-                self.__hooks_facade.get_campaign_before_hooks().map_campaign_state,
-                self.__hooks_facade.get_campaign_before_hooks().map_campaign_categories_and_values
-            ],
-            action=self.__campaign_ctr.create,
-            after_hooks=[
-                self.__hooks_facade.get_campaign_after_hooks().format_values_and_categories,
-                self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images,
-                self.__hooks_facade.get_campaign_after_hooks().format_campaign_state
-            ]
-        )
-
-    def get_campaign_by_id(self):
-        return Route(
-            before_hooks=[
-                self.__hooks_facade.get_campaign_before_hooks().validate_id
-            ],
-            action=self.__campaign_ctr.get_by_id,
-            after_hooks=[
-                self.__hooks_facade.get_campaign_after_hooks().format_values_and_categories,
-                self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images,
-                self.__hooks_facade.get_campaign_after_hooks().format_campaign_state
-            ]
-        )
-
     def delete_campaign_for_brand(self):
         return self.get_not_implemented_method('DELETE brands/me/campaigns/{campaign_id}')
 
-    def get_campaigns_for_brand(self):
-        return Route(
-            before_hooks=[
-                self.__hooks_facade.get_user_before_hooks().set_auth_user_id
-            ],
-            action=self.__campaign_ctr.get_for_brand,
-            after_hooks=[
-                self.__hooks_facade.get_campaign_after_hooks().format_values_and_categories_collection,
-                self.__hooks_facade.get_campaign_after_hooks().tag_bucket_url_to_images_collection,
-                self.__hooks_facade.get_campaign_after_hooks().format_campaign_state_collection
-            ]
-        )
 
     def update_influencer_image(self):
-        return Route(
-            before_hooks=[
+        '''
+            TODO:
                 self.__hooks_facade.get_before_common_hooks().set_body,
                 self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
                 self.__hooks_facade.get_influencer_before_hooks().validate_image_key,
                 self.__hooks_facade.get_influencer_before_hooks().upload_image
-            ],
-            action=self.__influencer_ctr.update_image_field_for_user,
-            after_hooks=[
+                self.__influencer_ctr.update_image_field_for_user,
                 self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
                 self.__hooks_facade.get_influencer_after_hooks().tag_bucket_url_to_images,
                 self.__hooks_facade.get_user_after_hooks().format_values_and_categories
-            ]
-        )
+        '''
+        return Route(self.__service_locator.locate(NotImplementedSequenceBuilder))
 
     def update_influencer(self):
-        return Route(
-            before_hooks=[
+        '''
+            TODO:
                 self.__hooks_facade.get_before_common_hooks().set_body,
                 self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
                 self.__hooks_facade.get_influencer_before_hooks().validate_influencer,
                 self.__hooks_facade.get_user_before_hooks().set_categories_and_values,
-            ],
-            action=self.__influencer_ctr.update_for_user,
-            after_hooks=[
+                self.__influencer_ctr.update_for_user,
                 self.__hooks_facade.get_influencer_after_hooks().set_influencer_claims,
                 self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
                 self.__hooks_facade.get_influencer_after_hooks().tag_bucket_url_to_images,
                 self.__hooks_facade.get_user_after_hooks().format_values_and_categories
-            ]
-        )
+        '''
+        return Route(self.__service_locator.locate(NotImplementedSequenceBuilder))
 
     def create_influencer(self):
-        return Route(
-            before_hooks=[
+        '''
+            TODO:
                 self.__hooks_facade.get_before_common_hooks().set_body,
                 self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
                 self.__hooks_facade.get_influencer_before_hooks().validate_influencer,
                 self.__hooks_facade.get_user_before_hooks().set_categories_and_values
-            ],
-            action=self.__influencer_ctr.create,
-            after_hooks=[
+                self.__influencer_ctr.create,
                 self.__hooks_facade.get_influencer_after_hooks().set_influencer_claims,
                 self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
                 self.__hooks_facade.get_influencer_after_hooks().tag_bucket_url_to_images,
                 self.__hooks_facade.get_user_after_hooks().format_values_and_categories
-            ]
-        )
+        '''
+        return Route(self.__service_locator.locate(NotImplementedSequenceBuilder))
 
     def get_auth_influencer(self):
-        return Route(
-            before_hooks=[
+        '''
+            TODO:
                 self.__hooks_facade.get_user_before_hooks().set_auth_user_id
-            ],
-            action=self.__influencer_ctr.get,
-            after_hooks=[
+                self.__influencer_ctr.get,
                 self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
                 self.__hooks_facade.get_influencer_after_hooks().tag_bucket_url_to_images,
                 self.__hooks_facade.get_user_after_hooks().format_values_and_categories
-            ]
-        )
+        '''
+        return Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder))
 
     def update_brand_image(self):
-        return Route(
-            before_hooks=[
+        '''
+            TODO:
                 self.__hooks_facade.get_before_common_hooks().set_body,
                 self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
                 self.__hooks_facade.get_brand_before_hooks().validate_image_key,
                 self.__hooks_facade.get_brand_before_hooks().upload_image
-            ],
-            action=self.__brand_ctr.update_image_field_for_user,
-            after_hooks=[
+                self.__brand_ctr.update_image_field_for_user,
                 self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
                 self.__hooks_facade.get_brand_after_hooks().tag_bucket_url_to_images,
                 self.__hooks_facade.get_user_after_hooks().format_values_and_categories
-            ]
-        )
+        '''
+        return Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder))
 
     def update_brand(self):
-        return Route(
-            before_hooks=[
+        '''
+            TODO:
                 self.__hooks_facade.get_before_common_hooks().set_body,
                 self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
                 self.__hooks_facade.get_brand_before_hooks().validate_brand,
                 self.__hooks_facade.get_user_before_hooks().set_categories_and_values
-            ],
-            action=self.__brand_ctr.update_for_user,
-            after_hooks=[
+                self.__brand_ctr.update_for_user,
                 self.__hooks_facade.get_brand_after_hooks().set_brand_claims,
                 self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
                 self.__hooks_facade.get_brand_after_hooks().tag_bucket_url_to_images,
                 self.__hooks_facade.get_user_after_hooks().format_values_and_categories
-            ]
-        )
+        '''
+        return Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder))
 
     def create_brand(self):
-        return Route(
-            before_hooks=[
+        '''
+            TODO:
                 self.__hooks_facade.get_before_common_hooks().set_body,
                 self.__hooks_facade.get_user_before_hooks().set_auth_user_id,
                 self.__hooks_facade.get_brand_before_hooks().validate_brand,
                 self.__hooks_facade.get_user_before_hooks().set_categories_and_values
-            ],
-            action=self.__brand_ctr.create,
-            after_hooks=[
+                self.__brand_ctr.create,
                 self.__hooks_facade.get_brand_after_hooks().set_brand_claims,
                 self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
                 self.__hooks_facade.get_brand_after_hooks().tag_bucket_url_to_images,
                 self.__hooks_facade.get_user_after_hooks().format_values_and_categories
-            ]
-        )
+        '''
+        return Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder))
 
     def get_auth_brand(self):
-        return Route(
-            before_hooks=[
+        '''
+            TODO:
                 self.__hooks_facade.get_user_before_hooks().set_auth_user_id
-            ],
-            action=self.__brand_ctr.get,
-            after_hooks=[
+                self.__brand_ctr.get,
                 self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
                 self.__hooks_facade.get_brand_after_hooks().tag_bucket_url_to_images,
                 self.__hooks_facade.get_user_after_hooks().format_values_and_categories
-            ]
-        )
+        '''
+        return Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder))
 
     def get_influencer_by_id(self):
-        return Route(
-            before_hooks=[
+        '''
+            TODO:
                 self.__hooks_facade.get_influencer_before_hooks().validate_uuid
-            ],
-            action=self.__influencer_ctr.get_by_id,
-            after_hooks=[
+                self.__influencer_ctr.get_by_id,
                 self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
                 self.__hooks_facade.get_influencer_after_hooks().tag_bucket_url_to_images,
                 self.__hooks_facade.get_user_after_hooks().format_values_and_categories
-            ])
+        '''
+        return Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder))
 
     def get_brand_by_id(self):
-        return Route(
-            before_hooks=[
+        '''
+            TODO:
                 self.__hooks_facade.get_brand_before_hooks().validate_uuid
-            ],
-            action=self.__brand_ctr.get_by_id,
-            after_hooks=[
+                self.__brand_ctr.get_by_id,
                 self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response,
                 self.__hooks_facade.get_brand_after_hooks().tag_bucket_url_to_images,
                 self.__hooks_facade.get_user_after_hooks().format_values_and_categories
-            ])
+        '''
+        return Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder))
 
     def get_all_influencers(self):
-        return Route(
-            action=self.__influencer_ctr.get_all,
-            after_hooks=[
+        '''
+            TODO:
+                self.__influencer_ctr.get_all,
                 self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response_collection,
                 self.__hooks_facade.get_influencer_after_hooks().tag_bucket_url_to_images_collection,
                 self.__hooks_facade.get_user_after_hooks().format_values_and_categories_collection
-            ])
+        '''
+        return Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder))
 
     def get_all_brands(self):
-        return Route(
-            action=self.__brand_ctr.get_all,
-            after_hooks=[
+        '''
+            TODO:
+                self.__brand_ctr.get_all,
                 self.__hooks_facade.get_user_after_hooks().tag_auth_user_claims_to_response_collection,
                 self.__hooks_facade.get_brand_after_hooks().tag_bucket_url_to_images_collection,
                 self.__hooks_facade.get_user_after_hooks().format_values_and_categories_collection
-            ])
+        '''
+        return Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder))

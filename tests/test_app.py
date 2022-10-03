@@ -3,7 +3,7 @@ from typing import Union
 from unittest import TestCase
 from unittest.mock import Mock, MagicMock
 
-from callee import Any, Captor
+from callee import Any
 from cfn_tools import load_yaml
 from simple_injection import ServiceCollection
 
@@ -14,6 +14,9 @@ from src.web.hooks import CommonBeforeHooks, UserAfterHooks, BrandAfterHooks, Us
     CampaignBeforeHooks, CampaignAfterHooks, BrandBeforeHooks, InfluencerAfterHooks, InfluencerBeforeHooks
 from src.web.middleware import MiddlewarePipeline
 from src.web.routing import Dispatcher
+from src.web.sequences import NotImplementedSequenceBuilder, UpdateImageForCampaignSequenceBuilder, \
+    UpdateCampaignSequenceBuilder, CreateCampaignSequenceBuilder, GetCampaignByIdSequenceBuilder, \
+    GetCampaignsForBrandSequenceBuilder
 from tests import get_as_json
 
 
@@ -370,17 +373,7 @@ class TestRoutes(TestCase):
         self.__mock_middleware_pipeline \
             .execute_middleware \
             .assert_called_once_with(context=Any(),
-                                     middleware=[
-                                         self.__ioc.resolve(CommonBeforeHooks).set_body,
-                                         self.__ioc.resolve(UserBeforeHooks).set_auth_user_id,
-                                         self.__ioc.resolve(CampaignBeforeHooks).validate_campaign,
-                                         self.__ioc.resolve(CampaignBeforeHooks).map_campaign_state,
-                                         self.__ioc.resolve(CampaignBeforeHooks).map_campaign_categories_and_values,
-                                         self.__ioc.resolve(CampaignController).create,
-                                         self.__ioc.resolve(CampaignAfterHooks).format_values_and_categories,
-                                         self.__ioc.resolve(CampaignAfterHooks).tag_bucket_url_to_images,
-                                         self.__ioc.resolve(CampaignAfterHooks).format_campaign_state
-                                     ])
+                                     sequence=self.__ioc.resolve(CreateCampaignSequenceBuilder))
 
     def test_get_campaign_by_id(self):
         # arrange
@@ -398,13 +391,7 @@ class TestRoutes(TestCase):
         self.__mock_middleware_pipeline \
             .execute_middleware \
             .assert_called_once_with(context=Any(),
-                                     middleware=[
-                                         self.__ioc.resolve(CampaignBeforeHooks).validate_id,
-                                         self.__ioc.resolve(CampaignController).get_by_id,
-                                         self.__ioc.resolve(CampaignAfterHooks).format_values_and_categories,
-                                         self.__ioc.resolve(CampaignAfterHooks).tag_bucket_url_to_images,
-                                         self.__ioc.resolve(CampaignAfterHooks).format_campaign_state
-                                     ])
+                                     sequence=self.__ioc.resolve(GetCampaignByIdSequenceBuilder))
 
     def test_get_auth_brand_campaigns(self):
         # arrange
@@ -422,13 +409,7 @@ class TestRoutes(TestCase):
         self.__mock_middleware_pipeline \
             .execute_middleware \
             .assert_called_once_with(context=Any(),
-                                     middleware=[
-                                         self.__ioc.resolve(UserBeforeHooks).set_auth_user_id,
-                                         self.__ioc.resolve(CampaignController).get_for_brand,
-                                         self.__ioc.resolve(CampaignAfterHooks).format_values_and_categories_collection,
-                                         self.__ioc.resolve(CampaignAfterHooks).tag_bucket_url_to_images_collection,
-                                         self.__ioc.resolve(CampaignAfterHooks).format_campaign_state_collection
-                                     ])
+                                     sequence=self.__ioc.resolve(GetCampaignsForBrandSequenceBuilder))
 
     def test_update_brand_auth_campaign_by_id(self):
         # arrange
@@ -446,20 +427,7 @@ class TestRoutes(TestCase):
         self.__mock_middleware_pipeline \
             .execute_middleware \
             .assert_called_once_with(context=Any(),
-                                     middleware=[
-                                         self.__ioc.resolve(CommonBeforeHooks).set_body,
-                                         self.__ioc.resolve(UserBeforeHooks).set_auth_user_id,
-                                         self.__ioc.resolve(CampaignBeforeHooks).validate_id,
-                                         self.__ioc.resolve(CampaignBeforeHooks).validate_campaign,
-                                         self.__ioc.resolve(BrandBeforeHooks).validate_auth_brand,
-                                         self.__ioc.resolve(CampaignBeforeHooks).map_campaign_state,
-                                         self.__ioc.resolve(CampaignBeforeHooks).map_campaign_categories_and_values,
-                                         self.__ioc.resolve(CampaignController).update_campaign,
-                                         self.__ioc.resolve(CampaignAfterHooks).validate_campaign_belongs_to_brand,
-                                         self.__ioc.resolve(CampaignAfterHooks).format_values_and_categories,
-                                         self.__ioc.resolve(CampaignAfterHooks).tag_bucket_url_to_images,
-                                         self.__ioc.resolve(CampaignAfterHooks).format_campaign_state
-                                     ])
+                                     sequence=self.__ioc.resolve(UpdateCampaignSequenceBuilder))
 
     def test_delete_brand_auth_campaign_by_id(self):
         self.__assert_not_implemented(route="DELETE /brands/me/campaigns/{campaign_id}")
@@ -480,18 +448,7 @@ class TestRoutes(TestCase):
         self.__mock_middleware_pipeline \
             .execute_middleware \
             .assert_called_once_with(context=Any(),
-                                     middleware=[
-                                         self.__ioc.resolve(CommonBeforeHooks).set_body,
-                                         self.__ioc.resolve(UserBeforeHooks).set_auth_user_id,
-                                         self.__ioc.resolve(CampaignBeforeHooks).validate_id,
-                                         self.__ioc.resolve(BrandBeforeHooks).validate_auth_brand,
-                                         self.__ioc.resolve(CampaignBeforeHooks).validate_image_key,
-                                         self.__ioc.resolve(CampaignBeforeHooks).upload_image,
-                                         self.__ioc.resolve(CampaignController).update_campaign_image,
-                                         self.__ioc.resolve(CampaignAfterHooks).format_values_and_categories,
-                                         self.__ioc.resolve(CampaignAfterHooks).tag_bucket_url_to_images,
-                                         self.__ioc.resolve(CampaignAfterHooks).format_campaign_state
-                                     ])
+                                     sequence=self.__ioc.resolve(UpdateImageForCampaignSequenceBuilder))
 
     def test_get_notification_by_id(self):
         self.__assert_not_implemented(route="GET /notifications/{notification_id}")
@@ -535,7 +492,10 @@ class TestRoutes(TestCase):
             route_paths = sorted([*Dispatcher(brand_ctr=Mock(),
                                               campaign_ctr=Mock(),
                                               hooks_facade=Mock(),
-                                              influencer_ctr=Mock()).dispatch_route_to_ctr])
+                                              influencer_ctr=Mock(),
+                                              update_image_for_campaign_sequence=Mock(),
+                                              not_implemented_sequence_builder=Mock(),
+                                              update_campaign_sequence_builder=Mock()).dispatch_route_to_ctr])
             assert paths == route_paths
 
     def __assert_service_endpoint_200(self,
@@ -597,12 +557,8 @@ class TestRoutes(TestCase):
                   cognito_auth_service=Mock())
 
         # assert
-        captor = Captor()
         with self.subTest(msg="pipeline executes once"):
-            self.__mock_middleware_pipeline.execute_middleware.assert_called_once_with(context=Any(),
-                                                                                   middleware=captor)
-
-        # assert
-        with self.subTest(msg="response is not implemented"):
-            captor.arg[0](context)
-            assert context.response.status_code == 405
+            self.__mock_middleware_pipeline \
+                .execute_middleware \
+                .assert_called_once_with(context=Any(),
+                                         sequence=self.__ioc.resolve(NotImplementedSequenceBuilder))
