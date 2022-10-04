@@ -16,7 +16,9 @@ from src.web.middleware import MiddlewarePipeline
 from src.web.routing import Dispatcher
 from src.web.sequences import NotImplementedSequenceBuilder, UpdateImageForCampaignSequenceBuilder, \
     UpdateCampaignSequenceBuilder, CreateCampaignSequenceBuilder, GetCampaignByIdSequenceBuilder, \
-    GetCampaignsForBrandSequenceBuilder
+    GetCampaignsForBrandSequenceBuilder, UpdateInfluencerImageSequenceBuilder, UpdateInfluencerSequenceBuilder, \
+    CreateInfluencerSequenceBuilder, GetAuthInfluencerSequenceBuilder, GetInfluencerByIdSequenceBuilder, \
+    GetAllInfluencersSequenceBuilder
 from tests import get_as_json
 
 
@@ -113,12 +115,7 @@ class TestRoutes(TestCase):
         self.__mock_middleware_pipeline \
             .execute_middleware \
             .assert_called_once_with(context=Any(),
-                                     middleware=[
-                                         self.__ioc.resolve(InfluencerController).get_all,
-                                         self.__ioc.resolve(UserAfterHooks).tag_auth_user_claims_to_response_collection,
-                                         self.__ioc.resolve(InfluencerAfterHooks).tag_bucket_url_to_images_collection,
-                                         self.__ioc.resolve(UserAfterHooks).format_values_and_categories_collection
-                                     ])
+                                     sequence=self.__ioc.resolve(GetAllInfluencersSequenceBuilder))
 
     def test_get_influencer_by_id(self):
         # arrange
@@ -136,13 +133,7 @@ class TestRoutes(TestCase):
         self.__mock_middleware_pipeline \
             .execute_middleware \
             .assert_called_once_with(context=Any(),
-                                     middleware=[
-                                         self.__ioc.resolve(InfluencerBeforeHooks).validate_uuid,
-                                         self.__ioc.resolve(InfluencerController).get_by_id,
-                                         self.__ioc.resolve(UserAfterHooks).tag_auth_user_claims_to_response,
-                                         self.__ioc.resolve(InfluencerAfterHooks).tag_bucket_url_to_images,
-                                         self.__ioc.resolve(UserAfterHooks).format_values_and_categories
-                                     ])
+                                     sequence=self.__ioc.resolve(GetInfluencerByIdSequenceBuilder))
 
     def test_get_auth_brand(self):
         # arrange
@@ -267,13 +258,7 @@ class TestRoutes(TestCase):
         self.__mock_middleware_pipeline \
             .execute_middleware \
             .assert_called_once_with(context=Any(),
-                                     middleware=[
-                                         self.__ioc.resolve(UserBeforeHooks).set_auth_user_id,
-                                         self.__ioc.resolve(InfluencerController).get,
-                                         self.__ioc.resolve(UserAfterHooks).tag_auth_user_claims_to_response,
-                                         self.__ioc.resolve(InfluencerAfterHooks).tag_bucket_url_to_images,
-                                         self.__ioc.resolve(UserAfterHooks).format_values_and_categories
-                                     ])
+                                     sequence=self.__ioc.resolve(GetAuthInfluencerSequenceBuilder))
 
     def test_create_auth_influencer(self):
         # arrange
@@ -291,17 +276,7 @@ class TestRoutes(TestCase):
         self.__mock_middleware_pipeline \
             .execute_middleware \
             .assert_called_once_with(context=Any(),
-                                     middleware=[
-                                         self.__ioc.resolve(CommonBeforeHooks).set_body,
-                                         self.__ioc.resolve(UserBeforeHooks).set_auth_user_id,
-                                         self.__ioc.resolve(InfluencerBeforeHooks).validate_influencer,
-                                         self.__ioc.resolve(UserBeforeHooks).set_categories_and_values,
-                                         self.__ioc.resolve(InfluencerController).create,
-                                         self.__ioc.resolve(InfluencerAfterHooks).set_influencer_claims,
-                                         self.__ioc.resolve(UserAfterHooks).tag_auth_user_claims_to_response,
-                                         self.__ioc.resolve(InfluencerAfterHooks).tag_bucket_url_to_images,
-                                         self.__ioc.resolve(UserAfterHooks).format_values_and_categories
-                                     ])
+                                     sequence=self.__ioc.resolve(CreateInfluencerSequenceBuilder))
 
     def test_update_auth_influencer_image(self):
         # arrange
@@ -319,16 +294,7 @@ class TestRoutes(TestCase):
         self.__mock_middleware_pipeline \
             .execute_middleware \
             .assert_called_once_with(context=Any(),
-                                     middleware=[
-                                         self.__ioc.resolve(CommonBeforeHooks).set_body,
-                                         self.__ioc.resolve(UserBeforeHooks).set_auth_user_id,
-                                         self.__ioc.resolve(InfluencerBeforeHooks).validate_image_key,
-                                         self.__ioc.resolve(InfluencerBeforeHooks).upload_image,
-                                         self.__ioc.resolve(InfluencerController).update_image_field_for_user,
-                                         self.__ioc.resolve(UserAfterHooks).tag_auth_user_claims_to_response,
-                                         self.__ioc.resolve(InfluencerAfterHooks).tag_bucket_url_to_images,
-                                         self.__ioc.resolve(UserAfterHooks).format_values_and_categories
-                                     ])
+                                     sequence=self.__ioc.resolve(UpdateInfluencerImageSequenceBuilder))
 
     def test_update_auth_influencer(self):
         # arrange
@@ -346,17 +312,7 @@ class TestRoutes(TestCase):
         self.__mock_middleware_pipeline \
             .execute_middleware \
             .assert_called_once_with(context=Any(),
-                                     middleware=[
-                                         self.__ioc.resolve(CommonBeforeHooks).set_body,
-                                         self.__ioc.resolve(UserBeforeHooks).set_auth_user_id,
-                                         self.__ioc.resolve(InfluencerBeforeHooks).validate_influencer,
-                                         self.__ioc.resolve(UserBeforeHooks).set_categories_and_values,
-                                         self.__ioc.resolve(InfluencerController).update_for_user,
-                                         self.__ioc.resolve(InfluencerAfterHooks).set_influencer_claims,
-                                         self.__ioc.resolve(UserAfterHooks).tag_auth_user_claims_to_response,
-                                         self.__ioc.resolve(InfluencerAfterHooks).tag_bucket_url_to_images,
-                                         self.__ioc.resolve(UserAfterHooks).format_values_and_categories
-                                     ])
+                                     sequence=self.__ioc.resolve(UpdateInfluencerSequenceBuilder))
 
     def test_create_auth_brand_campaign(self):  # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()

@@ -1,7 +1,7 @@
 from src.web import FluentSequenceBuilder, PinfluencerContext
-from src.web.controllers import CampaignController
+from src.web.controllers import CampaignController, InfluencerController
 from src.web.hooks import CommonBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, UserAfterHooks, UserBeforeHooks, \
-    BrandBeforeHooks, BrandAfterHooks
+    BrandBeforeHooks, BrandAfterHooks, InfluencerBeforeHooks, InfluencerAfterHooks
 
 
 class PreGenericUpdateCreateSubsequenceBuilder(FluentSequenceBuilder):
@@ -195,6 +195,136 @@ class GetCampaignsForBrandSequenceBuilder(FluentSequenceBuilder):
             ._add_command(command=self.__campaign_controller.get_for_brand) \
             ._add_sequence_builder(sequence_builder=self.__post_multiple_campaign_sequence) \
             ._add_command(command=self.__campaign_after_hooks.tag_bucket_url_to_images_collection)
+
+
+class UpdateInfluencerImageSequenceBuilder(FluentSequenceBuilder):
+
+    def __init__(self, pre_update_create_subsequence_builder: PreGenericUpdateCreateSubsequenceBuilder,
+                 influencer_before_hooks: InfluencerBeforeHooks,
+                 influencer_controller: InfluencerController,
+                 influencer_after_hooks: InfluencerAfterHooks,
+                 post_user_single_sequence_builder: PostSingleUserSubsequenceBuilder):
+        super().__init__()
+        self.__post_user_single_sequence_builder = post_user_single_sequence_builder
+        self.__influencer_after_hooks = influencer_after_hooks
+        self.__influencer_controller = influencer_controller
+        self.__influencer_before_hooks = influencer_before_hooks
+        self.__pre_update_create_subsequence_builder = pre_update_create_subsequence_builder
+
+    def build(self):
+        self._add_sequence_builder(sequence_builder=self.__pre_update_create_subsequence_builder)\
+            ._add_command(command=self.__influencer_before_hooks.validate_image_key) \
+            ._add_command(command=self.__influencer_before_hooks.upload_image) \
+            ._add_command(command=self.__influencer_controller.update_image_field_for_user) \
+            ._add_sequence_builder(sequence_builder=self.__post_user_single_sequence_builder) \
+            ._add_command(command=self.__influencer_after_hooks.tag_bucket_url_to_images)
+
+
+class UpdateInfluencerSequenceBuilder(FluentSequenceBuilder):
+
+    def __init__(self, pre_update_create_subsequence_builder: PreGenericUpdateCreateSubsequenceBuilder,
+                 influencer_before_hooks: InfluencerBeforeHooks,
+                 influencer_controller: InfluencerController,
+                 influencer_after_hooks: InfluencerAfterHooks,
+                 post_user_single_sequence_builder: PostSingleUserSubsequenceBuilder,
+                 user_before_hooks: UserBeforeHooks):
+        super().__init__()
+        self.__user_before_hooks = user_before_hooks
+        self.__post_user_single_sequence_builder = post_user_single_sequence_builder
+        self.__influencer_after_hooks = influencer_after_hooks
+        self.__influencer_controller = influencer_controller
+        self.__influencer_before_hooks = influencer_before_hooks
+        self.__pre_update_create_subsequence_builder = pre_update_create_subsequence_builder
+
+    def build(self):
+        self._add_sequence_builder(sequence_builder=self.__pre_update_create_subsequence_builder)\
+            ._add_command(command=self.__user_before_hooks.set_categories_and_values) \
+            ._add_command(command=self.__influencer_before_hooks.validate_influencer) \
+            ._add_command(command=self.__influencer_controller.update_for_user) \
+            ._add_command(command=self.__influencer_after_hooks.set_influencer_claims) \
+            ._add_sequence_builder(sequence_builder=self.__post_user_single_sequence_builder) \
+            ._add_command(command=self.__influencer_after_hooks.tag_bucket_url_to_images)
+
+
+class CreateInfluencerSequenceBuilder(FluentSequenceBuilder):
+
+    def __init__(self, pre_update_create_subsequence_builder: PreGenericUpdateCreateSubsequenceBuilder,
+                 influencer_before_hooks: InfluencerBeforeHooks,
+                 influencer_controller: InfluencerController,
+                 influencer_after_hooks: InfluencerAfterHooks,
+                 post_user_single_sequence_builder: PostSingleUserSubsequenceBuilder,
+                 user_before_hooks: UserBeforeHooks):
+        super().__init__()
+        self.__user_before_hooks = user_before_hooks
+        self.__post_user_single_sequence_builder = post_user_single_sequence_builder
+        self.__influencer_after_hooks = influencer_after_hooks
+        self.__influencer_controller = influencer_controller
+        self.__influencer_before_hooks = influencer_before_hooks
+        self.__pre_update_create_subsequence_builder = pre_update_create_subsequence_builder
+
+    def build(self):
+        self._add_sequence_builder(sequence_builder=self.__pre_update_create_subsequence_builder) \
+            ._add_command(command=self.__user_before_hooks.set_categories_and_values) \
+            ._add_command(command=self.__influencer_before_hooks.validate_influencer) \
+            ._add_command(command=self.__influencer_controller.create) \
+            ._add_command(command=self.__influencer_after_hooks.set_influencer_claims) \
+            ._add_sequence_builder(sequence_builder=self.__post_user_single_sequence_builder) \
+            ._add_command(command=self.__influencer_after_hooks.tag_bucket_url_to_images)
+
+
+class GetAuthInfluencerSequenceBuilder(FluentSequenceBuilder):
+
+    def __init__(self, influencer_controller: InfluencerController,
+                 influencer_after_hooks: InfluencerAfterHooks,
+                 post_user_single_sequence_builder: PostSingleUserSubsequenceBuilder,
+                 user_before_hooks: UserBeforeHooks):
+        super().__init__()
+        self.__user_before_hooks = user_before_hooks
+        self.__post_user_single_sequence_builder = post_user_single_sequence_builder
+        self.__influencer_after_hooks = influencer_after_hooks
+        self.__influencer_controller = influencer_controller
+
+    def build(self):
+        self._add_command(command=self.__user_before_hooks.set_auth_user_id) \
+            ._add_command(command=self.__influencer_controller.get) \
+            ._add_sequence_builder(sequence_builder=self.__post_user_single_sequence_builder) \
+            ._add_command(command=self.__influencer_after_hooks.tag_bucket_url_to_images)
+
+
+class GetInfluencerByIdSequenceBuilder(FluentSequenceBuilder):
+
+    def __init__(self, influencer_controller: InfluencerController,
+                 influencer_after_hooks: InfluencerAfterHooks,
+                 post_user_single_sequence_builder: PostSingleUserSubsequenceBuilder,
+                 influencer_before_hooks: InfluencerBeforeHooks):
+        super().__init__()
+        self.__influencer_before_hooks = influencer_before_hooks
+        self.__post_user_single_sequence_builder = post_user_single_sequence_builder
+        self.__influencer_after_hooks = influencer_after_hooks
+        self.__influencer_controller = influencer_controller
+
+    def build(self):
+        self._add_command(command=self.__influencer_before_hooks.validate_uuid) \
+            ._add_command(command=self.__influencer_controller.get_by_id) \
+            ._add_sequence_builder(sequence_builder=self.__post_user_single_sequence_builder) \
+            ._add_command(command=self.__influencer_after_hooks.tag_bucket_url_to_images)
+
+
+class GetAllInfluencersSequenceBuilder(FluentSequenceBuilder):
+
+    def __init__(self,
+                 influencer_controller: InfluencerController,
+                 influencer_after_hooks: InfluencerAfterHooks,
+                 post_user_multiple_sequence_builder: PostMultipleUserSubsequenceBuilder):
+        super().__init__()
+        self.__post_user_multiple_sequence_builder = post_user_multiple_sequence_builder
+        self.__influencer_after_hooks = influencer_after_hooks
+        self.__influencer_controller = influencer_controller
+
+    def build(self):
+        self._add_command(command=self.__influencer_controller.get_all)\
+            ._add_sequence_builder(sequence_builder=self.__post_user_multiple_sequence_builder) \
+            ._add_command(command=self.__influencer_after_hooks.tag_bucket_url_to_images_collection)
 
 
 class NotImplementedSequenceBuilder(FluentSequenceBuilder):

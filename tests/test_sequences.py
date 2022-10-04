@@ -4,13 +4,15 @@ from unittest.mock import Mock
 from simple_injection import ServiceCollection
 
 from src.app import bootstrap
-from src.web.controllers import CampaignController
+from src.web.controllers import CampaignController, InfluencerController
 from src.web.hooks import CommonBeforeHooks, UserBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, UserAfterHooks, \
-    BrandBeforeHooks
+    BrandBeforeHooks, InfluencerBeforeHooks, InfluencerAfterHooks
 from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdateCreateCampaignSubsequenceBuilder, \
     PostSingleCampaignSubsequenceBuilder, PostMultipleCampaignSubsequenceBuilder, PostSingleUserSubsequenceBuilder, \
     PostMultipleUserSubsequenceBuilder, UpdateImageForCampaignSequenceBuilder, UpdateCampaignSequenceBuilder, \
-    CreateCampaignSequenceBuilder, GetCampaignByIdSequenceBuilder, GetCampaignsForBrandSequenceBuilder
+    CreateCampaignSequenceBuilder, GetCampaignByIdSequenceBuilder, GetCampaignsForBrandSequenceBuilder, \
+    UpdateInfluencerImageSequenceBuilder, UpdateInfluencerSequenceBuilder, CreateInfluencerSequenceBuilder, \
+    GetAuthInfluencerSequenceBuilder, GetInfluencerByIdSequenceBuilder, GetAllInfluencersSequenceBuilder
 
 
 def setup(ioc: ServiceCollection):
@@ -235,3 +237,130 @@ class TestGetCampaignsForBrandSequenceBuilder(TestCase):
                                               ioc.resolve(CampaignController).get_for_brand,
                                               ioc.resolve(PostMultipleCampaignSubsequenceBuilder),
                                               ioc.resolve(CampaignAfterHooks).tag_bucket_url_to_images_collection])
+
+
+class TestUpdateImageForInfluencerSequenceBuilder(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(UpdateInfluencerImageSequenceBuilder)
+
+        # act
+        sut.build()
+
+        # assert
+        with self.subTest(msg="components match"):
+            self.maxDiff = None
+            self.assertEqual(sut.components, [ioc.resolve(PreGenericUpdateCreateSubsequenceBuilder),
+                                              ioc.resolve(InfluencerBeforeHooks).validate_image_key,
+                                              ioc.resolve(InfluencerBeforeHooks).upload_image,
+                                              ioc.resolve(InfluencerController).update_image_field_for_user,
+                                              ioc.resolve(PostSingleUserSubsequenceBuilder),
+                                              ioc.resolve(InfluencerAfterHooks).tag_bucket_url_to_images])
+
+
+class TestUpdateInfluencerSequenceBuilder(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(UpdateInfluencerSequenceBuilder)
+
+        # act
+        sut.build()
+
+        # assert
+        with self.subTest(msg="components match"):
+            self.maxDiff = None
+            self.assertEqual(sut.components, [ioc.resolve(PreGenericUpdateCreateSubsequenceBuilder),
+                                              ioc.resolve(UserBeforeHooks).set_categories_and_values,
+                                              ioc.resolve(InfluencerBeforeHooks).validate_influencer,
+                                              ioc.resolve(InfluencerController).update_for_user,
+                                              ioc.resolve(InfluencerAfterHooks).set_influencer_claims,
+                                              ioc.resolve(PostSingleUserSubsequenceBuilder),
+                                              ioc.resolve(InfluencerAfterHooks).tag_bucket_url_to_images])
+
+
+class TestCreateInfluencerSequenceBuilder(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(CreateInfluencerSequenceBuilder)
+
+        # act
+        sut.build()
+
+        # assert
+        with self.subTest(msg="components match"):
+            self.maxDiff = None
+            self.assertEqual(sut.components, [ioc.resolve(PreGenericUpdateCreateSubsequenceBuilder),
+                                              ioc.resolve(UserBeforeHooks).set_categories_and_values,
+                                              ioc.resolve(InfluencerBeforeHooks).validate_influencer,
+                                              ioc.resolve(InfluencerController).create,
+                                              ioc.resolve(InfluencerAfterHooks).set_influencer_claims,
+                                              ioc.resolve(PostSingleUserSubsequenceBuilder),
+                                              ioc.resolve(InfluencerAfterHooks).tag_bucket_url_to_images])
+
+
+class TestGetAuthInfluencerSequenceBuilder(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(GetAuthInfluencerSequenceBuilder)
+
+        # act
+        sut.build()
+
+        # assert
+        with self.subTest(msg="components match"):
+            self.maxDiff = None
+            self.assertEqual(sut.components, [ioc.resolve(UserBeforeHooks).set_auth_user_id,
+                                              ioc.resolve(InfluencerController).get,
+                                              ioc.resolve(PostSingleUserSubsequenceBuilder),
+                                              ioc.resolve(InfluencerAfterHooks).tag_bucket_url_to_images])
+
+
+class TestGetInfluencerByIdSequenceBuilder(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(GetInfluencerByIdSequenceBuilder)
+
+        # act
+        sut.build()
+
+        # assert
+        with self.subTest(msg="components match"):
+            self.maxDiff = None
+            self.assertEqual(sut.components, [ioc.resolve(InfluencerBeforeHooks).validate_uuid,
+                                              ioc.resolve(InfluencerController).get_by_id,
+                                              ioc.resolve(PostSingleUserSubsequenceBuilder),
+                                              ioc.resolve(InfluencerAfterHooks).tag_bucket_url_to_images])
+
+
+class TestGetAllInfluencersSequenceBuilder(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(GetAllInfluencersSequenceBuilder)
+
+        # act
+        sut.build()
+
+        # assert
+        with self.subTest(msg="components match"):
+            self.maxDiff = None
+            self.assertEqual(sut.components, [ioc.resolve(InfluencerController).get_all,
+                                              ioc.resolve(PostMultipleUserSubsequenceBuilder),
+                                              ioc.resolve(InfluencerAfterHooks).tag_bucket_url_to_images_collection])

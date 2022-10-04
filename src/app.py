@@ -21,7 +21,9 @@ from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdat
     PostSingleCampaignSubsequenceBuilder, PostMultipleCampaignSubsequenceBuilder, PostSingleUserSubsequenceBuilder, \
     PostMultipleUserSubsequenceBuilder, UpdateImageForCampaignSequenceBuilder, NotImplementedSequenceBuilder, \
     UpdateCampaignSequenceBuilder, CreateCampaignSequenceBuilder, GetCampaignByIdSequenceBuilder, \
-    GetCampaignsForBrandSequenceBuilder
+    GetCampaignsForBrandSequenceBuilder, UpdateInfluencerImageSequenceBuilder, UpdateInfluencerSequenceBuilder, \
+    CreateInfluencerSequenceBuilder, GetAuthInfluencerSequenceBuilder, GetInfluencerByIdSequenceBuilder, \
+    GetAllInfluencersSequenceBuilder
 
 
 def lambda_handler(event, context):
@@ -165,3 +167,9 @@ def register_sequences(ioc: ServiceCollection):
     ioc.add_singleton(CreateCampaignSequenceBuilder)
     ioc.add_singleton(GetCampaignByIdSequenceBuilder)
     ioc.add_singleton(GetCampaignsForBrandSequenceBuilder)
+    ioc.add_singleton(UpdateInfluencerImageSequenceBuilder)
+    ioc.add_singleton(UpdateInfluencerSequenceBuilder)
+    ioc.add_singleton(CreateInfluencerSequenceBuilder)
+    ioc.add_singleton(GetAuthInfluencerSequenceBuilder)
+    ioc.add_singleton(GetInfluencerByIdSequenceBuilder)
+    ioc.add_singleton(GetAllInfluencersSequenceBuilder)
