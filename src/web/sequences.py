@@ -1,5 +1,5 @@
 from src.web import FluentSequenceBuilder, PinfluencerContext
-from src.web.controllers import CampaignController, InfluencerController
+from src.web.controllers import CampaignController, InfluencerController, BrandController
 from src.web.hooks import CommonBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, UserAfterHooks, UserBeforeHooks, \
     BrandBeforeHooks, BrandAfterHooks, InfluencerBeforeHooks, InfluencerAfterHooks
 
@@ -325,6 +325,135 @@ class GetAllInfluencersSequenceBuilder(FluentSequenceBuilder):
         self._add_command(command=self.__influencer_controller.get_all)\
             ._add_sequence_builder(sequence_builder=self.__post_user_multiple_sequence_builder) \
             ._add_command(command=self.__influencer_after_hooks.tag_bucket_url_to_images_collection)
+
+
+class UpdateBrandImageSequenceBuilder(FluentSequenceBuilder):
+
+    def __init__(self, pre_update_create_subsequence_builder: PreGenericUpdateCreateSubsequenceBuilder,
+                 brand_before_hooks: BrandBeforeHooks,
+                 brand_controller: BrandController,
+                 brand_after_hooks: BrandAfterHooks,
+                 post_single_user_subsequence_builder: PostSingleUserSubsequenceBuilder):
+        super().__init__()
+        self.__post_single_user_subsequence_builder = post_single_user_subsequence_builder
+        self.__brand_after_hooks = brand_after_hooks
+        self.__brand_controller = brand_controller
+        self.__brand_before_hooks = brand_before_hooks
+        self.__pre_update_create_subsequence_builder = pre_update_create_subsequence_builder
+
+    def build(self):
+        self._add_sequence_builder(sequence_builder=self.__pre_update_create_subsequence_builder)\
+            ._add_command(command=self.__brand_before_hooks.validate_image_key)\
+            ._add_command(command=self.__brand_before_hooks.upload_image)\
+            ._add_command(command=self.__brand_controller.update_image_field_for_user) \
+            ._add_sequence_builder(sequence_builder=self.__post_single_user_subsequence_builder)\
+            ._add_command(command=self.__brand_after_hooks.tag_bucket_url_to_images)
+
+
+class UpdateBrandSequenceBuilder(FluentSequenceBuilder):
+
+    def __init__(self, pre_update_create_subsequence_builder: PreGenericUpdateCreateSubsequenceBuilder,
+                 brand_before_hooks: BrandBeforeHooks,
+                 brand_controller: BrandController,
+                 brand_after_hooks: BrandAfterHooks,
+                 user_before_hooks: UserBeforeHooks,
+                 post_single_user_subsequence_builder: PostSingleUserSubsequenceBuilder):
+        super().__init__()
+        self.__user_before_hooks = user_before_hooks
+        self.__post_single_user_subsequence_builder = post_single_user_subsequence_builder
+        self.__brand_after_hooks = brand_after_hooks
+        self.__brand_controller = brand_controller
+        self.__brand_before_hooks = brand_before_hooks
+        self.__pre_update_create_subsequence_builder = pre_update_create_subsequence_builder
+
+    def build(self):
+        self._add_sequence_builder(sequence_builder=self.__pre_update_create_subsequence_builder)\
+            ._add_command(command=self.__user_before_hooks.set_categories_and_values) \
+            ._add_command(command=self.__brand_before_hooks.validate_brand) \
+            ._add_command(command=self.__brand_controller.update_for_user) \
+            ._add_command(command=self.__brand_after_hooks.set_brand_claims)\
+            ._add_sequence_builder(sequence_builder=self.__post_single_user_subsequence_builder) \
+            ._add_command(command=self.__brand_after_hooks.tag_bucket_url_to_images)
+
+
+class CreateBrandSequenceBuilder(FluentSequenceBuilder):
+
+    def __init__(self, pre_update_create_subsequence_builder: PreGenericUpdateCreateSubsequenceBuilder,
+                 brand_before_hooks: BrandBeforeHooks,
+                 brand_controller: BrandController,
+                 brand_after_hooks: BrandAfterHooks,
+                 user_before_hooks: UserBeforeHooks,
+                 post_single_user_subsequence_builder: PostSingleUserSubsequenceBuilder):
+        super().__init__()
+        self.__user_before_hooks = user_before_hooks
+        self.__post_single_user_subsequence_builder = post_single_user_subsequence_builder
+        self.__brand_after_hooks = brand_after_hooks
+        self.__brand_controller = brand_controller
+        self.__brand_before_hooks = brand_before_hooks
+        self.__pre_update_create_subsequence_builder = pre_update_create_subsequence_builder
+
+    def build(self):
+        self._add_sequence_builder(sequence_builder=self.__pre_update_create_subsequence_builder)\
+            ._add_command(command=self.__user_before_hooks.set_categories_and_values) \
+            ._add_command(command=self.__brand_before_hooks.validate_brand) \
+            ._add_command(command=self.__brand_controller.create) \
+            ._add_command(command=self.__brand_after_hooks.set_brand_claims)\
+            ._add_sequence_builder(sequence_builder=self.__post_single_user_subsequence_builder) \
+            ._add_command(command=self.__brand_after_hooks.tag_bucket_url_to_images)
+
+
+class GetAuthBrandSequenceBuilder(FluentSequenceBuilder):
+
+    def __init__(self, brand_controller: BrandController,
+                 brand_after_hooks: BrandAfterHooks,
+                 user_before_hooks: UserBeforeHooks,
+                 post_single_user_subsequence_builder: PostSingleUserSubsequenceBuilder):
+        super().__init__()
+        self.__user_before_hooks = user_before_hooks
+        self.__post_single_user_subsequence_builder = post_single_user_subsequence_builder
+        self.__brand_after_hooks = brand_after_hooks
+        self.__brand_controller = brand_controller
+
+    def build(self):
+        self._add_command(command=self.__user_before_hooks.set_auth_user_id)\
+            ._add_command(command=self.__brand_controller.get) \
+            ._add_sequence_builder(sequence_builder=self.__post_single_user_subsequence_builder)\
+            ._add_command(command=self.__brand_after_hooks.tag_bucket_url_to_images)
+
+
+class GetBrandByIdSequenceBuilder(FluentSequenceBuilder):
+
+    def __init__(self, brand_controller: BrandController,
+                 brand_after_hooks: BrandAfterHooks,
+                 brand_before_hooks: BrandBeforeHooks,
+                 post_single_user_subsequence_builder: PostSingleUserSubsequenceBuilder):
+        super().__init__()
+        self.__brand_before_hooks = brand_before_hooks
+        self.__post_single_user_subsequence_builder = post_single_user_subsequence_builder
+        self.__brand_after_hooks = brand_after_hooks
+        self.__brand_controller = brand_controller
+
+    def build(self):
+        self._add_command(command=self.__brand_before_hooks.validate_uuid)\
+            ._add_command(command=self.__brand_controller.get_by_id)\
+            ._add_sequence_builder(sequence_builder=self.__post_single_user_subsequence_builder)\
+            ._add_command(command=self.__brand_after_hooks.tag_bucket_url_to_images)
+
+
+class GetAllBrandsSequenceBuilder(FluentSequenceBuilder):
+
+    def __init__(self, brand_controller: BrandController,
+                 brand_after_hooks: BrandAfterHooks,
+                 post_multiple_user_subsequence_builder: PostMultipleUserSubsequenceBuilder):
+        super().__init__()
+        self.__post_multiple_user_subsequence_builder = post_multiple_user_subsequence_builder
+        self.__brand_after_hooks = brand_after_hooks
+        self.__brand_controller = brand_controller
+
+    def build(self):
+        self._add_command(command=self.__brand_controller.get_all)\
+            ._add_sequence_builder(sequence_builder=self.__post_multiple_user_subsequence_builder)\
+            ._add_command(command=self.__brand_after_hooks.tag_bucket_url_to_images_collection)
 
 
 class NotImplementedSequenceBuilder(FluentSequenceBuilder):

@@ -23,7 +23,8 @@ from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdat
     UpdateCampaignSequenceBuilder, CreateCampaignSequenceBuilder, GetCampaignByIdSequenceBuilder, \
     GetCampaignsForBrandSequenceBuilder, UpdateInfluencerImageSequenceBuilder, UpdateInfluencerSequenceBuilder, \
     CreateInfluencerSequenceBuilder, GetAuthInfluencerSequenceBuilder, GetInfluencerByIdSequenceBuilder, \
-    GetAllInfluencersSequenceBuilder
+    GetAllInfluencersSequenceBuilder, UpdateBrandImageSequenceBuilder, UpdateBrandSequenceBuilder, \
+    CreateBrandSequenceBuilder, GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder
 
 
 def lambda_handler(event, context):
@@ -173,3 +174,9 @@ def register_sequences(ioc: ServiceCollection):
     ioc.add_singleton(GetAuthInfluencerSequenceBuilder)
     ioc.add_singleton(GetInfluencerByIdSequenceBuilder)
     ioc.add_singleton(GetAllInfluencersSequenceBuilder)
+    ioc.add_singleton(UpdateBrandImageSequenceBuilder)
+    ioc.add_singleton(UpdateBrandSequenceBuilder)
+    ioc.add_singleton(CreateBrandSequenceBuilder)
+    ioc.add_singleton(GetAuthBrandSequenceBuilder)
+    ioc.add_singleton(GetBrandByIdSequenceBuilder)
+    ioc.add_singleton(GetAllBrandsSequenceBuilder)

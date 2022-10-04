@@ -4,15 +4,17 @@ from unittest.mock import Mock
 from simple_injection import ServiceCollection
 
 from src.app import bootstrap
-from src.web.controllers import CampaignController, InfluencerController
+from src.web.controllers import CampaignController, InfluencerController, BrandController
 from src.web.hooks import CommonBeforeHooks, UserBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, UserAfterHooks, \
-    BrandBeforeHooks, InfluencerBeforeHooks, InfluencerAfterHooks
+    BrandBeforeHooks, InfluencerBeforeHooks, InfluencerAfterHooks, BrandAfterHooks
 from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdateCreateCampaignSubsequenceBuilder, \
     PostSingleCampaignSubsequenceBuilder, PostMultipleCampaignSubsequenceBuilder, PostSingleUserSubsequenceBuilder, \
     PostMultipleUserSubsequenceBuilder, UpdateImageForCampaignSequenceBuilder, UpdateCampaignSequenceBuilder, \
     CreateCampaignSequenceBuilder, GetCampaignByIdSequenceBuilder, GetCampaignsForBrandSequenceBuilder, \
     UpdateInfluencerImageSequenceBuilder, UpdateInfluencerSequenceBuilder, CreateInfluencerSequenceBuilder, \
-    GetAuthInfluencerSequenceBuilder, GetInfluencerByIdSequenceBuilder, GetAllInfluencersSequenceBuilder
+    GetAuthInfluencerSequenceBuilder, GetInfluencerByIdSequenceBuilder, GetAllInfluencersSequenceBuilder, \
+    UpdateBrandImageSequenceBuilder, UpdateBrandSequenceBuilder, CreateBrandSequenceBuilder, \
+    GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder
 
 
 def setup(ioc: ServiceCollection):
@@ -364,3 +366,130 @@ class TestGetAllInfluencersSequenceBuilder(TestCase):
             self.assertEqual(sut.components, [ioc.resolve(InfluencerController).get_all,
                                               ioc.resolve(PostMultipleUserSubsequenceBuilder),
                                               ioc.resolve(InfluencerAfterHooks).tag_bucket_url_to_images_collection])
+
+
+class TestUpdateBrandImageSequenceBuilder(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(UpdateBrandImageSequenceBuilder)
+
+        # act
+        sut.build()
+
+        # assert
+        with self.subTest(msg="components match"):
+            self.maxDiff = None
+            self.assertEqual(sut.components, [ioc.resolve(PreGenericUpdateCreateSubsequenceBuilder),
+                                              ioc.resolve(BrandBeforeHooks).validate_image_key,
+                                              ioc.resolve(BrandBeforeHooks).upload_image,
+                                              ioc.resolve(BrandController).update_image_field_for_user,
+                                              ioc.resolve(PostSingleUserSubsequenceBuilder),
+                                              ioc.resolve(BrandAfterHooks).tag_bucket_url_to_images])
+
+
+class TestUpdateBrandSequenceBuilder(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(UpdateBrandSequenceBuilder)
+
+        # act
+        sut.build()
+
+        # assert
+        with self.subTest(msg="components match"):
+            self.maxDiff = None
+            self.assertEqual(sut.components, [ioc.resolve(PreGenericUpdateCreateSubsequenceBuilder),
+                                              ioc.resolve(UserBeforeHooks).set_categories_and_values,
+                                              ioc.resolve(BrandBeforeHooks).validate_brand,
+                                              ioc.resolve(BrandController).update_for_user,
+                                              ioc.resolve(BrandAfterHooks).set_brand_claims,
+                                              ioc.resolve(PostSingleUserSubsequenceBuilder),
+                                              ioc.resolve(BrandAfterHooks).tag_bucket_url_to_images])
+
+
+class TestCreateBrandSequenceBuilder(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(CreateBrandSequenceBuilder)
+
+        # act
+        sut.build()
+
+        # assert
+        with self.subTest(msg="components match"):
+            self.maxDiff = None
+            self.assertEqual(sut.components, [ioc.resolve(PreGenericUpdateCreateSubsequenceBuilder),
+                                              ioc.resolve(UserBeforeHooks).set_categories_and_values,
+                                              ioc.resolve(BrandBeforeHooks).validate_brand,
+                                              ioc.resolve(BrandController).create,
+                                              ioc.resolve(BrandAfterHooks).set_brand_claims,
+                                              ioc.resolve(PostSingleUserSubsequenceBuilder),
+                                              ioc.resolve(BrandAfterHooks).tag_bucket_url_to_images])
+
+
+class TestGetAuthBrandSequenceBuilder(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(GetAuthBrandSequenceBuilder)
+
+        # act
+        sut.build()
+
+        # assert
+        with self.subTest(msg="components match"):
+            self.maxDiff = None
+            self.assertEqual(sut.components, [ioc.resolve(UserBeforeHooks).set_auth_user_id,
+                                              ioc.resolve(BrandController).get,
+                                              ioc.resolve(PostSingleUserSubsequenceBuilder),
+                                              ioc.resolve(BrandAfterHooks).tag_bucket_url_to_images])
+
+
+class TestGetBrandByIdSequenceBuilder(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(GetBrandByIdSequenceBuilder)
+
+        # act
+        sut.build()
+
+        # assert
+        with self.subTest(msg="components match"):
+            self.maxDiff = None
+            self.assertEqual(sut.components, [ioc.resolve(BrandBeforeHooks).validate_uuid,
+                                              ioc.resolve(BrandController).get_by_id,
+                                              ioc.resolve(PostSingleUserSubsequenceBuilder),
+                                              ioc.resolve(BrandAfterHooks).tag_bucket_url_to_images])
+
+
+class TestGetAllBrandsSequenceBuilder(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(GetAllBrandsSequenceBuilder)
+
+        # act
+        sut.build()
+
+        # assert
+        with self.subTest(msg="components match"):
+            self.maxDiff = None
+            self.assertEqual(sut.components, [ioc.resolve(BrandController).get_all,
+                                              ioc.resolve(PostMultipleUserSubsequenceBuilder),
+                                              ioc.resolve(BrandAfterHooks).tag_bucket_url_to_images_collection])
