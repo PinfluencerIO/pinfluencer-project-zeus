@@ -233,5 +233,5 @@ class TestGetCampaignsForBrandSequenceBuilder(TestCase):
             self.maxDiff = None
             self.assertEqual(sut.components, [ioc.resolve(UserBeforeHooks).set_auth_user_id,
                                               ioc.resolve(CampaignController).get_for_brand,
-                                              ioc.resolve(PostSingleCampaignSubsequenceBuilder),
-                                              ioc.resolve(CampaignAfterHooks).tag_bucket_url_to_images])
+                                              ioc.resolve(PostMultipleCampaignSubsequenceBuilder),
+                                              ioc.resolve(CampaignAfterHooks).tag_bucket_url_to_images_collection])

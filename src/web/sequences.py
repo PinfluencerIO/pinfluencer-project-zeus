@@ -182,19 +182,19 @@ class GetCampaignsForBrandSequenceBuilder(FluentSequenceBuilder):
     def __init__(self,
                  user_before_hooks: UserBeforeHooks,
                  campaign_controller: CampaignController,
-                 post_single_campaign_sequence: PostSingleCampaignSubsequenceBuilder,
+                 post_multiple_campaign_sequence: PostMultipleCampaignSubsequenceBuilder,
                  campaign_after_hooks: CampaignAfterHooks):
         super().__init__()
+        self.__post_multiple_campaign_sequence = post_multiple_campaign_sequence
         self.__campaign_after_hooks = campaign_after_hooks
-        self.__post_single_campaign_sequence = post_single_campaign_sequence
         self.__campaign_controller = campaign_controller
         self.__user_before_hooks = user_before_hooks
 
     def build(self):
         self._add_command(command=self.__user_before_hooks.set_auth_user_id)\
             ._add_command(command=self.__campaign_controller.get_for_brand) \
-            ._add_sequence_builder(sequence_builder=self.__post_single_campaign_sequence) \
-            ._add_command(command=self.__campaign_after_hooks.tag_bucket_url_to_images)
+            ._add_sequence_builder(sequence_builder=self.__post_multiple_campaign_sequence) \
+            ._add_command(command=self.__campaign_after_hooks.tag_bucket_url_to_images_collection)
 
 
 class NotImplementedSequenceBuilder(FluentSequenceBuilder):
@@ -207,5 +207,5 @@ class NotImplementedSequenceBuilder(FluentSequenceBuilder):
 
     @staticmethod
     def not_implemented(context: PinfluencerContext):
-        context.response.status_code = 405
-        context.response.body = {"message": "route is not implemented"}
+        context.response.status_code = 501
+        context.response.body = {"message": f"{context.route_key} route is not implemented"}

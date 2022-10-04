@@ -137,7 +137,7 @@ class SqlAlchemyCampaignRepository(BaseSqlAlchemyRepository):
             campaigns = self._data_manager \
                 .session \
                 .query(Campaign) \
-                .filter(Campaign.brand_auth_user_id == brand.id) \
+                .filter(Campaign.brand_auth_user_id == brand.auth_user_id) \
                 .all()
             return campaigns
         else:

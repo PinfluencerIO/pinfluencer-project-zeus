@@ -357,7 +357,7 @@ class TestCampaignRepository(TestCase):
         brand = AutoFixture().create(dto=Brand, list_limit=5)
         campaigns = AutoFixture().create_many(dto=Campaign, list_limit=5, ammount=10)
         for campaign in campaigns:
-            campaign.brand_auth_user_id = brand.id
+            campaign.brand_auth_user_id = brand.auth_user_id
         self.__data_manager.create_fake_data([brand])
         self.__data_manager.create_fake_data(campaigns)
 
@@ -365,7 +365,7 @@ class TestCampaignRepository(TestCase):
         returned_campaigns = self.__sut.load_for_auth_brand(auth_user_id=brand.auth_user_id)
 
         # assert
-        assert campaigns == returned_campaigns
+        self.assertEquals(campaigns, returned_campaigns)
 
     def test_load_for_brand_when_brand_not_found(self):
         self.assertRaises(NotFoundException, lambda: self.__sut.load_for_auth_brand(auth_user_id="1234"))

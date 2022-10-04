@@ -69,7 +69,8 @@ def bootstrap(event: dict,
                                                      short_circuit=False,
                                                      event=event,
                                                      body={},
-                                                     auth_user_id="")
+                                                     auth_user_id="",
+                                                     route_key=route)
             route_desc: Route = routes[route]
 
             # middleware execution

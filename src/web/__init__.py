@@ -59,10 +59,11 @@ def get_cognito_user(event):
 
 
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class PinfluencerContext:
     response: PinfluencerResponse = None,
     short_circuit: bool = False,
+    route_key: str = "",
     event: Union[list, dict] = field(default_factory=dict),
     auth_user_id: str = "",
     body: dict = field(default_factory=dict)

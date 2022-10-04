@@ -21,13 +21,13 @@ class Dispatcher:
         self.__influencer_ctr = influencer_ctr
         self.__hooks_facade = hooks_facade
 
-    def get_not_implemented_method(self, route: str) -> Route:
-        return Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder))
-
     @property
     def dispatch_route_to_ctr(self) -> dict[dict[str, Route]]:
         feed = OrderedDict(
-            {'GET /feed': self.get_not_implemented_method('GET /feed')}
+            {
+                'GET /feed':
+                    Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder))
+            }
         )
 
         users = OrderedDict(
@@ -65,7 +65,8 @@ class Dispatcher:
                 'GET /brands/me/campaigns':
                     Route(sequence_builder=self.__service_locator.locate(GetCampaignsForBrandSequenceBuilder)),
 
-                'DELETE /brands/me/campaigns/{campaign_id}': self.delete_campaign_for_brand(),
+                'DELETE /brands/me/campaigns/{campaign_id}':
+                    Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),
 
                 'GET /campaigns/{campaign_id}':
                     Route(sequence_builder=self.__service_locator.locate(GetCampaignByIdSequenceBuilder)),
@@ -83,29 +84,39 @@ class Dispatcher:
 
         collaborations = OrderedDict(
             {
-                'GET /collaborations/{collaboration_id}': self.get_not_implemented_method('GET /collaborations/{collaboration_id}'),
+                'GET /collaborations/{collaboration_id}':
+                    Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),
 
-                'POST /influencers/me/collaborations': self.get_not_implemented_method('POST /influencers/me/collaborations'),
+                'POST /influencers/me/collaborations':
+                    Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),
 
-                'PATCH /influencers/me/collaborations/{collaboration_id}': self.get_not_implemented_method('PATCH /influencers/me/collaborations/{collaboration_id}'),
+                'PATCH /influencers/me/collaborations/{collaboration_id}':
+                    Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),
 
-                'GET /influencers/me/collaborations': self.get_not_implemented_method('GET /influencers/me/collaborations'),
+                'GET /influencers/me/collaborations':
+                    Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),
 
-                'GET /brands/me/collaborations': self.get_not_implemented_method('GET /brands/me/collaborations'),
+                'GET /brands/me/collaborations':
+                    Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder))
             }
         )
 
         notifications = OrderedDict(
             {
-                'GET /notifications/{notification_id}': self.get_not_implemented_method('GET /notifications/{notification_id}'),
+                'GET /notifications/{notification_id}':
+                    Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),
 
-                'POST /users/me/notifications': self.get_not_implemented_method('POST /users/me/notifications'),
+                'POST /users/me/notifications':
+                    Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),
 
-                'PATCH /users/me/notifications': self.get_not_implemented_method('PATCH /users/me/notifications'),
+                'PATCH /users/me/notifications':
+                    Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),
 
-                'GET /receivers/me/notifications': self.get_not_implemented_method('GET /receivers/me/notifications'),
+                'GET /receivers/me/notifications':
+                    Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),
 
-                'GET /senders/me/notifications': self.get_not_implemented_method('GET /senders/me/notifications'),
+                'GET /senders/me/notifications':
+                    Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder))
             }
         )
 
@@ -116,10 +127,6 @@ class Dispatcher:
         routes.update(collaborations)
         routes.update(notifications)
         return routes
-
-    def delete_campaign_for_brand(self):
-        return self.get_not_implemented_method('DELETE brands/me/campaigns/{campaign_id}')
-
 
     def update_influencer_image(self):
         '''
