@@ -1,6 +1,7 @@
 from jsonschema.exceptions import ValidationError
 
-from src._types import AuthUserRepository, Deserializer, BrandRepository, ImageRepository, Logger
+from src._types import AuthUserRepository, Deserializer, BrandRepository, ImageRepository, Logger, \
+    NotificationRepository
 from src.crosscutting import PinfluencerObjectMapper
 from src.domain.models import CategoryEnum, ValueEnum, CampaignStateEnum, User
 from src.domain.validation import BrandValidator, InfluencerValidator, CampaignValidator
@@ -437,3 +438,12 @@ class HooksFacade:
 
     def get_before_common_hooks(self) -> CommonBeforeHooks:
         return self.__common_before_hooks
+
+
+class NotificationAfterHooks:
+
+    def __init__(self, repository: NotificationRepository):
+        self.__repository = repository
+
+    def save_notification_state(self, context: PinfluencerContext):
+        self.__repository.save()

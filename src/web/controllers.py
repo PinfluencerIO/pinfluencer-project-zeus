@@ -2,13 +2,14 @@ from contextlib import contextmanager
 from typing import Callable
 
 from src._types import BrandRepository, UserRepository, InfluencerRepository, Repository, CampaignRepository, Logger, \
-    Model
+    Model, NotificationRepository
 from src.crosscutting import PinfluencerObjectMapper, FlexiUpdater
-from src.domain.models import Brand, Influencer, Campaign
+from src.domain.models import Brand, Influencer, Campaign, Notification
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.web import BRAND_ID_PATH_KEY, INFLUENCER_ID_PATH_KEY, PinfluencerContext
 from src.web.views import BrandRequestDto, BrandResponseDto, ImageRequestDto, InfluencerRequestDto, \
-    InfluencerResponseDto, CampaignRequestDto, CampaignResponseDto
+    InfluencerResponseDto, CampaignRequestDto, CampaignResponseDto, NotificationCreateRequestDto, \
+    NotificationResponseDto
 
 
 class BaseController:
@@ -104,6 +105,33 @@ class BaseController:
             context.response.body = mapped_response.__dict__
             context.response.status_code = 200
 
+    def _create(self,
+                context: PinfluencerContext,
+                model,
+                request,
+                response):
+        auth_user_id = context.auth_user_id
+        payload_dict = context.body
+        with self._unit_of_work():
+            try:
+                entity = self._mapper.map(_from=self._mapper.map_from_dict(_from=payload_dict,
+                                                                           to=request),
+                                          to=model)
+
+                entity_to_return = self._repository.write_new_for_auth_user(auth_user_id=auth_user_id, payload=entity)
+            except AlreadyExistsException as e:
+                self._logger.log_exception(e)
+                context.short_circuit = True
+                context.response.body = {}
+                context.response.status_code = 400
+                return
+            self._logger.log_trace(f"entity to return {entity_to_return}")
+            self._logger.log_trace(f"mapping {model.__name__} to {response.__name__}")
+            response = self._mapper.map(_from=entity_to_return, to=response)
+            self._logger.log_trace(f"mapped response: {response}")
+            context.response.body = response.__dict__
+            context.response.status_code = 201
+
 
 class BaseUserController(BaseController):
 
@@ -134,29 +162,6 @@ class BaseUserController(BaseController):
 
     def get(self, context: PinfluencerContext) -> None:
         self._get(context=context, response=self._response)
-
-    def _create(self, context: PinfluencerContext, model, request, response):
-        auth_user_id = context.auth_user_id
-        payload_dict = context.body
-        with self._unit_of_work():
-            try:
-                entity = self._mapper.map(_from=self._mapper.map_from_dict(_from=payload_dict,
-                                                                           to=request),
-                                          to=model)
-
-                entity_to_return = self._repository.write_new_for_auth_user(auth_user_id=auth_user_id, payload=entity)
-            except AlreadyExistsException as e:
-                self._logger.log_exception(e)
-                context.short_circuit = True
-                context.response.body = {}
-                context.response.status_code = 400
-                return
-            self._logger.log_trace(f"entity to return {entity_to_return}")
-            self._logger.log_trace(f"mapping {model.__name__} to {response.__name__}")
-            response = self._mapper.map(_from=entity_to_return, to=response)
-            self._logger.log_trace(f"mapped response: {response}")
-            context.response.body = response.__dict__
-            context.response.status_code = 201
 
     def create(self, context: PinfluencerContext) -> None:
         self._create(context=context,
@@ -244,3 +249,21 @@ class CampaignController(BaseController):
 
 
 
+class NotificationController(BaseController):
+
+    def __init__(self, repository: NotificationRepository,
+                 mapper: PinfluencerObjectMapper,
+                 flexi_updater: FlexiUpdater,
+                 logger: Logger):
+        super().__init__(repository,
+                         mapper,
+                         flexi_updater,
+                         logger,
+                         NotificationCreateRequestDto,
+                         NotificationResponseDto)
+
+    def create(self, context: PinfluencerContext):
+        self._create(context=context,
+                     model=Notification,
+                     request=NotificationCreateRequestDto,
+                     response=NotificationResponseDto)

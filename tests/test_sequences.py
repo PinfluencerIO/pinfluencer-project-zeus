@@ -4,7 +4,7 @@ from unittest.mock import Mock
 from simple_injection import ServiceCollection
 
 from src.app import bootstrap
-from src.web.controllers import CampaignController, InfluencerController, BrandController
+from src.web.controllers import CampaignController, InfluencerController, BrandController, NotificationController
 from src.web.hooks import CommonBeforeHooks, UserBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, UserAfterHooks, \
     BrandBeforeHooks, InfluencerBeforeHooks, InfluencerAfterHooks, BrandAfterHooks
 from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdateCreateCampaignSubsequenceBuilder, \
@@ -14,7 +14,8 @@ from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdat
     UpdateInfluencerImageSequenceBuilder, UpdateInfluencerSequenceBuilder, CreateInfluencerSequenceBuilder, \
     GetAuthInfluencerSequenceBuilder, GetInfluencerByIdSequenceBuilder, GetAllInfluencersSequenceBuilder, \
     UpdateBrandImageSequenceBuilder, UpdateBrandSequenceBuilder, CreateBrandSequenceBuilder, \
-    GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder
+    GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder, \
+    CreateNotificationSequenceBuilder
 
 
 def setup(ioc: ServiceCollection):
@@ -493,3 +494,21 @@ class TestGetAllBrandsSequenceBuilder(TestCase):
             self.assertEqual(sut.components, [ioc.resolve(BrandController).get_all,
                                               ioc.resolve(PostMultipleUserSubsequenceBuilder),
                                               ioc.resolve(BrandAfterHooks).tag_bucket_url_to_images_collection])
+
+
+class TestCreateNotificationSequenceBuilder(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(CreateNotificationSequenceBuilder)
+
+        # act
+        sut.build()
+
+        # assert
+        with self.subTest(msg="components match"):
+            self.maxDiff = None
+            self.assertEqual(sut.components, [ioc.resolve(PreGenericUpdateCreateSubsequenceBuilder),
+                                              ioc.resolve(NotificationController).create])

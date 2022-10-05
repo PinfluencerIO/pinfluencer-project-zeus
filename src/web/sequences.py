@@ -1,5 +1,5 @@
 from src.web import FluentSequenceBuilder, PinfluencerContext
-from src.web.controllers import CampaignController, InfluencerController, BrandController
+from src.web.controllers import CampaignController, InfluencerController, BrandController, NotificationController
 from src.web.hooks import CommonBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, UserAfterHooks, UserBeforeHooks, \
     BrandBeforeHooks, BrandAfterHooks, InfluencerBeforeHooks, InfluencerAfterHooks
 
@@ -454,6 +454,19 @@ class GetAllBrandsSequenceBuilder(FluentSequenceBuilder):
         self._add_command(command=self.__brand_controller.get_all)\
             ._add_sequence_builder(sequence_builder=self.__post_multiple_user_subsequence_builder)\
             ._add_command(command=self.__brand_after_hooks.tag_bucket_url_to_images_collection)
+
+
+class CreateNotificationSequenceBuilder(FluentSequenceBuilder):
+
+    def __init__(self, pre_generic_update_create_subsequence_builder: PreGenericUpdateCreateSubsequenceBuilder,
+                 notification_controller: NotificationController):
+        super().__init__()
+        self.__notification_controller = notification_controller
+        self.__pre_generic_update_create_subsequence_builder = pre_generic_update_create_subsequence_builder
+
+    def build(self):
+        self._add_sequence_builder(sequence_builder=self.__pre_generic_update_create_subsequence_builder)\
+            ._add_command(command=self.__notification_controller.create)
 
 
 class NotImplementedSequenceBuilder(FluentSequenceBuilder):

@@ -1,6 +1,6 @@
 from typing import Protocol, Optional, Union
 
-from src.domain.models import Brand, Influencer, Campaign, User
+from src.domain.models import Brand, Influencer, Campaign, User, Notification, Collaboration
 
 
 class AuthUserRepository(Protocol):
@@ -70,9 +70,25 @@ class InfluencerRepository(Protocol):
         ...
 
 
+class NotificationRepository(Protocol):
+
+    def load_collection(self) -> list[Notification]:
+        ...
+
+    def load_by_id(self, id_: str) -> Notification:
+        ...
+
+    def write_new_for_auth_user(self) -> Notification:
+        ...
+
+    def save(self):
+        ...
+
+
 Repository = Union[BrandRepository,
                    InfluencerRepository,
-                   CampaignRepository]
+                   CampaignRepository,
+                   NotificationRepository]
 
 UserRepository = Union[BrandRepository, InfluencerRepository]
 
@@ -127,7 +143,7 @@ class ImageRepository(Protocol):
 UserModel = Union[Brand, Influencer]
 
 # TODO: add rest
-Model = Union[UserModel, Campaign]
+Model = Union[UserModel, Campaign, Notification, Collaboration]
 
 
 class Serializer(Protocol):

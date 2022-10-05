@@ -5,7 +5,7 @@ from uuid import uuid4
 from callee import Captor
 from ddt import data, ddt
 
-from src._types import AuthUserRepository, BrandRepository, ImageRepository
+from src._types import AuthUserRepository, BrandRepository, ImageRepository, NotificationRepository
 from src.app import logger_factory
 from src.crosscutting import JsonCamelToSnakeCaseDeserializer, PinfluencerObjectMapper, AutoFixture
 from src.domain.models import User, ValueEnum, CategoryEnum, CampaignStateEnum
@@ -13,7 +13,8 @@ from src.domain.validation import InfluencerValidator, BrandValidator, CampaignV
 from src.exceptions import NotFoundException
 from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, CommonBeforeHooks, \
-    InfluencerBeforeHooks, BrandBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, CommonAfterHooks
+    InfluencerBeforeHooks, BrandBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, CommonAfterHooks, \
+    NotificationAfterHooks
 from src.web.views import ImageRequestDto, BrandResponseDto, BrandRequestDto, CampaignResponseDto
 from tests import get_auth_user_event, create_for_auth_user_event, get_brand_id_event, \
     get_influencer_id_event, get_campaign_id_event
@@ -1104,3 +1105,20 @@ class TestUserAfterHooks(TestCase):
                                                                        key="values")
         self.__common_after_hooks.map_enums_collection.assert_any_call(context=context,
                                                                        key="categories")
+
+
+class TestNotificationAfterHooks(TestCase):
+
+    def setUp(self) -> None:
+        self.__repository: NotificationRepository = Mock()
+        self.__sut = NotificationAfterHooks(repository=self.__repository)
+
+    def test_save_notification_state(self):
+        # arrange
+        self.__repository.save = MagicMock()
+
+        # act
+        self.__sut.save_notification_state(context=PinfluencerContext())
+
+        # assert
+        self.__repository.save.assert_called_once()

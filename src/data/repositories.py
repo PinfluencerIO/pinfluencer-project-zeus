@@ -9,7 +9,7 @@ from filetype import filetype
 
 from src._types import DataManager, ImageRepository, Model, UserModel, Logger
 from src.data.entities import create_mappings
-from src.domain.models import Brand, Influencer, Campaign, User
+from src.domain.models import Brand, Influencer, Campaign, User, Notification
 from src.exceptions import AlreadyExistsException, ImageException, NotFoundException
 
 
@@ -17,10 +17,8 @@ class BaseSqlAlchemyRepository:
     def __init__(self,
                  data_manager: DataManager,
                  model,
-                 image_repository: ImageRepository,
                  logger: Logger):
         self._logger = logger
-        self._image_repository = image_repository
         self._data_manager = data_manager
         self._model = model
 
@@ -50,7 +48,6 @@ class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):
                  logger: Logger):
         super().__init__(data_manager=data_manager,
                          model=model,
-                         image_repository=image_repository,
                          logger=logger)
 
     def load_for_auth_user(self, auth_user_id) -> UserModel:
@@ -108,7 +105,6 @@ class SqlAlchemyCampaignRepository(BaseSqlAlchemyRepository):
                  logger: Logger):
         super().__init__(data_manager,
                          Campaign,
-                         image_repository=image_repository,
                          logger=logger)
 
     def write_new_for_brand(self, payload: Campaign,
@@ -143,6 +139,19 @@ class SqlAlchemyCampaignRepository(BaseSqlAlchemyRepository):
         else:
             raise NotFoundException("brand not found")
 
+
+class SqlAlchemyNotificationRepository(BaseSqlAlchemyRepository):
+
+    def __init__(self, data_manager: DataManager,
+                 logger: Logger):
+        super().__init__(data_manager,
+                         Notification,
+                         logger=logger)
+
+    def write_new_for_auth_user(self, auth_user_id: str, payload: Notification) -> Notification:
+        payload.sender_auth_user_id = auth_user_id
+        self._data_manager.session.add(payload)
+        return payload
 
 class S3ImageRepository:
 

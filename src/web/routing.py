@@ -7,7 +7,8 @@ from src.web.sequences import UpdateCampaignSequenceBuilder, UpdateImageForCampa
     GetCampaignsForBrandSequenceBuilder, UpdateInfluencerImageSequenceBuilder, UpdateInfluencerSequenceBuilder, \
     CreateInfluencerSequenceBuilder, GetAuthInfluencerSequenceBuilder, GetInfluencerByIdSequenceBuilder, \
     GetAllInfluencersSequenceBuilder, UpdateBrandImageSequenceBuilder, UpdateBrandSequenceBuilder, \
-    CreateBrandSequenceBuilder, GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder
+    CreateBrandSequenceBuilder, GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder, \
+    CreateNotificationSequenceBuilder
 
 
 class Dispatcher:
@@ -112,7 +113,7 @@ class Dispatcher:
                     Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),
 
                 'POST /users/me/notifications':
-                    Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),
+                    Route(sequence_builder=self.__service_locator.locate(CreateNotificationSequenceBuilder)),
 
                 'PATCH /users/me/notifications':
                     Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),

@@ -5,14 +5,16 @@ from unittest.mock import Mock, MagicMock
 from callee import Captor
 from ddt import ddt, data
 
-from src._types import BrandRepository, InfluencerRepository, CampaignRepository
+from src._types import BrandRepository, InfluencerRepository, CampaignRepository, NotificationRepository
+from src.app import logger_factory
 from src.crosscutting import PinfluencerObjectMapper, AutoFixture, FlexiUpdater
-from src.domain.models import Influencer, Campaign, Brand
+from src.domain.models import Influencer, Campaign, Brand, Notification
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.web import PinfluencerContext, PinfluencerResponse
-from src.web.controllers import BrandController, InfluencerController, CampaignController
+from src.web.controllers import BrandController, InfluencerController, CampaignController, NotificationController
 from src.web.views import BrandRequestDto, BrandResponseDto, ImageRequestDto, InfluencerRequestDto, \
-    InfluencerResponseDto, CampaignRequestDto, CampaignResponseDto
+    InfluencerResponseDto, CampaignRequestDto, CampaignResponseDto, NotificationCreateRequestDto, \
+    NotificationResponseDto
 
 
 class TestInfluencerController(TestCase):
@@ -740,3 +742,29 @@ class TestCampaignController(TestCase):
         with self.subTest(msg="repo was called"):
             captor.arg()
             self.__campaign_repository.load_by_id.assert_called_once_with(id_=context.id)
+
+
+class TestNotificationController(TestCase):
+
+    def setUp(self) -> None:
+        self.__repository: NotificationRepository = Mock()
+        self.__mapper = PinfluencerObjectMapper(logger=logger_factory())
+        self.__flexi_updater = FlexiUpdater()
+        self.__sut = NotificationController(repository=self.__repository,
+                                            mapper=self.__mapper,
+                                            flexi_updater=self.__flexi_updater,
+                                            logger=logger_factory())
+
+    def test_create(self):
+        # arrange
+        self.__sut._create = MagicMock()
+        context = PinfluencerContext()
+
+        # act
+        self.__sut.create(context=context)
+
+        # assert
+        self.__sut._create.assert_called_once_with(context=context,
+                                                   model=Notification,
+                                                   request=NotificationCreateRequestDto,
+                                                   response=NotificationResponseDto)

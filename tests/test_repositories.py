@@ -4,10 +4,11 @@ from unittest.mock import Mock, MagicMock
 from callee import Captor
 
 from src._types import ImageRepository
+from src.app import logger_factory
 from src.crosscutting import AutoFixture
 from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository, CognitoAuthUserRepository, \
-    CognitoAuthService, SqlAlchemyCampaignRepository
-from src.domain.models import Brand, Influencer, User, Campaign
+    CognitoAuthService, SqlAlchemyCampaignRepository, SqlAlchemyNotificationRepository
+from src.domain.models import Brand, Influencer, User, Campaign, Notification
 from src.exceptions import AlreadyExistsException, NotFoundException
 from tests import InMemorySqliteDataManager
 
@@ -369,3 +370,46 @@ class TestCampaignRepository(TestCase):
 
     def test_load_for_brand_when_brand_not_found(self):
         self.assertRaises(NotFoundException, lambda: self.__sut.load_for_auth_brand(auth_user_id="1234"))
+
+
+class TestNotificationRepository(TestCase):
+
+    def setUp(self) -> None:
+        self.__data_manager = InMemorySqliteDataManager()
+        self.__sut = SqlAlchemyNotificationRepository(data_manager=self.__data_manager,
+                                                      logger=logger_factory())
+
+    def test_write_for_auth_user(self):
+        # arrange
+        notification = AutoFixture().create(dto=Notification)
+        notification.sender_auth_user_id = None
+
+        # act
+        self.__sut.write_new_for_auth_user(auth_user_id="1234", payload=notification)
+
+        # assert
+        with self.subTest(msg="notification matches notification in db"):
+            notification_in_db = self.__sut.load_by_id(id_=notification.id)
+            notification.sender_auth_user_id = "1234"
+            self.assertEqual(notification, notification_in_db)
+
+class TestNotificationRepository(TestCase):
+
+    def setUp(self) -> None:
+        self.__data_manager = InMemorySqliteDataManager()
+        self.__sut = SqlAlchemyNotificationRepository(data_manager=self.__data_manager,
+                                                      logger=logger_factory())
+
+    def test_write_for_auth_user(self):
+        # arrange
+        notification = AutoFixture().create(dto=Notification)
+        notification.sender_auth_user_id = None
+
+        # act
+        returned_notification = self.__sut.write_new_for_auth_user(auth_user_id="1234", payload=notification)
+
+        # assert
+        with self.subTest(msg="notification matches notification in db"):
+            notification_in_db = self.__sut.load_by_id(id_=notification.id)
+            notification.sender_auth_user_id = "1234"
+            assert notification == notification_in_db == returned_notification

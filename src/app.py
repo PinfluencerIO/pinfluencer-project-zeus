@@ -4,17 +4,19 @@ from simple_injection import ServiceCollection
 
 from src import ServiceLocator
 from src._types import DataManager, BrandRepository, InfluencerRepository, CampaignRepository, ImageRepository, \
-    Deserializer, Serializer, AuthUserRepository, Logger
+    Deserializer, Serializer, AuthUserRepository, Logger, NotificationRepository
 from src.crosscutting import JsonCamelToSnakeCaseDeserializer, JsonSnakeToCamelSerializer, \
     PinfluencerObjectMapper, FlexiUpdater, ConsoleLogger, DummyLogger
 from src.data import SqlAlchemyDataManager
 from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository, \
-    SqlAlchemyCampaignRepository, S3ImageRepository, CognitoAuthUserRepository, CognitoAuthService
+    SqlAlchemyCampaignRepository, S3ImageRepository, CognitoAuthUserRepository, CognitoAuthService, \
+    SqlAlchemyNotificationRepository
 from src.domain.validation import BrandValidator, CampaignValidator, InfluencerValidator
 from src.web import PinfluencerResponse, PinfluencerContext, Route
-from src.web.controllers import BrandController, InfluencerController, CampaignController
+from src.web.controllers import BrandController, InfluencerController, CampaignController, NotificationController
 from src.web.hooks import HooksFacade, CommonBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, UserBeforeHooks, \
-    UserAfterHooks, InfluencerBeforeHooks, BrandBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, CommonAfterHooks
+    UserAfterHooks, InfluencerBeforeHooks, BrandBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, CommonAfterHooks, \
+    NotificationAfterHooks
 from src.web.middleware import MiddlewarePipeline
 from src.web.routing import Dispatcher
 from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdateCreateCampaignSubsequenceBuilder, \
@@ -24,7 +26,8 @@ from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdat
     GetCampaignsForBrandSequenceBuilder, UpdateInfluencerImageSequenceBuilder, UpdateInfluencerSequenceBuilder, \
     CreateInfluencerSequenceBuilder, GetAuthInfluencerSequenceBuilder, GetInfluencerByIdSequenceBuilder, \
     GetAllInfluencersSequenceBuilder, UpdateBrandImageSequenceBuilder, UpdateBrandSequenceBuilder, \
-    CreateBrandSequenceBuilder, GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder
+    CreateBrandSequenceBuilder, GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder, \
+    CreateNotificationSequenceBuilder
 
 
 def lambda_handler(event, context):
@@ -118,6 +121,7 @@ def register_middleware(ioc):
     ioc.add_singleton(CampaignBeforeHooks)
     ioc.add_singleton(CampaignAfterHooks)
     ioc.add_singleton(CommonAfterHooks)
+    ioc.add_singleton(NotificationAfterHooks)
 
 
 def register_auth(ioc):
@@ -133,6 +137,7 @@ def register_controllers(ioc):
     ioc.add_singleton(BrandController)
     ioc.add_singleton(InfluencerController)
     ioc.add_singleton(CampaignController)
+    ioc.add_singleton(NotificationController)
 
 
 def register_object_mapping(ioc):
@@ -150,6 +155,7 @@ def register_data_layer(ioc):
     ioc.add_singleton(BrandRepository, SqlAlchemyBrandRepository)
     ioc.add_singleton(InfluencerRepository, SqlAlchemyInfluencerRepository)
     ioc.add_singleton(CampaignRepository, SqlAlchemyCampaignRepository)
+    ioc.add_singleton(NotificationRepository, SqlAlchemyNotificationRepository)
 
     # s3
     ioc.add_singleton(ImageRepository, S3ImageRepository)
@@ -180,3 +186,4 @@ def register_sequences(ioc: ServiceCollection):
     ioc.add_singleton(GetAuthBrandSequenceBuilder)
     ioc.add_singleton(GetBrandByIdSequenceBuilder)
     ioc.add_singleton(GetAllBrandsSequenceBuilder)
+    ioc.add_singleton(CreateNotificationSequenceBuilder)
