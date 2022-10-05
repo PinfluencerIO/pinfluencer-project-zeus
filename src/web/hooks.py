@@ -6,7 +6,7 @@ from src.domain.models import CategoryEnum, ValueEnum, CampaignStateEnum, User
 from src.domain.validation import BrandValidator, InfluencerValidator, CampaignValidator
 from src.exceptions import NotFoundException
 from src.web import PinfluencerContext, valid_path_resource_id
-from src.web.views import RawImageRequestDto, ImageRequestDto, BrandResponseDto, CampaignResponseDto
+from src.web.views import RawImageRequestDto, ImageRequestDto, CampaignResponseDto
 
 S3_URL = "https://pinfluencer-product-images.s3.eu-west-2.amazonaws.com"
 

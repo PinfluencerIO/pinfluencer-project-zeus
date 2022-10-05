@@ -1,5 +1,3 @@
-from urllib.parse import urlparse
-
 import validators
 from jsonschema.exceptions import ValidationError
 from jsonschema.validators import validate

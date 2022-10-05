@@ -9,9 +9,6 @@ from simple_injection import ServiceCollection
 
 from src.app import bootstrap
 from src.web import PinfluencerContext, PinfluencerResponse
-from src.web.controllers import BrandController, CampaignController, InfluencerController
-from src.web.hooks import CommonBeforeHooks, UserAfterHooks, BrandAfterHooks, UserBeforeHooks, \
-    CampaignBeforeHooks, CampaignAfterHooks, BrandBeforeHooks, InfluencerAfterHooks, InfluencerBeforeHooks
 from src.web.middleware import MiddlewarePipeline
 from src.web.routing import Dispatcher
 from src.web.sequences import NotImplementedSequenceBuilder, UpdateImageForCampaignSequenceBuilder, \
@@ -400,13 +397,7 @@ class TestRoutes(TestCase):
             data = load_yaml(yaml_str)
             paths = sorted([f"{event[1]['Properties']['Method'].upper()} {event[1]['Properties']['Path']}" for event in
                             data["Resources"]["PinfluencerFunction"]["Properties"]["Events"].items()])
-            route_paths = sorted([*Dispatcher(brand_ctr=Mock(),
-                                              campaign_ctr=Mock(),
-                                              hooks_facade=Mock(),
-                                              influencer_ctr=Mock(),
-                                              update_image_for_campaign_sequence=Mock(),
-                                              not_implemented_sequence_builder=Mock(),
-                                              update_campaign_sequence_builder=Mock()).dispatch_route_to_ctr])
+            route_paths = sorted([*Dispatcher(service_locator=Mock()).dispatch_route_to_ctr])
             assert paths == route_paths
 
     def __assert_service_endpoint_200(self,

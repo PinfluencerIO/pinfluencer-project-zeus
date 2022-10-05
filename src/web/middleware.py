@@ -1,7 +1,7 @@
 import inspect
 
 from src._types import Logger
-from src.web import PinfluencerContext, PinfluencerCommand, PinfluencerSequenceBuilder
+from src.web import PinfluencerContext, PinfluencerSequenceBuilder
 
 
 class MiddlewarePipeline:

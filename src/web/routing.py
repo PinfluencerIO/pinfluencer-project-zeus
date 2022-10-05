@@ -2,8 +2,6 @@ from collections import OrderedDict
 
 from src import ServiceLocator
 from src.web import Route
-from src.web.controllers import CampaignController, BrandController, InfluencerController
-from src.web.hooks import HooksFacade
 from src.web.sequences import UpdateCampaignSequenceBuilder, UpdateImageForCampaignSequenceBuilder, \
     NotImplementedSequenceBuilder, CreateCampaignSequenceBuilder, GetCampaignByIdSequenceBuilder, \
     GetCampaignsForBrandSequenceBuilder, UpdateInfluencerImageSequenceBuilder, UpdateInfluencerSequenceBuilder, \
@@ -13,16 +11,8 @@ from src.web.sequences import UpdateCampaignSequenceBuilder, UpdateImageForCampa
 
 
 class Dispatcher:
-    def __init__(self, campaign_ctr: CampaignController,
-                 brand_ctr: BrandController,
-                 influencer_ctr: InfluencerController,
-                 hooks_facade: HooksFacade,
-                 service_locator: ServiceLocator):
+    def __init__(self, service_locator: ServiceLocator):
         self.__service_locator = service_locator
-        self.__campaign_ctr = campaign_ctr
-        self.__brand_ctr = brand_ctr
-        self.__influencer_ctr = influencer_ctr
-        self.__hooks_facade = hooks_facade
 
     @property
     def dispatch_route_to_ctr(self) -> dict[dict[str, Route]]:

@@ -13,93 +13,36 @@ class DummyErrorCapsule(ErrorCapsule):
         self.status = 418
 
 
-class TestMiddlewarePipeline(TestCase):
+class DummyNestedErrorSequenceBuilder(FluentSequenceBuilder):
 
-    def setUp(self) -> None:
-        self.__sut = MiddlewarePipeline(logger=Mock())
+    @property
+    def invocations(self) -> list[str]:
+        return self.__invocations
 
-    def test_execute(self):
-        # arrange
-        context = PinfluencerContext(body={
-            "invocations": [
+    def __init__(self, type="no error"):
+        super().__init__()
+        self.__type = type
+        self.__invocations = []
 
-            ]
-        }, short_circuit=False, response=PinfluencerResponse())
-        middlware = [MagicMock(side_effect=lambda x: x.body["invocations"].append(1)),
-                     MagicMock(side_effect=lambda x: x.body["invocations"].append(2)),
-                     MagicMock(side_effect=lambda x: x.body["invocations"].append(3)),
-                     MagicMock(side_effect=lambda x: x.body["invocations"].append(4)),
-                     MagicMock(side_effect=lambda x: x.body["invocations"].append(5))]
+    def build(self):
+        self._add_command(self.command1)\
+            ._add_command(self.command2)\
+            ._add_command(self.command3)
 
-        # act
-        self.__sut.execute_middleware(context=context,
-                                      middleware=middlware)
+    def command1(self, context: PinfluencerContext):
+        self.__invocations.append("run 1")
+        if self.__type == "error capsule":
+            context.error_capsule.append(DummyErrorCapsule())
 
-        # assert
-        assert context.body["invocations"] == [1, 2, 3, 4, 5]
+    def command2(self, context: PinfluencerContext):
+        self.__invocations.append("run 2")
+        if self.__type == "short circuit":
+            context.short_circuit = True
+            context.response.body = {"hello": "world"}
+            context.response.status_code = 400
 
-    @staticmethod
-    def __short_middlware_with_error_capsule(context: PinfluencerContext, invoc_num: int):
-        context.error_capsule.append(DummyErrorCapsule())
-        context.body["invocations"].append(invoc_num)
-
-
-    @staticmethod
-    def __short_middlware(context: PinfluencerContext, invoc_num: int):
-        context.short_circuit = True
-        context.body["invocations"].append(invoc_num)
-
-    def test_execute_and_middlware_shorts(self):
-        # arrange
-        context = PinfluencerContext(body={
-            "invocations": [
-
-            ]
-        }, short_circuit=False, response=PinfluencerResponse())
-        middlware = [MagicMock(side_effect=lambda x: x.body["invocations"].append(1)),
-                     MagicMock(side_effect=lambda x: x.body["invocations"].append(2)),
-                     MagicMock(side_effect=lambda x: self.__short_middlware(context=x, invoc_num=3)),
-                     MagicMock(side_effect=lambda x: x.body["invocations"].append(4)),
-                     MagicMock(side_effect=lambda x: x.body["invocations"].append(5))]
-
-        # act
-        self.__sut.execute_middleware(context=context,
-                                      middleware=middlware)
-
-        # assert
-        assert context.body["invocations"] == [1, 2, 3]
-
-
-    def test_execute_and_middlware_shorts_when_error_capsules_are_appended_to(self):
-        # arrange
-        context = PinfluencerContext(body={
-            "invocations": [
-
-            ]
-        }, short_circuit=False, response=PinfluencerResponse())
-        middlware = [MagicMock(side_effect=lambda x: x.body["invocations"].append(1)),
-                     MagicMock(side_effect=lambda x: x.body["invocations"].append(2)),
-                     MagicMock(side_effect=lambda x: self.__short_middlware_with_error_capsule(context=x, invoc_num=3)),
-                     MagicMock(side_effect=lambda x: x.body["invocations"].append(4)),
-                     MagicMock(side_effect=lambda x: x.body["invocations"].append(5))]
-
-        # act
-        self.__sut.execute_middleware(context=context,
-                                      middleware=middlware)
-
-        # assert
-        with self.subTest(msg="invocation match sequence"):
-            self.assertEqual(context.body["invocations"], [1, 2, 3])
-
-        # assert
-        with self.subTest(msg="body displays custom error message"):
-            self.assertEqual(context.response.body, {"message": "im a teapot"})
-
-        # assert
-        with self.subTest(msg="body displays custom error code"):
-            self.assertEqual(context.response.status_code, 418)
-
-
+    def command3(self, context: PinfluencerContext):
+        self.__invocations.append("run 3")
 
 class CommandContextClass:
 
@@ -170,6 +113,61 @@ class DummySequenceBuilder(FluentSequenceBuilder):
 
 
 class TestSequenceBuilder(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        middleware = MiddlewarePipeline(logger=logger_factory())
+        sut = DummyNestedErrorSequenceBuilder()
+
+        # act
+        middleware.execute_middleware(context=PinfluencerContext(response=PinfluencerResponse(), short_circuit=False),
+                                      sequence=sut)
+
+        # assert
+        self.assertEqual(sut.invocations, ["run 1", "run 2", "run 3"])
+
+    def test_sequence_with_short_circuit(self):
+        # arrange
+        middleware = MiddlewarePipeline(logger=logger_factory())
+        sut = DummyNestedErrorSequenceBuilder(type="short circuit")
+        context = PinfluencerContext(response=PinfluencerResponse(body={}),
+                                     short_circuit=False)
+
+        # act
+        middleware.execute_middleware(context=context,
+                                      sequence=sut)
+
+        # assert
+        with self.subTest("invocations match"):
+            self.assertEqual(sut.invocations, ["run 1", "run 2"])
+
+        # assert
+        with self.subTest("context is updated"):
+            self.assertEqual(context.response.body, {"hello": "world"})
+            self.assertEqual(context.response.status_code, 400)
+
+    def test_sequence_with_error_capsule(self):
+        # arrange
+        middleware = MiddlewarePipeline(logger=logger_factory())
+        sut = DummyNestedErrorSequenceBuilder(type="error capsule")
+        context = PinfluencerContext(response=PinfluencerResponse(),
+                                     short_circuit=False)
+
+        # act
+        middleware.execute_middleware(context=context,
+                                      sequence=sut)
+
+        # assert
+        with self.subTest("invocations match"):
+            self.assertEqual(sut.invocations, ["run 1"])
+
+        # assert
+        with self.subTest("context is updated"):
+            self.assertEqual(context.response.body, {"message": "im a teapot"})
+            self.assertEqual(context.response.status_code, 418)
+
+
+class TestComplexSequenceBuilder(TestCase):
 
     def setUp(self) -> None:
         self.__command_context = CommandContextClass()
