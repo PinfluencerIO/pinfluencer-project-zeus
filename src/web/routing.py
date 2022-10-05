@@ -8,7 +8,7 @@ from src.web.sequences import UpdateCampaignSequenceBuilder, UpdateImageForCampa
     CreateInfluencerSequenceBuilder, GetAuthInfluencerSequenceBuilder, GetInfluencerByIdSequenceBuilder, \
     GetAllInfluencersSequenceBuilder, UpdateBrandImageSequenceBuilder, UpdateBrandSequenceBuilder, \
     CreateBrandSequenceBuilder, GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder, \
-    CreateNotificationSequenceBuilder
+    CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder
 
 
 class Dispatcher:
@@ -110,7 +110,7 @@ class Dispatcher:
         notifications = OrderedDict(
             {
                 'GET /notifications/{notification_id}':
-                    Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),
+                    Route(sequence_builder=self.__service_locator.locate(GetNotificationByIdSequenceBuilder)),
 
                 'POST /users/me/notifications':
                     Route(sequence_builder=self.__service_locator.locate(CreateNotificationSequenceBuilder)),

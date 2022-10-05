@@ -1,7 +1,7 @@
 from src.web import FluentSequenceBuilder, PinfluencerContext
 from src.web.controllers import CampaignController, InfluencerController, BrandController, NotificationController
 from src.web.hooks import CommonBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, UserAfterHooks, UserBeforeHooks, \
-    BrandBeforeHooks, BrandAfterHooks, InfluencerBeforeHooks, InfluencerAfterHooks
+    BrandBeforeHooks, BrandAfterHooks, InfluencerBeforeHooks, InfluencerAfterHooks, NotificationBeforeHooks
 
 
 class PreGenericUpdateCreateSubsequenceBuilder(FluentSequenceBuilder):
@@ -459,14 +459,30 @@ class GetAllBrandsSequenceBuilder(FluentSequenceBuilder):
 class CreateNotificationSequenceBuilder(FluentSequenceBuilder):
 
     def __init__(self, pre_generic_update_create_subsequence_builder: PreGenericUpdateCreateSubsequenceBuilder,
-                 notification_controller: NotificationController):
+                 notification_controller: NotificationController,
+                 notification_before_hooks: NotificationBeforeHooks):
         super().__init__()
+        self.__notification_before_hooks = notification_before_hooks
         self.__notification_controller = notification_controller
         self.__pre_generic_update_create_subsequence_builder = pre_generic_update_create_subsequence_builder
 
     def build(self):
         self._add_sequence_builder(sequence_builder=self.__pre_generic_update_create_subsequence_builder)\
+            ._add_command(command=self.__notification_before_hooks.override_create_fields)\
             ._add_command(command=self.__notification_controller.create)
+
+
+class GetNotificationByIdSequenceBuilder(FluentSequenceBuilder):
+
+    def __init__(self, notification_controller: NotificationController,
+                 notification_before_hooks: NotificationBeforeHooks):
+        super().__init__()
+        self.__notification_before_hooks = notification_before_hooks
+        self.__notification_controller = notification_controller
+
+    def build(self):
+        self._add_command(command=self.__notification_before_hooks.validate_uuid)\
+            ._add_command(command=self.__notification_controller.get_by_id)
 
 
 class NotImplementedSequenceBuilder(FluentSequenceBuilder):

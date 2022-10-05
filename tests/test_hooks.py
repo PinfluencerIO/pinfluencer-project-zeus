@@ -6,7 +6,6 @@ from callee import Captor
 from ddt import data, ddt
 
 from src._types import AuthUserRepository, BrandRepository, ImageRepository, NotificationRepository
-from src.app import logger_factory
 from src.crosscutting import JsonCamelToSnakeCaseDeserializer, PinfluencerObjectMapper, AutoFixture
 from src.domain.models import User, ValueEnum, CategoryEnum, CampaignStateEnum
 from src.domain.validation import InfluencerValidator, BrandValidator, CampaignValidator
@@ -14,10 +13,11 @@ from src.exceptions import NotFoundException
 from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, CommonBeforeHooks, \
     InfluencerBeforeHooks, BrandBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, CommonAfterHooks, \
-    NotificationAfterHooks
-from src.web.views import ImageRequestDto, BrandResponseDto, BrandRequestDto, CampaignResponseDto
+    NotificationAfterHooks, NotificationBeforeHooks
+from src.web.views import ImageRequestDto, BrandResponseDto, BrandRequestDto, CampaignResponseDto, \
+    NotificationCreateRequestDto
 from tests import get_auth_user_event, create_for_auth_user_event, get_brand_id_event, \
-    get_influencer_id_event, get_campaign_id_event
+    get_influencer_id_event, get_campaign_id_event, get_notification_id_event
 
 TEST_S3_URL = "https://pinfluencer-product-images.s3.eu-west-2.amazonaws.com"
 
@@ -872,7 +872,7 @@ class TestCampaignAfterHooks(TestCase):
 
     def setUp(self) -> None:
         self.__common_after_hooks: CommonAfterHooks = Mock()
-        self.__mapper = PinfluencerObjectMapper(logger=logger_factory())
+        self.__mapper = PinfluencerObjectMapper(logger=Mock())
         self.__sut = CampaignAfterHooks(common_after_hooks=self.__common_after_hooks, mapper=self.__mapper)
 
     def test_tag_bucket_url_to_images(self):
@@ -1122,3 +1122,67 @@ class TestNotificationAfterHooks(TestCase):
 
         # assert
         self.__repository.save.assert_called_once()
+
+
+class TestNotificationBeforeHooks(TestCase):
+
+    def setUp(self) -> None:
+        self.__mapper = PinfluencerObjectMapper(logger=Mock())
+        self.__sut = NotificationBeforeHooks(mapper=self.__mapper,
+                                             logger=Mock())
+
+    def test_save_notification_state(self):
+        # arrange
+        notification = AutoFixture().create(dto=NotificationCreateRequestDto)
+        context = PinfluencerContext(body=notification.__dict__, auth_user_id="1234")
+
+        # act
+        self.__sut.override_create_fields(context=context)
+
+        body = self.__mapper.map_from_dict(_from=context.body, to=NotificationCreateRequestDto)
+
+        # assert
+        with self.subTest(msg="read was overriden"):
+            self.assertEqual(body.read, False)
+
+        # assert
+        with self.subTest(msg="sender was overriden"):
+            self.assertEqual(body.sender_auth_user_id, "1234")
+
+    def test_validate_uuid(self):
+        # arrange
+        id = str(uuid4())
+        context = PinfluencerContext(event=get_notification_id_event(notification_id=id),
+                                     short_circuit=False)
+
+        # act
+        self.__sut.validate_uuid(context=context)
+
+        # assert
+        with self.subTest(msg="middleware does not short"):
+            assert not context.short_circuit
+
+        # assert
+        with self.subTest(msg="id is set"):
+            assert context.id == id
+
+    def test_validate_uuid_when_invalid(self):
+        # arrange
+        context = PinfluencerContext(event=get_notification_id_event(notification_id="boo"),
+                                     short_circuit=False,
+                                     response=PinfluencerResponse())
+
+        # act
+        self.__sut.validate_uuid(context=context)
+
+        # assert
+        with self.subTest(msg="middleware shorts"):
+            assert context.short_circuit
+
+        # assert
+        with self.subTest(msg="response status code is 400"):
+            assert context.response.status_code == 400
+
+        # assert
+        with self.subTest(msg="response body is empty"):
+            assert context.response.body == {}

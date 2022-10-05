@@ -390,7 +390,4 @@ class TestNotificationRepository(TestCase):
         # assert
         with self.subTest(msg="notification matches notification in db"):
             notification_in_db = self.__sut.load_by_id(id_=notification.id)
-            assert False == notification_in_db.read == returned_notification.read
-            assert notification_in_db.sender_auth_user_id == returned_notification.sender_auth_user_id == "1234"
-            assert notification.receiver_auth_user_id == notification_in_db.receiver_auth_user_id == returned_notification.receiver_auth_user_id
-            assert notification.payload_body == notification_in_db.payload_body == returned_notification.payload_body
+            assert notification == notification_in_db == returned_notification

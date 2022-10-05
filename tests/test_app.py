@@ -17,7 +17,7 @@ from src.web.sequences import NotImplementedSequenceBuilder, UpdateImageForCampa
     CreateInfluencerSequenceBuilder, GetAuthInfluencerSequenceBuilder, GetInfluencerByIdSequenceBuilder, \
     GetAllInfluencersSequenceBuilder, UpdateBrandImageSequenceBuilder, UpdateBrandSequenceBuilder, \
     CreateBrandSequenceBuilder, GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder, \
-    CreateNotificationSequenceBuilder
+    CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder
 from tests import get_as_json
 
 
@@ -360,7 +360,22 @@ class TestRoutes(TestCase):
                                      sequence=self.__ioc.resolve(UpdateImageForCampaignSequenceBuilder))
 
     def test_get_notification_by_id(self):
-        self.__assert_not_implemented(route="GET /notifications/{notification_id}")
+        # arrange
+        self.__mock_middleware_pipeline.execute_middleware = MagicMock()
+
+        # act
+        bootstrap(event={"routeKey": "GET /notifications/{notification_id}"},
+                  context={},
+                  middleware=self.__mock_middleware_pipeline,
+                  ioc=self.__ioc,
+                  data_manager=Mock(),
+                  cognito_auth_service=Mock())
+
+        # assert
+        self.__mock_middleware_pipeline \
+            .execute_middleware \
+            .assert_called_once_with(context=Any(),
+                                     sequence=self.__ioc.resolve(GetNotificationByIdSequenceBuilder))
 
     def test_get_collaboration_by_id(self):
         self.__assert_not_implemented(route="GET /collaborations/{collaboration_id}")

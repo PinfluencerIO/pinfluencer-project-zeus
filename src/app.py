@@ -16,7 +16,7 @@ from src.web import PinfluencerResponse, PinfluencerContext, Route
 from src.web.controllers import BrandController, InfluencerController, CampaignController, NotificationController
 from src.web.hooks import HooksFacade, CommonBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, UserBeforeHooks, \
     UserAfterHooks, InfluencerBeforeHooks, BrandBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, CommonAfterHooks, \
-    NotificationAfterHooks
+    NotificationAfterHooks, NotificationBeforeHooks
 from src.web.middleware import MiddlewarePipeline
 from src.web.routing import Dispatcher
 from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdateCreateCampaignSubsequenceBuilder, \
@@ -27,7 +27,8 @@ from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdat
     CreateInfluencerSequenceBuilder, GetAuthInfluencerSequenceBuilder, GetInfluencerByIdSequenceBuilder, \
     GetAllInfluencersSequenceBuilder, UpdateBrandImageSequenceBuilder, UpdateBrandSequenceBuilder, \
     CreateBrandSequenceBuilder, GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder, \
-    CreateNotificationSequenceBuilder
+    CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder
+from tests.test_hooks import TestNotificationBeforeHooks
 
 
 def lambda_handler(event, context):
@@ -122,6 +123,7 @@ def register_middleware(ioc):
     ioc.add_singleton(CampaignAfterHooks)
     ioc.add_singleton(CommonAfterHooks)
     ioc.add_singleton(NotificationAfterHooks)
+    ioc.add_singleton(TestNotificationBeforeHooks)
 
 
 def register_auth(ioc):
@@ -187,3 +189,5 @@ def register_sequences(ioc: ServiceCollection):
     ioc.add_singleton(GetBrandByIdSequenceBuilder)
     ioc.add_singleton(GetAllBrandsSequenceBuilder)
     ioc.add_singleton(CreateNotificationSequenceBuilder)
+    ioc.add_singleton(NotificationBeforeHooks)
+    ioc.add_singleton(GetNotificationByIdSequenceBuilder)

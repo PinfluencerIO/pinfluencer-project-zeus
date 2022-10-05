@@ -88,8 +88,10 @@ class CollaborationUpdateRequestDto:
 
 @dataclass(unsafe_hash=True)
 class NotificationCreateRequestDto:
+    sender_auth_user_id: str = None
     receiver_auth_user_id: str = None
     payload_body: str = None
+    read: bool = None
 
 
 @dataclass(unsafe_hash=True)

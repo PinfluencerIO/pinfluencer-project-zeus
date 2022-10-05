@@ -149,8 +149,6 @@ class SqlAlchemyNotificationRepository(BaseSqlAlchemyRepository):
                          logger=logger)
 
     def write_new_for_auth_user(self, auth_user_id: str, payload: Notification) -> Notification:
-        payload.sender_auth_user_id = auth_user_id
-        payload.read = False
         self._data_manager.session.add(payload)
         return payload
 

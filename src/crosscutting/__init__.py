@@ -12,6 +12,9 @@ from src._types import Logger
 from src.exceptions import AutoFixtureException
 
 
+T = typing.TypeVar("T")
+
+
 def fullname(o):
     klass = o.__class__
     module = klass.__module__
@@ -25,7 +28,7 @@ class PinfluencerObjectMapper:
     def __init__(self, logger: Logger):
         self.__logger = logger
 
-    def map_to_dict_and_ignore_none_fields(self, _from, to) -> dict:
+    def map_to_dict_and_ignore_none_fields(self, _from, to: typing.Type[T]) -> dict:
         self.__logger.log_trace(f"{vars(_from).items()}")
         mapped = self.__generic_map(_from=_from,
                                   to=to,
@@ -46,13 +49,13 @@ class PinfluencerObjectMapper:
             if value is None:
                 new_dict.pop(property)
 
-    def map(self, _from, to):
+    def map(self, _from, to: typing.Type[T]) -> T:
         self.__logger.log_trace(f"{vars(_from).items()}")
         return self.__generic_map(_from=_from,
                                   to=to,
                                   propValues=vars(_from).items())
 
-    def map_from_dict(self, _from, to):
+    def map_from_dict(self, _from, to: typing.Type[T]) -> T:
         self.__logger.log_trace(_from.items())
         return self.__generic_map(_from=_from,
                                   to=to,

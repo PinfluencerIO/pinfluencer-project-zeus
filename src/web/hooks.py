@@ -7,7 +7,7 @@ from src.domain.models import CategoryEnum, ValueEnum, CampaignStateEnum, User
 from src.domain.validation import BrandValidator, InfluencerValidator, CampaignValidator
 from src.exceptions import NotFoundException
 from src.web import PinfluencerContext, valid_path_resource_id
-from src.web.views import RawImageRequestDto, ImageRequestDto, CampaignResponseDto
+from src.web.views import RawImageRequestDto, ImageRequestDto, CampaignResponseDto, NotificationCreateRequestDto
 
 S3_URL = "https://pinfluencer-product-images.s3.eu-west-2.amazonaws.com"
 
@@ -438,6 +438,29 @@ class HooksFacade:
 
     def get_before_common_hooks(self) -> CommonBeforeHooks:
         return self.__common_before_hooks
+
+
+class NotificationBeforeHooks:
+
+    def __init__(self, mapper: PinfluencerObjectMapper,
+                 logger: Logger):
+        self.__logger = logger
+        self.__mapper = mapper
+
+    def override_create_fields(self, context: PinfluencerContext):
+        notification = self.__mapper.map_from_dict(_from=context.body, to=NotificationCreateRequestDto)
+        notification.sender_auth_user_id = context.auth_user_id
+        notification.read = False
+        context.body = notification.__dict__
+
+    def validate_uuid(self, context: PinfluencerContext):
+        id = valid_path_resource_id(event=context.event, resource_key="notification_id", logger=self.__logger)
+        if not id:
+            context.short_circuit = True
+            context.response.body = {}
+            context.response.status_code = 400
+        else:
+            context.id = id
 
 
 class NotificationAfterHooks:

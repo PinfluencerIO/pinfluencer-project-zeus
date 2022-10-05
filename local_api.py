@@ -127,6 +127,11 @@ def create_notification_for_auth_user():
     return generic_handler(routeKey="POST /users/me/notifications", params={})
 
 
+@app.route("/notifications/<id>", methods=['GET'])
+def get_notification_by_id(id):
+    return generic_handler(routeKey="GET /notifications/{notification_id}", params={'notification_id': id})
+
+
 def generic_handler(routeKey: str, params: dict):
     body_string = None
     try:
