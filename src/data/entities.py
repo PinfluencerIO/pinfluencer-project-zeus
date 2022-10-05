@@ -79,7 +79,7 @@ collaboration_table = Table('collaboration', Base.metadata,
                             Column('campaign_id', PickleType),
                             Column('collaboration_state', PickleType))
 
-notifications_table = Table('notifications', Base.metadata,
+notifications_table = Table('notification', Base.metadata,
                             Column('id', String(length=36), primary_key=True),
                             Column('created', DateTime),
                             Column('sender_auth_user_id', String(length=64)),

@@ -371,7 +371,6 @@ class TestCampaignRepository(TestCase):
     def test_load_for_brand_when_brand_not_found(self):
         self.assertRaises(NotFoundException, lambda: self.__sut.load_for_auth_brand(auth_user_id="1234"))
 
-
 class TestNotificationRepository(TestCase):
 
     def setUp(self) -> None:
@@ -382,27 +381,7 @@ class TestNotificationRepository(TestCase):
     def test_write_for_auth_user(self):
         # arrange
         notification = AutoFixture().create(dto=Notification)
-        notification.sender_auth_user_id = None
-
-        # act
-        self.__sut.write_new_for_auth_user(auth_user_id="1234", payload=notification)
-
-        # assert
-        with self.subTest(msg="notification matches notification in db"):
-            notification_in_db = self.__sut.load_by_id(id_=notification.id)
-            notification.sender_auth_user_id = "1234"
-            self.assertEqual(notification, notification_in_db)
-
-class TestNotificationRepository(TestCase):
-
-    def setUp(self) -> None:
-        self.__data_manager = InMemorySqliteDataManager()
-        self.__sut = SqlAlchemyNotificationRepository(data_manager=self.__data_manager,
-                                                      logger=logger_factory())
-
-    def test_write_for_auth_user(self):
-        # arrange
-        notification = AutoFixture().create(dto=Notification)
+        notification.read = True
         notification.sender_auth_user_id = None
 
         # act
@@ -411,5 +390,7 @@ class TestNotificationRepository(TestCase):
         # assert
         with self.subTest(msg="notification matches notification in db"):
             notification_in_db = self.__sut.load_by_id(id_=notification.id)
-            notification.sender_auth_user_id = "1234"
-            assert notification == notification_in_db == returned_notification
+            assert False == notification_in_db.read == returned_notification.read
+            assert notification_in_db.sender_auth_user_id == returned_notification.sender_auth_user_id == "1234"
+            assert notification.receiver_auth_user_id == notification_in_db.receiver_auth_user_id == returned_notification.receiver_auth_user_id
+            assert notification.payload_body == notification_in_db.payload_body == returned_notification.payload_body

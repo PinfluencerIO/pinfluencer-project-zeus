@@ -122,6 +122,11 @@ def get_campaign_by_id(id):
     return generic_handler(routeKey="GET /campaigns/{campaign_id}", params={"campaign_id": id})
 
 
+@app.route("/users/me/notifications", methods=['POST'])
+def create_notification_for_auth_user():
+    return generic_handler(routeKey="POST /users/me/notifications", params={})
+
+
 def generic_handler(routeKey: str, params: dict):
     body_string = None
     try:
