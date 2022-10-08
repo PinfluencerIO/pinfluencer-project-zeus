@@ -188,5 +188,4 @@ def register_sequences(ioc: ServiceCollection):
     ioc.add_singleton(GetBrandByIdSequenceBuilder)
     ioc.add_singleton(GetAllBrandsSequenceBuilder)
     ioc.add_singleton(CreateNotificationSequenceBuilder)
-    ioc.add_singleton(NotificationBeforeHooks)
     ioc.add_singleton(GetNotificationByIdSequenceBuilder)
