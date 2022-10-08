@@ -28,7 +28,6 @@ from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdat
     GetAllInfluencersSequenceBuilder, UpdateBrandImageSequenceBuilder, UpdateBrandSequenceBuilder, \
     CreateBrandSequenceBuilder, GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder, \
     CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder
-from tests.test_hooks import TestNotificationBeforeHooks
 
 
 def lambda_handler(event, context):
@@ -123,7 +122,7 @@ def register_middleware(ioc):
     ioc.add_singleton(CampaignAfterHooks)
     ioc.add_singleton(CommonAfterHooks)
     ioc.add_singleton(NotificationAfterHooks)
-    ioc.add_singleton(TestNotificationBeforeHooks)
+    ioc.add_singleton(NotificationBeforeHooks)
 
 
 def register_auth(ioc):

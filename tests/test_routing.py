@@ -1,5 +1,4 @@
 from unittest import TestCase
-from unittest.mock import MagicMock, Mock
 
 from src.app import logger_factory
 from src.web import PinfluencerContext, PinfluencerResponse, ErrorCapsule, FluentSequenceBuilder
