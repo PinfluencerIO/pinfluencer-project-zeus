@@ -5,6 +5,7 @@ import random
 import re
 import typing
 import uuid
+from dataclasses import dataclass
 from enum import Enum
 from typing import Union
 
@@ -13,6 +14,14 @@ from src.exceptions import AutoFixtureException
 
 
 T = typing.TypeVar("T")
+
+
+@dataclass(unsafe_hash=True)
+class Rule:
+    to: type = None
+    _from: type = None
+    field: str = None
+    expression: typing.Callable[[typing.Any, typing.Any], None] = None
 
 
 def fullname(o):
@@ -27,12 +36,27 @@ class PinfluencerObjectMapper:
 
     def __init__(self, logger: Logger):
         self.__logger = logger
+        self.__maps: list[Rule] = []
+
+    @property
+    def rules(self) -> list[Rule]:
+        return self.__maps
+
+    def add_rule(self,
+                 _type_from: type,
+                 _type_to: type,
+                 field: str,
+                 expression: typing.Callable[[typing.Any, typing.Any], None]):
+        self.__maps.append(Rule(to=_type_to,
+                                _from=_type_from,
+                                field=field,
+                                expression=expression))
 
     def map_to_dict_and_ignore_none_fields(self, _from, to: typing.Type[T]) -> dict:
         self.__logger.log_trace(f"{vars(_from).items()}")
         mapped = self.__generic_map(_from=_from,
-                                  to=to,
-                                  propValues=vars(_from).items())
+                                    to=to,
+                                    propValues=vars(_from).items())
         new_dict = mapped.__dict__
         self.__to_dict_and_ignore_none_fields(new_dict=new_dict, mapped=mapped)
         return new_dict
@@ -69,9 +93,17 @@ class PinfluencerObjectMapper:
         self.__logger.log_trace(f"all props from _from {propValues}")
         for property, value in propValues:
             if property in dict_to:
-                setattr(new_dto, property, value)
-                if bool(typing.get_type_hints(dict_to[property])):
-                    setattr(new_dto, property, self.map(_from=value, to=dict_to[property]))
+                try:
+                    rule_match = \
+                        list(filter(lambda x:
+                                    x._from == type(_from) and
+                                    x.to == to and
+                                    x.field == property, self.__maps))[0]
+                    rule_match.expression(new_dto, _from)
+                except IndexError:
+                    setattr(new_dto, property, value)
+                    if bool(typing.get_type_hints(dict_to[property])):
+                        setattr(new_dto, property, self.map(_from=value, to=dict_to[property]))
         self.__logger.log_trace(f"__generic_map from {type(_from)} {to} and mapped {_from} out -> {new_dto}")
         return new_dto
 
@@ -127,13 +159,23 @@ class ConsoleLogger:
 
 class FlexiUpdater:
 
+    def __init__(self, mapper: PinfluencerObjectMapper):
+        self.__mapper = mapper
+
     def update(self, request, object_to_update):
-        values = vars(object_to_update).items()
+        values = list(vars(object_to_update).items())
         for key, value in values:
             try:
-                value_in_request = getattr(request, key)
-                if value_in_request is not None:
-                    setattr(object_to_update, key, getattr(request, key))
+                try:
+                    matching_rule = list(filter(lambda x:
+                                                x._from == type(request) and
+                                                x.to == type(object_to_update) and
+                                                x.field == key, self.__mapper.rules))[0]
+                    matching_rule.expression(object_to_update, request)
+                except IndexError:
+                    value_in_request = getattr(request, key)
+                    if value_in_request is not None:
+                        setattr(object_to_update, key, getattr(request, key))
             except AttributeError:
                 ...
 
@@ -180,11 +222,11 @@ class AutoFixture:
                                             list_limit=list_limit))
         return list_of_dtos
 
-    def create(self, dto,
+    def create(self, dto: typing.Type[T],
                seed=None,
                num=None,
                nest=0,
-               list_limit=100):
+               list_limit=100) -> T:
         self.__validate_predictable_data(num, seed)
 
         try:
@@ -198,7 +240,8 @@ class AutoFixture:
         members = all_annotations(cls=dto).items()
         for (key, _type) in members:
 
-            if getattr(new_value, key) is None:
+            if (getattr(new_value, key) is None) or (
+                    typing.get_origin(_type) is list and getattr(new_value, key) == []):
 
                 if _type is str:
                     self.__generate_string_field(is_predictable_data, key, new_value, seed)

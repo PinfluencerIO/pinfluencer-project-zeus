@@ -4,5 +4,5 @@ filetype==1.1.0
 boto3==1.24.84
 simple-injection==0.2.5
 Flask==2.2.2
-mysql-connector-python==8.0.30
+pymysql==1.0.2
 validators==0.20.0

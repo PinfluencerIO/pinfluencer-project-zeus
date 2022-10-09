@@ -7,7 +7,7 @@ from ddt import ddt, data
 
 from src._types import BrandRepository, InfluencerRepository, CampaignRepository, NotificationRepository
 from src.app import logger_factory
-from src.crosscutting import PinfluencerObjectMapper, AutoFixture, FlexiUpdater
+from src.crosscutting import AutoFixture, FlexiUpdater
 from src.domain.models import Influencer, Campaign, Brand, Notification
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.web import PinfluencerContext, PinfluencerResponse
@@ -15,14 +15,15 @@ from src.web.controllers import BrandController, InfluencerController, CampaignC
 from src.web.views import BrandRequestDto, BrandResponseDto, ImageRequestDto, InfluencerRequestDto, \
     InfluencerResponseDto, CampaignRequestDto, CampaignResponseDto, NotificationCreateRequestDto, \
     NotificationResponseDto
+from tests import test_mapper
 
 
 class TestInfluencerController(TestCase):
 
     def setUp(self):
-        self.__flexi_updater = FlexiUpdater()
         self.__influencer_repository: InfluencerRepository = Mock()
-        self.__object_mapper = PinfluencerObjectMapper(logger=Mock())
+        self.__object_mapper = test_mapper()
+        self.__flexi_updater = FlexiUpdater(mapper=self.__object_mapper)
         self.__sut = InfluencerController(influencer_repository=self.__influencer_repository,
                                           object_mapper=self.__object_mapper,
                                           flexi_updater=self.__flexi_updater,
@@ -105,9 +106,9 @@ class TestInfluencerController(TestCase):
 class TestBrandController(TestCase):
 
     def setUp(self):
-        self.__flexi_updater = FlexiUpdater()
         self.__brand_repository: BrandRepository = Mock()
-        self.__object_mapper = PinfluencerObjectMapper(logger=Mock())
+        self.__object_mapper = test_mapper()
+        self.__flexi_updater = FlexiUpdater(mapper=self.__object_mapper)
         self.__sut = BrandController(brand_repository=self.__brand_repository,
                                      object_mapper=self.__object_mapper,
                                      flexi_updater=self.__flexi_updater,
@@ -406,7 +407,7 @@ class TestBrandController(TestCase):
 
         # assert
         with self.subTest(msg="response values was equal to brand values in db and request values and body values"):
-            assert actual_payload.values == brand_request.values == mapped_brand_body.values == brand_db.values
+            assert brand_request.values == mapped_brand_body.values == list(map(lambda x: x.value, actual_payload.values)) == list(map(lambda x: x.value, brand_db.values))
 
         # assert
         with self.subTest(msg="response website was equal to brand website in db and request website and body website"):
@@ -471,7 +472,7 @@ class TestBrandController(TestCase):
             assert brand_db.brand_name == brand_request.brand_name == mapped_brand_body.brand_name
             assert brand_db.categories == brand_request.categories == mapped_brand_body.categories
             assert brand_db.insta_handle == brand_request.insta_handle == mapped_brand_body.insta_handle
-            assert brand_db.values == brand_request.values == mapped_brand_body.values
+            assert brand_request.values == mapped_brand_body.values == list(map(lambda x: x.value, brand_db.values))
             assert brand_db.website == brand_request.website == mapped_brand_body.website
 
         # assert
@@ -511,7 +512,7 @@ class TestBrandController(TestCase):
             assert brand_db.brand_name == brand_request.brand_name == mapped_brand_body.brand_name
             assert deep_copy_of_brand_db.categories == mapped_brand_body.categories
             assert brand_db.insta_handle == brand_request.insta_handle == mapped_brand_body.insta_handle
-            assert brand_db.values == brand_request.values == mapped_brand_body.values
+            assert brand_request.values == mapped_brand_body.values
             assert deep_copy_of_brand_db.website == mapped_brand_body.website
 
         # assert
@@ -552,9 +553,9 @@ class TestBrandController(TestCase):
 class TestCampaignController(TestCase):
 
     def setUp(self) -> None:
-        self.__flexi_updater = FlexiUpdater()
         self.__campaign_repository: CampaignRepository = Mock()
-        self.__object_mapper = PinfluencerObjectMapper(logger=Mock())
+        self.__object_mapper = test_mapper()
+        self.__flexi_updater = FlexiUpdater(mapper=self.__object_mapper)
         self.__sut = CampaignController(repository=self.__campaign_repository,
                                         object_mapper=self.__object_mapper,
                                         flexi_updater=self.__flexi_updater,
@@ -605,7 +606,6 @@ class TestCampaignController(TestCase):
         with self.subTest(msg="campaign fields match"):
             assert payload_campaign.campaign_hashtag == campaign_request.campaign_hashtag
             assert payload_campaign.campaign_categories == campaign_request.campaign_categories
-            assert payload_campaign.campaign_values == campaign_request.campaign_values
             assert payload_campaign.campaign_state == campaign_request.campaign_state
             assert payload_campaign.campaign_description == campaign_request.campaign_description
             assert payload_campaign.campaign_discount_code == campaign_request.campaign_discount_code
@@ -714,7 +714,8 @@ class TestCampaignController(TestCase):
         captor = Captor()
 
         with self.subTest(msg="generic update was made"):
-            self.__sut._generic_update.assert_called_once_with(context=context, request=CampaignRequestDto,
+            self.__sut._generic_update.assert_called_once_with(context=context,
+                                                               request=CampaignRequestDto,
                                                                response=CampaignResponseDto,
                                                                repo_func=captor)
 
@@ -748,8 +749,8 @@ class TestNotificationController(TestCase):
 
     def setUp(self) -> None:
         self.__repository: NotificationRepository = Mock()
-        self.__mapper = PinfluencerObjectMapper(logger=logger_factory())
-        self.__flexi_updater = FlexiUpdater()
+        self.__mapper = test_mapper()
+        self.__flexi_updater = FlexiUpdater(mapper=self.__mapper)
         self.__sut = NotificationController(repository=self.__repository,
                                             mapper=self.__mapper,
                                             flexi_updater=self.__flexi_updater,

@@ -17,6 +17,7 @@ from src.web.controllers import BrandController, InfluencerController, CampaignC
 from src.web.hooks import HooksFacade, CommonBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, UserBeforeHooks, \
     UserAfterHooks, InfluencerBeforeHooks, BrandBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, CommonAfterHooks, \
     NotificationAfterHooks, NotificationBeforeHooks
+from src.web.mapping import MappingRules
 from src.web.middleware import MiddlewarePipeline
 from src.web.routing import Dispatcher
 from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdateCreateCampaignSubsequenceBuilder, \
@@ -60,6 +61,11 @@ def bootstrap(event: dict,
                               ioc,
                               middleware)
 
+        # register custom mapping rules
+        mapping_rules = ioc.resolve(MappingRules)
+        mapping_rules.add_rules()
+
+        # dispatch route to function
         dispatcher = ioc.resolve(Dispatcher)
         route = event['routeKey']
         logger_factory().log_debug(f'Route: {route}')
@@ -105,6 +111,7 @@ def register_dependencies(cognito_auth_service, data_manager, ioc, middleware):
     ioc.add_instance(MiddlewarePipeline, middleware)
     ioc.add_singleton(FlexiUpdater)
 
+
     ioc.add_instance(Logger, logger_factory())
     ioc.add_instance(ServiceLocator, ServiceLocator(ioc=ioc))
 
@@ -143,6 +150,7 @@ def register_controllers(ioc):
 
 def register_object_mapping(ioc):
     ioc.add_singleton(PinfluencerObjectMapper)
+    ioc.add_singleton(MappingRules)
 
 
 def register_domain(ioc):

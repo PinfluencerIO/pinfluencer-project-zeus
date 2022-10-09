@@ -29,6 +29,7 @@ class TestBaseRepository(BrandRepositoryTestCase):
         # arrange
         expected_brand = AutoFixture().create(dto=Brand,
                                               list_limit=5)
+        expected_brand_id = expected_brand.id
         brand_names = [expected_brand.brand_name, "new_brand_name"]
         self._data_manager.create_fake_data([expected_brand])
 
@@ -46,8 +47,32 @@ class TestBaseRepository(BrandRepositoryTestCase):
             assert self._data_manager \
                        .session \
                        .query(Brand) \
-                       .filter(Brand.id == expected_brand.id) \
+                       .filter(Brand.id == expected_brand_id) \
                        .first().brand_name == brand_names[1]
+
+    def test_commit_when_data_not_committed(self):
+        # arrange
+        expected_brand = AutoFixture().create(dto=Brand,
+                                              list_limit=5)
+        expected_brand_id = expected_brand.id
+        brand_names = [expected_brand.brand_name, "new_brand_name"]
+        self._data_manager.create_fake_data([expected_brand])
+
+        # act
+        self._data_manager \
+            .session \
+            .query(Brand) \
+            .filter(Brand.id == expected_brand.id) \
+            .first().brand_name = brand_names[1]
+        self._data_manager.session.close()
+
+        # assert
+        with self.subTest(msg="brand name has been changed in db"):
+            assert self._data_manager \
+                       .session \
+                       .query(Brand) \
+                       .filter(Brand.id == expected_brand_id) \
+                       .first().brand_name == brand_names[0]
 
     def test_load_by_id(self):
         # arrange
@@ -59,7 +84,7 @@ class TestBaseRepository(BrandRepositoryTestCase):
 
         # assert
         with self.subTest(msg="brands match"):
-            assert expected_brand == actual_brand
+            self.assertEqual(expected_brand, actual_brand)
 
     def test_load_by_id_when_brand_cannot_be_found(self):
         self.assertRaises(NotFoundException, lambda: self._sut.load_by_id(id_="1234"))

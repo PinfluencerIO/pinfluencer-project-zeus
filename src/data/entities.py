@@ -1,8 +1,8 @@
 import sqlalchemy.orm
-from sqlalchemy import Column, String, DateTime, Float, PickleType, Table, Integer, Boolean
+from sqlalchemy import Column, String, DateTime, Float, PickleType, Table, Integer, Boolean, Enum, orm
 
 from src.data import Base
-from src.domain.models import Brand, Influencer, Campaign, Collaboration, Notification
+from src.domain.models import Brand, Influencer, Campaign, Collaboration, Notification, ValueEnum, Value
 
 
 class SqlAlchemyBaseEntity:
@@ -14,6 +14,14 @@ class SqlAlchemyBaseUserEntity(SqlAlchemyBaseEntity):
     auth_user_id = Column(type_=String(length=64), nullable=False, unique=True)
 
 
+
+value_table = Table('value', Base.metadata,
+                    Column('id', String(length=36), primary_key=True),
+                    Column('created', DateTime),
+                    Column('value', Enum(ValueEnum)),
+                    Column('brand_id', String(length=64)),
+                    Column('influencer_id', String(length=64)))
+
 brand_table = Table('brand', Base.metadata,
                     Column('id', String(length=36), primary_key=True),
                     Column('created', DateTime),
@@ -21,7 +29,6 @@ brand_table = Table('brand', Base.metadata,
                     Column('brand_name', String(length=120)),
                     Column('brand_description', String(length=500)),
                     Column('header_image', String(length=360)),
-                    Column('values', PickleType),
                     Column('categories', PickleType),
                     Column('insta_handle', String(length=30)),
                     Column('website', String(length=120)),
@@ -45,7 +52,6 @@ influencer_table = Table('influencer', Base.metadata,
                          Column('audience_female_split', Float),
                          Column('insta_handle', String(length=30)),
                          Column('address', String(length=500)),
-                         Column('values', PickleType),
                          Column('categories', PickleType))
 
 campaign_table = Table('campaign', Base.metadata,
@@ -57,7 +63,6 @@ campaign_table = Table('campaign', Base.metadata,
                        Column('campaign_title', String(length=120)),
                        Column('campaign_description', String(length=500)),
                        Column('campaign_categories', PickleType),
-                       Column('campaign_values', PickleType),
                        Column('campaign_state', PickleType),
                        Column('campaign_product_link', String(length=120)),
                        Column('campaign_hashtag', String(length=120)),
@@ -91,8 +96,19 @@ notifications_table = Table('notification', Base.metadata,
 def create_mappings(logger):
     try:
         # sqlalchemy mappings
-        sqlalchemy.orm.mapper(Brand, brand_table)
-        sqlalchemy.orm.mapper(Influencer, influencer_table)
+        sqlalchemy.orm.mapper(Value, value_table)
+        sqlalchemy.orm.mapper(Brand, brand_table, properties={
+            'values': orm.relationship(Value,
+                                       foreign_keys=value_table.c.brand_id,
+                                       primaryjoin=brand_table.c.auth_user_id == value_table.c.brand_id,
+                                       lazy='joined')
+        })
+        sqlalchemy.orm.mapper(Influencer, influencer_table, properties={
+            'values': orm.relationship(Value,
+                                       foreign_keys=value_table.c.influencer_id,
+                                       primaryjoin=influencer_table.c.auth_user_id == value_table.c.influencer_id,
+                                       lazy='joined')
+        })
         sqlalchemy.orm.mapper(Campaign, campaign_table)
         sqlalchemy.orm.mapper(Collaboration, collaboration_table)
         sqlalchemy.orm.mapper(Notification, notifications_table)

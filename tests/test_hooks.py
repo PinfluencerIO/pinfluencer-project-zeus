@@ -17,7 +17,7 @@ from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks, Infl
 from src.web.views import ImageRequestDto, BrandResponseDto, BrandRequestDto, CampaignResponseDto, \
     NotificationCreateRequestDto
 from tests import get_auth_user_event, create_for_auth_user_event, get_brand_id_event, \
-    get_influencer_id_event, get_campaign_id_event, get_notification_id_event
+    get_influencer_id_event, get_campaign_id_event, get_notification_id_event, test_mapper
 
 TEST_S3_URL = "https://pinfluencer-product-images.s3.eu-west-2.amazonaws.com"
 
@@ -164,7 +164,7 @@ class TestBrandBeforeHooks(TestCase):
         self.__common_before_hooks: CommonBeforeHooks = Mock()
         self.__brand_repository: BrandRepository = Mock()
         self.__brand_validator = BrandValidator()
-        self.__mapper = PinfluencerObjectMapper(logger=Mock())
+        self.__mapper = test_mapper()
         self.__sut = BrandBeforeHooks(brand_validator=self.__brand_validator,
                                       brand_repository=self.__brand_repository,
                                       common_before_hooks=self.__common_before_hooks,
@@ -579,7 +579,7 @@ class TestCampaignBeforeHooks(TestCase):
 class TestCommonHooks(TestCase):
 
     def setUp(self) -> None:
-        self.__object_mapper = PinfluencerObjectMapper(logger=Mock())
+        self.__object_mapper = test_mapper()
         self.__image_repo: ImageRepository = Mock()
         self.__deserializer = JsonCamelToSnakeCaseDeserializer()
         self.__sut = CommonBeforeHooks(deserializer=self.__deserializer,
@@ -734,7 +734,7 @@ class TestBrandAfterHooks(TestCase):
     def setUp(self) -> None:
         self.__auth_user_repository: AuthUserRepository = Mock()
         self.__common_after_hooks: CommonAfterHooks = Mock()
-        self.__mapper = PinfluencerObjectMapper(logger=Mock())
+        self.__mapper = test_mapper()
         self.__sut = BrandAfterHooks(auth_user_repository=self.__auth_user_repository,
                                      common_after_common_hooks=self.__common_after_hooks,
                                      mapper=self.__mapper)
@@ -805,7 +805,7 @@ class TestInfluencerAfterHooks(TestCase):
     def setUp(self) -> None:
         self.__auth_user_repository: AuthUserRepository = Mock()
         self.__common_after_hooks: CommonAfterHooks = Mock()
-        self.__mapper = PinfluencerObjectMapper(logger=Mock())
+        self.__mapper = test_mapper()
         self.__sut = InfluencerAfterHooks(auth_user_repository=self.__auth_user_repository,
                                           common_after_hooks=self.__common_after_hooks,
                                           mapper=self.__mapper)
@@ -872,7 +872,7 @@ class TestCampaignAfterHooks(TestCase):
 
     def setUp(self) -> None:
         self.__common_after_hooks: CommonAfterHooks = Mock()
-        self.__mapper = PinfluencerObjectMapper(logger=Mock())
+        self.__mapper = test_mapper()
         self.__sut = CampaignAfterHooks(common_after_hooks=self.__common_after_hooks, mapper=self.__mapper)
 
     def test_tag_bucket_url_to_images(self):
@@ -1035,7 +1035,7 @@ class TestUserAfterHooks(TestCase):
     def setUp(self) -> None:
         self.__common_after_hooks: CommonAfterHooks = Mock()
         self.__auth_user_repository: AuthUserRepository = Mock()
-        self.__mapper = PinfluencerObjectMapper(logger=Mock())
+        self.__mapper = test_mapper()
         self.__sut = UserAfterHooks(auth_user_repository=self.__auth_user_repository,
                                     common_after_hooks=self.__common_after_hooks,
                                     mapper=self.__mapper)
@@ -1127,7 +1127,7 @@ class TestNotificationAfterHooks(TestCase):
 class TestNotificationBeforeHooks(TestCase):
 
     def setUp(self) -> None:
-        self.__mapper = PinfluencerObjectMapper(logger=Mock())
+        self.__mapper = test_mapper()
         self.__sut = NotificationBeforeHooks(mapper=self.__mapper,
                                              logger=Mock())
 

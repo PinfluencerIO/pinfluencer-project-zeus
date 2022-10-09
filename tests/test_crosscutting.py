@@ -5,7 +5,9 @@ from unittest.mock import Mock
 
 from src.crosscutting import JsonSnakeToCamelSerializer, JsonCamelToSnakeCaseDeserializer, AutoFixture, \
     PinfluencerObjectMapper
-from src.domain.models import ValueEnum, CategoryEnum
+from src.domain.models import ValueEnum, CategoryEnum, Brand, Value
+from src.web.views import BrandRequestDto
+from tests import test_mapper
 
 TEST_DICT_JSON = "{\"name\": \"adam raymond\", \"snakeInValue\": \"snake_in_value\", \"value2To3Values\": 2}"
 TEST_LIST_SERIALIZATION_JSON = "[{\"name\": \"adam raymond\", \"snakeInValue\": \"snake_in_value\", \"value2To3Values\": 2}, {\"name\": \"adam raymond\", \"snakeInValue\": \"snake_in_value\", \"value2To3Values\": 2}, {\"name\": \"adam raymond\", \"snakeInValue\": \"snake_in_value\", \"value2To3Values\": 2}]"
@@ -114,7 +116,7 @@ class TestPinfluencerMapper(TestCase):
                                         list_limit=5)
 
         # act
-        test_other_dto: TestOtherDto = PinfluencerObjectMapper(logger=Mock()).map(_from=test_dto, to=TestOtherDto)
+        test_other_dto: TestOtherDto = test_mapper().map(_from=test_dto, to=TestOtherDto)
 
         # assert
         with self.subTest(msg="id with default value matches"):
@@ -180,6 +182,42 @@ class TestPinfluencerMapper(TestCase):
         with self.subTest(msg="list of floats field matches"):
             assert test_other_dto.list_of_floats == test_dto.list_of_floats
 
+    def test_add_custom_rule(self):
+        # arrange
+        brand = AutoFixture().create(dto=Brand, list_limit=5)
+        brand_request = AutoFixture().create(dto=BrandRequestDto, list_limit=5)
+        mapper = test_mapper()
+
+        # act
+        mapper.add_rule(_type_from=Brand,
+                        _type_to=BrandRequestDto,
+                        field='values',
+                        expression=self.__map_values_in)
+
+        # act
+        mapper.add_rule(_type_from=BrandRequestDto,
+                        _type_to=Brand,
+                        field='values',
+                        expression=self.__map_values_out)
+
+        # assert
+        with self.subTest(msg="map out works"):
+            mapped_brand_request = mapper.map(_from=brand, to=BrandRequestDto)
+            self.assertEqual(mapped_brand_request.values, list(map(lambda x: x.value, brand.values)))
+
+        # assert
+        with self.subTest(msg="map in works"):
+            mapped_brand = mapper.map(_from=brand_request, to=Brand)
+            self.assertEqual(list(map(lambda x: x.value, mapped_brand.values)), brand_request.values)
+
+
+
+
+    def __map_values_in(self, to: BrandRequestDto, _from=Brand):
+        to.values = list(map(lambda x: x.value, _from.values))
+
+    def __map_values_out(self, to: Brand, _from=BrandRequestDto):
+        to.values = list(map(lambda x: Value(value=x), _from.values))
 
 class TestAutoFixture:
 

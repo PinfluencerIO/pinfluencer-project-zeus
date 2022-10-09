@@ -3,10 +3,12 @@ from enum import Enum
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from src.crosscutting import JsonSnakeToCamelSerializer
+from src.app import logger_factory
+from src.crosscutting import JsonSnakeToCamelSerializer, PinfluencerObjectMapper
 from src.data import Base
 from src.data.entities import SqlAlchemyBaseEntity
 from src.domain.models import Brand, Influencer, ValueEnum, CategoryEnum, User
+from src.web.mapping import MappingRules
 
 TEST_DEFAULT_PRODUCT_IMAGE1 = "default_product_image1.png"
 TEST_DEFAULT_PRODUCT_IMAGE2 = "default_product_image2.png"
@@ -14,6 +16,14 @@ TEST_DEFAULT_PRODUCT_IMAGE3 = "default_product_image3.png"
 TEST_DEFAULT_BRAND_LOGO = "default_brand_logo.png"
 TEST_DEFAULT_BRAND_HEADER_IMAGE = "default_brand_header_image.png"
 TEST_DEFAULT_INFLUENCER_PROFILE_IMAGE = "default_influencer_profile_image.png"
+
+
+def test_mapper() -> PinfluencerObjectMapper:
+    object_mapper = PinfluencerObjectMapper(logger=logger_factory())
+    rules = MappingRules(mapper=object_mapper)
+    rules.add_rules()
+    return object_mapper
+
 
 
 class InMemorySqliteDataManager:
@@ -33,7 +43,8 @@ class InMemorySqliteDataManager:
         return self.__session
 
     def create_fake_data(self, objects):
-        self.__session.bulk_save_objects(objects=objects)
+        for object in objects:
+            self.__session.add(object)
         self.session.commit()
 
 
