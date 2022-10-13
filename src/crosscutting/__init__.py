@@ -10,8 +10,7 @@ from enum import Enum
 from typing import Union
 
 from src._types import Logger
-from src.exceptions import AutoFixtureException
-
+from src.exceptions import AutoFixtureException, AutoMapperException
 
 T = typing.TypeVar("T")
 
@@ -51,6 +50,25 @@ class PinfluencerObjectMapper:
                                 _from=_type_from,
                                 field=field,
                                 expression=expression))
+
+    def add_rules(self,
+                  _type_from: list[type],
+                  _type_to: list[type],
+                  field: list[str],
+                  expression: typing.Callable[[typing.Any, typing.Any], None]):
+        length = len(_type_from)
+        if not (length == len(_type_to) == len(field)):
+            raise AutoMapperException()
+
+        for i in range(0, length):
+            _single_type_from = _type_from[i]
+            _single_type_to = _type_to[i]
+            single_field = field[i]
+
+            self.add_rule(_type_from=_single_type_from,
+                          _type_to=_single_type_to,
+                          field=single_field,
+                          expression=expression)
 
     def map_to_dict_and_ignore_none_fields(self, _from, to: typing.Type[T]) -> dict:
         self.__logger.log_trace(f"{vars(_from).items()}")
@@ -99,7 +117,8 @@ class PinfluencerObjectMapper:
                                     x._from == type(_from) and
                                     x.to == to and
                                     x.field == property, self.__maps))[0]
-                    rule_match.expression(new_dto, _from)
+                    if value is not None:
+                        rule_match.expression(new_dto, _from)
                 except IndexError:
                     setattr(new_dto, property, value)
                     if bool(typing.get_type_hints(dict_to[property])):
@@ -171,7 +190,9 @@ class FlexiUpdater:
                                                 x._from == type(request) and
                                                 x.to == type(object_to_update) and
                                                 x.field == key, self.__mapper.rules))[0]
-                    matching_rule.expression(object_to_update, request)
+                    value_in_request = getattr(request, key)
+                    if value_in_request is not None:
+                        matching_rule.expression(object_to_update, request)
                 except IndexError:
                     value_in_request = getattr(request, key)
                     if value_in_request is not None:

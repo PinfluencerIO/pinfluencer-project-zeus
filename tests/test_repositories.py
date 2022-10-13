@@ -174,7 +174,8 @@ class TestBrandRepository(BrandRepositoryTestCase):
         actual = self._sut.load_by_id(id_=expected.id)
 
         # assert
-        assert actual == expected
+        with self.subTest(msg="brand is retrieved"):
+            self.assertEqual(actual, expected)
 
 
 class TestInfluencerRepository(TestCase):

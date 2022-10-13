@@ -150,9 +150,9 @@ class CampaignResponseDto(BaseResponseDto):
     success_description: str = None
     campaign_title: str = None
     campaign_description: str = None
+    campaign_state: CampaignStateEnum = None
     campaign_categories: list[CategoryEnum] = None
     campaign_values: list[ValueEnum] = None
-    campaign_state: CampaignStateEnum = None
     campaign_product_link: str = None
     campaign_hashtag: str = None
     campaign_discount_code: str = None

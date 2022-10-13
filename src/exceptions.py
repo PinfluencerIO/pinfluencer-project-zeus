@@ -12,3 +12,7 @@ class ImageException(Exception):
 
 class AutoFixtureException(Exception):
     pass
+
+
+class AutoMapperException(Exception):
+    pass

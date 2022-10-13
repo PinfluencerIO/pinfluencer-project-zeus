@@ -399,7 +399,7 @@ class TestBrandController(TestCase):
 
         # assert
         with self.subTest(msg="response categories was equal to brand categories in db and request categories and body categories"):
-            assert actual_payload.categories == brand_request.categories == mapped_brand_body.categories == brand_db.categories
+            assert list(map(lambda x: x.category, actual_payload.categories)) == brand_request.categories == mapped_brand_body.categories == list(map(lambda x: x.category, brand_db.categories))
 
         # assert
         with self.subTest(msg="response insta handle was equal to brand insta handle in db and request insta handle and body insta handle"):
@@ -470,7 +470,7 @@ class TestBrandController(TestCase):
             # brand response asserts
             assert brand_db.brand_description == brand_request.brand_description == mapped_brand_body.brand_description
             assert brand_db.brand_name == brand_request.brand_name == mapped_brand_body.brand_name
-            assert brand_db.categories == brand_request.categories == mapped_brand_body.categories
+            assert brand_request.categories == mapped_brand_body.categories == list(map(lambda x: x.category, brand_db.categories))
             assert brand_db.insta_handle == brand_request.insta_handle == mapped_brand_body.insta_handle
             assert brand_request.values == mapped_brand_body.values == list(map(lambda x: x.value, brand_db.values))
             assert brand_db.website == brand_request.website == mapped_brand_body.website
@@ -510,7 +510,8 @@ class TestBrandController(TestCase):
             # brand response asserts
             assert deep_copy_of_brand_db.brand_description == mapped_brand_body.brand_description
             assert brand_db.brand_name == brand_request.brand_name == mapped_brand_body.brand_name
-            assert deep_copy_of_brand_db.categories == mapped_brand_body.categories
+            assert brand_request.categories != mapped_brand_body.categories
+            assert list(map(lambda x: x.category, deep_copy_of_brand_db.categories)) == mapped_brand_body.categories
             assert brand_db.insta_handle == brand_request.insta_handle == mapped_brand_body.insta_handle
             assert brand_request.values == mapped_brand_body.values
             assert deep_copy_of_brand_db.website == mapped_brand_body.website
@@ -605,7 +606,8 @@ class TestCampaignController(TestCase):
         # assert
         with self.subTest(msg="campaign fields match"):
             assert payload_campaign.campaign_hashtag == campaign_request.campaign_hashtag
-            assert payload_campaign.campaign_categories == campaign_request.campaign_categories
+            assert list(map(lambda x: x.category, payload_campaign.campaign_categories)) == campaign_request.campaign_categories
+            assert list(map(lambda x: x.value, payload_campaign.campaign_values)) == campaign_request.campaign_values
             assert payload_campaign.campaign_state == campaign_request.campaign_state
             assert payload_campaign.campaign_description == campaign_request.campaign_description
             assert payload_campaign.campaign_discount_code == campaign_request.campaign_discount_code

@@ -49,6 +49,11 @@ class DataModel:
 
 
 @dataclass(unsafe_hash=True)
+class Category(DataModel):
+    category: CategoryEnum = None
+
+
+@dataclass(unsafe_hash=True)
 class Value(DataModel):
     value: ValueEnum = None
 
@@ -61,9 +66,9 @@ class Brand(DataModel):
     logo: str = None
     header_image: str = None
     insta_handle: str = None
-    categories: list[CategoryEnum] = None
-    auth_user_id: str = None
+    categories: list[Category] = field(default_factory=list[Category])
     values: list[Value] = field(default_factory=list[Value])
+    auth_user_id: str = None
 
 
 @dataclass(unsafe_hash=True)
@@ -88,8 +93,8 @@ class Influencer(DataModel):
     audience_age_65_plus_split: float = None
     audience_male_split: float = None
     audience_female_split: float = None
-    values: list[Value] = field(default_factory=list)
-    categories: list[CategoryEnum] = None
+    categories: list[Category] = field(default_factory=list[Value])
+    values: list[Value] = field(default_factory=list[Value])
     address: str = None
     auth_user_id: str = None
 
@@ -108,8 +113,9 @@ class Campaign(DataModel):
     success_description: str = None
     campaign_title: str = None
     campaign_description: str = None
-    campaign_categories: list[CategoryEnum] = None
     campaign_state: CampaignStateEnum = None
+    campaign_categories: list[Category] = field(default_factory=list[Value])
+    campaign_values: list[Value] = field(default_factory=list[Value])
     campaign_product_link: str = None
     campaign_hashtag: str = None
     campaign_discount_code: str = None

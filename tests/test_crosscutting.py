@@ -3,10 +3,13 @@ from dataclasses import dataclass, field
 from unittest import TestCase
 from unittest.mock import Mock
 
+from ddt import ddt, data
+
 from src.crosscutting import JsonSnakeToCamelSerializer, JsonCamelToSnakeCaseDeserializer, AutoFixture, \
     PinfluencerObjectMapper
 from src.domain.models import ValueEnum, CategoryEnum, Brand, Value
-from src.web.views import BrandRequestDto
+from src.exceptions import AutoMapperException
+from src.web.views import BrandRequestDto, BrandResponseDto
 from tests import test_mapper
 
 TEST_DICT_JSON = "{\"name\": \"adam raymond\", \"snakeInValue\": \"snake_in_value\", \"value2To3Values\": 2}"
@@ -108,6 +111,7 @@ class TestDto(InheritedDto):
     nested_list: list[NestedTestDto] = None
 
 
+@ddt
 class TestPinfluencerMapper(TestCase):
 
     def test_map(self):
@@ -210,14 +214,47 @@ class TestPinfluencerMapper(TestCase):
             mapped_brand = mapper.map(_from=brand_request, to=Brand)
             self.assertEqual(list(map(lambda x: x.value, mapped_brand.values)), brand_request.values)
 
+    @data(([Brand, Brand], [BrandRequestDto, BrandResponseDto], ['values', 'values']),
+          ([Brand, Brand], [BrandRequestDto, BrandRequestDto], ['values', 'categories']))
+    def test_add_custom_rules(self, _input: tuple[list[type], list[type], list[str]]):
+        # arrange
+        (type_from, type_to, fields) = _input
+        mapper = test_mapper()
 
+        # act
+        delegate = lambda: mapper.add_rules(_type_from=type_from,
+                                            _type_to=type_to,
+                                            field=fields,
+                                            expression=lambda x, y: print("work"))
 
+        # assert
+        with self.subTest(msg="should not throw"):
+            delegate()
+
+    @data(([Brand], [BrandRequestDto, BrandResponseDto], ['values', 'values']),
+          ([Brand, Brand], [BrandRequestDto], ['values', 'categories']),
+          ([Brand, Brand], [BrandRequestDto, BrandResponseDto], ['categories']))
+    def test_add_custom_rules_when_invalid_length_input(self, _input: tuple[list[type], list[type], list[str]]):
+        # arrange
+        (type_from, type_to, fields) = _input
+        mapper = test_mapper()
+
+        # act
+        delegate = lambda: mapper.add_rules(_type_from=type_from,
+                                            _type_to=type_to,
+                                            field=fields,
+                                            expression=lambda x, y: print("work"))
+
+        # assert
+        with self.subTest(msg="should throw"):
+            self.assertRaises(AutoMapperException, delegate)
 
     def __map_values_in(self, to: BrandRequestDto, _from=Brand):
         to.values = list(map(lambda x: x.value, _from.values))
 
     def __map_values_out(self, to: Brand, _from=BrandRequestDto):
         to.values = list(map(lambda x: Value(value=x), _from.values))
+
 
 class TestAutoFixture:
 

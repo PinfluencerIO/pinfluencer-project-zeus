@@ -15,7 +15,7 @@ class SqlAlchemyDataManager:
         engine_str = f"mysql+pymysql://{os.environ['DB_USER']}:{os.environ['DB_PASSWORD']}@{os.environ['DB_URL']}/{os.environ['DB_NAME']}"
         engine = create_engine(engine_str)
         self.__engine = engine
-        session = sessionmaker(bind=self.__engine,)
+        session = sessionmaker(bind=self.__engine)
         self.__session = session()
 
     @property
