@@ -50,6 +50,7 @@ Resources:
           - "https://localhost:3000"
           - "http://localhost:3000"
           - "https://app.pinfluencer.io"
+          - "https://pinfluencer.link"
         AllowHeaders:
           - "*"
         AllowMethods:
