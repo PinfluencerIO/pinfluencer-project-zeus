@@ -99,6 +99,25 @@ class Influencer(DataModel):
     auth_user_id: str = None
 
 
+class GenderEnum(Enum):
+    MALE = "MALE"
+    FEMALE = "FEMALE"
+    UNKNOWN = "UNKNOWN"
+
+
+@dataclass(unsafe_hash=True)
+class AudienceAge(DataModel):
+    split: float = None
+    gender: GenderEnum = None
+
+
+@dataclass(unsafe_hash=True)
+class AudienceAgeSplit(DataModel):
+    split: float = None
+    min_age: int = None
+    max_age: int = None
+
+
 class CampaignStateEnum(Enum):
     DRAFT = "DRAFT",
     ACTIVE = "ACTIVE",

@@ -6,7 +6,7 @@ from sqlalchemy import Column, String, DateTime, Float, PickleType, Table, Integ
 from src import T
 from src.data import Base
 from src.domain.models import Brand, Influencer, Campaign, Collaboration, Notification, ValueEnum, Value, CategoryEnum, \
-    Category, CampaignStateEnum
+    Category, CampaignStateEnum, GenderEnum
 
 
 class SqlAlchemyBaseEntity:
@@ -25,6 +25,21 @@ value_table = Table('value', Base.metadata,
                     Column('brand_id', String(length=64)),
                     Column('influencer_id', String(length=64)),
                     Column('campaign_id', String(length=64)))
+
+audience_age_table = Table('audience_age', Base.metadata,
+                           Column('id', String(length=36), primary_key=True),
+                           Column('created', DateTime),
+                           Column('min_age', Integer),
+                           Column('max_age', Integer),
+                           Column('split', Float),
+                           Column('influencer_id', String(length=64)))
+
+audience_gender_table = Table('audience_gender', Base.metadata,
+                              Column('id', String(length=36), primary_key=True),
+                              Column('created', DateTime),
+                              Column('gender', Enum(GenderEnum)),
+                              Column('split', Float),
+                              Column('influencer_id', String(length=64)))
 
 category_table = Table('category', Base.metadata,
                        Column('id', String(length=36), primary_key=True),
