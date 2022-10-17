@@ -3,7 +3,7 @@ from unittest import TestCase
 from src.app import logger_factory
 from src.crosscutting import AutoFixture, PinfluencerObjectMapper
 from src.data.entities import create_mappings
-from src.domain.models import Brand, Influencer, Campaign
+from src.domain.models import Brand, Influencer, Campaign, AudienceAgeSplit, AudienceGenderSplit
 from tests import InMemorySqliteDataManager
 
 
@@ -13,6 +13,58 @@ class TestMapping(TestCase):
         self.__data_manager = InMemorySqliteDataManager()
         create_mappings(logger=logger_factory())
         self.__mapper = PinfluencerObjectMapper(logger=logger_factory())
+
+    def test_audience_gender_fetch_mapping(self):
+        # arrange
+        expected_audience_gender = AutoFixture().create(dto=AudienceGenderSplit)
+        self.__data_manager.create_fake_data([expected_audience_gender])
+
+        # act
+        audience_gender_fetched_from_db = self.__data_manager.session.query(AudienceGenderSplit).first()
+
+        # assert
+        with self.subTest(msg="ids match"):
+            self.assertEqual(expected_audience_gender.id, audience_gender_fetched_from_db.id)
+
+        # assert
+        with self.subTest(msg="created dates match"):
+            self.assertEqual(expected_audience_gender.created, audience_gender_fetched_from_db.created)
+
+        # assert
+        with self.subTest(msg="genders match"):
+            self.assertEqual(expected_audience_gender.gender, audience_gender_fetched_from_db.gender)
+
+        # assert
+        with self.subTest(msg="splits match"):
+            self.assertEqual(expected_audience_gender.split, audience_gender_fetched_from_db.split)
+
+    def test_audience_age_fetch_mapping(self):
+        # arrange
+        expected_audience_age = AutoFixture().create(dto=AudienceAgeSplit)
+        self.__data_manager.create_fake_data([expected_audience_age])
+
+        # act
+        audience_age_fetched_from_db = self.__data_manager.session.query(AudienceAgeSplit).first()
+
+        # assert
+        with self.subTest(msg="ids match"):
+            self.assertEqual(expected_audience_age.id, audience_age_fetched_from_db.id)
+
+        # assert
+        with self.subTest(msg="created dates match"):
+            self.assertEqual(expected_audience_age.created, audience_age_fetched_from_db.created)
+
+        # assert
+        with self.subTest(msg="max ages match"):
+            self.assertEqual(expected_audience_age.max_age, audience_age_fetched_from_db.max_age)
+
+        # assert
+        with self.subTest(msg="min ages match"):
+            self.assertEqual(expected_audience_age.min_age, audience_age_fetched_from_db.min_age)
+
+        # assert
+        with self.subTest(msg="splits match"):
+            self.assertEqual(expected_audience_age.split, audience_age_fetched_from_db.split)
 
     def test_brand_fetch_mapping(self):
         # arrange

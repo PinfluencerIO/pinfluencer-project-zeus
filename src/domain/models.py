@@ -106,7 +106,7 @@ class GenderEnum(Enum):
 
 
 @dataclass(unsafe_hash=True)
-class AudienceAge(DataModel):
+class AudienceGenderSplit(DataModel):
     split: float = None
     gender: GenderEnum = None
 
