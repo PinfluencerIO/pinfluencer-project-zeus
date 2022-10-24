@@ -78,7 +78,7 @@ class AudienceAgeRequestDto:
 
 
 @dataclass(unsafe_hash=True)
-class AudienceAgeRequestDto:
+class AudienceGenderRequestDto:
     audience_male_split: float = None
     audience_female_split: float = None
 

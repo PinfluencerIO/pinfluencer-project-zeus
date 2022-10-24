@@ -1,19 +1,139 @@
+import datetime
 from unittest import TestCase
 
+from ddt import data, ddt
+
 from src.crosscutting import AutoFixture
-from src.domain.models import Brand, Influencer, Campaign
+from src.domain.models import Brand, Influencer, Campaign, AudienceAge, AudienceAgeSplit
 from src.web.mapping import MappingRules
 from src.web.views import BrandRequestDto, BrandResponseDto, InfluencerRequestDto, InfluencerResponseDto, \
-    CampaignResponseDto, CampaignRequestDto
+    CampaignResponseDto, CampaignRequestDto, AudienceAgeRequestDto, AudienceAgeResponseDto
 from tests import test_mapper
 
+audience_age_data = [
+    ([
+         AudienceAge(min_age=13, max_age=17, split=0.1),
+         AudienceAge(min_age=18, max_age=24, split=0.1),
+         AudienceAge(min_age=25, max_age=34, split=0.1),
+         AudienceAge(min_age=35, max_age=44, split=0.1),
+         AudienceAge(min_age=45, max_age=54, split=0.1),
+         AudienceAge(min_age=55, max_age=64, split=0.1),
+         AudienceAge(min_age=65, split=0.1)
+     ], AudienceAgeRequestDto(audience_age_13_to_17_split=0.1,
+                              audience_age_18_to_24_split=0.1,
+                              audience_age_25_to_34_split=0.1,
+                              audience_age_35_to_44_split=0.1,
+                              audience_age_45_to_54_split=0.1,
+                              audience_age_55_to_64_split=0.1,
+                              audience_age_65_plus_split=0.1)),
+    ([
+         AudienceAge(min_age=13, max_age=17, split=0.1),
+         AudienceAge(min_age=18, max_age=24, split=0.1),
+         AudienceAge(min_age=45, max_age=54, split=0.1),
+         AudienceAge(min_age=55, max_age=64, split=0.1),
+         AudienceAge(min_age=65, split=0.1)
+     ], AudienceAgeRequestDto(audience_age_13_to_17_split=0.1,
+                              audience_age_18_to_24_split=0.1,
+                              audience_age_25_to_34_split=0,
+                              audience_age_35_to_44_split=0,
+                              audience_age_45_to_54_split=0.1,
+                              audience_age_55_to_64_split=0.1,
+                              audience_age_65_plus_split=0.1))
+]
 
+audience_age_response_data = [
+    (AudienceAgeSplit(id="test_id", created=datetime.datetime(1, 1, 1), audience_ages=[
+        AudienceAge(min_age=13, max_age=17, split=0.1),
+        AudienceAge(min_age=18, max_age=24, split=0.1),
+        AudienceAge(min_age=25, max_age=34, split=0.1),
+        AudienceAge(min_age=35, max_age=44, split=0.1),
+        AudienceAge(min_age=45, max_age=54, split=0.1),
+        AudienceAge(min_age=55, max_age=64, split=0.1),
+        AudienceAge(min_age=65, split=0.1)
+    ]), AudienceAgeResponseDto(id="test_id", created=datetime.datetime(1, 1, 1), audience_age_13_to_17_split=0.1,
+                               audience_age_18_to_24_split=0.1,
+                               audience_age_25_to_34_split=0.1,
+                               audience_age_35_to_44_split=0.1,
+                               audience_age_45_to_54_split=0.1,
+                               audience_age_55_to_64_split=0.1,
+                               audience_age_65_plus_split=0.1)),
+    ([
+         AudienceAge(min_age=13, max_age=17, split=0.1),
+         AudienceAge(min_age=18, max_age=24, split=0.1),
+         AudienceAge(min_age=45, max_age=54, split=0.1),
+         AudienceAge(min_age=55, max_age=64, split=0.1),
+         AudienceAge(min_age=65, split=0.1)
+     ], AudienceAgeResponseDto(audience_age_13_to_17_split=0.1,
+                               audience_age_18_to_24_split=0.1,
+                               audience_age_25_to_34_split=0,
+                               audience_age_35_to_44_split=0,
+                               audience_age_45_to_54_split=0.1,
+                               audience_age_55_to_64_split=0.1,
+                               audience_age_65_plus_split=0.1))
+]
+
+
+@ddt
 class TestMappingRules(TestCase):
 
     def setUp(self) -> None:
         self.__mapper = test_mapper()
         self.__sut = MappingRules(mapper=self.__mapper)
         self.__fixture = AutoFixture()
+
+    @data(*audience_age_response_data)
+    def test_map_audience_age_to_audience_age_response(self, data: (AudienceAgeSplit, AudienceAgeResponseDto)):
+        # arrange
+        (audience_age, expected_audience_age_response) = data
+
+        self.__sut.add_rules()
+
+        audience_age_response: AudienceAgeResponseDto = self.__mapper.map(
+            _from=audience_age, to=AudienceAgeResponseDto)
+
+        # assert
+        with self.subTest(msg="audience request matches"):
+            self.assertEqual(audience_age_response, expected_audience_age_response)
+
+    @data(*audience_age_response_data)
+    def test_map_audience_age_response_to_audience_age(self, data: (AudienceAgeSplit, AudienceAgeResponseDto)):
+        # arrange
+        (audience_age, expected_audience_age_response) = data
+
+        self.__sut.add_rules()
+
+        audience_age_split = self.__mapper.map(_from=expected_audience_age_response, to=AudienceAgeSplit)
+
+        # assert
+        with self.subTest(msg="audience data matches"):
+            self.assertEqual(audience_ages, audience_age)
+
+    @data(*audience_age_data)
+    def test_map_audience_age_to_audience_age_request(self, data: (list[AudienceAge], AudienceAgeRequestDto)):
+        # arrange
+        (audience_age, expected_audience_age_request) = data
+
+        self.__sut.add_rules()
+
+        audience_age_request: AudienceAgeRequestDto = self.__mapper.map(
+            _from=AudienceAgeSplit(audience_ages=audience_age), to=AudienceAgeRequestDto)
+
+        # assert
+        with self.subTest(msg="audience request matches"):
+            self.assertEqual(audience_age_request, expected_audience_age_request)
+
+    @data(*audience_age_data)
+    def test_map_audience_age_request_to_audience_age(self, data: (list[AudienceAge], AudienceAgeRequestDto)):
+        # arrange
+        (audience_age, expected_audience_age_request) = data
+
+        self.__sut.add_rules()
+
+        audience_age_split = self.__mapper.map(_from=expected_audience_age_request, to=AudienceAgeSplit)
+
+        # assert
+        with self.subTest(msg="audience data matches"):
+            self.assertEqual(audience_age_split.audience_ages, audience_age)
 
     def test_map_brand_to_brand_request(self):
         # arrange
@@ -170,15 +290,15 @@ class TestMappingRules(TestCase):
         # assert
         with self.subTest(msg="brand insta handle matches"):
             self.assertEqual(brand.insta_handle, brand_response.insta_handle)
-            
+
     def test_map_influencer_to_influencer_request(self):
         # arrange
         influencer = AutoFixture().create(dto=Influencer, list_limit=5)
-        
+
         # act
         self.__sut.add_rules()
         influencer_request = self.__mapper.map(_from=influencer, to=InfluencerRequestDto)
-        
+
         # assert
         with self.subTest(msg="values match"):
             self.assertEqual(influencer_request.values, list(map(lambda x: x.value, influencer.values)))
@@ -186,7 +306,7 @@ class TestMappingRules(TestCase):
         # assert
         with self.subTest(msg="websites match"):
             self.assertEqual(influencer_request.website, influencer.website)
-            
+
         # assert
         with self.subTest(msg="categories match"):
             self.assertEqual(influencer_request.categories, list(map(lambda x: x.category, influencer.categories)))
@@ -489,7 +609,8 @@ class TestMappingRules(TestCase):
 
         # assert
         with self.subTest(msg="categories match"):
-            self.assertEqual(campaign_response.campaign_categories, list(map(lambda x: x.category, campaign.campaign_categories)))
+            self.assertEqual(campaign_response.campaign_categories,
+                             list(map(lambda x: x.category, campaign.campaign_categories)))
 
         # assert
         with self.subTest(msg="ids match"):
@@ -561,7 +682,8 @@ class TestMappingRules(TestCase):
 
         # assert
         with self.subTest(msg="categories match"):
-            self.assertEqual(campaign_response.campaign_categories, list(map(lambda x: x.category, campaign.campaign_categories)))
+            self.assertEqual(campaign_response.campaign_categories,
+                             list(map(lambda x: x.category, campaign.campaign_categories)))
 
         # assert
         with self.subTest(msg="ids match"):
@@ -633,13 +755,12 @@ class TestMappingRules(TestCase):
 
         # assert
         with self.subTest(msg="categories match"):
-            self.assertEqual(campaign_request.campaign_categories, list(map(lambda x: x.category, campaign.campaign_categories)))
-
+            self.assertEqual(campaign_request.campaign_categories,
+                             list(map(lambda x: x.category, campaign.campaign_categories)))
 
         # assert
         with self.subTest(msg="hashtag match"):
             self.assertEqual(campaign_request.campaign_hashtag, campaign.campaign_hashtag)
-
 
         # assert
         with self.subTest(msg="product links match"):
@@ -691,13 +812,12 @@ class TestMappingRules(TestCase):
 
         # assert
         with self.subTest(msg="categories match"):
-            self.assertEqual(campaign_request.campaign_categories, list(map(lambda x: x.category, campaign.campaign_categories)))
-
+            self.assertEqual(campaign_request.campaign_categories,
+                             list(map(lambda x: x.category, campaign.campaign_categories)))
 
         # assert
         with self.subTest(msg="hashtag match"):
             self.assertEqual(campaign_request.campaign_hashtag, campaign.campaign_hashtag)
-
 
         # assert
         with self.subTest(msg="product links match"):

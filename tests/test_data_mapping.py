@@ -3,7 +3,7 @@ from unittest import TestCase
 from src.app import logger_factory
 from src.crosscutting import AutoFixture, PinfluencerObjectMapper
 from src.data.entities import create_mappings
-from src.domain.models import Brand, Influencer, Campaign, AudienceAgeSplit, AudienceGenderSplit
+from src.domain.models import Brand, Influencer, Campaign, AudienceAge, AudienceGender
 from tests import InMemorySqliteDataManager
 
 
@@ -16,11 +16,11 @@ class TestMapping(TestCase):
 
     def test_audience_gender_fetch_mapping(self):
         # arrange
-        expected_audience_gender = AutoFixture().create(dto=AudienceGenderSplit)
+        expected_audience_gender = AutoFixture().create(dto=AudienceGender)
         self.__data_manager.create_fake_data([expected_audience_gender])
 
         # act
-        audience_gender_fetched_from_db = self.__data_manager.session.query(AudienceGenderSplit).first()
+        audience_gender_fetched_from_db = self.__data_manager.session.query(AudienceGender).first()
 
         # assert
         with self.subTest(msg="ids match"):
@@ -40,11 +40,11 @@ class TestMapping(TestCase):
 
     def test_audience_age_fetch_mapping(self):
         # arrange
-        expected_audience_age = AutoFixture().create(dto=AudienceAgeSplit)
+        expected_audience_age = AutoFixture().create(dto=AudienceAge)
         self.__data_manager.create_fake_data([expected_audience_age])
 
         # act
-        audience_age_fetched_from_db = self.__data_manager.session.query(AudienceAgeSplit).first()
+        audience_age_fetched_from_db = self.__data_manager.session.query(AudienceAge).first()
 
         # assert
         with self.subTest(msg="ids match"):

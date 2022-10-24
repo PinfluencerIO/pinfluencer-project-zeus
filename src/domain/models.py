@@ -106,16 +106,26 @@ class GenderEnum(Enum):
 
 
 @dataclass(unsafe_hash=True)
-class AudienceGenderSplit(DataModel):
+class AudienceGender(DataModel):
     split: float = None
     gender: GenderEnum = None
 
 
 @dataclass(unsafe_hash=True)
-class AudienceAgeSplit(DataModel):
+class AudienceAge(DataModel):
     split: float = None
     min_age: int = None
     max_age: int = None
+
+
+@dataclass(unsafe_hash=True)
+class AudienceAgeSplit(DataModel):
+    audience_ages: list[AudienceAge] = None
+
+
+@dataclass(unsafe_hash=True)
+class AudienceGenderSplit(DataModel):
+    audience_genders: list[AudienceGender] = None
 
 
 class CampaignStateEnum(Enum):

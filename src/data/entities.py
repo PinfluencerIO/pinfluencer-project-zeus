@@ -6,7 +6,7 @@ from sqlalchemy import Column, String, DateTime, Float, PickleType, Table, Integ
 from src import T
 from src.data import Base
 from src.domain.models import Brand, Influencer, Campaign, Collaboration, Notification, ValueEnum, Value, CategoryEnum, \
-    Category, CampaignStateEnum, GenderEnum, AudienceAgeSplit, AudienceGenderSplit
+    Category, CampaignStateEnum, GenderEnum, AudienceAge, AudienceGender
 
 
 class SqlAlchemyBaseEntity:
@@ -120,8 +120,8 @@ notifications_table = Table('notification', Base.metadata,
 def create_mappings(logger):
     try:
         # sqlalchemy mappings
-        sqlalchemy.orm.mapper(AudienceGenderSplit, audience_age_table)
-        sqlalchemy.orm.mapper(AudienceAgeSplit, audience_gender_table)
+        sqlalchemy.orm.mapper(AudienceGender, audience_age_table)
+        sqlalchemy.orm.mapper(AudienceAge, audience_gender_table)
         sqlalchemy.orm.mapper(Value, value_table)
         sqlalchemy.orm.mapper(Category, category_table)
         sqlalchemy.orm.mapper(Brand, brand_table, properties={
