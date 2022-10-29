@@ -265,7 +265,6 @@ class CreateInfluencerSequenceBuilder(FluentSequenceBuilder):
     def build(self):
         self._add_sequence_builder(sequence_builder=self.__pre_update_create_subsequence_builder) \
             ._add_command(command=self.__user_before_hooks.set_categories_and_values) \
-            ._add_command(command=self.__influencer_before_hooks.validate_influencer) \
             ._add_command(command=self.__influencer_controller.create) \
             ._add_command(command=self.__influencer_after_hooks.set_influencer_claims) \
             ._add_sequence_builder(sequence_builder=self.__post_user_single_sequence_builder) \
@@ -395,7 +394,6 @@ class CreateBrandSequenceBuilder(FluentSequenceBuilder):
     def build(self):
         self._add_sequence_builder(sequence_builder=self.__pre_update_create_subsequence_builder)\
             ._add_command(command=self.__user_before_hooks.set_categories_and_values) \
-            ._add_command(command=self.__brand_before_hooks.validate_brand) \
             ._add_command(command=self.__brand_controller.create) \
             ._add_command(command=self.__brand_after_hooks.set_brand_claims)\
             ._add_sequence_builder(sequence_builder=self.__post_single_user_subsequence_builder) \

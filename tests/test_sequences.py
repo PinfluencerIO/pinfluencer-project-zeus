@@ -303,7 +303,7 @@ class TestCreateInfluencerSequenceBuilder(TestCase):
             self.maxDiff = None
             self.assertEqual(sut.components, [ioc.resolve(PreGenericUpdateCreateSubsequenceBuilder),
                                               ioc.resolve(UserBeforeHooks).set_categories_and_values,
-                                              ioc.resolve(InfluencerBeforeHooks).validate_influencer,
+                                              # ioc.resolve(InfluencerBeforeHooks).validate_influencer,
                                               ioc.resolve(InfluencerController).create,
                                               ioc.resolve(InfluencerAfterHooks).set_influencer_claims,
                                               ioc.resolve(PostSingleUserSubsequenceBuilder),
@@ -430,7 +430,7 @@ class TestCreateBrandSequenceBuilder(TestCase):
             self.maxDiff = None
             self.assertEqual(sut.components, [ioc.resolve(PreGenericUpdateCreateSubsequenceBuilder),
                                               ioc.resolve(UserBeforeHooks).set_categories_and_values,
-                                              ioc.resolve(BrandBeforeHooks).validate_brand,
+                                              # ioc.resolve(BrandBeforeHooks).validate_brand,
                                               ioc.resolve(BrandController).create,
                                               ioc.resolve(BrandAfterHooks).set_brand_claims,
                                               ioc.resolve(PostSingleUserSubsequenceBuilder),
