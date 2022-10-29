@@ -110,16 +110,16 @@ class PinfluencerObjectMapper:
         self.__logger.log_trace(f"all annotations from DTO {dict_to}")
         self.__logger.log_trace(f"all props from _from {propValues}")
         for property, value in propValues:
-            if property in dict_to:
-                try:
-                    rule_match = \
-                        list(filter(lambda x:
-                                    x._from == type(_from) and
-                                    x.to == to and
-                                    x.field == property, self.__maps))[0]
-                    if value is not None:
-                        rule_match.expression(new_dto, _from)
-                except IndexError:
+            try:
+                rule_match = \
+                    list(filter(lambda x:
+                                x._from == type(_from) and
+                                x.to == to and
+                                x.field == property, self.__maps))[0]
+                if value is not None:
+                    rule_match.expression(new_dto, _from)
+            except IndexError:
+                if property in dict_to:
                     setattr(new_dto, property, value)
                     if bool(typing.get_type_hints(dict_to[property])):
                         setattr(new_dto, property, self.map(_from=value, to=dict_to[property]))

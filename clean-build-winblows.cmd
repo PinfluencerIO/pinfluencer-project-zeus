@@ -1,1 +1,1 @@
-sam build --use-container && cd .aws-sam/build/PinfluencerFunction && rm -fr clean-build.sh tests events env.json README.md samconfig.toml template.yaml requirements.txt
+sam build && cd .aws-sam/build/PinfluencerFunction && rm -fr clean-build.sh tests events env.json README.md samconfig.toml template.yaml requirements.txt

@@ -119,13 +119,13 @@ class AudienceAge(DataModel):
 
 
 @dataclass(unsafe_hash=True)
-class AudienceAgeSplit(DataModel):
-    audience_ages: list[AudienceAge] = None
+class AudienceAgeSplit:
+    audience_ages: list[AudienceAge] = field(default_factory=list)
 
 
 @dataclass(unsafe_hash=True)
-class AudienceGenderSplit(DataModel):
-    audience_genders: list[AudienceGender] = None
+class AudienceGenderSplit:
+    audience_genders: list[AudienceGender] = field(default_factory=list)
 
 
 class CampaignStateEnum(Enum):
