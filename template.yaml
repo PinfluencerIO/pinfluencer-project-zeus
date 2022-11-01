@@ -162,6 +162,57 @@ Resources:
             ApiId: !Ref PinfluencerHttpApi
         #Authenticated Influencer endpoints END
 
+        #Authenticated Audience endpoints START
+        GetAudienceAgeSplitsForUser:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /users/me/audience-age-splits
+            Method: get
+            ApiId: !Ref PinfluencerHttpApi
+        GetAudienceGenderSplitsForUser:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /users/me/audience-gender-splits
+            Method: get
+            ApiId: !Ref PinfluencerHttpApi
+        CreateAudienceAgeSplitsForUser:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /users/me/audience-age-splits
+            Method: post
+            ApiId: !Ref PinfluencerHttpApi
+        CreateAudienceGenderSplitsForUser:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /users/me/audience-gender-splits
+            Method: post
+            ApiId: !Ref PinfluencerHttpApi
+        UpdateAudienceAgeSplitsForUser:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /users/me/audience-age-splits
+            Method: patch
+            ApiId: !Ref PinfluencerHttpApi
+        UpdateAudienceGenderSplitsForUser:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /users/me/audience-gender-splits
+            Method: patch
+            ApiId: !Ref PinfluencerHttpApi
+        #Authenticated Audience endpoints END
+
         #Authenticated Brand endpoints START
         CreateMyBrand:
           Type: HttpApi

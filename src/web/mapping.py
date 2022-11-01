@@ -269,7 +269,7 @@ class MappingRules:
                                                   to: AudienceGenderSplit,
                                                   _from: Union[AudienceGenderRequestDto, AudienceGenderResponseDto]):
         if self.__if_gender_in_split(gender=GenderEnum.MALE, audience_split=to):
-            list(filter(lambda x: x.gender, to.audience_genders))[0].split = _from.audience_male_split
+            list(filter(lambda x: x.gender == GenderEnum.MALE, to.audience_genders))[0].split = _from.audience_male_split
         else:
             to.audience_genders.append(AudienceGender(gender=GenderEnum.MALE, split=_from.audience_male_split))
 
@@ -277,7 +277,7 @@ class MappingRules:
                                                   to: AudienceGenderSplit,
                                                   _from: Union[AudienceGenderRequestDto, AudienceGenderResponseDto]):
         if self.__if_gender_in_split(gender=GenderEnum.FEMALE, audience_split=to):
-            list(filter(lambda x: x.gender, to.audience_genders))[0].split = _from.audience_female_split
+            list(filter(lambda x: x.gender == GenderEnum.FEMALE, to.audience_genders))[0].split = _from.audience_female_split
         else:
             to.audience_genders.append(AudienceGender(gender=GenderEnum.FEMALE, split=_from.audience_female_split))
 
@@ -285,7 +285,7 @@ class MappingRules:
                                                   to: AudienceAgeSplit,
                                                   _from: Union[AudienceAgeRequestDto, AudienceAgeResponseDto]):
         if self.__if_age_band_in_split(min=13, max=17, audience_split=to):
-            list(filter(lambda x: x.min_age, to.audience_ages))[0].split = _from.audience_age_13_to_17_split
+            list(filter(lambda x: x.min_age == 13 and x.max_age == 17, to.audience_ages))[0].split = _from.audience_age_13_to_17_split
         else:
             to.audience_ages.append(AudienceAge(min_age=13, max_age=17, split=_from.audience_age_13_to_17_split))
 
@@ -293,7 +293,7 @@ class MappingRules:
                                                   to: AudienceAgeSplit,
                                                   _from: Union[AudienceAgeRequestDto, AudienceAgeResponseDto]):
         if self.__if_age_band_in_split(min=18, max=24, audience_split=to):
-            list(filter(lambda x: x.min_age, to.audience_ages))[0].split = _from.audience_age_18_to_24_split
+            list(filter(lambda x: x.min_age == 18 and x.max_age == 24, to.audience_ages))[0].split = _from.audience_age_18_to_24_split
         else:
             to.audience_ages.append(AudienceAge(min_age=18, max_age=24, split=_from.audience_age_18_to_24_split))
 
@@ -301,7 +301,7 @@ class MappingRules:
                                                   to: AudienceAgeSplit,
                                                   _from: Union[AudienceAgeRequestDto, AudienceAgeResponseDto]):
         if self.__if_age_band_in_split(min=25, max=34, audience_split=to):
-            list(filter(lambda x: x.min_age, to.audience_ages))[0].split = _from.audience_age_25_to_34_split
+            list(filter(lambda x: x.min_age == 25 and x.max_age == 34, to.audience_ages))[0].split = _from.audience_age_25_to_34_split
         else:
             to.audience_ages.append(AudienceAge(min_age=25, max_age=34, split=_from.audience_age_18_to_24_split))
 
@@ -309,7 +309,7 @@ class MappingRules:
                                                   to: AudienceAgeSplit,
                                                   _from: Union[AudienceAgeRequestDto, AudienceAgeResponseDto]):
         if self.__if_age_band_in_split(min=35, max=44, audience_split=to):
-            list(filter(lambda x: x.min_age, to.audience_ages))[0].split = _from.audience_age_35_to_44_split
+            list(filter(lambda x: x.min_age == 35 and x.max_age == 44, to.audience_ages))[0].split = _from.audience_age_35_to_44_split
         else:
             to.audience_ages.append(AudienceAge(min_age=35, max_age=44, split=_from.audience_age_35_to_44_split))
 
@@ -317,7 +317,7 @@ class MappingRules:
                                                   to: AudienceAgeSplit,
                                                   _from: Union[AudienceAgeRequestDto, AudienceAgeResponseDto]):
         if self.__if_age_band_in_split(min=45, max=54, audience_split=to):
-            list(filter(lambda x: x.min_age, to.audience_ages))[0].split = _from.audience_age_45_to_54_split
+            list(filter(lambda x: x.min_age == 45 and x.max_age == 54, to.audience_ages))[0].split = _from.audience_age_45_to_54_split
         else:
             to.audience_ages.append(AudienceAge(min_age=45, max_age=54, split=_from.audience_age_45_to_54_split))
 
@@ -325,7 +325,7 @@ class MappingRules:
                                                   to: AudienceAgeSplit,
                                                   _from: Union[AudienceAgeRequestDto, AudienceAgeResponseDto]):
         if self.__if_age_band_in_split(min=55, max=64, audience_split=to):
-            list(filter(lambda x: x.min_age, to.audience_ages))[0].split = _from.audience_age_55_to_64_split
+            list(filter(lambda x: x.min_age == 55 and x.max_age == 64, to.audience_ages))[0].split = _from.audience_age_55_to_64_split
         else:
             to.audience_ages.append(AudienceAge(min_age=55, max_age=64, split=_from.audience_age_55_to_64_split))
 
@@ -333,7 +333,7 @@ class MappingRules:
                                                   to: AudienceAgeSplit,
                                                   _from: Union[AudienceAgeRequestDto, AudienceAgeResponseDto]):
         if self.__if_age_band_in_split(min=65, max=None, audience_split=to):
-            list(filter(lambda x: x.min_age, to.audience_ages))[0].split = _from.audience_age_65_plus_split
+            list(filter(lambda x: x.min_age == 65, to.audience_ages))[0].split = _from.audience_age_65_plus_split
         else:
             to.audience_ages.append(AudienceAge(min_age=65, split=_from.audience_age_65_plus_split))
 

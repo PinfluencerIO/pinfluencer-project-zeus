@@ -17,14 +17,14 @@ class Dispatcher:
 
     @property
     def dispatch_route_to_ctr(self) -> dict[dict[str, Route]]:
-        feed = OrderedDict(
+        feed_routes = OrderedDict(
             {
                 'GET /feed':
                     Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder))
             }
         )
 
-        users = OrderedDict(
+        user_routes = OrderedDict(
             {
                 'GET /brands':
                     Route(sequence_builder=self.__service_locator.locate(GetAllBrandsSequenceBuilder)),
@@ -66,7 +66,7 @@ class Dispatcher:
             }
         )
 
-        campaigns = OrderedDict(
+        campaign_routes = OrderedDict(
             {
                 'GET /brands/me/campaigns':
                     Route(sequence_builder=self.__service_locator.locate(GetCampaignsForBrandSequenceBuilder)),
@@ -88,7 +88,7 @@ class Dispatcher:
             }
         )
 
-        collaborations = OrderedDict(
+        collaboration_routes = OrderedDict(
             {
                 'GET /collaborations/{collaboration_id}':
                     Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),
@@ -107,7 +107,7 @@ class Dispatcher:
             }
         )
 
-        notifications = OrderedDict(
+        notification_routes = OrderedDict(
             {
                 'GET /notifications/{notification_id}':
                     Route(sequence_builder=self.__service_locator.locate(GetNotificationByIdSequenceBuilder)),
@@ -126,10 +126,33 @@ class Dispatcher:
             }
         )
 
+        audience_routes = OrderedDict(
+            {
+                'GET /users/me/audience-age-splits':
+                    Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),
+
+                'GET /users/me/audience-gender-splits':
+                    Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),
+
+                'POST /users/me/audience-age-splits':
+                    Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),
+
+                'POST /users/me/audience-gender-splits':
+                    Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),
+
+                'PATCH /users/me/audience-age-splits':
+                    Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),
+
+                'PATCH /users/me/audience-gender-splits':
+                    Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder))
+            }
+        )
+
         routes = {}
-        routes.update(feed)
-        routes.update(users)
-        routes.update(campaigns)
-        routes.update(collaborations)
-        routes.update(notifications)
+        routes.update(feed_routes)
+        routes.update(user_routes)
+        routes.update(campaign_routes)
+        routes.update(collaboration_routes)
+        routes.update(notification_routes)
+        routes.update(audience_routes)
         return routes
