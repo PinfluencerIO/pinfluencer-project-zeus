@@ -1,14 +1,14 @@
 from unittest import TestCase
 from unittest.mock import Mock, MagicMock
 
-from callee import Captor
+from callee import Captor, Any
 
 from src._types import ImageRepository
 from src.app import logger_factory
 from src.crosscutting import AutoFixture
 from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository, CognitoAuthUserRepository, \
-    CognitoAuthService, SqlAlchemyCampaignRepository, SqlAlchemyNotificationRepository
-from src.domain.models import Brand, Influencer, User, Campaign, Notification
+    CognitoAuthService, SqlAlchemyCampaignRepository, SqlAlchemyNotificationRepository, SqlAlchemyAudienceAgeRepository
+from src.domain.models import Brand, Influencer, User, Campaign, Notification, AudienceAgeSplit
 from src.exceptions import AlreadyExistsException, NotFoundException
 from tests import InMemorySqliteDataManager
 
@@ -397,6 +397,7 @@ class TestCampaignRepository(TestCase):
     def test_load_for_brand_when_brand_not_found(self):
         self.assertRaises(NotFoundException, lambda: self.__sut.load_for_auth_brand(auth_user_id="1234"))
 
+
 class TestNotificationRepository(TestCase):
 
     def setUp(self) -> None:
@@ -417,3 +418,41 @@ class TestNotificationRepository(TestCase):
         with self.subTest(msg="notification matches notification in db"):
             notification_in_db = self.__sut.load_by_id(id_=notification.id)
             assert notification == notification_in_db == returned_notification
+
+
+class TestAudienceAgeRepository(TestCase):
+
+    def setUp(self) -> None:
+        self.__data_manager = InMemorySqliteDataManager()
+        self.__sut = SqlAlchemyAudienceAgeRepository(data_manager=self.__data_manager,
+                                                     logger=logger_factory())
+
+    def test_write_for_influencer(self):
+        # arrange
+        audience_age_split = AutoFixture().create(dto=AudienceAgeSplit, list_limit=15)
+        self.__sut._write_new_for_owner = MagicMock(return_value=audience_age_split)
+
+        # act
+        returned_audience_age_split = \
+            self.__sut.write_new_for_influencer(payload=audience_age_split,
+                                                auth_user_id="user1234")
+
+        # assert
+        for audience_age in audience_age_split.audience_ages:
+            captor = Captor()
+            with self.subTest(msg=f"base repo was called for age ranges"
+                                  f"{audience_age.min_age}-{audience_age.max_age}"):
+                self.__sut._write_new_for_owner.assert_any_call(payload=audience_age,
+                                                                auth_user_id="user1234",
+                                                                parent_entity=Influencer,
+                                                                parent_entity_field=Influencer.auth_user_id,
+                                                                foreign_key_setter=captor)
+
+            with self.subTest(msg=f"field setter sets correct field for age ranges"
+                                  f"{audience_age.min_age}-{audience_age.max_age}"):
+                captor.arg(audience_age)
+                audience_age.influencer_auth_user_id = "user1234"
+
+            with self.subTest(msg="captured repo value was returned age ranges"
+                                  f"{audience_age.min_age}-{audience_age.max_age}"):
+                self.assertEqual(returned_audience_age_split, audience_age_split)

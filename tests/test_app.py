@@ -17,7 +17,7 @@ from src.web.sequences import NotImplementedSequenceBuilder, UpdateImageForCampa
     CreateInfluencerSequenceBuilder, GetAuthInfluencerSequenceBuilder, GetInfluencerByIdSequenceBuilder, \
     GetAllInfluencersSequenceBuilder, UpdateBrandImageSequenceBuilder, UpdateBrandSequenceBuilder, \
     CreateBrandSequenceBuilder, GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder, \
-    CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder
+    CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder, CreateAudienceAgeSequenceBuilder
 from tests import get_as_json
 
 
@@ -426,7 +426,22 @@ class TestRoutes(TestCase):
         self.__assert_not_implemented(route="GET /influencers/me/audience-gender-splits")
 
     def test_create_audience_age_splits(self):
-        self.__assert_not_implemented(route="POST /influencers/me/audience-age-splits")
+        # arrange
+        self.__mock_middleware_pipeline.execute_middleware = MagicMock()
+
+        # act
+        bootstrap(event={"routeKey": "POST /influencers/me/audience-age-splits"},
+                  context={},
+                  middleware=self.__mock_middleware_pipeline,
+                  ioc=self.__ioc,
+                  data_manager=Mock(),
+                  cognito_auth_service=Mock())
+
+        # assert
+        self.__mock_middleware_pipeline \
+            .execute_middleware \
+            .assert_called_once_with(context=Any(),
+                                     sequence=self.__ioc.resolve(CreateAudienceAgeSequenceBuilder))
 
     def test_create_audience_gender_splits(self):
         self.__assert_not_implemented(route="POST /influencers/me/audience-gender-splits")

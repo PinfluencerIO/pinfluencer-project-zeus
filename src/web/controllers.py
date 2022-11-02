@@ -1,15 +1,15 @@
 from contextlib import contextmanager
-from typing import Callable
+from typing import Callable, Any
 
 from src._types import BrandRepository, UserRepository, InfluencerRepository, Repository, CampaignRepository, Logger, \
-    Model, NotificationRepository
+    Model, NotificationRepository, AudienceAgeRepository
 from src.crosscutting import PinfluencerObjectMapper, FlexiUpdater
-from src.domain.models import Brand, Influencer, Campaign, Notification
+from src.domain.models import Brand, Influencer, Campaign, Notification, AudienceAgeSplit
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.web import BRAND_ID_PATH_KEY, INFLUENCER_ID_PATH_KEY, PinfluencerContext
 from src.web.views import BrandRequestDto, BrandResponseDto, ImageRequestDto, InfluencerRequestDto, \
     InfluencerResponseDto, CampaignRequestDto, CampaignResponseDto, NotificationCreateRequestDto, \
-    NotificationResponseDto
+    NotificationResponseDto, AudienceAgeResponseDto, AudienceAgeRequestDto
 
 
 class BaseController:
@@ -133,6 +133,47 @@ class BaseController:
             context.response.status_code = 201
 
 
+class BaseOwnerController(BaseController):
+
+    def __init__(self, user_repository: Repository,
+                 object_mapper: PinfluencerObjectMapper,
+                 flexi_updater: FlexiUpdater,
+                 logger: Logger,
+                 response,
+                 request):
+        super().__init__(user_repository,
+                         object_mapper,
+                         flexi_updater,
+                         logger=logger,
+                         response=response,
+                         request=request)
+
+    def _create_for_owner(self,
+                          context: PinfluencerContext,
+                          repo_method: Callable[[Any, str], Any],
+                          request,
+                          response,
+                          model) -> None:
+        with self._unit_of_work():
+            try:
+
+                returned_model = repo_method(self._mapper.map(
+                    _from=self._mapper.map_from_dict(
+                        _from=context.body,
+                        to=request),
+                    to=model),
+                    context.auth_user_id)
+                self._logger.log_trace(f"{returned_model}")
+                self._logger.log_trace(f"{returned_model.__dict__}")
+                context.response.body = self._mapper.map(_from=returned_model, to=response).__dict__
+                context.response.status_code = 201
+                return
+            except NotFoundException as e:
+                self._logger.log_exception(e)
+                context.response.body = {}
+                context.response.status_code = 404
+                context.short_circuit = True
+
 class BaseUserController(BaseController):
 
     def __init__(self, user_repository: UserRepository, resource_id: str, object_mapper: PinfluencerObjectMapper,
@@ -195,7 +236,28 @@ class InfluencerController(BaseUserController):
                          model=Influencer)
 
 
-class CampaignController(BaseController):
+class AudienceAgeController(BaseOwnerController):
+
+    def __init__(self, repository: AudienceAgeRepository,
+                 mapper: PinfluencerObjectMapper,
+                 flexi_updater: FlexiUpdater,
+                 logger: Logger):
+        super().__init__(repository,
+                         mapper,
+                         flexi_updater,
+                         logger,
+                         AudienceAgeResponseDto,
+                         AudienceAgeRequestDto)
+
+    def create_for_influencer(self, context: PinfluencerContext):
+        self._create_for_owner(context=context,
+                               repo_method=self._repository.write_new_for_influencer,
+                               request=AudienceAgeRequestDto,
+                               response=AudienceAgeResponseDto,
+                               model=AudienceAgeSplit)
+
+
+class CampaignController(BaseOwnerController):
 
     def __init__(self, repository: CampaignRepository, object_mapper: PinfluencerObjectMapper,
                  flexi_updater: FlexiUpdater, logger: Logger):
@@ -203,26 +265,12 @@ class CampaignController(BaseController):
                          response=CampaignResponseDto,
                          request=CampaignRequestDto)
 
-    def create(self, context: PinfluencerContext) -> None:
-        with self._unit_of_work():
-            try:
-
-                campaign = self._repository.write_new_for_brand(payload=self._mapper.map(
-                    _from=self._mapper.map_from_dict(
-                        _from=context.body,
-                        to=CampaignRequestDto),
-                    to=Campaign),
-                    auth_user_id=context.auth_user_id)
-                self._logger.log_trace(f"{campaign}")
-                self._logger.log_trace(f"{campaign.__dict__}")
-                context.response.body = self._mapper.map(_from=campaign, to=CampaignResponseDto).__dict__
-                context.response.status_code = 201
-                return
-            except NotFoundException as e:
-                self._logger.log_exception(e)
-                context.response.body = {}
-                context.response.status_code = 404
-                context.short_circuit = True
+    def create_for_brand(self, context: PinfluencerContext) -> None:
+        self._create_for_owner(context=context,
+                               repo_method=self._repository.write_new_for_brand,
+                               request=CampaignRequestDto,
+                               response=CampaignResponseDto,
+                               model=Campaign)
 
     def get_for_brand(self, context: PinfluencerContext) -> None:
         try:

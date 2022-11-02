@@ -1,5 +1,6 @@
 from src.web import FluentSequenceBuilder, PinfluencerContext
-from src.web.controllers import CampaignController, InfluencerController, BrandController, NotificationController
+from src.web.controllers import CampaignController, InfluencerController, BrandController, NotificationController, \
+    AudienceAgeController
 from src.web.hooks import CommonBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, UserAfterHooks, UserBeforeHooks, \
     BrandBeforeHooks, BrandAfterHooks, InfluencerBeforeHooks, InfluencerAfterHooks, NotificationBeforeHooks
 
@@ -152,7 +153,7 @@ class CreateCampaignSequenceBuilder(FluentSequenceBuilder):
             ._add_command(command=self.__brand_before_hooks.validate_auth_brand) \
             ._add_command(command=self.__campaign_before_hooks.map_campaign_state) \
             ._add_command(command=self.__campaign_before_hooks.map_campaign_categories_and_values) \
-            ._add_command(command=self.__campaign_controller.create) \
+            ._add_command(command=self.__campaign_controller.create_for_brand) \
             ._add_sequence_builder(sequence_builder=self.__post_single_campaign_sequence) \
             ._add_command(command=self.__campaign_after_hooks.tag_bucket_url_to_images)
 
@@ -481,6 +482,20 @@ class GetNotificationByIdSequenceBuilder(FluentSequenceBuilder):
     def build(self):
         self._add_command(command=self.__notification_before_hooks.validate_uuid)\
             ._add_command(command=self.__notification_controller.get_by_id)
+
+
+class CreateAudienceAgeSequenceBuilder(FluentSequenceBuilder):
+
+    def __init__(self,
+                 audience_age_controller: AudienceAgeController,
+                 pre_generic_update_create_subsequence_builder: PreGenericUpdateCreateSubsequenceBuilder):
+        super().__init__()
+        self.__pre_generic_update_create_subsequence_builder = pre_generic_update_create_subsequence_builder
+        self.__audience_age_controller = audience_age_controller
+
+    def build(self):
+        self._add_sequence_builder(sequence_builder=self.__pre_generic_update_create_subsequence_builder) \
+            ._add_command(command=self.__audience_age_controller.create_for_influencer)
 
 
 class NotImplementedSequenceBuilder(FluentSequenceBuilder):

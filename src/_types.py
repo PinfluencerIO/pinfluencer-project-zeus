@@ -1,6 +1,6 @@
 from typing import Protocol, Optional, Union
 
-from src.domain.models import Brand, Influencer, Campaign, User, Notification, Collaboration
+from src.domain.models import Brand, Influencer, Campaign, User, Notification, Collaboration, AudienceAgeSplit
 
 
 class AuthUserRepository(Protocol):
@@ -12,6 +12,14 @@ class AuthUserRepository(Protocol):
         ...
 
     def get_by_id(self, _id: str) -> User:
+        ...
+
+
+class AudienceAgeRepository(Protocol):
+
+    def write_new_for_influencer(self,
+                                 payload: AudienceAgeSplit,
+                                 auth_user_id: str) -> AudienceAgeSplit:
         ...
 
 
@@ -88,7 +96,8 @@ class NotificationRepository(Protocol):
 Repository = Union[BrandRepository,
                    InfluencerRepository,
                    CampaignRepository,
-                   NotificationRepository]
+                   NotificationRepository,
+                   AudienceAgeRepository]
 
 UserRepository = Union[BrandRepository, InfluencerRepository]
 

@@ -5,16 +5,18 @@ from unittest.mock import Mock, MagicMock
 from callee import Captor
 from ddt import ddt, data
 
-from src._types import BrandRepository, InfluencerRepository, CampaignRepository, NotificationRepository
+from src._types import BrandRepository, InfluencerRepository, CampaignRepository, NotificationRepository, \
+    AudienceAgeRepository
 from src.app import logger_factory
 from src.crosscutting import AutoFixture, FlexiUpdater
-from src.domain.models import Influencer, Campaign, Brand, Notification
+from src.domain.models import Influencer, Campaign, Brand, Notification, AudienceAgeSplit
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.web import PinfluencerContext, PinfluencerResponse
-from src.web.controllers import BrandController, InfluencerController, CampaignController, NotificationController
+from src.web.controllers import BrandController, InfluencerController, CampaignController, NotificationController, \
+    AudienceAgeController
 from src.web.views import BrandRequestDto, BrandResponseDto, ImageRequestDto, InfluencerRequestDto, \
     InfluencerResponseDto, CampaignRequestDto, CampaignResponseDto, NotificationCreateRequestDto, \
-    NotificationResponseDto
+    NotificationResponseDto, AudienceAgeRequestDto, AudienceAgeResponseDto
 from tests import test_mapper
 
 
@@ -574,7 +576,7 @@ class TestCampaignController(TestCase):
         self.__campaign_repository.write_new_for_brand = MagicMock(return_value=campaign_from_db)
 
         # act
-        self.__sut.create(context=context)
+        self.__sut.create_for_brand(context=context)
 
         # assert
         payload_captor = Captor()
@@ -586,8 +588,8 @@ class TestCampaignController(TestCase):
         # assert
         with self.subTest(msg="repo was called"):
             self.__campaign_repository.write_new_for_brand.assert_called_once_with(
-                payload=payload_captor,
-                auth_user_id="12341")
+                payload_captor,
+                "12341")
         payload_campaign: Campaign = payload_captor.arg
 
         # assert
@@ -627,7 +629,7 @@ class TestCampaignController(TestCase):
         self.__campaign_repository.write_new_for_brand = MagicMock(side_effect=NotFoundException())
 
         # act
-        self.__sut.create(context=context)
+        self.__sut.create_for_brand(context=context)
 
         # assert
         with self.subTest(msg="middleware shorts"):
@@ -771,3 +773,31 @@ class TestNotificationController(TestCase):
                                                    model=Notification,
                                                    request=NotificationCreateRequestDto,
                                                    response=NotificationResponseDto)
+
+
+class TestAudienceAgeController(TestCase):
+
+    def setUp(self) -> None:
+        self.__audience_age_repository: AudienceAgeRepository = Mock()
+        self.__object_mapper = test_mapper()
+        self.__flexi_updater = FlexiUpdater(mapper=self.__object_mapper)
+        self.__sut = AudienceAgeController(repository=self.__audience_age_repository,
+                                           mapper=self.__object_mapper,
+                                           flexi_updater=self.__flexi_updater,
+                                           logger=Mock())
+
+    def test_create_for_influencer(self):
+        # arrange
+        context = PinfluencerContext()
+        self.__sut._create_for_owner = MagicMock()
+
+        # act
+        self.__sut.create_for_influencer(context=context)
+
+        # assert
+        self.__sut._create_for_owner.assert_called_once_with(context=context,
+                                                             repo_method=self.__audience_age_repository
+                                                             .write_new_for_influencer,
+                                                             request=AudienceAgeRequestDto,
+                                                             response=AudienceAgeResponseDto,
+                                                             model=AudienceAgeSplit)

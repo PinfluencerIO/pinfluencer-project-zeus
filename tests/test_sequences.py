@@ -4,7 +4,8 @@ from unittest.mock import Mock
 from simple_injection import ServiceCollection
 
 from src.app import bootstrap
-from src.web.controllers import CampaignController, InfluencerController, BrandController, NotificationController
+from src.web.controllers import CampaignController, InfluencerController, BrandController, NotificationController, \
+    AudienceAgeController
 from src.web.hooks import CommonBeforeHooks, UserBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, UserAfterHooks, \
     BrandBeforeHooks, InfluencerBeforeHooks, InfluencerAfterHooks, BrandAfterHooks, NotificationBeforeHooks
 from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdateCreateCampaignSubsequenceBuilder, \
@@ -15,7 +16,7 @@ from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdat
     GetAuthInfluencerSequenceBuilder, GetInfluencerByIdSequenceBuilder, GetAllInfluencersSequenceBuilder, \
     UpdateBrandImageSequenceBuilder, UpdateBrandSequenceBuilder, CreateBrandSequenceBuilder, \
     GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder, \
-    CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder
+    CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder, CreateAudienceAgeSequenceBuilder
 
 
 def setup(ioc: ServiceCollection):
@@ -197,7 +198,7 @@ class TestCreateCampaignSequenceBuilder(TestCase):
                                               ioc.resolve(BrandBeforeHooks).validate_auth_brand,
                                               ioc.resolve(CampaignBeforeHooks).map_campaign_state,
                                               ioc.resolve(CampaignBeforeHooks).map_campaign_categories_and_values,
-                                              ioc.resolve(CampaignController).create,
+                                              ioc.resolve(CampaignController).create_for_brand,
                                               ioc.resolve(PostSingleCampaignSubsequenceBuilder),
                                               ioc.resolve(CampaignAfterHooks).tag_bucket_url_to_images])
 
@@ -532,4 +533,24 @@ class TestGetNotificationByIdSequenceBuilder(TestCase):
             self.assertEqual(sut.components, [
                 ioc.resolve(NotificationBeforeHooks).validate_uuid,
                 ioc.resolve(NotificationController).get_by_id
+            ])
+
+
+class TestCreateAudienceAgeSequenceBuilder(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(CreateAudienceAgeSequenceBuilder)
+
+        # act
+        sut.build()
+
+        # assert
+        with self.subTest(msg="components match"):
+            self.maxDiff = None
+            self.assertEqual(sut.components, [
+                ioc.resolve(PreGenericUpdateCreateSubsequenceBuilder),
+                ioc.resolve(AudienceAgeController).create_for_influencer
             ])

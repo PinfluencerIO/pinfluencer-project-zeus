@@ -2,6 +2,7 @@ import base64
 import io
 import os
 import uuid
+from typing import Type, TypeVar, Callable
 
 import boto3
 from botocore.exceptions import ClientError, ParamValidationError
@@ -9,8 +10,11 @@ from filetype import filetype
 
 from src._types import DataManager, ImageRepository, Model, UserModel, Logger
 from src.data.entities import create_mappings
-from src.domain.models import Brand, Influencer, Campaign, User, Notification
+from src.domain.models import Brand, Influencer, Campaign, User, Notification, AudienceAgeSplit, AudienceAge
 from src.exceptions import AlreadyExistsException, ImageException, NotFoundException
+
+TPayload = TypeVar("TPayload")
+TParent = TypeVar("TParent")
 
 
 class BaseSqlAlchemyRepository:
@@ -39,6 +43,36 @@ class BaseSqlAlchemyRepository:
         self._data_manager.session.flush()
         self._data_manager.session.commit()
         self._logger.log_debug("status committed ...")
+
+
+class BaseSqlAlchemyOwnerRepository(BaseSqlAlchemyRepository):
+
+    def __init__(self, data_manager: DataManager,
+                 model,
+                 logger: Logger):
+        super().__init__(data_manager=data_manager,
+                         model=model,
+                         logger=logger)
+
+    def _write_new_for_owner(self,
+                             payload: TPayload,
+                             auth_user_id: str,
+                             parent_entity: Type[TParent],
+                             parent_entity_field,
+                             foreign_key_setter: Callable[[TPayload], None]) -> TPayload:
+        brand = self._data_manager \
+            .session \
+            .query(parent_entity) \
+            .filter(parent_entity_field == auth_user_id) \
+            .first()
+        if brand:
+            foreign_key_setter(payload)
+            self._data_manager.session.add(payload)
+            return payload
+        else:
+            error_message = f"brand <{auth_user_id}> not found"
+            self._logger.log_error(error_message)
+            raise NotFoundException(error_message)
 
 
 class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):
@@ -76,8 +110,29 @@ class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):
                 raise e
 
 
-class SqlAlchemyAudienceAgeRepository(BaseSqlAlchemyUserRepository):
-    ...
+class SqlAlchemyAudienceAgeRepository(BaseSqlAlchemyOwnerRepository):
+
+    def __init__(self, data_manager: DataManager,
+                 logger: Logger):
+        super().__init__(data_manager,
+                         Campaign,
+                         logger=logger)
+
+    def write_new_for_influencer(self,
+                                 payload: AudienceAgeSplit,
+                                 auth_user_id: str) -> AudienceAgeSplit:
+        for audience_age in payload.audience_ages:
+            self._write_new_for_owner(payload=audience_age,
+                                      auth_user_id="user1234",
+                                      parent_entity=Influencer,
+                                      parent_entity_field=Influencer.auth_user_id,
+                                      foreign_key_setter=lambda x:
+                                      self.__set_audience_age_auth_user_id(audience_age=x,
+                                                                           auth_user_id=auth_user_id))
+        return payload
+
+    def __set_audience_age_auth_user_id(self, audience_age: AudienceAge, auth_user_id: str):
+        audience_age.influencer_auth_user_id = auth_user_id
 
 
 class SqlAlchemyBrandRepository(BaseSqlAlchemyUserRepository):
@@ -102,7 +157,7 @@ class SqlAlchemyInfluencerRepository(BaseSqlAlchemyUserRepository):
                          logger=logger)
 
 
-class SqlAlchemyCampaignRepository(BaseSqlAlchemyRepository):
+class SqlAlchemyCampaignRepository(BaseSqlAlchemyOwnerRepository):
 
     def __init__(self, data_manager: DataManager,
                  image_repository: ImageRepository,
@@ -111,21 +166,18 @@ class SqlAlchemyCampaignRepository(BaseSqlAlchemyRepository):
                          Campaign,
                          logger=logger)
 
-    def write_new_for_brand(self, payload: Campaign,
+    def write_new_for_brand(self,
+                            payload: Campaign,
                             auth_user_id: str) -> Campaign:
-        brand = self._data_manager \
-            .session \
-            .query(Brand) \
-            .filter(Brand.auth_user_id == auth_user_id) \
-            .first()
-        if brand:
-            payload.brand_auth_user_id = brand.auth_user_id
-            self._data_manager.session.add(payload)
-            return payload
-        else:
-            error_message = f"brand <{auth_user_id}> not found"
-            self._logger.log_error(error_message)
-            raise NotFoundException(error_message)
+        return self._write_new_for_owner(payload=payload,
+                                         auth_user_id=auth_user_id,
+                                         parent_entity=Brand,
+                                         parent_entity_field=Brand.auth_user_id,
+                                         foreign_key_setter=lambda x: self.__brand_auth_user_id_setter(payload=x,
+                                                                                                       auth_user_id=auth_user_id))
+
+    def __brand_auth_user_id_setter(self, payload: Campaign, auth_user_id: str):
+        payload.brand_auth_user_id = auth_user_id
 
     def load_for_auth_brand(self, auth_user_id: str) -> list[Campaign]:
         brand = self._data_manager \
@@ -155,6 +207,7 @@ class SqlAlchemyNotificationRepository(BaseSqlAlchemyRepository):
     def write_new_for_auth_user(self, auth_user_id: str, payload: Notification) -> Notification:
         self._data_manager.session.add(payload)
         return payload
+
 
 class S3ImageRepository:
 
@@ -251,9 +304,9 @@ class CognitoAuthUserRepository:
         try:
             list_of_attributes = self.__flexi_update_claims(user=user)
             list_of_attributes.append({
-                    'Name': 'custom:usertype',
-                    'Value': type
-                })
+                'Name': 'custom:usertype',
+                'Value': type
+            })
             self.__auth_service.update_user_claims(username=auth_user_id, attributes=list_of_attributes)
         except ParamValidationError:
             ...

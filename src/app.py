@@ -4,16 +4,17 @@ from simple_injection import ServiceCollection
 
 from src import ServiceLocator
 from src._types import DataManager, BrandRepository, InfluencerRepository, CampaignRepository, ImageRepository, \
-    Deserializer, Serializer, AuthUserRepository, Logger, NotificationRepository
+    Deserializer, Serializer, AuthUserRepository, Logger, NotificationRepository, AudienceAgeRepository
 from src.crosscutting import JsonCamelToSnakeCaseDeserializer, JsonSnakeToCamelSerializer, \
     PinfluencerObjectMapper, FlexiUpdater, ConsoleLogger, DummyLogger
 from src.data import SqlAlchemyDataManager
 from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository, \
     SqlAlchemyCampaignRepository, S3ImageRepository, CognitoAuthUserRepository, CognitoAuthService, \
-    SqlAlchemyNotificationRepository
+    SqlAlchemyNotificationRepository, SqlAlchemyAudienceAgeRepository
 from src.domain.validation import BrandValidator, CampaignValidator, InfluencerValidator
 from src.web import PinfluencerResponse, PinfluencerContext, Route
-from src.web.controllers import BrandController, InfluencerController, CampaignController, NotificationController
+from src.web.controllers import BrandController, InfluencerController, CampaignController, NotificationController, \
+    AudienceAgeController
 from src.web.hooks import HooksFacade, CommonBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, UserBeforeHooks, \
     UserAfterHooks, InfluencerBeforeHooks, BrandBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, CommonAfterHooks, \
     NotificationAfterHooks, NotificationBeforeHooks
@@ -28,7 +29,7 @@ from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdat
     CreateInfluencerSequenceBuilder, GetAuthInfluencerSequenceBuilder, GetInfluencerByIdSequenceBuilder, \
     GetAllInfluencersSequenceBuilder, UpdateBrandImageSequenceBuilder, UpdateBrandSequenceBuilder, \
     CreateBrandSequenceBuilder, GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder, \
-    CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder
+    CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder, CreateAudienceAgeSequenceBuilder
 
 
 def lambda_handler(event, context):
@@ -146,6 +147,7 @@ def register_controllers(ioc):
     ioc.add_singleton(InfluencerController)
     ioc.add_singleton(CampaignController)
     ioc.add_singleton(NotificationController)
+    ioc.add_singleton(AudienceAgeController)
 
 
 def register_object_mapping(ioc):
@@ -165,6 +167,7 @@ def register_data_layer(ioc):
     ioc.add_singleton(InfluencerRepository, SqlAlchemyInfluencerRepository)
     ioc.add_singleton(CampaignRepository, SqlAlchemyCampaignRepository)
     ioc.add_singleton(NotificationRepository, SqlAlchemyNotificationRepository)
+    ioc.add_singleton(AudienceAgeRepository, SqlAlchemyAudienceAgeRepository)
 
     # s3
     ioc.add_singleton(ImageRepository, S3ImageRepository)
@@ -197,3 +200,4 @@ def register_sequences(ioc: ServiceCollection):
     ioc.add_singleton(GetAllBrandsSequenceBuilder)
     ioc.add_singleton(CreateNotificationSequenceBuilder)
     ioc.add_singleton(GetNotificationByIdSequenceBuilder)
+    ioc.add_singleton(CreateAudienceAgeSequenceBuilder)
