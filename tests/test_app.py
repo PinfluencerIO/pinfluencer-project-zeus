@@ -420,22 +420,22 @@ class TestRoutes(TestCase):
         self.__assert_not_implemented(route="PATCH /users/me/notifications")
 
     def test_get_audience_age_splits(self):
-        self.__assert_not_implemented(route="GET /users/me/audience-age-splits")
+        self.__assert_not_implemented(route="GET /influencers/me/audience-age-splits")
 
     def test_get_audience_gender_splits(self):
-        self.__assert_not_implemented(route="GET /users/me/audience-gender-splits")
+        self.__assert_not_implemented(route="GET /influencers/me/audience-gender-splits")
 
     def test_create_audience_age_splits(self):
-        self.__assert_not_implemented(route="POST /users/me/audience-age-splits")
+        self.__assert_not_implemented(route="POST /influencers/me/audience-age-splits")
 
     def test_create_audience_gender_splits(self):
-        self.__assert_not_implemented(route="POST /users/me/audience-gender-splits")
+        self.__assert_not_implemented(route="POST /influencers/me/audience-gender-splits")
 
     def test_update_audience_age_splits(self):
-        self.__assert_not_implemented(route="PATCH /users/me/audience-age-splits")
+        self.__assert_not_implemented(route="PATCH /influencers/me/audience-age-splits")
 
     def test_update_audience_gender_splits(self):
-        self.__assert_not_implemented(route="PATCH /users/me/audience-gender-splits")
+        self.__assert_not_implemented(route="PATCH /influencers/me/audience-gender-splits")
 
     def test_template_matches_routes(self):
         template_file_path = f"./../template.yaml"

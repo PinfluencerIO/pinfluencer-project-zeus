@@ -76,6 +76,10 @@ class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):
                 raise e
 
 
+class SqlAlchemyAudienceAgeRepository(BaseSqlAlchemyUserRepository):
+    ...
+
+
 class SqlAlchemyBrandRepository(BaseSqlAlchemyUserRepository):
     def __init__(self,
                  data_manager: DataManager,

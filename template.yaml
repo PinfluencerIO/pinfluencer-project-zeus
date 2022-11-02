@@ -168,7 +168,7 @@ Resources:
           Properties:
             Auth:
               Authorizer: UserAuth
-            Path: /users/me/audience-age-splits
+            Path: /influencers/me/audience-age-splits
             Method: get
             ApiId: !Ref PinfluencerHttpApi
         GetAudienceGenderSplitsForUser:
@@ -176,7 +176,7 @@ Resources:
           Properties:
             Auth:
               Authorizer: UserAuth
-            Path: /users/me/audience-gender-splits
+            Path: /influencers/me/audience-gender-splits
             Method: get
             ApiId: !Ref PinfluencerHttpApi
         CreateAudienceAgeSplitsForUser:
@@ -184,7 +184,7 @@ Resources:
           Properties:
             Auth:
               Authorizer: UserAuth
-            Path: /users/me/audience-age-splits
+            Path: /influencers/me/audience-age-splits
             Method: post
             ApiId: !Ref PinfluencerHttpApi
         CreateAudienceGenderSplitsForUser:
@@ -192,7 +192,7 @@ Resources:
           Properties:
             Auth:
               Authorizer: UserAuth
-            Path: /users/me/audience-gender-splits
+            Path: /influencers/me/audience-gender-splits
             Method: post
             ApiId: !Ref PinfluencerHttpApi
         UpdateAudienceAgeSplitsForUser:
@@ -200,7 +200,7 @@ Resources:
           Properties:
             Auth:
               Authorizer: UserAuth
-            Path: /users/me/audience-age-splits
+            Path: /influencers/me/audience-age-splits
             Method: patch
             ApiId: !Ref PinfluencerHttpApi
         UpdateAudienceGenderSplitsForUser:
@@ -208,7 +208,7 @@ Resources:
           Properties:
             Auth:
               Authorizer: UserAuth
-            Path: /users/me/audience-gender-splits
+            Path: /influencers/me/audience-gender-splits
             Method: patch
             ApiId: !Ref PinfluencerHttpApi
         #Authenticated Audience endpoints END

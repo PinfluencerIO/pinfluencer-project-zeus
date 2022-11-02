@@ -32,14 +32,14 @@ audience_age_table = Table('audience_age', Base.metadata,
                            Column('min_age', Integer),
                            Column('max_age', Integer),
                            Column('split', Float),
-                           Column('influencer_id', String(length=64)))
+                           Column('influencer_auth_user_id', String(length=64)))
 
 audience_gender_table = Table('audience_gender', Base.metadata,
                               Column('id', String(length=36), primary_key=True),
                               Column('created', DateTime),
                               Column('gender', Enum(GenderEnum)),
                               Column('split', Float),
-                              Column('influencer_id', String(length=64)))
+                              Column('influencer_auth_user_id', String(length=64)))
 
 category_table = Table('category', Base.metadata,
                        Column('id', String(length=36), primary_key=True),

@@ -109,6 +109,7 @@ class GenderEnum(Enum):
 class AudienceGender(DataModel):
     split: float = None
     gender: GenderEnum = None
+    influencer_auth_user_id: str = None
 
 
 @dataclass(unsafe_hash=True)
@@ -116,6 +117,7 @@ class AudienceAge(DataModel):
     split: float = None
     min_age: int = None
     max_age: int = None
+    influencer_auth_user_id: str = None
 
 
 @dataclass(unsafe_hash=True)

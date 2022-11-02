@@ -38,6 +38,11 @@ class TestMapping(TestCase):
         with self.subTest(msg="splits match"):
             self.assertEqual(expected_audience_gender.split, audience_gender_fetched_from_db.split)
 
+        # assert
+        with self.subTest(msg="influencer auth user ids match"):
+            self.assertEqual(expected_audience_gender.influencer_auth_user_id,
+                             audience_gender_fetched_from_db.influencer_auth_user_id)
+
     def test_audience_age_fetch_mapping(self):
         # arrange
         expected_audience_age = AutoFixture().create(dto=AudienceAge)
@@ -65,6 +70,11 @@ class TestMapping(TestCase):
         # assert
         with self.subTest(msg="splits match"):
             self.assertEqual(expected_audience_age.split, audience_age_fetched_from_db.split)
+
+        # assert
+        with self.subTest(msg="influencer auth user ids match"):
+            self.assertEqual(expected_audience_age.influencer_auth_user_id,
+                             audience_age_fetched_from_db.influencer_auth_user_id)
 
     def test_brand_fetch_mapping(self):
         # arrange

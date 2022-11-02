@@ -128,22 +128,22 @@ class Dispatcher:
 
         audience_routes = OrderedDict(
             {
-                'GET /users/me/audience-age-splits':
+                'GET /influencers/me/audience-age-splits':
                     Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),
 
-                'GET /users/me/audience-gender-splits':
+                'GET /influencers/me/audience-gender-splits':
                     Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),
 
-                'POST /users/me/audience-age-splits':
+                'POST /influencers/me/audience-age-splits':
                     Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),
 
-                'POST /users/me/audience-gender-splits':
+                'POST /influencers/me/audience-gender-splits':
                     Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),
 
-                'PATCH /users/me/audience-age-splits':
+                'PATCH /influencers/me/audience-age-splits':
                     Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),
 
-                'PATCH /users/me/audience-gender-splits':
+                'PATCH /influencers/me/audience-gender-splits':
                     Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder))
             }
         )
