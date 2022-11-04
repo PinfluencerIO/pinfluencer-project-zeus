@@ -123,7 +123,7 @@ class SqlAlchemyAudienceAgeRepository(BaseSqlAlchemyOwnerRepository):
                                  auth_user_id: str) -> AudienceAgeSplit:
         for audience_age in payload.audience_ages:
             self._write_new_for_owner(payload=audience_age,
-                                      auth_user_id="user1234",
+                                      auth_user_id=auth_user_id,
                                       parent_entity=Influencer,
                                       parent_entity_field=Influencer.auth_user_id,
                                       foreign_key_setter=lambda x:

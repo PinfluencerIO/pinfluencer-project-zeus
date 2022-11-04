@@ -132,6 +132,11 @@ def get_notification_by_id(id):
     return generic_handler(routeKey="GET /notifications/{notification_id}", params={'notification_id': id})
 
 
+@app.route("/influencers/me/audience-age-splits", methods=['POST'])
+def create_audience_age_splits():
+    return generic_handler(routeKey="POST /influencers/me/audience-age-splits", params={})
+
+
 def generic_handler(routeKey: str, params: dict):
     body_string = None
     try:
