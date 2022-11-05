@@ -16,7 +16,7 @@ from src.web.controllers import BrandController, InfluencerController, CampaignC
     AudienceAgeController
 from src.web.views import BrandRequestDto, BrandResponseDto, ImageRequestDto, InfluencerRequestDto, \
     InfluencerResponseDto, CampaignRequestDto, CampaignResponseDto, NotificationCreateRequestDto, \
-    NotificationResponseDto, AudienceAgeRequestDto, AudienceAgeResponseDto
+    NotificationResponseDto, AudienceAgeViewDto
 from tests import test_mapper
 
 
@@ -798,6 +798,6 @@ class TestAudienceAgeController(TestCase):
         self.__sut._create_for_owner.assert_called_once_with(context=context,
                                                              repo_method=self.__audience_age_repository
                                                              .write_new_for_influencer,
-                                                             request=AudienceAgeRequestDto,
-                                                             response=AudienceAgeResponseDto,
+                                                             request=AudienceAgeViewDto,
+                                                             response=AudienceAgeViewDto,
                                                              model=AudienceAgeSplit)

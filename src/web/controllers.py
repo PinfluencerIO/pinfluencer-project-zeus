@@ -9,7 +9,7 @@ from src.exceptions import AlreadyExistsException, NotFoundException
 from src.web import BRAND_ID_PATH_KEY, INFLUENCER_ID_PATH_KEY, PinfluencerContext
 from src.web.views import BrandRequestDto, BrandResponseDto, ImageRequestDto, InfluencerRequestDto, \
     InfluencerResponseDto, CampaignRequestDto, CampaignResponseDto, NotificationCreateRequestDto, \
-    NotificationResponseDto, AudienceAgeResponseDto, AudienceAgeRequestDto
+    NotificationResponseDto, AudienceAgeViewDto
 
 
 class BaseController:
@@ -246,14 +246,14 @@ class AudienceAgeController(BaseOwnerController):
                          mapper,
                          flexi_updater,
                          logger,
-                         AudienceAgeResponseDto,
-                         AudienceAgeRequestDto)
+                         AudienceAgeViewDto,
+                         AudienceAgeViewDto)
 
     def create_for_influencer(self, context: PinfluencerContext):
         self._create_for_owner(context=context,
                                repo_method=self._repository.write_new_for_influencer,
-                               request=AudienceAgeRequestDto,
-                               response=AudienceAgeResponseDto,
+                               request=AudienceAgeViewDto,
+                               response=AudienceAgeViewDto,
                                model=AudienceAgeSplit)
 
 

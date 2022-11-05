@@ -1,7 +1,7 @@
 from unittest import TestCase
 from unittest.mock import Mock, MagicMock
 
-from callee import Captor, Any
+from callee import Captor
 
 from src._types import ImageRepository
 from src.app import logger_factory

@@ -4,8 +4,7 @@ from src.crosscutting import PinfluencerObjectMapper, Rule
 from src.domain.models import Brand, Value, Category, Influencer, Campaign, AudienceAgeSplit, AudienceAge, \
     AudienceGenderSplit, GenderEnum, AudienceGender
 from src.web.views import BrandRequestDto, BrandResponseDto, InfluencerRequestDto, InfluencerResponseDto, \
-    CampaignRequestDto, CampaignResponseDto, AudienceAgeRequestDto, AudienceAgeResponseDto, AudienceGenderRequestDto, \
-    AudienceGenderResponseDto
+    CampaignRequestDto, CampaignResponseDto, AudienceAgeViewDto, AudienceGenderViewDto
 
 
 class MappingRules:
@@ -129,98 +128,52 @@ class MappingRules:
                                expression=self.__map_campaign_categories_view_to_campaign)
 
     def __add_audience_age_rules(self):
-        self.__mapper.add_rule(_type_from=AudienceAgeRequestDto,
+        self.__mapper.add_rule(_type_from=AudienceAgeViewDto,
                                _type_to=AudienceAgeSplit,
                                field='audience_age_13_to_17_split',
                                expression=self.__map_audience_age_13_to_17_view_to_split)
-        self.__mapper.add_rule(_type_from=AudienceAgeRequestDto,
+        self.__mapper.add_rule(_type_from=AudienceAgeViewDto,
                                _type_to=AudienceAgeSplit,
                                field='audience_age_18_to_24_split',
                                expression=self.__map_audience_age_18_to_24_view_to_split)
-        self.__mapper.add_rule(_type_from=AudienceAgeRequestDto,
+        self.__mapper.add_rule(_type_from=AudienceAgeViewDto,
                                _type_to=AudienceAgeSplit,
                                field='audience_age_25_to_34_split',
                                expression=self.__map_audience_age_25_to_34_view_to_split)
-        self.__mapper.add_rule(_type_from=AudienceAgeRequestDto,
+        self.__mapper.add_rule(_type_from=AudienceAgeViewDto,
                                _type_to=AudienceAgeSplit,
                                field='audience_age_35_to_44_split',
                                expression=self.__map_audience_age_35_to_44_view_to_split)
-        self.__mapper.add_rule(_type_from=AudienceAgeRequestDto,
+        self.__mapper.add_rule(_type_from=AudienceAgeViewDto,
                                _type_to=AudienceAgeSplit,
                                field='audience_age_45_to_54_split',
                                expression=self.__map_audience_age_45_to_54_view_to_split)
-        self.__mapper.add_rule(_type_from=AudienceAgeRequestDto,
+        self.__mapper.add_rule(_type_from=AudienceAgeViewDto,
                                _type_to=AudienceAgeSplit,
                                field='audience_age_55_to_64_split',
                                expression=self.__map_audience_age_55_to_64_view_to_split)
-        self.__mapper.add_rule(_type_from=AudienceAgeRequestDto,
-                               _type_to=AudienceAgeSplit,
-                               field='audience_age_65_plus_split',
-                               expression=self.__map_audience_age_65_plus_view_to_split)
-
-        self.__mapper.add_rule(_type_from=AudienceAgeResponseDto,
-                               _type_to=AudienceAgeSplit,
-                               field='audience_age_13_to_17_split',
-                               expression=self.__map_audience_age_13_to_17_view_to_split)
-        self.__mapper.add_rule(_type_from=AudienceAgeResponseDto,
-                               _type_to=AudienceAgeSplit,
-                               field='audience_age_18_to_24_split',
-                               expression=self.__map_audience_age_18_to_24_view_to_split)
-        self.__mapper.add_rule(_type_from=AudienceAgeResponseDto,
-                               _type_to=AudienceAgeSplit,
-                               field='audience_age_25_to_34_split',
-                               expression=self.__map_audience_age_25_to_34_view_to_split)
-        self.__mapper.add_rule(_type_from=AudienceAgeResponseDto,
-                               _type_to=AudienceAgeSplit,
-                               field='audience_age_35_to_44_split',
-                               expression=self.__map_audience_age_35_to_44_view_to_split)
-        self.__mapper.add_rule(_type_from=AudienceAgeResponseDto,
-                               _type_to=AudienceAgeSplit,
-                               field='audience_age_45_to_54_split',
-                               expression=self.__map_audience_age_45_to_54_view_to_split)
-        self.__mapper.add_rule(_type_from=AudienceAgeResponseDto,
-                               _type_to=AudienceAgeSplit,
-                               field='audience_age_55_to_64_split',
-                               expression=self.__map_audience_age_55_to_64_view_to_split)
-        self.__mapper.add_rule(_type_from=AudienceAgeResponseDto,
+        self.__mapper.add_rule(_type_from=AudienceAgeViewDto,
                                _type_to=AudienceAgeSplit,
                                field='audience_age_65_plus_split',
                                expression=self.__map_audience_age_65_plus_view_to_split)
 
         self.__mapper.add_rule(_type_from=AudienceAgeSplit,
-                               _type_to=AudienceAgeRequestDto,
-                               field='audience_ages',
-                               expression=self.__map_audience_age_view_to_audience_age_split)
-        self.__mapper.add_rule(_type_from=AudienceAgeSplit,
-                               _type_to=AudienceAgeResponseDto,
+                               _type_to=AudienceAgeViewDto,
                                field='audience_ages',
                                expression=self.__map_audience_age_view_to_audience_age_split)
 
     def __add_audience_gender_rules(self):
-        self.__mapper.add_rule(_type_from=AudienceGenderRequestDto,
+        self.__mapper.add_rule(_type_from=AudienceGenderViewDto,
                                _type_to=AudienceGenderSplit,
                                field='audience_male_split',
                                expression=self.__map_audience_male_view_to_split)
-        self.__mapper.add_rule(_type_from=AudienceGenderRequestDto,
-                               _type_to=AudienceGenderSplit,
-                               field='audience_female_split',
-                               expression=self.__map_audience_female_view_to_split)
-
-        self.__mapper.add_rule(_type_from=AudienceGenderResponseDto,
-                               _type_to=AudienceGenderSplit,
-                               field='audience_male_split',
-                               expression=self.__map_audience_male_view_to_split)
-        self.__mapper.add_rule(_type_from=AudienceGenderResponseDto,
+        self.__mapper.add_rule(_type_from=AudienceGenderViewDto,
                                _type_to=AudienceGenderSplit,
                                field='audience_female_split',
                                expression=self.__map_audience_female_view_to_split)
 
         self.__mapper.add_rule(_type_from=AudienceGenderSplit,
-                               _type_to=AudienceGenderRequestDto,
-                               field='audience_genders',
-                               expression=self.__map_audience_gender_view_to_audience_gender_split)
-        self.__mapper.add_rule(_type_from=AudienceGenderSplit,
-                               _type_to=AudienceGenderResponseDto,
+                               _type_to=AudienceGenderViewDto,
                                field='audience_genders',
                                expression=self.__map_audience_gender_view_to_audience_gender_split)
 
@@ -266,16 +219,16 @@ class MappingRules:
         to.campaign_categories = list(map(lambda x: Category(category=x), _from.campaign_categories))
 
     def __map_audience_male_view_to_split(self,
-                                                  to: AudienceGenderSplit,
-                                                  _from: Union[AudienceGenderRequestDto, AudienceGenderResponseDto]):
+                                          to: AudienceGenderSplit,
+                                          _from: AudienceGenderViewDto):
         if self.__if_gender_in_split(gender=GenderEnum.MALE, audience_split=to):
             list(filter(lambda x: x.gender == GenderEnum.MALE, to.audience_genders))[0].split = _from.audience_male_split
         else:
             to.audience_genders.append(AudienceGender(gender=GenderEnum.MALE, split=_from.audience_male_split))
 
     def __map_audience_female_view_to_split(self,
-                                                  to: AudienceGenderSplit,
-                                                  _from: Union[AudienceGenderRequestDto, AudienceGenderResponseDto]):
+                                            to: AudienceGenderSplit,
+                                            _from: AudienceGenderViewDto):
         if self.__if_gender_in_split(gender=GenderEnum.FEMALE, audience_split=to):
             list(filter(lambda x: x.gender == GenderEnum.FEMALE, to.audience_genders))[0].split = _from.audience_female_split
         else:
@@ -283,7 +236,7 @@ class MappingRules:
 
     def __map_audience_age_13_to_17_view_to_split(self,
                                                   to: AudienceAgeSplit,
-                                                  _from: Union[AudienceAgeRequestDto, AudienceAgeResponseDto]):
+                                                  _from: AudienceAgeViewDto):
         if self.__if_age_band_in_split(min=13, max=17, audience_split=to):
             list(filter(lambda x: x.min_age == 13 and x.max_age == 17, to.audience_ages))[0].split = _from.audience_age_13_to_17_split
         else:
@@ -291,7 +244,7 @@ class MappingRules:
 
     def __map_audience_age_18_to_24_view_to_split(self,
                                                   to: AudienceAgeSplit,
-                                                  _from: Union[AudienceAgeRequestDto, AudienceAgeResponseDto]):
+                                                  _from: AudienceAgeViewDto):
         if self.__if_age_band_in_split(min=18, max=24, audience_split=to):
             list(filter(lambda x: x.min_age == 18 and x.max_age == 24, to.audience_ages))[0].split = _from.audience_age_18_to_24_split
         else:
@@ -299,7 +252,7 @@ class MappingRules:
 
     def __map_audience_age_25_to_34_view_to_split(self,
                                                   to: AudienceAgeSplit,
-                                                  _from: Union[AudienceAgeRequestDto, AudienceAgeResponseDto]):
+                                                  _from: AudienceAgeViewDto):
         if self.__if_age_band_in_split(min=25, max=34, audience_split=to):
             list(filter(lambda x: x.min_age == 25 and x.max_age == 34, to.audience_ages))[0].split = _from.audience_age_25_to_34_split
         else:
@@ -307,7 +260,7 @@ class MappingRules:
 
     def __map_audience_age_35_to_44_view_to_split(self,
                                                   to: AudienceAgeSplit,
-                                                  _from: Union[AudienceAgeRequestDto, AudienceAgeResponseDto]):
+                                                  _from: AudienceAgeViewDto):
         if self.__if_age_band_in_split(min=35, max=44, audience_split=to):
             list(filter(lambda x: x.min_age == 35 and x.max_age == 44, to.audience_ages))[0].split = _from.audience_age_35_to_44_split
         else:
@@ -315,7 +268,7 @@ class MappingRules:
 
     def __map_audience_age_45_to_54_view_to_split(self,
                                                   to: AudienceAgeSplit,
-                                                  _from: Union[AudienceAgeRequestDto, AudienceAgeResponseDto]):
+                                                  _from: AudienceAgeViewDto):
         if self.__if_age_band_in_split(min=45, max=54, audience_split=to):
             list(filter(lambda x: x.min_age == 45 and x.max_age == 54, to.audience_ages))[0].split = _from.audience_age_45_to_54_split
         else:
@@ -323,23 +276,23 @@ class MappingRules:
 
     def __map_audience_age_55_to_64_view_to_split(self,
                                                   to: AudienceAgeSplit,
-                                                  _from: Union[AudienceAgeRequestDto, AudienceAgeResponseDto]):
+                                                  _from: AudienceAgeViewDto):
         if self.__if_age_band_in_split(min=55, max=64, audience_split=to):
             list(filter(lambda x: x.min_age == 55 and x.max_age == 64, to.audience_ages))[0].split = _from.audience_age_55_to_64_split
         else:
             to.audience_ages.append(AudienceAge(min_age=55, max_age=64, split=_from.audience_age_55_to_64_split))
 
     def __map_audience_age_65_plus_view_to_split(self,
-                                                  to: AudienceAgeSplit,
-                                                  _from: Union[AudienceAgeRequestDto, AudienceAgeResponseDto]):
+                                                 to: AudienceAgeSplit,
+                                                 _from: AudienceAgeViewDto):
         if self.__if_age_band_in_split(min=65, max=None, audience_split=to):
             list(filter(lambda x: x.min_age == 65, to.audience_ages))[0].split = _from.audience_age_65_plus_split
         else:
             to.audience_ages.append(AudienceAge(min_age=65, split=_from.audience_age_65_plus_split))
 
     def __map_audience_gender_view_to_audience_gender_split(self,
-                                                      to: Union[AudienceGenderRequestDto, AudienceGenderResponseDto],
-                                                      _from: AudienceGenderSplit):
+                                                            to: AudienceGenderViewDto,
+                                                            _from: AudienceGenderSplit):
         to.audience_male_split = list(filter(
             lambda x: x.gender == GenderEnum.MALE, _from.audience_genders)
         )[0].split
@@ -349,7 +302,7 @@ class MappingRules:
         )[0].split
 
     def __map_audience_age_view_to_audience_age_split(self,
-                                                      to: Union[AudienceAgeRequestDto, AudienceAgeResponseDto],
+                                                      to: AudienceAgeViewDto,
                                                       _from: AudienceAgeSplit):
         to.audience_age_13_to_17_split = list(filter(
             lambda x: x.min_age == 13 and x.max_age == 17, _from.audience_ages)

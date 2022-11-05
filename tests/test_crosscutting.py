@@ -1,12 +1,10 @@
 import datetime
 from dataclasses import dataclass, field
 from unittest import TestCase
-from unittest.mock import Mock
 
 from ddt import ddt, data
 
-from src.crosscutting import JsonSnakeToCamelSerializer, JsonCamelToSnakeCaseDeserializer, AutoFixture, \
-    PinfluencerObjectMapper
+from src.crosscutting import JsonSnakeToCamelSerializer, JsonCamelToSnakeCaseDeserializer, AutoFixture
 from src.domain.models import ValueEnum, CategoryEnum, Brand, Value
 from src.exceptions import AutoMapperException
 from src.web.views import BrandRequestDto, BrandResponseDto

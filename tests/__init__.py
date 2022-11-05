@@ -7,7 +7,7 @@ from src.app import logger_factory
 from src.crosscutting import JsonSnakeToCamelSerializer, PinfluencerObjectMapper
 from src.data import Base
 from src.data.entities import SqlAlchemyBaseEntity
-from src.domain.models import Brand, Influencer, ValueEnum, CategoryEnum, User
+from src.domain.models import ValueEnum, CategoryEnum
 from src.web.mapping import MappingRules
 
 TEST_DEFAULT_PRODUCT_IMAGE1 = "default_product_image1.png"
@@ -106,44 +106,10 @@ def update_brand_payload():
     }
 
 
-def update_user_dto():
-    return User(given_name="first_name",
-                family_name="last_name",
-                email="email@gmail.com")
-
-
-def create_brand_dto():
-    return Brand(brand_name="name",
-                 brand_description="description",
-                 website="https://website.com",
-                 insta_handle="instahandle",
-                 values=[ValueEnum.VALUE7, ValueEnum.VALUE8, ValueEnum.VALUE9],
-                 categories=[CategoryEnum.CATEGORY7, CategoryEnum.CATEGORY6, CategoryEnum.CATEGORY5],
-                 auth_user_id="1234")
-
-
 def update_image_payload():
     return {
         "image_bytes": "random_bytes"
     }
-
-
-def update_brand_return_dto():
-    return Brand(brand_name="name",
-                 brand_description="description",
-                 website="https://website.com",
-                 insta_handle="instahandle",
-                 values=[ValueEnum.VALUE7, ValueEnum.VALUE8, ValueEnum.VALUE9],
-                 categories=[CategoryEnum.CATEGORY7, CategoryEnum.CATEGORY6, CategoryEnum.CATEGORY5])
-
-
-def update_brand_expected_dto():
-    return Brand(brand_name="name",
-                 brand_description="description",
-                 website="https://website.com",
-                 insta_handle="instahandle",
-                 values=[ValueEnum.VALUE7, ValueEnum.VALUE8, ValueEnum.VALUE9],
-                 categories=[CategoryEnum.CATEGORY7, CategoryEnum.CATEGORY6, CategoryEnum.CATEGORY5])
 
 
 def create_for_auth_user_event(auth_id, payload):
@@ -151,24 +117,6 @@ def create_for_auth_user_event(auth_id, payload):
         "requestContext": {"authorizer": {"jwt": {"claims": {"cognito:username": auth_id}}}},
         "body": JsonSnakeToCamelSerializer().serialize(payload)
     }
-
-
-def create_influencer_dto():
-    return Influencer(bio="bio",
-                      website="https://website.com",
-                      insta_handle="instahandle",
-                      values=[ValueEnum.VALUE7, ValueEnum.VALUE8, ValueEnum.VALUE9],
-                      categories=[CategoryEnum.CATEGORY7, CategoryEnum.CATEGORY6, CategoryEnum.CATEGORY5],
-                      auth_user_id="1234",
-                      audience_male_split=0.5,
-                      audience_female_split=0.5,
-                      audience_age_13_to_17_split=0.142,
-                      audience_age_18_to_24_split=0.142,
-                      audience_age_25_to_34_split=0.142,
-                      audience_age_35_to_44_split=0.142,
-                      audience_age_45_to_54_split=0.142,
-                      audience_age_55_to_64_split=0.142,
-                      audience_age_65_plus_split=0.143)
 
 
 def update_influencer_payload():

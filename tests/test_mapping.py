@@ -8,8 +8,8 @@ from src.domain.models import Brand, Influencer, Campaign, AudienceAge, Audience
     AudienceGender, GenderEnum
 from src.web.mapping import MappingRules
 from src.web.views import BrandRequestDto, BrandResponseDto, InfluencerRequestDto, InfluencerResponseDto, \
-    CampaignResponseDto, CampaignRequestDto, AudienceAgeRequestDto, AudienceAgeResponseDto, AudienceGenderResponseDto, \
-    AudienceGenderRequestDto
+    CampaignResponseDto, CampaignRequestDto, AudienceAgeViewDto, \
+    AudienceGenderViewDto
 from tests import test_mapper
 
 
@@ -28,49 +28,21 @@ audience_age_data = [
          audience_split_test_factory(AudienceAge(min_age=45, max_age=54, split=0.1)),
          audience_split_test_factory(AudienceAge(min_age=55, max_age=64, split=0.1)),
          audience_split_test_factory(AudienceAge(min_age=65, split=0.1))
-     ], AudienceAgeRequestDto(audience_age_13_to_17_split=0.1,
-                              audience_age_18_to_24_split=0.1,
-                              audience_age_25_to_34_split=0.1,
-                              audience_age_35_to_44_split=0.1,
-                              audience_age_45_to_54_split=0.1,
-                              audience_age_55_to_64_split=0.1,
-                              audience_age_65_plus_split=0.1))
-]
-
-audience_age_response_data = [
-    (AudienceAgeSplit(audience_ages=[
-        audience_split_test_factory(AudienceAge(min_age=13, max_age=17, split=0.1)),
-        audience_split_test_factory(AudienceAge(min_age=18, max_age=24, split=0.1)),
-        audience_split_test_factory(AudienceAge(min_age=25, max_age=34, split=0.1)),
-        audience_split_test_factory(AudienceAge(min_age=35, max_age=44, split=0.1)),
-        audience_split_test_factory(AudienceAge(min_age=45, max_age=54, split=0.1)),
-        audience_split_test_factory(AudienceAge(min_age=55, max_age=64, split=0.1)),
-        audience_split_test_factory(AudienceAge(min_age=65, split=0.1))
-    ]), audience_split_test_factory(
-        AudienceAgeResponseDto(audience_age_13_to_17_split=0.1,
-                               audience_age_18_to_24_split=0.1,
-                               audience_age_25_to_34_split=0.1,
-                               audience_age_35_to_44_split=0.1,
-                               audience_age_45_to_54_split=0.1,
-                               audience_age_55_to_64_split=0.1,
-                               audience_age_65_plus_split=0.1)))
-]
-
-audience_gender_response_data = [
-    (AudienceGenderSplit(audience_genders=[
-        audience_split_test_factory(AudienceGender(gender=GenderEnum.MALE, split=0.1)),
-        audience_split_test_factory(AudienceGender(gender=GenderEnum.FEMALE, split=0.1))
-    ]), audience_split_test_factory(
-        AudienceGenderResponseDto(audience_male_split=0.1,
-                                  audience_female_split=0.1)))
+     ], AudienceAgeViewDto(audience_age_13_to_17_split=0.1,
+                           audience_age_18_to_24_split=0.1,
+                           audience_age_25_to_34_split=0.1,
+                           audience_age_35_to_44_split=0.1,
+                           audience_age_45_to_54_split=0.1,
+                           audience_age_55_to_64_split=0.1,
+                           audience_age_65_plus_split=0.1))
 ]
 
 audience_gender_data = [
     (AudienceGenderSplit(audience_genders=[
         audience_split_test_factory(AudienceGender(gender=GenderEnum.MALE, split=0.1)),
         audience_split_test_factory(AudienceGender(gender=GenderEnum.FEMALE, split=0.1))
-    ]), AudienceGenderRequestDto(audience_male_split=0.1,
-                                 audience_female_split=0.1))
+    ]), AudienceGenderViewDto(audience_male_split=0.1,
+                              audience_female_split=0.1))
 ]
 
 
@@ -82,50 +54,22 @@ class TestMappingRules(TestCase):
         self.__sut = MappingRules(mapper=self.__mapper)
         self.__fixture = AutoFixture()
 
-    @data(*audience_gender_response_data)
-    def test_map_audience_gender_to_audience_gender_response(self, data: (AudienceGenderSplit, AudienceGenderResponseDto)):
-        # arrange
-        (audience_gender, expected_audience_gender_response) = data
-
-        self.__sut.add_rules()
-
-        audience_gender_response: AudienceGenderResponseDto = self.__mapper.map(
-            _from=audience_gender, to=AudienceGenderResponseDto)
-
-        # assert
-        with self.subTest(msg="audience request matches"):
-            self.assertEqual(audience_split_test_factory(audience_gender_response), expected_audience_gender_response)
-
-    @data(*audience_gender_response_data)
-    def test_map_audience_gender_response_to_audience_gender(self, data: (AudienceGenderSplit, AudienceGenderResponseDto)):
-        # arrange
-        (audience_gender, expected_audience_gender_response) = data
-
-        self.__sut.add_rules()
-
-        audience_gender_split = self.__mapper.map(_from=expected_audience_gender_response, to=AudienceGenderSplit)
-        expected_audience_split = list(map(lambda x: audience_split_test_factory(x), audience_gender_split.audience_genders))
-
-        # assert
-        with self.subTest(msg="audience data matches"):
-            self.assertEqual(expected_audience_split, audience_gender.audience_genders)
-
     @data(*audience_gender_data)
-    def test_map_audience_gender_to_audience_gender_request(self, data: (list[AudienceGender], AudienceGenderRequestDto)):
+    def test_map_audience_gender_to_audience_gender_request(self, data: (list[AudienceGender], AudienceGenderViewDto)):
         # arrange
         (audience_gender, expected_audience_gender_request) = data
 
         self.__sut.add_rules()
 
-        audience_gender_request: AudienceGenderRequestDto = self.__mapper.map(
-            _from=audience_gender, to=AudienceGenderRequestDto)
+        audience_gender_request: AudienceGenderViewDto = self.__mapper.map(
+            _from=audience_gender, to=AudienceGenderViewDto)
 
         # assert
         with self.subTest(msg="audience request matches"):
             self.assertEqual(audience_gender_request, expected_audience_gender_request)
 
     @data(*audience_gender_data)
-    def test_map_audience_gender_request_to_audience_gender(self, data: (list[AudienceGender], AudienceGenderRequestDto)):
+    def test_map_audience_gender_request_to_audience_gender(self, data: (list[AudienceGender], AudienceGenderViewDto)):
         # arrange
         (audience_gender, expected_audience_gender_request) = data
 
@@ -139,50 +83,22 @@ class TestMappingRules(TestCase):
         with self.subTest(msg="audience data matches"):
             self.assertEqual(expected_audience_gender_split, audience_gender.audience_genders)
 
-    @data(*audience_age_response_data)
-    def test_map_audience_age_to_audience_age_response(self, data: (AudienceAgeSplit, AudienceAgeResponseDto)):
-        # arrange
-        (audience_age, expected_audience_age_response) = data
-
-        self.__sut.add_rules()
-
-        audience_age_response: AudienceAgeResponseDto = self.__mapper.map(
-            _from=audience_age, to=AudienceAgeResponseDto)
-
-        # assert
-        with self.subTest(msg="audience request matches"):
-            self.assertEqual(audience_split_test_factory(audience_age_response), expected_audience_age_response)
-
-    @data(*audience_age_response_data)
-    def test_map_audience_age_response_to_audience_age(self, data: (AudienceAgeSplit, AudienceAgeResponseDto)):
-        # arrange
-        (audience_age, expected_audience_age_response) = data
-
-        self.__sut.add_rules()
-
-        audience_age_split = self.__mapper.map(_from=expected_audience_age_response, to=AudienceAgeSplit)
-        expected_audience_split = list(map(lambda x: audience_split_test_factory(x), audience_age_split.audience_ages))
-
-        # assert
-        with self.subTest(msg="audience data matches"):
-            self.assertEqual(expected_audience_split, audience_age.audience_ages)
-
     @data(*audience_age_data)
-    def test_map_audience_age_to_audience_age_request(self, data: (list[AudienceAge], AudienceAgeRequestDto)):
+    def test_map_audience_age_to_audience_age_request(self, data: (list[AudienceAge], AudienceAgeViewDto)):
         # arrange
         (audience_age, expected_audience_age_request) = data
 
         self.__sut.add_rules()
 
-        audience_age_request: AudienceAgeRequestDto = self.__mapper.map(
-            _from=AudienceAgeSplit(audience_ages=audience_age), to=AudienceAgeRequestDto)
+        audience_age_request: AudienceAgeViewDto = self.__mapper.map(
+            _from=AudienceAgeSplit(audience_ages=audience_age), to=AudienceAgeViewDto)
 
         # assert
         with self.subTest(msg="audience request matches"):
             self.assertEqual(audience_age_request, expected_audience_age_request)
 
     @data(*audience_age_data)
-    def test_map_audience_age_request_to_audience_age(self, data: (list[AudienceAge], AudienceAgeRequestDto)):
+    def test_map_audience_age_request_to_audience_age(self, data: (list[AudienceAge], AudienceAgeViewDto)):
         # arrange
         (audience_age, expected_audience_age_request) = data
 
