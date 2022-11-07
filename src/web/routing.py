@@ -8,7 +8,8 @@ from src.web.sequences import UpdateCampaignSequenceBuilder, UpdateImageForCampa
     CreateInfluencerSequenceBuilder, GetAuthInfluencerSequenceBuilder, GetInfluencerByIdSequenceBuilder, \
     GetAllInfluencersSequenceBuilder, UpdateBrandImageSequenceBuilder, UpdateBrandSequenceBuilder, \
     CreateBrandSequenceBuilder, GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder, \
-    CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder, CreateAudienceAgeSequenceBuilder
+    CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder, CreateAudienceAgeSequenceBuilder, \
+    GetAudienceAgeSequenceBuilder
 
 
 class Dispatcher:
@@ -129,7 +130,7 @@ class Dispatcher:
         audience_routes = OrderedDict(
             {
                 'GET /influencers/me/audience-age-splits':
-                    Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),
+                    Route(sequence_builder=self.__service_locator.locate(GetAudienceAgeSequenceBuilder)),
 
                 'GET /influencers/me/audience-gender-splits':
                     Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),

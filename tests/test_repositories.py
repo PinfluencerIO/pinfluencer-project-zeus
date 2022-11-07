@@ -8,7 +8,7 @@ from src.app import logger_factory
 from src.crosscutting import AutoFixture
 from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository, CognitoAuthUserRepository, \
     CognitoAuthService, SqlAlchemyCampaignRepository, SqlAlchemyNotificationRepository, SqlAlchemyAudienceAgeRepository
-from src.domain.models import Brand, Influencer, User, Campaign, Notification, AudienceAgeSplit
+from src.domain.models import Brand, Influencer, User, Campaign, Notification, AudienceAgeSplit, AudienceAge
 from src.exceptions import AlreadyExistsException, NotFoundException
 from tests import InMemorySqliteDataManager
 
@@ -451,8 +451,34 @@ class TestAudienceAgeRepository(TestCase):
             with self.subTest(msg=f"field setter sets correct field for age ranges"
                                   f"{audience_age.min_age}-{audience_age.max_age}"):
                 captor.arg(audience_age)
-                audience_age.influencer_auth_user_id = "user1234"
+                self.assertEqual(audience_age.influencer_auth_user_id, "user1234")
 
             with self.subTest(msg="captured repo value was returned age ranges"
                                   f"{audience_age.min_age}-{audience_age.max_age}"):
                 self.assertEqual(returned_audience_age_split, audience_age_split)
+
+    def test_load_for_influencer(self):
+        # arrange
+        audience_ages = AutoFixture().create_many(dto=AudienceAge, ammount=5)
+        self.__sut._load_for_auth_owner = MagicMock(return_value=audience_ages)
+
+        # act
+        returned_audience_age_split = self.__sut.load_for_influencer(auth_user_id="user1234")
+
+        # assert
+        captor = Captor()
+        with self.subTest(msg=f"base repo was called"):
+            self.__sut._load_for_auth_owner.assert_called_once_with(auth_user_id="user1234",
+                                                                    parent_entity_field=Influencer.auth_user_id,
+                                                                    parent=Influencer,
+                                                                    model=AudienceAge,
+                                                                    model_entity_field=AudienceAge.influencer_auth_user_id,
+                                                                    parent_field_getter=captor)
+
+        with self.subTest(msg=f"field getter gets correct field"):
+            owner = AutoFixture().create(dto=Influencer)
+            owner.auth_user_id = "user1234"
+            self.assertEqual(captor.arg(owner), "user1234")
+
+        with self.subTest(msg="captured repo value was returned age ranges"):
+            self.assertEqual(returned_audience_age_split, AudienceAgeSplit(audience_ages=audience_ages))

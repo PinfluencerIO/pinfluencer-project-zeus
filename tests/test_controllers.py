@@ -392,24 +392,31 @@ class TestBrandController(TestCase):
             assert brand_db.logo == mapped_brand_body.logo
 
         # assert
-        with self.subTest(msg="response brand description was equal to brand brand description in db and request brand description and body brand description"):
+        with self.subTest(
+                msg="response brand description was equal to brand brand description in db and request brand description and body brand description"):
             assert actual_payload.brand_description == brand_request.brand_description == mapped_brand_body.brand_description == brand_db.brand_description
 
         # assert
-        with self.subTest(msg="response brand name was equal to brand brand name in db and request brand name and body brand name"):
+        with self.subTest(
+                msg="response brand name was equal to brand brand name in db and request brand name and body brand name"):
             assert actual_payload.brand_name == brand_request.brand_name == mapped_brand_body.brand_name == brand_db.brand_name
 
         # assert
-        with self.subTest(msg="response categories was equal to brand categories in db and request categories and body categories"):
-            assert list(map(lambda x: x.category, actual_payload.categories)) == brand_request.categories == mapped_brand_body.categories == list(map(lambda x: x.category, brand_db.categories))
+        with self.subTest(
+                msg="response categories was equal to brand categories in db and request categories and body categories"):
+            assert list(map(lambda x: x.category,
+                            actual_payload.categories)) == brand_request.categories == mapped_brand_body.categories == list(
+                map(lambda x: x.category, brand_db.categories))
 
         # assert
-        with self.subTest(msg="response insta handle was equal to brand insta handle in db and request insta handle and body insta handle"):
+        with self.subTest(
+                msg="response insta handle was equal to brand insta handle in db and request insta handle and body insta handle"):
             assert actual_payload.insta_handle == brand_request.insta_handle == mapped_brand_body.insta_handle == brand_db.insta_handle
 
         # assert
         with self.subTest(msg="response values was equal to brand values in db and request values and body values"):
-            assert brand_request.values == mapped_brand_body.values == list(map(lambda x: x.value, actual_payload.values)) == list(map(lambda x: x.value, brand_db.values))
+            assert brand_request.values == mapped_brand_body.values == list(
+                map(lambda x: x.value, actual_payload.values)) == list(map(lambda x: x.value, brand_db.values))
 
         # assert
         with self.subTest(msg="response website was equal to brand website in db and request website and body website"):
@@ -472,7 +479,8 @@ class TestBrandController(TestCase):
             # brand response asserts
             assert brand_db.brand_description == brand_request.brand_description == mapped_brand_body.brand_description
             assert brand_db.brand_name == brand_request.brand_name == mapped_brand_body.brand_name
-            assert brand_request.categories == mapped_brand_body.categories == list(map(lambda x: x.category, brand_db.categories))
+            assert brand_request.categories == mapped_brand_body.categories == list(
+                map(lambda x: x.category, brand_db.categories))
             assert brand_db.insta_handle == brand_request.insta_handle == mapped_brand_body.insta_handle
             assert brand_request.values == mapped_brand_body.values == list(map(lambda x: x.value, brand_db.values))
             assert brand_db.website == brand_request.website == mapped_brand_body.website
@@ -608,7 +616,8 @@ class TestCampaignController(TestCase):
         # assert
         with self.subTest(msg="campaign fields match"):
             assert payload_campaign.campaign_hashtag == campaign_request.campaign_hashtag
-            assert list(map(lambda x: x.category, payload_campaign.campaign_categories)) == campaign_request.campaign_categories
+            assert list(
+                map(lambda x: x.category, payload_campaign.campaign_categories)) == campaign_request.campaign_categories
             assert list(map(lambda x: x.value, payload_campaign.campaign_values)) == campaign_request.campaign_values
             assert payload_campaign.campaign_state == campaign_request.campaign_state
             assert payload_campaign.campaign_description == campaign_request.campaign_description
@@ -668,7 +677,7 @@ class TestCampaignController(TestCase):
 
         # assert
         with self.subTest(msg="repo is called"):
-            self.__campaign_repository.load_for_auth_brand.assert_called_once_with(auth_user_id=auth_user_id)
+            self.__campaign_repository.load_for_auth_brand.assert_called_once_with(auth_user_id)
 
         # assert
         with self.subTest(msg="middleware shorts"):
@@ -801,3 +810,17 @@ class TestAudienceAgeController(TestCase):
                                                              request=AudienceAgeViewDto,
                                                              response=AudienceAgeViewDto,
                                                              model=AudienceAgeSplit)
+
+    def test_get_for_influencer(self):
+        # arrange
+        context = PinfluencerContext()
+        self.__sut._get_for_owner = MagicMock()
+
+        # act
+        self.__sut.get_for_influencer(context=context)
+
+        # assert
+        self.__sut._get_for_owner.assert_called_once_with(context=context,
+                                                          repo_method=self.__audience_age_repository
+                                                          .load_for_influencer,
+                                                          response=AudienceAgeViewDto)

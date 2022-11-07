@@ -60,19 +60,41 @@ class BaseSqlAlchemyOwnerRepository(BaseSqlAlchemyRepository):
                              parent_entity: Type[TParent],
                              parent_entity_field,
                              foreign_key_setter: Callable[[TPayload], None]) -> TPayload:
-        brand = self._data_manager \
+        owner = self._data_manager \
             .session \
             .query(parent_entity) \
             .filter(parent_entity_field == auth_user_id) \
             .first()
-        if brand:
+        if owner:
             foreign_key_setter(payload)
             self._data_manager.session.add(payload)
             return payload
         else:
-            error_message = f"brand <{auth_user_id}> not found"
+            error_message = f"owner <{auth_user_id}> not found"
             self._logger.log_error(error_message)
             raise NotFoundException(error_message)
+
+    def _load_for_auth_owner(self,
+                             auth_user_id: str,
+                             parent_entity_field,
+                             parent: Type[TParent],
+                             model: Type[TPayload],
+                             model_entity_field,
+                             parent_field_getter: Callable[[TParent], str]) -> list[TPayload]:
+        owner = self._data_manager \
+            .session \
+            .query(parent) \
+            .filter(parent_entity_field == auth_user_id) \
+            .first()
+        if owner != None:
+            children = self._data_manager \
+                .session \
+                .query(model) \
+                .filter(model_entity_field == parent_field_getter(owner)) \
+                .all()
+            return children
+        else:
+            raise NotFoundException("owner not found")
 
 
 class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):
@@ -131,6 +153,17 @@ class SqlAlchemyAudienceAgeRepository(BaseSqlAlchemyOwnerRepository):
                                                                            auth_user_id=auth_user_id))
         return payload
 
+    def load_for_influencer(self,
+                            auth_user_id: str) -> AudienceAgeSplit:
+        return \
+            AudienceAgeSplit(audience_ages=self
+                             ._load_for_auth_owner(auth_user_id=auth_user_id,
+                                                   parent_entity_field=Influencer.auth_user_id,
+                                                   model_entity_field=AudienceAge.influencer_auth_user_id,
+                                                   parent_field_getter=lambda x: x.auth_user_id,
+                                                   parent=Influencer,
+                                                   model=AudienceAge))
+
     def __set_audience_age_auth_user_id(self, audience_age: AudienceAge, auth_user_id: str):
         audience_age.influencer_auth_user_id = auth_user_id
 
@@ -180,20 +213,12 @@ class SqlAlchemyCampaignRepository(BaseSqlAlchemyOwnerRepository):
         payload.brand_auth_user_id = auth_user_id
 
     def load_for_auth_brand(self, auth_user_id: str) -> list[Campaign]:
-        brand = self._data_manager \
-            .session \
-            .query(Brand) \
-            .filter(Brand.auth_user_id == auth_user_id) \
-            .first()
-        if brand != None:
-            campaigns = self._data_manager \
-                .session \
-                .query(Campaign) \
-                .filter(Campaign.brand_auth_user_id == brand.auth_user_id) \
-                .all()
-            return campaigns
-        else:
-            raise NotFoundException("brand not found")
+        return self._load_for_auth_owner(auth_user_id=auth_user_id,
+                                         parent_entity_field=Brand.auth_user_id,
+                                         model_entity_field=Campaign.brand_auth_user_id,
+                                         parent_field_getter=lambda x: x.auth_user_id,
+                                         parent=Brand,
+                                         model=Campaign)
 
 
 class SqlAlchemyNotificationRepository(BaseSqlAlchemyRepository):

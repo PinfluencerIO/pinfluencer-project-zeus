@@ -22,6 +22,10 @@ class AudienceAgeRepository(Protocol):
                                  auth_user_id: str) -> AudienceAgeSplit:
         ...
 
+    def load_for_influencer(self,
+                            auth_user_id: str) -> AudienceAgeSplit:
+        ...
+
 
 class CampaignRepository(Protocol):
 

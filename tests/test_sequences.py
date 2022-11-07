@@ -16,7 +16,8 @@ from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdat
     GetAuthInfluencerSequenceBuilder, GetInfluencerByIdSequenceBuilder, GetAllInfluencersSequenceBuilder, \
     UpdateBrandImageSequenceBuilder, UpdateBrandSequenceBuilder, CreateBrandSequenceBuilder, \
     GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder, \
-    CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder, CreateAudienceAgeSequenceBuilder
+    CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder, CreateAudienceAgeSequenceBuilder, \
+    GetAudienceAgeSequenceBuilder
 
 
 def setup(ioc: ServiceCollection):
@@ -553,4 +554,23 @@ class TestCreateAudienceAgeSequenceBuilder(TestCase):
             self.assertEqual(sut.components, [
                 ioc.resolve(PreGenericUpdateCreateSubsequenceBuilder),
                 ioc.resolve(AudienceAgeController).create_for_influencer
+            ])
+
+
+class TestGetAudienceAgeSequenceBuilder(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(GetAudienceAgeSequenceBuilder)
+
+        # act
+        sut.build()
+
+        # assert
+        with self.subTest(msg="components match"):
+            self.maxDiff = None
+            self.assertEqual(sut.components, [
+                ioc.resolve(AudienceAgeController).get_for_influencer
             ])

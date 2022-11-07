@@ -498,6 +498,16 @@ class CreateAudienceAgeSequenceBuilder(FluentSequenceBuilder):
             ._add_command(command=self.__audience_age_controller.create_for_influencer)
 
 
+class GetAudienceAgeSequenceBuilder(FluentSequenceBuilder):
+
+    def __init__(self, audience_age_controller: AudienceAgeController):
+        super().__init__()
+        self.__audience_age_controller = audience_age_controller
+
+    def build(self):
+        self._add_command(command=self.__audience_age_controller.get_for_influencer)
+
+
 class NotImplementedSequenceBuilder(FluentSequenceBuilder):
 
     def __init__(self):

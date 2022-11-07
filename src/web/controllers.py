@@ -174,6 +174,21 @@ class BaseOwnerController(BaseController):
                 context.response.status_code = 404
                 context.short_circuit = True
 
+    def _get_for_owner(self,
+                       context: PinfluencerContext,
+                       repo_method: Callable[[str], Any],
+                       response) -> None:
+        try:
+            children = repo_method(context.auth_user_id)
+            context.response.status_code = 200
+            context.response.body = list(
+                map(lambda x: self._mapper.map(_from=x, to=response).__dict__, children))
+        except NotFoundException as e:
+            self._logger.log_exception(e)
+            context.response.status_code = 404
+            context.response.body = {}
+            context.short_circuit = True
+
 class BaseUserController(BaseController):
 
     def __init__(self, user_repository: UserRepository, resource_id: str, object_mapper: PinfluencerObjectMapper,
@@ -256,6 +271,11 @@ class AudienceAgeController(BaseOwnerController):
                                response=AudienceAgeViewDto,
                                model=AudienceAgeSplit)
 
+    def get_for_influencer(self, context: PinfluencerContext):
+        self._get_for_owner(context=context,
+                            repo_method=self._repository.load_for_influencer,
+                            response=AudienceAgeViewDto)
+
 
 class CampaignController(BaseOwnerController):
 
@@ -273,16 +293,9 @@ class CampaignController(BaseOwnerController):
                                model=Campaign)
 
     def get_for_brand(self, context: PinfluencerContext) -> None:
-        try:
-            campaigns = self._repository.load_for_auth_brand(auth_user_id=context.auth_user_id)
-            context.response.status_code = 200
-            context.response.body = list(
-                map(lambda x: self._mapper.map(_from=x, to=CampaignResponseDto).__dict__, campaigns))
-        except NotFoundException as e:
-            self._logger.log_exception(e)
-            context.response.status_code = 404
-            context.response.body = {}
-            context.short_circuit = True
+        self._get_for_owner(context=context,
+                            repo_method=self._repository.load_for_auth_brand,
+                            response=CampaignResponseDto)
 
     def update_campaign(self, context: PinfluencerContext):
         self._generic_update(context=context,
