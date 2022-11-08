@@ -120,8 +120,8 @@ notifications_table = Table('notification', Base.metadata,
 def create_mappings(logger):
     try:
         # sqlalchemy mappings
-        sqlalchemy.orm.mapper(AudienceGender, audience_age_table)
-        sqlalchemy.orm.mapper(AudienceAge, audience_gender_table)
+        sqlalchemy.orm.mapper(AudienceGender, audience_gender_table)
+        sqlalchemy.orm.mapper(AudienceAge, audience_age_table)
         sqlalchemy.orm.mapper(Value, value_table)
         sqlalchemy.orm.mapper(Category, category_table)
         sqlalchemy.orm.mapper(Brand, brand_table, properties={
