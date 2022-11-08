@@ -3,13 +3,14 @@ from typing import Any, Callable
 from jsonschema.exceptions import ValidationError
 
 from src._types import AuthUserRepository, Deserializer, BrandRepository, ImageRepository, Logger, \
-    NotificationRepository, AudienceAgeRepository
+    NotificationRepository, AudienceAgeRepository, InfluencerRepository, CampaignRepository, Repository
 from src.crosscutting import PinfluencerObjectMapper
 from src.domain.models import CategoryEnum, ValueEnum, CampaignStateEnum, User
 from src.domain.validation import BrandValidator, InfluencerValidator, CampaignValidator
 from src.exceptions import NotFoundException
-from src.web import PinfluencerContext, valid_path_resource_id
-from src.web.error_capsules import AudienceDataAlreadyExistsErrorCapsule
+from src.web import PinfluencerContext, valid_path_resource_id, ErrorCapsule
+from src.web.error_capsules import AudienceDataAlreadyExistsErrorCapsule, BrandNotFoundErrorCapsule, \
+    InfluencerNotFoundErrorCapsule
 from src.web.views import RawImageRequestDto, ImageRequestDto, CampaignResponseDto, NotificationCreateRequestDto
 
 S3_URL = "https://pinfluencer-product-images.s3.eu-west-2.amazonaws.com"
@@ -161,10 +162,19 @@ class CampaignBeforeHooks:
         self.__common_before_hooks.validate_image_path(context=context, possible_paths=["product-image"])
 
 
-class CampaignAfterHooks:
+class SaveableHook:
+    def __init__(self, repository: Repository):
+        self.__repository = repository
 
-    def __init__(self, common_after_hooks: CommonAfterHooks,
-                 mapper: PinfluencerObjectMapper):
+    def save_state(self, context: PinfluencerContext):
+        self.__repository.save()
+
+
+class CampaignAfterHooks(SaveableHook):
+
+    def __init__(self, common_after_hooks: CommonAfterHooks, mapper: PinfluencerObjectMapper,
+                 repository: CampaignRepository):
+        super().__init__(repository)
         self.__mapper = mapper
         self.__common_after_hooks = common_after_hooks
 
@@ -204,90 +214,6 @@ class CampaignAfterHooks:
             context.short_circuit = True
             context.response.body = {}
             context.response.status_code = 403
-
-
-class InfluencerBeforeHooks:
-
-    def __init__(self, influencer_validator: InfluencerValidator,
-                 common_before_hooks: CommonBeforeHooks,
-                 logger: Logger):
-        self.__logger = logger
-        self.__common_before_hooks = common_before_hooks
-        self.__influencer_validator = influencer_validator
-
-    def validate_uuid(self, context: PinfluencerContext):
-        id = valid_path_resource_id(event=context.event, resource_key="influencer_id", logger=self.__logger)
-        if not id:
-            context.short_circuit = True
-            context.response.body = {}
-            context.response.status_code = 400
-        else:
-            context.id = id
-
-    def validate_influencer(self, context: PinfluencerContext):
-        try:
-            self.__influencer_validator.validate_influencer(payload=context.body)
-        except ValidationError as e:
-            self.__logger.log_exception(e)
-            context.short_circuit = True
-            context.response.body = {}
-            context.response.status_code = 400
-
-    def upload_image(self, context: PinfluencerContext):
-        self.__common_before_hooks.upload_image(path=f"influencers/{context.auth_user_id}", context=context, map_list={
-            "image": "image"
-        })
-
-    def validate_image_key(self, context: PinfluencerContext):
-        self.__common_before_hooks.validate_image_path(context=context, possible_paths=["image"])
-
-
-class BrandBeforeHooks:
-
-    def __init__(self, brand_validator: BrandValidator,
-                 brand_repository: BrandRepository,
-                 common_before_hooks: CommonBeforeHooks,
-                 logger: Logger):
-        self.__logger = logger
-        self.__common_before_hooks = common_before_hooks
-        self.__brand_repository = brand_repository
-        self.__brand_validator = brand_validator
-
-    def validate_auth_brand(self, context: PinfluencerContext):
-        try:
-            self.__brand_repository.load_for_auth_user(auth_user_id=context.auth_user_id)
-        except NotFoundException as e:
-            self.__logger.log_exception(e)
-            context.short_circuit = True
-            context.response.status_code = 404
-            context.body = {}
-
-    def validate_uuid(self, context: PinfluencerContext):
-        id = valid_path_resource_id(event=context.event, resource_key="brand_id", logger=self.__logger)
-        if not id:
-            context.short_circuit = True
-            context.response.body = {}
-            context.response.status_code = 400
-        else:
-            context.id = id
-
-    def validate_brand(self, context: PinfluencerContext):
-        try:
-            self.__brand_validator.validate_brand(payload=context.body)
-        except ValidationError as e:
-            self.__logger.log_exception(e)
-            context.short_circuit = True
-            context.response.body = {}
-            context.response.status_code = 400
-
-    def upload_image(self, context: PinfluencerContext):
-        self.__common_before_hooks.upload_image(path=f"brands/{context.auth_user_id}", context=context, map_list={
-            "logo": "logo",
-            "header-image": "header_image"
-        })
-
-    def validate_image_key(self, context: PinfluencerContext):
-        self.__common_before_hooks.validate_image_path(context=context, possible_paths=["logo", "header-image"])
 
 
 class BrandAfterHooks:
@@ -359,6 +285,107 @@ class UserBeforeHooks:
         self.__common_before_hooks.map_enums(context=context,
                                              key="categories",
                                              enum_value=CategoryEnum)
+
+    def validate_owner(self, context: PinfluencerContext,
+                       repo_method: Callable[[str], Any],
+                       capsule: ErrorCapsule):
+        try:
+            repo_method(context.auth_user_id)
+        except NotFoundException as e:
+            self.__logger.log_exception(e)
+            context.error_capsule.append(capsule)
+
+
+class InfluencerBeforeHooks:
+
+    def __init__(self, influencer_validator: InfluencerValidator,
+                 common_before_hooks: CommonBeforeHooks,
+                 logger: Logger,
+                 influencer_repository: InfluencerRepository,
+                 user_before_hooks: UserBeforeHooks):
+        self.__logger = logger
+        self.__common_before_hooks = common_before_hooks
+        self.__influencer_validator = influencer_validator
+        self.__influencer_repository = influencer_repository
+        self.__user_before_hooks = user_before_hooks
+
+    def validate_uuid(self, context: PinfluencerContext):
+        id = valid_path_resource_id(event=context.event, resource_key="influencer_id", logger=self.__logger)
+        if not id:
+            context.short_circuit = True
+            context.response.body = {}
+            context.response.status_code = 400
+        else:
+            context.id = id
+
+    def validate_influencer(self, context: PinfluencerContext):
+        try:
+            self.__influencer_validator.validate_influencer(payload=context.body)
+        except ValidationError as e:
+            self.__logger.log_exception(e)
+            context.short_circuit = True
+            context.response.body = {}
+            context.response.status_code = 400
+
+    def upload_image(self, context: PinfluencerContext):
+        self.__common_before_hooks.upload_image(path=f"influencers/{context.auth_user_id}", context=context, map_list={
+            "image": "image"
+        })
+
+    def validate_image_key(self, context: PinfluencerContext):
+        self.__common_before_hooks.validate_image_path(context=context, possible_paths=["image"])
+
+    def validate_auth_influencer(self, context: PinfluencerContext):
+        self.__user_before_hooks.validate_owner(context=context,
+                                                repo_method=self.__influencer_repository.load_for_auth_user,
+                                                capsule=InfluencerNotFoundErrorCapsule(auth_user_id=context.auth_user_id))
+
+
+class BrandBeforeHooks:
+
+    def __init__(self, brand_validator: BrandValidator,
+                 brand_repository: BrandRepository,
+                 common_before_hooks: CommonBeforeHooks,
+                 user_before_hooks: UserBeforeHooks,
+                 logger: Logger):
+        self.__user_before_hooks = user_before_hooks
+        self.__logger = logger
+        self.__common_before_hooks = common_before_hooks
+        self.__brand_repository = brand_repository
+        self.__brand_validator = brand_validator
+
+    def validate_auth_brand(self, context: PinfluencerContext):
+        self.__user_before_hooks.validate_owner(context=context,
+                                                repo_method=self.__brand_repository.load_for_auth_user,
+                                                capsule=BrandNotFoundErrorCapsule(auth_user_id=context.auth_user_id))
+
+
+    def validate_uuid(self, context: PinfluencerContext):
+        id = valid_path_resource_id(event=context.event, resource_key="brand_id", logger=self.__logger)
+        if not id:
+            context.short_circuit = True
+            context.response.body = {}
+            context.response.status_code = 400
+        else:
+            context.id = id
+
+    def validate_brand(self, context: PinfluencerContext):
+        try:
+            self.__brand_validator.validate_brand(payload=context.body)
+        except ValidationError as e:
+            self.__logger.log_exception(e)
+            context.short_circuit = True
+            context.response.body = {}
+            context.response.status_code = 400
+
+    def upload_image(self, context: PinfluencerContext):
+        self.__common_before_hooks.upload_image(path=f"brands/{context.auth_user_id}", context=context, map_list={
+            "logo": "logo",
+            "header-image": "header_image"
+        })
+
+    def validate_image_key(self, context: PinfluencerContext):
+        self.__common_before_hooks.validate_image_path(context=context, possible_paths=["logo", "header-image"])
 
 
 class UserAfterHooks:
@@ -466,13 +493,10 @@ class NotificationBeforeHooks:
             context.id = id
 
 
-class NotificationAfterHooks:
+class NotificationAfterHooks(SaveableHook):
 
     def __init__(self, repository: NotificationRepository):
-        self.__repository = repository
-
-    def save_notification_state(self, context: PinfluencerContext):
-        self.__repository.save()
+        super().__init__(repository)
 
 
 class AudienceAgeCommonHooks:
@@ -482,6 +506,12 @@ class AudienceAgeCommonHooks:
         audience_split = repo_method(context.auth_user_id)
         if audience_split.audience_ages != []:
             context.error_capsule.append(AudienceDataAlreadyExistsErrorCapsule(auth_user_id=context.auth_user_id))
+
+
+class AudienceAgeAfterHooks(SaveableHook):
+
+    def __init__(self, repository: AudienceAgeRepository):
+        super().__init__(repository)
 
 
 class AudienceAgeBeforeHooks:

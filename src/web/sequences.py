@@ -3,7 +3,7 @@ from src.web.controllers import CampaignController, InfluencerController, BrandC
     AudienceAgeController
 from src.web.hooks import CommonBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, UserAfterHooks, UserBeforeHooks, \
     BrandBeforeHooks, BrandAfterHooks, InfluencerBeforeHooks, InfluencerAfterHooks, NotificationBeforeHooks, \
-    AudienceAgeBeforeHooks
+    AudienceAgeBeforeHooks, CommonAfterHooks, AudienceAgeAfterHooks
 
 
 class PreGenericUpdateCreateSubsequenceBuilder(FluentSequenceBuilder):
@@ -139,8 +139,10 @@ class CreateCampaignSequenceBuilder(FluentSequenceBuilder):
                  campaign_controller: CampaignController,
                  generic_update_sequence: PreGenericUpdateCreateSubsequenceBuilder,
                  post_single_campaign_sequence: PostSingleCampaignSubsequenceBuilder,
+                 common_after_hooks: CommonAfterHooks,
                  campaign_after_hooks: CampaignAfterHooks):
         super().__init__()
+        self.__common_after_hooks = common_after_hooks
         self.__campaign_after_hooks = campaign_after_hooks
         self.__post_single_campaign_sequence = post_single_campaign_sequence
         self.__generic_update_sequence = generic_update_sequence
@@ -155,6 +157,7 @@ class CreateCampaignSequenceBuilder(FluentSequenceBuilder):
             ._add_command(command=self.__campaign_before_hooks.map_campaign_state) \
             ._add_command(command=self.__campaign_before_hooks.map_campaign_categories_and_values) \
             ._add_command(command=self.__campaign_controller.create_for_brand) \
+            ._add_command(command=self.__campaign_after_hooks.save_state) \
             ._add_sequence_builder(sequence_builder=self.__post_single_campaign_sequence) \
             ._add_command(command=self.__campaign_after_hooks.tag_bucket_url_to_images)
 
@@ -183,17 +186,20 @@ class GetCampaignsForBrandSequenceBuilder(FluentSequenceBuilder):
 
     def __init__(self,
                  user_before_hooks: UserBeforeHooks,
+                 brand_before_hooks: BrandBeforeHooks,
                  campaign_controller: CampaignController,
                  post_multiple_campaign_sequence: PostMultipleCampaignSubsequenceBuilder,
                  campaign_after_hooks: CampaignAfterHooks):
         super().__init__()
+        self.__brand_before_hooks = brand_before_hooks
         self.__post_multiple_campaign_sequence = post_multiple_campaign_sequence
         self.__campaign_after_hooks = campaign_after_hooks
         self.__campaign_controller = campaign_controller
         self.__user_before_hooks = user_before_hooks
 
     def build(self):
-        self._add_command(command=self.__user_before_hooks.set_auth_user_id)\
+        self._add_command(command=self.__user_before_hooks.set_auth_user_id) \
+            ._add_command(command=self.__brand_before_hooks.validate_auth_brand) \
             ._add_command(command=self.__campaign_controller.get_for_brand) \
             ._add_sequence_builder(sequence_builder=self.__post_multiple_campaign_sequence) \
             ._add_command(command=self.__campaign_after_hooks.tag_bucket_url_to_images_collection)
@@ -490,26 +496,35 @@ class CreateAudienceAgeSequenceBuilder(FluentSequenceBuilder):
     def __init__(self,
                  audience_age_controller: AudienceAgeController,
                  pre_generic_update_create_subsequence_builder: PreGenericUpdateCreateSubsequenceBuilder,
-                 audience_age_before_hooks: AudienceAgeBeforeHooks):
+                 audience_age_before_hooks: AudienceAgeBeforeHooks,
+                 influencer_before_hooks: InfluencerBeforeHooks,
+                 audience_age_after_hooks: AudienceAgeAfterHooks):
         super().__init__()
         self.__audience_age_before_hooks = audience_age_before_hooks
         self.__pre_generic_update_create_subsequence_builder = pre_generic_update_create_subsequence_builder
         self.__audience_age_controller = audience_age_controller
+        self.__influencer_before_hooks = influencer_before_hooks
+        self.__audience_age_after_hooks = audience_age_after_hooks
 
     def build(self):
         self._add_sequence_builder(sequence_builder=self.__pre_generic_update_create_subsequence_builder) \
             ._add_command(command=self.__audience_age_before_hooks.check_audience_ages_are_empty) \
-            ._add_command(command=self.__audience_age_controller.create_for_influencer)
+            ._add_command(command=self.__influencer_before_hooks.validate_auth_influencer) \
+            ._add_command(command=self.__audience_age_controller.create_for_influencer) \
+            ._add_command(command=self.__audience_age_after_hooks.save_state)
 
 
 class GetAudienceAgeSequenceBuilder(FluentSequenceBuilder):
 
-    def __init__(self, audience_age_controller: AudienceAgeController):
+    def __init__(self, audience_age_controller: AudienceAgeController,
+                 influencer_before_hooks: InfluencerBeforeHooks):
         super().__init__()
+        self.__influencer_before_hooks = influencer_before_hooks
         self.__audience_age_controller = audience_age_controller
 
     def build(self):
-        self._add_command(command=self.__audience_age_controller.get_for_influencer)
+        self._add_command(command=self.__influencer_before_hooks.validate_auth_influencer)\
+            ._add_command(command=self.__audience_age_controller.get_for_influencer)
 
 
 class NotImplementedSequenceBuilder(FluentSequenceBuilder):

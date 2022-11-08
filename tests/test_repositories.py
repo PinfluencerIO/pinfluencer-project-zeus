@@ -359,15 +359,6 @@ class TestCampaignRepository(TestCase):
         with self.subTest(msg="campaign fields match"):
             assert campaign_payload == campaign_loaded_from_db == returned_campaign
 
-    def test_write_for_new_brand_when_brand_does_not_exist(self):
-        # arrange
-        campaign = AutoFixture().create(dto=Campaign, list_limit=5)
-
-        # act/assert
-        self.assertRaises(NotFoundException, lambda: self.__sut
-                          .write_new_for_brand(payload=campaign,
-                                               auth_user_id="1234"))
-
     def test_get_by_id(self):
         # arrange
         campaign = AutoFixture().create(dto=Campaign, list_limit=5)
@@ -393,9 +384,6 @@ class TestCampaignRepository(TestCase):
 
         # assert
         self.assertEquals(campaigns, returned_campaigns)
-
-    def test_load_for_brand_when_brand_not_found(self):
-        self.assertRaises(NotFoundException, lambda: self.__sut.load_for_auth_brand(auth_user_id="1234"))
 
 
 class TestNotificationRepository(TestCase):
@@ -443,9 +431,6 @@ class TestAudienceAgeRepository(TestCase):
             with self.subTest(msg=f"base repo was called for age ranges"
                                   f"{audience_age.min_age}-{audience_age.max_age}"):
                 self.__sut._write_new_for_owner.assert_any_call(payload=audience_age,
-                                                                auth_user_id="user1234",
-                                                                parent_entity=Influencer,
-                                                                parent_entity_field=Influencer.auth_user_id,
                                                                 foreign_key_setter=captor)
 
             with self.subTest(msg=f"field setter sets correct field for age ranges"
@@ -466,19 +451,10 @@ class TestAudienceAgeRepository(TestCase):
         returned_audience_age_split = self.__sut.load_for_influencer(auth_user_id="user1234")
 
         # assert
-        captor = Captor()
         with self.subTest(msg=f"base repo was called"):
             self.__sut._load_for_auth_owner.assert_called_once_with(auth_user_id="user1234",
-                                                                    parent_entity_field=Influencer.auth_user_id,
-                                                                    parent=Influencer,
                                                                     model=AudienceAge,
-                                                                    model_entity_field=AudienceAge.influencer_auth_user_id,
-                                                                    parent_field_getter=captor)
-
-        with self.subTest(msg=f"field getter gets correct field"):
-            owner = AutoFixture().create(dto=Influencer)
-            owner.auth_user_id = "user1234"
-            self.assertEqual(captor.arg(owner), "user1234")
+                                                                    model_entity_field=AudienceAge.influencer_auth_user_id)
 
         with self.subTest(msg="captured repo value was returned age ranges"):
             self.assertEqual(returned_audience_age_split, AudienceAgeSplit(audience_ages=audience_ages))

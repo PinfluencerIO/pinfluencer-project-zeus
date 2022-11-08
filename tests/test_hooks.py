@@ -6,13 +6,14 @@ from callee import Captor
 from ddt import data, ddt
 
 from src._types import AuthUserRepository, BrandRepository, ImageRepository, NotificationRepository, \
-    AudienceAgeRepository
+    AudienceAgeRepository, InfluencerRepository
 from src.crosscutting import JsonCamelToSnakeCaseDeserializer, AutoFixture
 from src.domain.models import User, ValueEnum, CategoryEnum, CampaignStateEnum, AudienceAgeSplit
 from src.domain.validation import InfluencerValidator, BrandValidator, CampaignValidator
 from src.exceptions import NotFoundException
 from src.web import PinfluencerContext, PinfluencerResponse
-from src.web.error_capsules import AudienceDataAlreadyExistsErrorCapsule
+from src.web.error_capsules import AudienceDataAlreadyExistsErrorCapsule, BrandNotFoundErrorCapsule, \
+    InfluencerNotFoundErrorCapsule
 from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, CommonBeforeHooks, \
     InfluencerBeforeHooks, BrandBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, CommonAfterHooks, \
     NotificationAfterHooks, NotificationBeforeHooks, AudienceAgeBeforeHooks, AudienceAgeCommonHooks
@@ -170,7 +171,9 @@ class TestBrandBeforeHooks(TestCase):
         self.__sut = BrandBeforeHooks(brand_validator=self.__brand_validator,
                                       brand_repository=self.__brand_repository,
                                       common_before_hooks=self.__common_before_hooks,
-                                      logger=Mock())
+                                      logger=Mock(),
+                                      user_before_hooks=UserBeforeHooks(common_before_hooks=self.__common_before_hooks,
+                                                                        logger=Mock()))
 
     def test_validate_uuid(self):
         # arrange
@@ -318,8 +321,12 @@ class TestBrandBeforeHooks(TestCase):
         self.__sut.validate_auth_brand(context=context)
 
         # assert
-        self.__brand_repository.load_for_auth_user.assert_called_once_with(auth_user_id="1234")
-        assert context.short_circuit == False
+        with self.subTest(msg="repo was called"):
+            self.__brand_repository.load_for_auth_user.assert_called_once_with("1234")
+
+        # assert
+        with self.subTest(msg="error capsules are empty"):
+            self.assertEqual(0, len(context.error_capsule))
 
     def test_validate_auth_brand_when_not_found(self):
         # arrange
@@ -332,9 +339,9 @@ class TestBrandBeforeHooks(TestCase):
         self.__sut.validate_auth_brand(context=context)
 
         # assert
-        assert context.short_circuit == True
-        assert context.response.body == {}
-        assert context.response.status_code == 404
+        with self.subTest(msg="error capsule is set"):
+            self.assertEqual(1, len(context.error_capsule))
+            self.assertEqual(BrandNotFoundErrorCapsule, type(context.error_capsule[0]))
 
     def test_upload_image(self):
         # arrange
@@ -370,9 +377,13 @@ class TestInfluencerBeforeHooks(TestCase):
     def setUp(self) -> None:
         self.__common_before_hooks: CommonBeforeHooks = Mock()
         self.__influencer_validator = InfluencerValidator()
+        self.__repository: InfluencerRepository = Mock()
+        self.__user_before_hooks: UserBeforeHooks = Mock()
         self.__sut = InfluencerBeforeHooks(influencer_validator=self.__influencer_validator,
                                            common_before_hooks=self.__common_before_hooks,
-                                           logger=Mock())
+                                           logger=Mock(),
+                                           influencer_repository=self.__repository,
+                                           user_before_hooks=self.__user_before_hooks)
 
     def test_validate_uuid(self):
         # arrange
@@ -456,6 +467,21 @@ class TestInfluencerBeforeHooks(TestCase):
         with self.subTest(msg="keys were validated"):
             self.__common_before_hooks.validate_image_path.assert_called_once_with(context=context,
                                                                                    possible_paths=["image"])
+
+    def test_validate_auth_influencer(self):
+        # arrage
+        context = PinfluencerContext(auth_user_id="1234")
+        self.__user_before_hooks.validate_owner = MagicMock()
+
+        # act
+        self.__sut.validate_auth_influencer(context=context)
+
+        # assert
+        captor = Captor()
+        self.__user_before_hooks.validate_owner.assert_called_once_with(context=context,
+                       repo_method=self.__repository.load_for_auth_user,
+                       capsule=captor)
+        self.assertEqual(type(captor.arg), InfluencerNotFoundErrorCapsule)
 
 
 class TestCampaignBeforeHooks(TestCase):
@@ -875,7 +901,9 @@ class TestCampaignAfterHooks(TestCase):
     def setUp(self) -> None:
         self.__common_after_hooks: CommonAfterHooks = Mock()
         self.__mapper = test_mapper()
-        self.__sut = CampaignAfterHooks(common_after_hooks=self.__common_after_hooks, mapper=self.__mapper)
+        self.__sut = CampaignAfterHooks(common_after_hooks=self.__common_after_hooks,
+                                        mapper=self.__mapper,
+                                        repository=Mock())
 
     def test_tag_bucket_url_to_images(self):
         # arrange
@@ -1120,7 +1148,7 @@ class TestNotificationAfterHooks(TestCase):
         self.__repository.save = MagicMock()
 
         # act
-        self.__sut.save_notification_state(context=PinfluencerContext())
+        self.__sut.save_state(context=PinfluencerContext())
 
         # assert
         self.__repository.save.assert_called_once()

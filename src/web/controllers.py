@@ -154,40 +154,26 @@ class BaseOwnerController(BaseController):
                           request,
                           response,
                           model) -> None:
-        with self._unit_of_work():
-            try:
-
-                returned_model = repo_method(self._mapper.map(
-                    _from=self._mapper.map_from_dict(
-                        _from=context.body,
-                        to=request),
-                    to=model),
-                    context.auth_user_id)
-                self._logger.log_trace(f"{returned_model}")
-                self._logger.log_trace(f"{returned_model.__dict__}")
-                context.response.body = self._mapper.map(_from=returned_model, to=response).__dict__
-                context.response.status_code = 201
-                return
-            except NotFoundException as e:
-                self._logger.log_exception(e)
-                context.response.body = {}
-                context.response.status_code = 404
-                context.short_circuit = True
+        returned_model = repo_method(self._mapper.map(
+            _from=self._mapper.map_from_dict(
+                _from=context.body,
+                to=request),
+            to=model),
+            context.auth_user_id)
+        self._logger.log_trace(f"{returned_model}")
+        self._logger.log_trace(f"{returned_model.__dict__}")
+        context.response.body = self._mapper.map(_from=returned_model, to=response).__dict__
+        context.response.status_code = 201
+        return
 
     def _get_for_owner(self,
                        context: PinfluencerContext,
                        repo_method: Callable[[str], Any],
                        response) -> None:
-        try:
-            children = repo_method(context.auth_user_id)
-            context.response.status_code = 200
-            context.response.body = list(
-                map(lambda x: self._mapper.map(_from=x, to=response).__dict__, children))
-        except NotFoundException as e:
-            self._logger.log_exception(e)
-            context.response.status_code = 404
-            context.response.body = {}
-            context.short_circuit = True
+        children = repo_method(context.auth_user_id)
+        context.response.status_code = 200
+        context.response.body = list(
+            map(lambda x: self._mapper.map(_from=x, to=response).__dict__, children))
 
 class BaseUserController(BaseController):
 

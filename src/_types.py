@@ -26,6 +26,9 @@ class AudienceAgeRepository(Protocol):
                             auth_user_id: str) -> AudienceAgeSplit:
         ...
 
+    def save(self):
+        ...
+
 
 class CampaignRepository(Protocol):
 

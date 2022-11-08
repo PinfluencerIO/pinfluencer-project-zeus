@@ -56,45 +56,23 @@ class BaseSqlAlchemyOwnerRepository(BaseSqlAlchemyRepository):
 
     def _write_new_for_owner(self,
                              payload: TPayload,
-                             auth_user_id: str,
-                             parent_entity: Type[TParent],
-                             parent_entity_field,
                              foreign_key_setter: Callable[[TPayload], None]) -> TPayload:
-        owner = self._data_manager \
-            .session \
-            .query(parent_entity) \
-            .filter(parent_entity_field == auth_user_id) \
-            .first()
-        if owner:
-            foreign_key_setter(payload)
-            self._data_manager.session.add(payload)
-            return payload
-        else:
-            error_message = f"owner <{auth_user_id}> not found"
-            self._logger.log_error(error_message)
-            raise NotFoundException(error_message)
+
+        foreign_key_setter(payload)
+        self._data_manager.session.add(payload)
+        return payload
 
     def _load_for_auth_owner(self,
                              auth_user_id: str,
-                             parent_entity_field,
-                             parent: Type[TParent],
                              model: Type[TPayload],
-                             model_entity_field,
-                             parent_field_getter: Callable[[TParent], str]) -> list[TPayload]:
-        owner = self._data_manager \
+                             model_entity_field) -> list[TPayload]:
+
+        children = self._data_manager \
             .session \
-            .query(parent) \
-            .filter(parent_entity_field == auth_user_id) \
-            .first()
-        if owner != None:
-            children = self._data_manager \
-                .session \
-                .query(model) \
-                .filter(model_entity_field == parent_field_getter(owner)) \
-                .all()
-            return children
-        else:
-            raise NotFoundException("owner not found")
+            .query(model) \
+            .filter(model_entity_field == auth_user_id) \
+            .all()
+        return children
 
 
 class BaseSqlAlchemyUserRepository(BaseSqlAlchemyRepository):
@@ -145,9 +123,6 @@ class SqlAlchemyAudienceAgeRepository(BaseSqlAlchemyOwnerRepository):
                                  auth_user_id: str) -> AudienceAgeSplit:
         for audience_age in payload.audience_ages:
             self._write_new_for_owner(payload=audience_age,
-                                      auth_user_id=auth_user_id,
-                                      parent_entity=Influencer,
-                                      parent_entity_field=Influencer.auth_user_id,
                                       foreign_key_setter=lambda x:
                                       self.__set_audience_age_auth_user_id(audience_age=x,
                                                                            auth_user_id=auth_user_id))
@@ -156,12 +131,8 @@ class SqlAlchemyAudienceAgeRepository(BaseSqlAlchemyOwnerRepository):
     def load_for_influencer(self,
                             auth_user_id: str) -> AudienceAgeSplit:
         return \
-            AudienceAgeSplit(audience_ages=self
-                             ._load_for_auth_owner(auth_user_id=auth_user_id,
-                                                   parent_entity_field=Influencer.auth_user_id,
+            AudienceAgeSplit(audience_ages=self._load_for_auth_owner(auth_user_id=auth_user_id,
                                                    model_entity_field=AudienceAge.influencer_auth_user_id,
-                                                   parent_field_getter=lambda x: x.auth_user_id,
-                                                   parent=Influencer,
                                                    model=AudienceAge))
 
     def __set_audience_age_auth_user_id(self, audience_age: AudienceAge, auth_user_id: str):
@@ -203,9 +174,6 @@ class SqlAlchemyCampaignRepository(BaseSqlAlchemyOwnerRepository):
                             payload: Campaign,
                             auth_user_id: str) -> Campaign:
         return self._write_new_for_owner(payload=payload,
-                                         auth_user_id=auth_user_id,
-                                         parent_entity=Brand,
-                                         parent_entity_field=Brand.auth_user_id,
                                          foreign_key_setter=lambda x: self.__brand_auth_user_id_setter(payload=x,
                                                                                                        auth_user_id=auth_user_id))
 
@@ -214,10 +182,7 @@ class SqlAlchemyCampaignRepository(BaseSqlAlchemyOwnerRepository):
 
     def load_for_auth_brand(self, auth_user_id: str) -> list[Campaign]:
         return self._load_for_auth_owner(auth_user_id=auth_user_id,
-                                         parent_entity_field=Brand.auth_user_id,
                                          model_entity_field=Campaign.brand_auth_user_id,
-                                         parent_field_getter=lambda x: x.auth_user_id,
-                                         parent=Brand,
                                          model=Campaign)
 
 

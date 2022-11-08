@@ -574,7 +574,6 @@ class TestCampaignController(TestCase):
 
     def test_write_for_campaign(self):
         # arrange
-        self.__sut._unit_of_work = MagicMock()
         campaign_from_db = AutoFixture().create(dto=Campaign, list_limit=5)
         campaign_request: CampaignRequestDto = self.__object_mapper.map(_from=campaign_from_db, to=CampaignRequestDto)
         context = PinfluencerContext(response=PinfluencerResponse(),
@@ -588,10 +587,6 @@ class TestCampaignController(TestCase):
 
         # assert
         payload_captor = Captor()
-
-        # assert
-        with self.subTest(msg="work was done in unit of work"):
-            self.__sut._unit_of_work.assert_called_once()
 
         # assert
         with self.subTest(msg="repo was called"):
@@ -629,29 +624,6 @@ class TestCampaignController(TestCase):
             assert payload_campaign.product_title == campaign_request.product_title
             assert payload_campaign.success_description == campaign_request.success_description
 
-    def test_write_for_brand_when_brand_not_found(self):
-        # arrange
-        campaign_request: CampaignRequestDto = AutoFixture().create(dto=CampaignRequestDto, list_limit=5)
-        context = PinfluencerContext(response=PinfluencerResponse(),
-                                     auth_user_id="1234",
-                                     body=campaign_request.__dict__)
-        self.__campaign_repository.write_new_for_brand = MagicMock(side_effect=NotFoundException())
-
-        # act
-        self.__sut.create_for_brand(context=context)
-
-        # assert
-        with self.subTest(msg="middleware shorts"):
-            assert context.short_circuit == True
-
-        # assert
-        with self.subTest(msg="body is empty"):
-            assert context.response.body == {}
-
-        # assert
-        with self.subTest(msg="response is not found"):
-            assert context.response.status_code == 404
-
     def test_get_by_id(self):
         # arrange
         self.__sut._get_by_id = MagicMock()
@@ -680,7 +652,7 @@ class TestCampaignController(TestCase):
             self.__campaign_repository.load_for_auth_brand.assert_called_once_with(auth_user_id)
 
         # assert
-        with self.subTest(msg="middleware shorts"):
+        with self.subTest(msg="middleware does not short"):
             assert context.short_circuit == False
 
         # assert
@@ -691,28 +663,6 @@ class TestCampaignController(TestCase):
         # assert
         with self.subTest(msg="response is success"):
             assert context.response.status_code == 200
-
-    def test_get_for_brand_when_brand_not_found(self):
-        # arrange
-        context = PinfluencerContext(response=PinfluencerResponse(),
-                                     short_circuit=False,
-                                     auth_user_id="12341")
-        self.__campaign_repository.load_for_auth_brand = MagicMock(side_effect=NotFoundException())
-
-        # act
-        self.__sut.get_for_brand(context=context)
-
-        # assert
-        with self.subTest(msg="middleware shorts"):
-            assert context.short_circuit == True
-
-        # assert
-        with self.subTest(msg="body is empty"):
-            assert context.response.body == {}
-
-        # assert
-        with self.subTest(msg="response is not found"):
-            assert context.response.status_code == 404
 
     def test_update(self):
         # arrange

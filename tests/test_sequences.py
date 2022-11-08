@@ -8,7 +8,7 @@ from src.web.controllers import CampaignController, InfluencerController, BrandC
     AudienceAgeController
 from src.web.hooks import CommonBeforeHooks, UserBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, UserAfterHooks, \
     BrandBeforeHooks, InfluencerBeforeHooks, InfluencerAfterHooks, BrandAfterHooks, NotificationBeforeHooks, \
-    AudienceAgeBeforeHooks
+    AudienceAgeBeforeHooks, AudienceAgeAfterHooks
 from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdateCreateCampaignSubsequenceBuilder, \
     PostSingleCampaignSubsequenceBuilder, PostMultipleCampaignSubsequenceBuilder, PostSingleUserSubsequenceBuilder, \
     PostMultipleUserSubsequenceBuilder, UpdateImageForCampaignSequenceBuilder, UpdateCampaignSequenceBuilder, \
@@ -201,6 +201,7 @@ class TestCreateCampaignSequenceBuilder(TestCase):
                                               ioc.resolve(CampaignBeforeHooks).map_campaign_state,
                                               ioc.resolve(CampaignBeforeHooks).map_campaign_categories_and_values,
                                               ioc.resolve(CampaignController).create_for_brand,
+                                              ioc.resolve(CampaignAfterHooks).save_state,
                                               ioc.resolve(PostSingleCampaignSubsequenceBuilder),
                                               ioc.resolve(CampaignAfterHooks).tag_bucket_url_to_images])
 
@@ -240,6 +241,7 @@ class TestGetCampaignsForBrandSequenceBuilder(TestCase):
         with self.subTest(msg="components match"):
             self.maxDiff = None
             self.assertEqual(sut.components, [ioc.resolve(UserBeforeHooks).set_auth_user_id,
+                                              ioc.resolve(BrandBeforeHooks).validate_auth_brand,
                                               ioc.resolve(CampaignController).get_for_brand,
                                               ioc.resolve(PostMultipleCampaignSubsequenceBuilder),
                                               ioc.resolve(CampaignAfterHooks).tag_bucket_url_to_images_collection])
@@ -555,7 +557,9 @@ class TestCreateAudienceAgeSequenceBuilder(TestCase):
             self.assertEqual(sut.components, [
                 ioc.resolve(PreGenericUpdateCreateSubsequenceBuilder),
                 ioc.resolve(AudienceAgeBeforeHooks).check_audience_ages_are_empty,
-                ioc.resolve(AudienceAgeController).create_for_influencer
+                ioc.resolve(InfluencerBeforeHooks).validate_auth_influencer,
+                ioc.resolve(AudienceAgeController).create_for_influencer,
+                ioc.resolve(AudienceAgeAfterHooks).save_state,
             ])
 
 
@@ -574,5 +578,6 @@ class TestGetAudienceAgeSequenceBuilder(TestCase):
         with self.subTest(msg="components match"):
             self.maxDiff = None
             self.assertEqual(sut.components, [
+                ioc.resolve(InfluencerBeforeHooks).validate_auth_influencer,
                 ioc.resolve(AudienceAgeController).get_for_influencer
             ])
