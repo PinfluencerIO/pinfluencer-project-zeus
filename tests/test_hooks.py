@@ -5,15 +5,17 @@ from uuid import uuid4
 from callee import Captor
 from ddt import data, ddt
 
-from src._types import AuthUserRepository, BrandRepository, ImageRepository, NotificationRepository
+from src._types import AuthUserRepository, BrandRepository, ImageRepository, NotificationRepository, \
+    AudienceAgeRepository
 from src.crosscutting import JsonCamelToSnakeCaseDeserializer, AutoFixture
-from src.domain.models import User, ValueEnum, CategoryEnum, CampaignStateEnum
+from src.domain.models import User, ValueEnum, CategoryEnum, CampaignStateEnum, AudienceAgeSplit
 from src.domain.validation import InfluencerValidator, BrandValidator, CampaignValidator
 from src.exceptions import NotFoundException
 from src.web import PinfluencerContext, PinfluencerResponse
+from src.web.error_capsules import AudienceDataAlreadyExistsErrorCapsule
 from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, CommonBeforeHooks, \
     InfluencerBeforeHooks, BrandBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, CommonAfterHooks, \
-    NotificationAfterHooks, NotificationBeforeHooks
+    NotificationAfterHooks, NotificationBeforeHooks, AudienceAgeBeforeHooks, AudienceAgeCommonHooks
 from src.web.views import ImageRequestDto, BrandResponseDto, BrandRequestDto, CampaignResponseDto, \
     NotificationCreateRequestDto
 from tests import get_auth_user_event, create_for_auth_user_event, get_brand_id_event, \
@@ -1186,3 +1188,38 @@ class TestNotificationBeforeHooks(TestCase):
         # assert
         with self.subTest(msg="response body is empty"):
             assert context.response.body == {}
+
+
+class TestAudienceAgeBeforeHooks(TestCase):
+
+    def setUp(self) -> None:
+        self.__repository: AudienceAgeRepository = Mock()
+        self.__sut = AudienceAgeBeforeHooks(repository=self.__repository,
+                                            audience_age_common_hooks=AudienceAgeCommonHooks())
+
+    def test_when_audience_data_is_already_populated(self):
+        # arrange
+        context = PinfluencerContext(auth_user_id="1234")
+        self.__repository.load_for_influencer = MagicMock(return_value=AutoFixture()
+                                                          .create(dto=AudienceAgeSplit,
+                                                                  list_limit=15))
+
+        # act
+        self.__sut.check_audience_ages_are_empty(context=context)
+
+        # assert
+        with self.subTest(msg="error capsule is added"):
+            self.assertEqual(1, len(context.error_capsule))
+            self.assertEqual(AudienceDataAlreadyExistsErrorCapsule, type(context.error_capsule[0]))
+
+    def test_when_audience_data_is_empty(self):
+        # arrange
+        context = PinfluencerContext(auth_user_id="1234")
+        self.__repository.load_for_influencer = MagicMock(return_value=AudienceAgeSplit(audience_ages=[]))
+
+        # act
+        self.__sut.check_audience_ages_are_empty(context=context)
+
+        # assert
+        with self.subTest(msg="error capsule list is empty"):
+            self.assertEqual(0, len(context.error_capsule))

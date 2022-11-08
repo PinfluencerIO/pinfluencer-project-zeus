@@ -1,12 +1,15 @@
+from typing import Any, Callable
+
 from jsonschema.exceptions import ValidationError
 
 from src._types import AuthUserRepository, Deserializer, BrandRepository, ImageRepository, Logger, \
-    NotificationRepository
+    NotificationRepository, AudienceAgeRepository
 from src.crosscutting import PinfluencerObjectMapper
 from src.domain.models import CategoryEnum, ValueEnum, CampaignStateEnum, User
 from src.domain.validation import BrandValidator, InfluencerValidator, CampaignValidator
 from src.exceptions import NotFoundException
 from src.web import PinfluencerContext, valid_path_resource_id
+from src.web.error_capsules import AudienceDataAlreadyExistsErrorCapsule
 from src.web.views import RawImageRequestDto, ImageRequestDto, CampaignResponseDto, NotificationCreateRequestDto
 
 S3_URL = "https://pinfluencer-product-images.s3.eu-west-2.amazonaws.com"
@@ -470,3 +473,24 @@ class NotificationAfterHooks:
 
     def save_notification_state(self, context: PinfluencerContext):
         self.__repository.save()
+
+
+class AudienceAgeCommonHooks:
+
+    def check_audience_data_is_empty(self, context: PinfluencerContext,
+                                     repo_method: Callable[[str], Any]):
+        audience_split = repo_method(context.auth_user_id)
+        if audience_split.audience_ages != []:
+            context.error_capsule.append(AudienceDataAlreadyExistsErrorCapsule(auth_user_id=context.auth_user_id))
+
+
+class AudienceAgeBeforeHooks:
+
+    def __init__(self, repository: AudienceAgeRepository,
+                 audience_age_common_hooks: AudienceAgeCommonHooks):
+        self.__audience_age_common_hooks = audience_age_common_hooks
+        self.__repository = repository
+
+    def check_audience_ages_are_empty(self, context: PinfluencerContext):
+        self.__audience_age_common_hooks.check_audience_data_is_empty(context=context,
+                                                                      repo_method=self.__repository.load_for_influencer)

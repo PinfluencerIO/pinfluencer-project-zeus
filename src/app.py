@@ -17,7 +17,7 @@ from src.web.controllers import BrandController, InfluencerController, CampaignC
     AudienceAgeController
 from src.web.hooks import HooksFacade, CommonBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, UserBeforeHooks, \
     UserAfterHooks, InfluencerBeforeHooks, BrandBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, CommonAfterHooks, \
-    NotificationAfterHooks, NotificationBeforeHooks
+    NotificationAfterHooks, NotificationBeforeHooks, AudienceAgeBeforeHooks, AudienceAgeCommonHooks
 from src.web.mapping import MappingRules
 from src.web.middleware import MiddlewarePipeline
 from src.web.routing import Dispatcher
@@ -132,6 +132,8 @@ def register_middleware(ioc):
     ioc.add_singleton(CommonAfterHooks)
     ioc.add_singleton(NotificationAfterHooks)
     ioc.add_singleton(NotificationBeforeHooks)
+    ioc.add_singleton(AudienceAgeCommonHooks)
+    ioc.add_singleton(AudienceAgeBeforeHooks)
 
 
 def register_auth(ioc):

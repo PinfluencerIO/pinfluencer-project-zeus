@@ -2,7 +2,8 @@ from src.web import FluentSequenceBuilder, PinfluencerContext
 from src.web.controllers import CampaignController, InfluencerController, BrandController, NotificationController, \
     AudienceAgeController
 from src.web.hooks import CommonBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, UserAfterHooks, UserBeforeHooks, \
-    BrandBeforeHooks, BrandAfterHooks, InfluencerBeforeHooks, InfluencerAfterHooks, NotificationBeforeHooks
+    BrandBeforeHooks, BrandAfterHooks, InfluencerBeforeHooks, InfluencerAfterHooks, NotificationBeforeHooks, \
+    AudienceAgeBeforeHooks
 
 
 class PreGenericUpdateCreateSubsequenceBuilder(FluentSequenceBuilder):
@@ -488,13 +489,16 @@ class CreateAudienceAgeSequenceBuilder(FluentSequenceBuilder):
 
     def __init__(self,
                  audience_age_controller: AudienceAgeController,
-                 pre_generic_update_create_subsequence_builder: PreGenericUpdateCreateSubsequenceBuilder):
+                 pre_generic_update_create_subsequence_builder: PreGenericUpdateCreateSubsequenceBuilder,
+                 audience_age_before_hooks: AudienceAgeBeforeHooks):
         super().__init__()
+        self.__audience_age_before_hooks = audience_age_before_hooks
         self.__pre_generic_update_create_subsequence_builder = pre_generic_update_create_subsequence_builder
         self.__audience_age_controller = audience_age_controller
 
     def build(self):
         self._add_sequence_builder(sequence_builder=self.__pre_generic_update_create_subsequence_builder) \
+            ._add_command(command=self.__audience_age_before_hooks.check_audience_ages_are_empty) \
             ._add_command(command=self.__audience_age_controller.create_for_influencer)
 
 

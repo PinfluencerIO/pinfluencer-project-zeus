@@ -7,7 +7,8 @@ from src.app import bootstrap
 from src.web.controllers import CampaignController, InfluencerController, BrandController, NotificationController, \
     AudienceAgeController
 from src.web.hooks import CommonBeforeHooks, UserBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, UserAfterHooks, \
-    BrandBeforeHooks, InfluencerBeforeHooks, InfluencerAfterHooks, BrandAfterHooks, NotificationBeforeHooks
+    BrandBeforeHooks, InfluencerBeforeHooks, InfluencerAfterHooks, BrandAfterHooks, NotificationBeforeHooks, \
+    AudienceAgeBeforeHooks
 from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdateCreateCampaignSubsequenceBuilder, \
     PostSingleCampaignSubsequenceBuilder, PostMultipleCampaignSubsequenceBuilder, PostSingleUserSubsequenceBuilder, \
     PostMultipleUserSubsequenceBuilder, UpdateImageForCampaignSequenceBuilder, UpdateCampaignSequenceBuilder, \
@@ -553,6 +554,7 @@ class TestCreateAudienceAgeSequenceBuilder(TestCase):
             self.maxDiff = None
             self.assertEqual(sut.components, [
                 ioc.resolve(PreGenericUpdateCreateSubsequenceBuilder),
+                ioc.resolve(AudienceAgeBeforeHooks).check_audience_ages_are_empty,
                 ioc.resolve(AudienceAgeController).create_for_influencer
             ])
 
