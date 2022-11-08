@@ -166,15 +166,6 @@ class BaseOwnerController(BaseController):
         context.response.status_code = 201
         return
 
-    def _get_for_owner(self,
-                       context: PinfluencerContext,
-                       repo_method: Callable[[str], Any],
-                       response) -> None:
-        children = repo_method(context.auth_user_id)
-        context.response.status_code = 200
-        context.response.body = list(
-            map(lambda x: self._mapper.map(_from=x, to=response).__dict__, children))
-
 class BaseUserController(BaseController):
 
     def __init__(self, user_repository: UserRepository, resource_id: str, object_mapper: PinfluencerObjectMapper,
@@ -258,9 +249,9 @@ class AudienceAgeController(BaseOwnerController):
                                model=AudienceAgeSplit)
 
     def get_for_influencer(self, context: PinfluencerContext):
-        self._get_for_owner(context=context,
-                            repo_method=self._repository.load_for_influencer,
-                            response=AudienceAgeViewDto)
+        children = self._repository.load_for_influencer(context.auth_user_id)
+        context.response.status_code = 200
+        context.response.body = self._mapper.map(_from=children, to=AudienceAgeViewDto).__dict__
 
 
 class CampaignController(BaseOwnerController):
@@ -279,9 +270,10 @@ class CampaignController(BaseOwnerController):
                                model=Campaign)
 
     def get_for_brand(self, context: PinfluencerContext) -> None:
-        self._get_for_owner(context=context,
-                            repo_method=self._repository.load_for_auth_brand,
-                            response=CampaignResponseDto)
+        children = self._repository.load_for_auth_brand(context.auth_user_id)
+        context.response.status_code = 200
+        context.response.body = list(
+            map(lambda x: self._mapper.map(_from=x, to=CampaignResponseDto).__dict__, children))
 
     def update_campaign(self, context: PinfluencerContext):
         self._generic_update(context=context,

@@ -763,14 +763,22 @@ class TestAudienceAgeController(TestCase):
 
     def test_get_for_influencer(self):
         # arrange
-        context = PinfluencerContext()
-        self.__sut._get_for_owner = MagicMock()
+        context = PinfluencerContext(auth_user_id="1234",
+                                     response=PinfluencerResponse())
+        audience_age_split = AutoFixture().create(dto=AudienceAgeSplit, list_limit=15)
+        self.__audience_age_repository.load_for_influencer = MagicMock(return_value=audience_age_split)
 
         # act
         self.__sut.get_for_influencer(context=context)
 
         # assert
-        self.__sut._get_for_owner.assert_called_once_with(context=context,
-                                                          repo_method=self.__audience_age_repository
-                                                          .load_for_influencer,
-                                                          response=AudienceAgeViewDto)
+        with self.subTest(msg="repo was called"):
+            self.__audience_age_repository \
+                .load_for_influencer \
+                .assert_called_once_with("1234")
+
+        with self.subTest(msg="body is set to response"):
+            self.assertEqual(context.response.body, self.__object_mapper.map(_from=audience_age_split, to=AudienceAgeViewDto).__dict__)
+
+        with self.subTest(msg="response is set to 200"):
+            self.assertEqual(context.response.status_code, 200)
