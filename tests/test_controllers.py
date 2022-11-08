@@ -1,4 +1,5 @@
 import uuid
+from typing import Optional
 from unittest import TestCase
 from unittest.mock import Mock, MagicMock
 
@@ -223,7 +224,7 @@ class TestBrandController(TestCase):
         brand_from_db = AutoFixture().create(dto=Brand,
                                              list_limit=5)
         self.__brand_repository.load_by_id = MagicMock(return_value=brand_from_db)
-        pinfluencer_response = PinfluencerResponse()
+        pinfluencer_response = PinfluencerResponse(body={})
 
         # act
         self.__sut.get_by_id(PinfluencerContext(id=brand_from_db.id,
@@ -274,7 +275,7 @@ class TestBrandController(TestCase):
                                                    ammount=5,
                                                    list_limit=5)
         self.__brand_repository.load_collection = MagicMock(return_value=brands_from_db)
-        pinfluencer_response = PinfluencerResponse()
+        pinfluencer_response = PinfluencerResponse(body=[])
 
         # act
         self.__sut.get_all(PinfluencerContext(event={},
@@ -298,7 +299,7 @@ class TestBrandController(TestCase):
         db_brand: Brand = AutoFixture().create(dto=Brand,
                                                list_limit=5)
         self.__brand_repository.load_for_auth_user = MagicMock(return_value=db_brand)
-        response = PinfluencerResponse()
+        response = PinfluencerResponse(body={})
 
         # act
         self.__sut.get(PinfluencerContext(auth_user_id=db_brand.auth_user_id,
@@ -641,7 +642,7 @@ class TestCampaignController(TestCase):
         campaigns = AutoFixture().create_many(dto=Campaign, list_limit=5, ammount=10)
         auth_user_id = "1234"
         context = PinfluencerContext(auth_user_id=auth_user_id,
-                                     response=PinfluencerResponse(),
+                                     response=PinfluencerResponse(body=[]),
                                      short_circuit=False)
         self.__campaign_repository.load_for_auth_brand = MagicMock(return_value=campaigns)
 
@@ -801,3 +802,106 @@ class TestAudienceAgeController(TestCase):
         with self.subTest(msg="no error capsule is set"):
             self.assertEqual(len(context.error_capsule), 1)
             self.assertEqual(type(context.error_capsule[0]), AudienceDataNotFoundErrorCapsule)
+
+    def test_update_for_influencer(self):
+        # arrange
+        audience_ages = self.__object_mapper.map(_from=AutoFixture().create(dto=AudienceAgeViewDto),
+                                                 to=AudienceAgeSplit)
+        self.__audience_age_repository.load_for_influencer = MagicMock(return_value=audience_ages)
+        updated_ages = AutoFixture().create(dto=AudienceAgeViewDto)
+        context = PinfluencerContext(auth_user_id="1234",
+                                     body=updated_ages.__dict__,
+                                     response=PinfluencerResponse(body={}))
+
+        # act
+        self.__sut.update_for_influencer(context=context)
+
+        # assert
+        with self.subTest(msg="repo was called"):
+            self.__audience_age_repository.load_for_influencer.assert_called_once_with("1234")
+
+        # assert
+        with self.subTest(msg="returned influencer was influencer from request"):
+            self.assertEqual(updated_ages.__dict__, context.response.body)
+
+        # assert
+        with self.subTest(msg="error capsules were empty"):
+            self.assertEqual(0, len(context.error_capsule))
+
+        # assert
+        with self.subTest(msg="status code is 200"):
+            self.assertEqual(200, context.response.status_code)
+
+        # assert
+        with self.subTest(msg="repo model was updated accordingly"):
+            self.assertEqual(updated_ages.audience_age_13_to_17_split, self.__get_split(audience_ages, 13, 17))
+            self.assertEqual(updated_ages.audience_age_18_to_24_split, self.__get_split(audience_ages, 18, 24))
+            self.assertEqual(updated_ages.audience_age_25_to_34_split, self.__get_split(audience_ages, 25, 34))
+            self.assertEqual(updated_ages.audience_age_35_to_44_split, self.__get_split(audience_ages, 35, 44))
+            self.assertEqual(updated_ages.audience_age_45_to_54_split, self.__get_split(audience_ages, 45, 54))
+            self.assertEqual(updated_ages.audience_age_55_to_64_split, self.__get_split(audience_ages, 55, 64))
+            self.assertEqual(updated_ages.audience_age_65_plus_split, self.__get_split(audience_ages, 65, None))
+
+    def test_update_partial_for_influencer(self):
+        # arrange
+        audience_ages = self.__object_mapper.map(_from=AutoFixture().create(dto=AudienceAgeViewDto),
+                                                 to=AudienceAgeSplit)
+        self.__audience_age_repository.load_for_influencer = MagicMock(return_value=audience_ages)
+        updated_ages = AutoFixture().create(dto=AudienceAgeViewDto)
+        updated_ages.audience_age_18_to_24_split = None
+        updated_ages.audience_age_35_to_44_split = None
+        updated_ages.audience_age_65_plus_split = None
+        context = PinfluencerContext(auth_user_id="1234",
+                                     body=updated_ages.__dict__,
+                                     response=PinfluencerResponse(body={}))
+
+        # act
+        self.__sut.update_for_influencer(context=context)
+
+        # assert
+        with self.subTest(msg="returned influencer was influencer from request"):
+            audience_age_view = self.__object_mapper.map_from_dict(_from=context.response.body, to=AudienceAgeViewDto)
+            self.assertEqual(updated_ages.audience_age_13_to_17_split, audience_age_view.audience_age_13_to_17_split)
+            self.assertEqual(self.__get_split(audience_ages, 18, 24), audience_age_view.audience_age_18_to_24_split)
+            self.assertNotEqual(updated_ages.audience_age_18_to_24_split, audience_age_view.audience_age_18_to_24_split)
+            self.assertEqual(updated_ages.audience_age_25_to_34_split, audience_age_view.audience_age_25_to_34_split)
+            self.assertEqual(self.__get_split(audience_ages, 35, 44), audience_age_view.audience_age_35_to_44_split)
+            self.assertNotEqual(updated_ages.audience_age_35_to_44_split, audience_age_view.audience_age_35_to_44_split)
+            self.assertEqual(updated_ages.audience_age_45_to_54_split, audience_age_view.audience_age_45_to_54_split)
+            self.assertEqual(updated_ages.audience_age_55_to_64_split, audience_age_view.audience_age_55_to_64_split)
+            self.assertNotEqual(updated_ages.audience_age_65_plus_split, audience_age_view.audience_age_65_plus_split)
+            self.assertEqual(self.__get_split(audience_ages, 65, None), audience_age_view.audience_age_65_plus_split)
+
+        # assert
+        with self.subTest(msg="repo model was updated accordingly"):
+            self.assertEqual(updated_ages.audience_age_13_to_17_split, self.__get_split(audience_ages, 13, 17))
+            self.assertNotEqual(updated_ages.audience_age_18_to_24_split, self.__get_split(audience_ages, 18, 24))
+            self.assertEqual(updated_ages.audience_age_25_to_34_split, self.__get_split(audience_ages, 25, 34))
+            self.assertNotEqual(updated_ages.audience_age_35_to_44_split, self.__get_split(audience_ages, 35, 44))
+            self.assertEqual(updated_ages.audience_age_45_to_54_split, self.__get_split(audience_ages, 45, 54))
+            self.assertEqual(updated_ages.audience_age_55_to_64_split, self.__get_split(audience_ages, 55, 64))
+            self.assertNotEqual(updated_ages.audience_age_65_plus_split, self.__get_split(audience_ages, 65, None))
+
+    def test_update_for_influencer_when_not_found(self):
+        # arrange
+        self.__audience_age_repository.load_for_influencer = MagicMock(return_value=AudienceAgeSplit(audience_ages=[]))
+        context = PinfluencerContext(auth_user_id="1234",
+                                     body=AutoFixture().create(dto=AudienceAgeViewDto).__dict__,
+                                     response=PinfluencerResponse(body={}))
+
+        # act
+        self.__sut.update_for_influencer(context=context)
+
+        # assert
+        with self.subTest(msg="error capsule was populated"):
+            self.assertEqual(1, len(context.error_capsule))
+            self.assertEqual(AudienceDataNotFoundErrorCapsule, type(context.error_capsule[0]))
+
+    def __get_split(self,
+                  audience_ages_split: AudienceAgeSplit,
+                  min: int,
+                  max: Optional[int]):
+        return list(filter(lambda x:
+               x.max_age == max and
+               x.min_age == min,
+               audience_ages_split.audience_ages))[0].split

@@ -31,18 +31,21 @@ class BaseController:
     def _get_all(self, context: PinfluencerContext, response) -> None:
         users = self._repository.load_collection()
         context.response.status_code = 200
-        context.response.body = list(map(lambda x: self._mapper.map(_from=x, to=response).__dict__, users))
+        context.response.body = (list(map(lambda x: self._mapper.map(_from=x, to=response).__dict__, users)))
 
     def get_all(self, context: PinfluencerContext) -> None:
         self._get_all(context=context, response=self._response)
 
-    def _generic_update_image_field(self, context: PinfluencerContext, response, repo_func: Callable[[], Model]):
+    def _generic_update_image_field(self,
+                                    context: PinfluencerContext,
+                                    response,
+                                    repo_func: Callable[[], Model]):
         request: ImageRequestDto = self._mapper.map_from_dict(_from=context.body, to=ImageRequestDto)
         with self._unit_of_work():
             try:
                 brand = repo_func()
                 setattr(brand, request.image_field, request.image_path)
-                context.response.body = self._mapper.map(_from=brand, to=response).__dict__
+                context.response.body.update(self._mapper.map(_from=brand, to=response).__dict__)
             except NotFoundException as e:
                 self._logger.log_error(str(e))
                 context.short_circuit = True
@@ -63,7 +66,7 @@ class BaseController:
         try:
             user = self._repository.load_by_id(id_=context.id)
             context.response.status_code = 200
-            context.response.body = self._mapper.map(_from=user, to=response).__dict__
+            context.response.body.update(self._mapper.map(_from=user, to=response).__dict__)
             return
         except NotFoundException as e:
             self._logger.log_exception(e)
@@ -87,7 +90,10 @@ class BaseController:
                                  auth_user_id=context.auth_user_id)
                              )
 
-    def _generic_update(self, context: PinfluencerContext, request, response, repo_func: Callable[[], Model]):
+    def _generic_update(self, context: PinfluencerContext,
+                        request,
+                        response,
+                        repo_func: Callable[[], Model]):
         payload_dict = context.body
         with self._unit_of_work():
             try:
@@ -103,7 +109,7 @@ class BaseController:
                 context.response.status_code = 404
                 return
             mapped_response = self._mapper.map(_from=entity_in_db, to=response)
-            context.response.body = mapped_response.__dict__
+            context.response.body.update(mapped_response.__dict__)
             context.response.status_code = 200
 
     def _create(self,
@@ -130,7 +136,7 @@ class BaseController:
             self._logger.log_trace(f"mapping {model.__name__} to {response.__name__}")
             response = self._mapper.map(_from=entity_to_return, to=response)
             self._logger.log_trace(f"mapped response: {response}")
-            context.response.body = response.__dict__
+            context.response.body.update(response.__dict__)
             context.response.status_code = 201
 
 
@@ -150,6 +156,22 @@ class BaseAudienceController(BaseController):
                          request)
         ...
 
+    def _update_for_influencer(self,
+                               context: PinfluencerContext,
+                               repo_call: Callable[[str], Any],
+                               type: str,
+                               view: Any,
+                               audience_splits_getter: Callable[[Any], list[Any]]):
+        audience_splits = repo_call(context.auth_user_id)
+        if audience_splits_getter(audience_splits) == []:
+            context.error_capsule.append(AudienceDataNotFoundErrorCapsule(type=type,
+                                                                          auth_user_id=context.auth_user_id))
+        else:
+            self._flexi_updater.update(request=self._mapper.map_from_dict(_from=context.body,
+                                                                          to=AudienceAgeViewDto),
+                                       object_to_update=audience_splits)
+            context.response.body.update(self._mapper.map(_from=audience_splits, to=view).__dict__)
+
     def _get_for_influencer(self,
                             context: PinfluencerContext,
                             repo_call: Callable[[str], Any],
@@ -159,7 +181,7 @@ class BaseAudienceController(BaseController):
         children = repo_call(context.auth_user_id)
         if not_empty_check(children):
             context.response.status_code = 200
-            context.response.body = self._mapper.map(_from=children, to=response).__dict__
+            context.response.body.update(self._mapper.map(_from=children, to=response).__dict__)
             return
         context.error_capsule.append(error_capsule)
 
@@ -194,7 +216,7 @@ class BaseOwnerController(BaseController):
             context.auth_user_id)
         self._logger.log_trace(f"{returned_model}")
         self._logger.log_trace(f"{returned_model.__dict__}")
-        context.response.body = self._mapper.map(_from=returned_model, to=response).__dict__
+        context.response.body.update(self._mapper.map(_from=returned_model, to=response).__dict__)
         context.response.status_code = 201
         return
 
@@ -217,7 +239,7 @@ class BaseUserController(BaseController):
             try:
                 brand = self._repository.load_for_auth_user(auth_user_id=auth_user_id)
                 context.response.status_code = 200
-                context.response.body = self._mapper.map(_from=brand, to=response).__dict__
+                context.response.body.update(self._mapper.map(_from=brand, to=response).__dict__)
                 return
             except NotFoundException as e:
                 self._logger.log_exception(e)
@@ -288,6 +310,13 @@ class AudienceAgeController(BaseAudienceController, BaseOwnerController):
                                  response=AudienceAgeViewDto,
                                  not_empty_check=lambda x: x.audience_ages != [])
 
+    def update_for_influencer(self, context: PinfluencerContext):
+        self._update_for_influencer(context=context,
+                                    repo_call=self._repository.load_for_influencer,
+                                    type="age",
+                                    view=AudienceAgeViewDto,
+                                    audience_splits_getter=lambda x: x.audience_ages)
+
 
 class CampaignController(BaseOwnerController):
 
@@ -307,8 +336,8 @@ class CampaignController(BaseOwnerController):
     def get_for_brand(self, context: PinfluencerContext) -> None:
         children = self._repository.load_for_auth_brand(context.auth_user_id)
         context.response.status_code = 200
-        context.response.body = list(
-            map(lambda x: self._mapper.map(_from=x, to=CampaignResponseDto).__dict__, children))
+        context.response.body = (list(
+            map(lambda x: self._mapper.map(_from=x, to=CampaignResponseDto).__dict__, children)))
 
     def update_campaign(self, context: PinfluencerContext):
         self._generic_update(context=context,

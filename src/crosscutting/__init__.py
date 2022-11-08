@@ -20,6 +20,7 @@ class Rule:
     to: type = None
     _from: type = None
     field: str = None
+    update: bool = False # TODO: workaround for flexi-updates
     expression: typing.Callable[[typing.Any, typing.Any], None] = None
 
 
@@ -45,11 +46,13 @@ class PinfluencerObjectMapper:
                  _type_from: type,
                  _type_to: type,
                  field: str,
-                 expression: typing.Callable[[typing.Any, typing.Any], None]):
+                 expression: typing.Callable[[typing.Any, typing.Any], None],
+                 update=False):
         self.__maps.append(Rule(to=_type_to,
                                 _from=_type_from,
                                 field=field,
-                                expression=expression))
+                                expression=expression,
+                                update=update))
 
     def add_rules(self,
                   _type_from: list[type],
@@ -190,8 +193,12 @@ class FlexiUpdater:
                                                 x._from == type(request) and
                                                 x.to == type(object_to_update) and
                                                 x.field == key, self.__mapper.rules))[0]
-                    value_in_request = getattr(request, key)
-                    if value_in_request is not None:
+
+                    try:
+                        value_in_request = getattr(request, key)
+                        if value_in_request is not None:
+                            matching_rule.expression(object_to_update, request)
+                    except AttributeError:
                         matching_rule.expression(object_to_update, request)
                 except IndexError:
                     value_in_request = getattr(request, key)

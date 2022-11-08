@@ -137,6 +137,11 @@ def create_audience_age_splits():
     return generic_handler(routeKey="POST /influencers/me/audience-age-splits", params={})
 
 
+@app.route("/influencers/me/audience-age-splits", methods=['PATCH'])
+def create_audience_age_splits():
+    return generic_handler(routeKey="PATCH /influencers/me/audience-age-splits", params={})
+
+
 def generic_handler(routeKey: str, params: dict):
     body_string = None
     try:

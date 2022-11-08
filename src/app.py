@@ -31,7 +31,7 @@ from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdat
     GetAllInfluencersSequenceBuilder, UpdateBrandImageSequenceBuilder, UpdateBrandSequenceBuilder, \
     CreateBrandSequenceBuilder, GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder, \
     CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder, CreateAudienceAgeSequenceBuilder, \
-    GetAudienceAgeSequenceBuilder
+    GetAudienceAgeSequenceBuilder, UpdateAudienceAgeSequenceBuilder
 
 
 def lambda_handler(event, context):
@@ -207,3 +207,4 @@ def register_sequences(ioc: ServiceCollection):
     ioc.add_singleton(GetNotificationByIdSequenceBuilder)
     ioc.add_singleton(CreateAudienceAgeSequenceBuilder)
     ioc.add_singleton(GetAudienceAgeSequenceBuilder)
+    ioc.add_singleton(UpdateAudienceAgeSequenceBuilder)
