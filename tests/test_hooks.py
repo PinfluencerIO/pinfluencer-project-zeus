@@ -1228,9 +1228,11 @@ class TestAudienceAgeBeforeHooks(TestCase):
     def test_when_audience_data_is_already_populated(self):
         # arrange
         context = PinfluencerContext(auth_user_id="1234")
-        self.__repository.load_for_influencer = MagicMock(return_value=AutoFixture()
-                                                          .create(dto=AudienceAgeSplit,
-                                                                  list_limit=15))
+        ages = []
+        while(ages == []):
+            ages = self.__repository.load_for_influencer = MagicMock(return_value=AutoFixture()
+                                                                     .create(dto=AudienceAgeSplit,
+                                                                             list_limit=15))
 
         # act
         self.__sut.check_audience_ages_are_empty(context=context)

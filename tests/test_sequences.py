@@ -578,6 +578,7 @@ class TestGetAudienceAgeSequenceBuilder(TestCase):
         with self.subTest(msg="components match"):
             self.maxDiff = None
             self.assertEqual(sut.components, [
+                ioc.resolve(UserBeforeHooks).set_auth_user_id,
                 ioc.resolve(InfluencerBeforeHooks).validate_auth_influencer,
                 ioc.resolve(AudienceAgeController).get_for_influencer
             ])

@@ -516,14 +516,18 @@ class CreateAudienceAgeSequenceBuilder(FluentSequenceBuilder):
 
 class GetAudienceAgeSequenceBuilder(FluentSequenceBuilder):
 
-    def __init__(self, audience_age_controller: AudienceAgeController,
+    def __init__(self,
+                 user_before_hooks: UserBeforeHooks,
+                 audience_age_controller: AudienceAgeController,
                  influencer_before_hooks: InfluencerBeforeHooks):
         super().__init__()
+        self.__user_before_hooks = user_before_hooks
         self.__influencer_before_hooks = influencer_before_hooks
         self.__audience_age_controller = audience_age_controller
 
     def build(self):
-        self._add_command(command=self.__influencer_before_hooks.validate_auth_influencer)\
+        self._add_command(command=self.__user_before_hooks.set_auth_user_id) \
+            ._add_command(command=self.__influencer_before_hooks.validate_auth_influencer)\
             ._add_command(command=self.__audience_age_controller.get_for_influencer)
 
 
