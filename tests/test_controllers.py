@@ -791,7 +791,7 @@ class TestAudienceAgeController(TestCase):
         # arrange
         context = PinfluencerContext(auth_user_id="1234",
                                      response=PinfluencerResponse())
-        audience_age_split = []
+        audience_age_split = AudienceAgeSplit(audience_ages=[])
         self.__audience_age_repository.load_for_influencer = MagicMock(return_value=audience_age_split)
 
         # act

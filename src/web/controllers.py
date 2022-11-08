@@ -154,9 +154,10 @@ class BaseAudienceController(BaseController):
                             context: PinfluencerContext,
                             repo_call: Callable[[str], Any],
                             error_capsule: ErrorCapsule,
-                            response):
+                            response,
+                            not_empty_check: Callable[[Any], bool], ):
         children = repo_call(context.auth_user_id)
-        if children != []:
+        if not_empty_check(children):
             context.response.status_code = 200
             context.response.body = self._mapper.map(_from=children, to=response).__dict__
             return
@@ -284,7 +285,8 @@ class AudienceAgeController(BaseAudienceController, BaseOwnerController):
                                  repo_call=self._repository.load_for_influencer,
                                  error_capsule=AudienceDataNotFoundErrorCapsule(type="age",
                                                                                 auth_user_id=context.auth_user_id),
-                                 response=AudienceAgeViewDto)
+                                 response=AudienceAgeViewDto,
+                                 not_empty_check=lambda x: x.audience_ages != [])
 
 
 class CampaignController(BaseOwnerController):
