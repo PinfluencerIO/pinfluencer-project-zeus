@@ -14,6 +14,7 @@ from src.exceptions import AlreadyExistsException, NotFoundException
 from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.controllers import BrandController, InfluencerController, CampaignController, NotificationController, \
     AudienceAgeController
+from src.web.error_capsules import AudienceDataNotFoundErrorCapsule
 from src.web.views import BrandRequestDto, BrandResponseDto, ImageRequestDto, InfluencerRequestDto, \
     InfluencerResponseDto, CampaignRequestDto, CampaignResponseDto, NotificationCreateRequestDto, \
     NotificationResponseDto, AudienceAgeViewDto
@@ -782,3 +783,21 @@ class TestAudienceAgeController(TestCase):
 
         with self.subTest(msg="response is set to 200"):
             self.assertEqual(context.response.status_code, 200)
+
+        with self.subTest(msg="no error capsule is set"):
+            self.assertEqual(len(context.error_capsule), 0)
+
+    def test_get_for_influencer_when_not_found(self):
+        # arrange
+        context = PinfluencerContext(auth_user_id="1234",
+                                     response=PinfluencerResponse())
+        audience_age_split = []
+        self.__audience_age_repository.load_for_influencer = MagicMock(return_value=audience_age_split)
+
+        # act
+        self.__sut.get_for_influencer(context=context)
+
+        # assert
+        with self.subTest(msg="no error capsule is set"):
+            self.assertEqual(len(context.error_capsule), 1)
+            self.assertEqual(type(context.error_capsule[0]), AudienceDataNotFoundErrorCapsule)

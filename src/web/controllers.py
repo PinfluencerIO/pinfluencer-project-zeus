@@ -6,7 +6,8 @@ from src._types import BrandRepository, UserRepository, InfluencerRepository, Re
 from src.crosscutting import PinfluencerObjectMapper, FlexiUpdater
 from src.domain.models import Brand, Influencer, Campaign, Notification, AudienceAgeSplit
 from src.exceptions import AlreadyExistsException, NotFoundException
-from src.web import BRAND_ID_PATH_KEY, INFLUENCER_ID_PATH_KEY, PinfluencerContext
+from src.web import BRAND_ID_PATH_KEY, INFLUENCER_ID_PATH_KEY, PinfluencerContext, ErrorCapsule
+from src.web.error_capsules import AudienceDataNotFoundErrorCapsule
 from src.web.views import BrandRequestDto, BrandResponseDto, ImageRequestDto, InfluencerRequestDto, \
     InfluencerResponseDto, CampaignRequestDto, CampaignResponseDto, NotificationCreateRequestDto, \
     NotificationResponseDto, AudienceAgeViewDto
@@ -133,6 +134,36 @@ class BaseController:
             context.response.status_code = 201
 
 
+class BaseAudienceController(BaseController):
+
+    def __init__(self, repository: Repository,
+                 mapper: PinfluencerObjectMapper,
+                 flexi_updater: FlexiUpdater,
+                 logger: Logger,
+                 response,
+                 request):
+        super().__init__(repository,
+                         mapper,
+                         flexi_updater,
+                         logger,
+                         response,
+                         request)
+        ...
+
+    def _get_for_influencer(self,
+                            context: PinfluencerContext,
+                            repo_call: Callable[[str], Any],
+                            error_capsule: ErrorCapsule,
+                            response):
+        children = repo_call(context.auth_user_id)
+        if children != []:
+            context.response.status_code = 200
+            context.response.body = self._mapper.map(_from=children, to=response).__dict__
+            return
+        context.error_capsule.append(error_capsule)
+
+
+
 class BaseOwnerController(BaseController):
 
     def __init__(self, user_repository: Repository,
@@ -228,7 +259,7 @@ class InfluencerController(BaseUserController):
                          model=Influencer)
 
 
-class AudienceAgeController(BaseOwnerController):
+class AudienceAgeController(BaseAudienceController, BaseOwnerController):
 
     def __init__(self, repository: AudienceAgeRepository,
                  mapper: PinfluencerObjectMapper,
@@ -249,9 +280,11 @@ class AudienceAgeController(BaseOwnerController):
                                model=AudienceAgeSplit)
 
     def get_for_influencer(self, context: PinfluencerContext):
-        children = self._repository.load_for_influencer(context.auth_user_id)
-        context.response.status_code = 200
-        context.response.body = self._mapper.map(_from=children, to=AudienceAgeViewDto).__dict__
+        self._get_for_influencer(context=context,
+                                 repo_call=self._repository.load_for_influencer,
+                                 error_capsule=AudienceDataNotFoundErrorCapsule(type="age",
+                                                                                auth_user_id=context.auth_user_id),
+                                 response=AudienceAgeViewDto)
 
 
 class CampaignController(BaseOwnerController):
