@@ -136,9 +136,12 @@ def get_notification_by_id(id):
 def create_audience_age_splits():
     return generic_handler(routeKey="POST /influencers/me/audience-age-splits", params={})
 
+@app.route("/influencers/me/audience-age-splits", methods=['GET'])
+def get_audience_age_splits():
+    return generic_handler(routeKey="GET /influencers/me/audience-age-splits", params={})
 
 @app.route("/influencers/me/audience-age-splits", methods=['PATCH'])
-def create_audience_age_splits():
+def update_audience_age_splits():
     return generic_handler(routeKey="PATCH /influencers/me/audience-age-splits", params={})
 
 
