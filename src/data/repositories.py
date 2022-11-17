@@ -10,7 +10,8 @@ from filetype import filetype
 
 from src._types import DataManager, ImageRepository, Model, UserModel, Logger
 from src.data.entities import create_mappings
-from src.domain.models import Brand, Influencer, Campaign, User, Notification, AudienceAgeSplit, AudienceAge
+from src.domain.models import Brand, Influencer, Campaign, User, Notification, AudienceAgeSplit, AudienceAge, \
+    AudienceGenderSplit, AudienceGender
 from src.exceptions import AlreadyExistsException, ImageException, NotFoundException
 
 TPayload = TypeVar("TPayload")
@@ -57,7 +58,6 @@ class BaseSqlAlchemyOwnerRepository(BaseSqlAlchemyRepository):
     def _write_new_for_owner(self,
                              payload: TPayload,
                              foreign_key_setter: Callable[[TPayload], None]) -> TPayload:
-
         foreign_key_setter(payload)
         self._data_manager.session.add(payload)
         return payload
@@ -66,7 +66,6 @@ class BaseSqlAlchemyOwnerRepository(BaseSqlAlchemyRepository):
                              auth_user_id: str,
                              model: Type[TPayload],
                              model_entity_field) -> list[TPayload]:
-
         children = self._data_manager \
             .session \
             .query(model) \
@@ -132,10 +131,39 @@ class SqlAlchemyAudienceAgeRepository(BaseSqlAlchemyOwnerRepository):
                             auth_user_id: str) -> AudienceAgeSplit:
         return \
             AudienceAgeSplit(audience_ages=self._load_for_auth_owner(auth_user_id=auth_user_id,
-                                                   model_entity_field=AudienceAge.influencer_auth_user_id,
-                                                   model=AudienceAge))
+                                                                     model_entity_field=AudienceAge.influencer_auth_user_id,
+                                                                     model=AudienceAge))
 
     def __set_audience_age_auth_user_id(self, audience_age: AudienceAge, auth_user_id: str):
+        audience_age.influencer_auth_user_id = auth_user_id
+
+
+class SqlAlchemyAudienceGenderRepository(BaseSqlAlchemyOwnerRepository):
+
+    def __init__(self, data_manager: DataManager,
+                 logger: Logger):
+        super().__init__(data_manager,
+                         Campaign,
+                         logger=logger)
+
+    def write_new_for_influencer(self,
+                                 payload: AudienceGenderSplit,
+                                 auth_user_id: str) -> AudienceGenderSplit:
+        for audience_age in payload.audience_genders:
+            self._write_new_for_owner(payload=audience_age,
+                                      foreign_key_setter=lambda x:
+                                      self.__set_audience_gender_auth_user_id(audience_age=x,
+                                                                              auth_user_id=auth_user_id))
+        return payload
+
+    def load_for_influencer(self,
+                            auth_user_id: str) -> AudienceGenderSplit:
+        return \
+            AudienceGenderSplit(audience_genders=self._load_for_auth_owner(auth_user_id=auth_user_id,
+                                                                           model_entity_field=AudienceGender.influencer_auth_user_id,
+                                                                           model=AudienceGender))
+
+    def __set_audience_gender_auth_user_id(self, audience_age: AudienceGender, auth_user_id: str):
         audience_age.influencer_auth_user_id = auth_user_id
 
 

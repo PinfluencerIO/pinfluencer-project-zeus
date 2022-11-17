@@ -6,9 +6,9 @@ from callee import Captor
 from ddt import data, ddt
 
 from src._types import AuthUserRepository, BrandRepository, ImageRepository, NotificationRepository, \
-    AudienceAgeRepository, InfluencerRepository
+    AudienceAgeRepository, InfluencerRepository, AudienceGenderRepository
 from src.crosscutting import JsonCamelToSnakeCaseDeserializer, AutoFixture
-from src.domain.models import User, ValueEnum, CategoryEnum, CampaignStateEnum, AudienceAgeSplit
+from src.domain.models import User, ValueEnum, CategoryEnum, CampaignStateEnum, AudienceAgeSplit, AudienceGenderSplit
 from src.domain.validation import InfluencerValidator, BrandValidator, CampaignValidator
 from src.exceptions import NotFoundException
 from src.web import PinfluencerContext, PinfluencerResponse
@@ -16,7 +16,8 @@ from src.web.error_capsules import AudienceDataAlreadyExistsErrorCapsule, BrandN
     InfluencerNotFoundErrorCapsule
 from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, CommonBeforeHooks, \
     InfluencerBeforeHooks, BrandBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, CommonAfterHooks, \
-    NotificationAfterHooks, NotificationBeforeHooks, AudienceAgeBeforeHooks, AudienceAgeCommonHooks
+    NotificationAfterHooks, NotificationBeforeHooks, AudienceAgeBeforeHooks, AudienceCommonHooks, \
+    AudienceGenderBeforeHooks
 from src.web.views import ImageRequestDto, BrandResponseDto, BrandRequestDto, CampaignResponseDto, \
     NotificationCreateRequestDto
 from tests import get_auth_user_event, create_for_auth_user_event, get_brand_id_event, \
@@ -289,7 +290,6 @@ class TestBrandBeforeHooks(TestCase):
         # assert
         assert not context.short_circuit
 
-
     @data("www.google.com",
           "beans",
           "http://http://www.www.google.com.com",
@@ -479,8 +479,8 @@ class TestInfluencerBeforeHooks(TestCase):
         # assert
         captor = Captor()
         self.__user_before_hooks.validate_owner.assert_called_once_with(context=context,
-                       repo_method=self.__repository.load_for_auth_user,
-                       capsule=captor)
+                                                                        repo_method=self.__repository.load_for_auth_user,
+                                                                        capsule=captor)
         self.assertEqual(type(captor.arg), InfluencerNotFoundErrorCapsule)
 
 
@@ -1218,19 +1218,46 @@ class TestNotificationBeforeHooks(TestCase):
             assert context.response.body == {}
 
 
+class TestAudienceGenderBeforeHooks(TestCase):
+
+    def setUp(self) -> None:
+        self.__repository: AudienceGenderRepository = Mock()
+        self.__audience_common_hooks: AudienceCommonHooks = Mock()
+        self.__sut = AudienceGenderBeforeHooks(repository=self.__repository,
+                                               audience_common_hooks=self.__audience_common_hooks)
+
+    def test_check_audience_genders_are_empty(self):
+        # arrange
+        context = PinfluencerContext()
+        self.__audience_common_hooks.check_audience_data_is_empty = MagicMock()
+
+        # act
+        self.__sut.check_audience_genders_are_empty(context=context)
+
+        # assert
+        captor = Captor()
+        with self.subTest(msg="common hooks was called"):
+            self.__audience_common_hooks \
+                .check_audience_data_is_empty \
+                .assert_called_once_with(context=context,
+                                         repo_method=self.__repository.load_for_influencer,
+                                         audience_splits_getter=captor)
+
+        with self.subTest(msg="audience genders getter returns audience gender"):
+            self.assertEqual([], captor.arg(AudienceGenderSplit()))
+
+
 class TestAudienceAgeBeforeHooks(TestCase):
 
     def setUp(self) -> None:
         self.__repository: AudienceAgeRepository = Mock()
         self.__sut = AudienceAgeBeforeHooks(repository=self.__repository,
-                                            audience_age_common_hooks=AudienceAgeCommonHooks())
+                                            audience_age_common_hooks=AudienceCommonHooks())
 
     def test_when_audience_data_is_already_populated(self):
         # arrange
         context = PinfluencerContext(auth_user_id="1234")
-        ages = []
-        while(ages == []):
-            ages = self.__repository.load_for_influencer = MagicMock(return_value=AutoFixture()
+        self.__repository.load_for_influencer = MagicMock(return_value=AutoFixture()
                                                                      .create(dto=AudienceAgeSplit,
                                                                              list_limit=15))
 

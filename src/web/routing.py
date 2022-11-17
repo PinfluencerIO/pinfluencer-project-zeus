@@ -9,7 +9,7 @@ from src.web.sequences import UpdateCampaignSequenceBuilder, UpdateImageForCampa
     GetAllInfluencersSequenceBuilder, UpdateBrandImageSequenceBuilder, UpdateBrandSequenceBuilder, \
     CreateBrandSequenceBuilder, GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder, \
     CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder, CreateAudienceAgeSequenceBuilder, \
-    GetAudienceAgeSequenceBuilder, UpdateAudienceAgeSequenceBuilder
+    GetAudienceAgeSequenceBuilder, UpdateAudienceAgeSequenceBuilder, CreateAudienceGenderSequenceBuilder
 
 
 class Dispatcher:
@@ -139,7 +139,7 @@ class Dispatcher:
                     Route(sequence_builder=self.__service_locator.locate(CreateAudienceAgeSequenceBuilder)),
 
                 'POST /influencers/me/audience-gender-splits':
-                    Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),
+                    Route(sequence_builder=self.__service_locator.locate(CreateAudienceGenderSequenceBuilder)),
 
                 'PATCH /influencers/me/audience-age-splits':
                     Route(sequence_builder=self.__service_locator.locate(UpdateAudienceAgeSequenceBuilder)),

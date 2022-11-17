@@ -1,9 +1,9 @@
 from src.web import FluentSequenceBuilder, PinfluencerContext
 from src.web.controllers import CampaignController, InfluencerController, BrandController, NotificationController, \
-    AudienceAgeController
+    AudienceAgeController, AudienceGenderController
 from src.web.hooks import CommonBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, UserAfterHooks, UserBeforeHooks, \
     BrandBeforeHooks, BrandAfterHooks, InfluencerBeforeHooks, InfluencerAfterHooks, NotificationBeforeHooks, \
-    AudienceAgeBeforeHooks, CommonAfterHooks, AudienceAgeAfterHooks
+    AudienceAgeBeforeHooks, CommonAfterHooks, AudienceAgeAfterHooks, AudienceGenderAfterHooks, AudienceGenderBeforeHooks
 
 
 class PreGenericUpdateCreateSubsequenceBuilder(FluentSequenceBuilder):
@@ -529,6 +529,30 @@ class GetAudienceAgeSequenceBuilder(FluentSequenceBuilder):
         self._add_command(command=self.__user_before_hooks.set_auth_user_id) \
             ._add_command(command=self.__influencer_before_hooks.validate_auth_influencer)\
             ._add_command(command=self.__audience_age_controller.get_for_influencer)
+
+
+class CreateAudienceGenderSequenceBuilder(FluentSequenceBuilder):
+
+    def __init__(self,
+                 audience_gender_controller: AudienceGenderController,
+                 pre_generic_update_create_subsequence_builder: PreGenericUpdateCreateSubsequenceBuilder,
+                 audience_gender_before_hooks: AudienceGenderBeforeHooks,
+                 influencer_before_hooks: InfluencerBeforeHooks,
+                 audience_gender_after_hooks: AudienceGenderAfterHooks
+                 ):
+        super().__init__()
+        self.__audience_gender_after_hooks = audience_gender_after_hooks
+        self.__influencer_before_hooks = influencer_before_hooks
+        self.__audience_gender_before_hooks = audience_gender_before_hooks
+        self.__pre_generic_update_create_subsequence_builder = pre_generic_update_create_subsequence_builder
+        self.__audience_gender_controller = audience_gender_controller
+
+    def build(self):
+        self._add_sequence_builder(sequence_builder=self.__pre_generic_update_create_subsequence_builder) \
+            ._add_command(command=self.__audience_gender_before_hooks.check_audience_genders_are_empty) \
+            ._add_command(command=self.__influencer_before_hooks.validate_auth_influencer) \
+            ._add_command(command=self.__audience_gender_controller.create_for_influencer) \
+            ._add_command(command=self.__audience_gender_after_hooks.save_state)
 
 
 class UpdateAudienceAgeSequenceBuilder(FluentSequenceBuilder):

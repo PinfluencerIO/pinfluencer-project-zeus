@@ -2,15 +2,15 @@ from contextlib import contextmanager
 from typing import Callable, Any
 
 from src._types import BrandRepository, UserRepository, InfluencerRepository, Repository, CampaignRepository, Logger, \
-    Model, NotificationRepository, AudienceAgeRepository
+    Model, NotificationRepository, AudienceAgeRepository, AudienceGenderRepository
 from src.crosscutting import PinfluencerObjectMapper, FlexiUpdater
-from src.domain.models import Brand, Influencer, Campaign, Notification, AudienceAgeSplit
+from src.domain.models import Brand, Influencer, Campaign, Notification, AudienceAgeSplit, AudienceGenderSplit
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.web import BRAND_ID_PATH_KEY, INFLUENCER_ID_PATH_KEY, PinfluencerContext, ErrorCapsule
 from src.web.error_capsules import AudienceDataNotFoundErrorCapsule
 from src.web.views import BrandRequestDto, BrandResponseDto, ImageRequestDto, InfluencerRequestDto, \
     InfluencerResponseDto, CampaignRequestDto, CampaignResponseDto, NotificationCreateRequestDto, \
-    NotificationResponseDto, AudienceAgeViewDto
+    NotificationResponseDto, AudienceAgeViewDto, AudienceGenderViewDto
 
 
 class BaseController:
@@ -280,6 +280,34 @@ class InfluencerController(BaseUserController):
                          response=InfluencerResponseDto,
                          request=InfluencerRequestDto,
                          model=Influencer)
+
+
+class AudienceGenderController(BaseAudienceController, BaseOwnerController):
+
+    def __init__(self,
+                 repository: AudienceGenderRepository,
+                 mapper: PinfluencerObjectMapper,
+                 flexi_updater: FlexiUpdater,
+                 logger: Logger):
+        super().__init__(repository,
+                         mapper,
+                         flexi_updater,
+                         logger,
+                         AudienceGenderViewDto,
+                         AudienceGenderViewDto)
+
+    def create_for_influencer(self, context: PinfluencerContext):
+        self._create_for_owner(context=context,
+                               repo_method=self._repository.write_new_for_influencer,
+                               request=AudienceGenderViewDto,
+                               response=AudienceGenderViewDto,
+                               model=AudienceGenderSplit)
+
+    def get_for_influencer(self, context: PinfluencerContext):
+        ...
+
+    def update_for_influencer(self, context: PinfluencerContext):
+        ...
 
 
 class AudienceAgeController(BaseAudienceController, BaseOwnerController):

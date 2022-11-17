@@ -1,6 +1,7 @@
 from typing import Protocol, Optional, Union
 
-from src.domain.models import Brand, Influencer, Campaign, User, Notification, Collaboration, AudienceAgeSplit
+from src.domain.models import Brand, Influencer, Campaign, User, Notification, Collaboration, AudienceAgeSplit, \
+    AudienceGenderSplit
 
 
 class AuthUserRepository(Protocol):
@@ -24,6 +25,21 @@ class AudienceAgeRepository(Protocol):
 
     def load_for_influencer(self,
                             auth_user_id: str) -> AudienceAgeSplit:
+        ...
+
+    def save(self):
+        ...
+
+
+class AudienceGenderRepository(Protocol):
+
+    def write_new_for_influencer(self,
+                                 payload: AudienceGenderSplit,
+                                 auth_user_id: str) -> AudienceGenderSplit:
+        ...
+
+    def load_for_influencer(self,
+                            auth_user_id: str) -> AudienceGenderSplit:
         ...
 
     def save(self):
@@ -104,7 +120,8 @@ Repository = Union[BrandRepository,
                    InfluencerRepository,
                    CampaignRepository,
                    NotificationRepository,
-                   AudienceAgeRepository]
+                   AudienceAgeRepository,
+                   AudienceGenderRepository]
 
 UserRepository = Union[BrandRepository, InfluencerRepository]
 

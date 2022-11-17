@@ -7,8 +7,10 @@ from src._types import ImageRepository
 from src.app import logger_factory
 from src.crosscutting import AutoFixture
 from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository, CognitoAuthUserRepository, \
-    CognitoAuthService, SqlAlchemyCampaignRepository, SqlAlchemyNotificationRepository, SqlAlchemyAudienceAgeRepository
-from src.domain.models import Brand, Influencer, User, Campaign, Notification, AudienceAgeSplit, AudienceAge
+    CognitoAuthService, SqlAlchemyCampaignRepository, SqlAlchemyNotificationRepository, SqlAlchemyAudienceAgeRepository, \
+    SqlAlchemyAudienceGenderRepository
+from src.domain.models import Brand, Influencer, User, Campaign, Notification, AudienceAgeSplit, AudienceAge, \
+    AudienceGenderSplit, AudienceGender
 from src.exceptions import AlreadyExistsException, NotFoundException
 from tests import InMemorySqliteDataManager
 
@@ -406,6 +408,58 @@ class TestNotificationRepository(TestCase):
         with self.subTest(msg="notification matches notification in db"):
             notification_in_db = self.__sut.load_by_id(id_=notification.id)
             assert notification == notification_in_db == returned_notification
+
+
+class TestAudienceGenderRepository(TestCase):
+
+    def setUp(self) -> None:
+        self.__data_manager = InMemorySqliteDataManager()
+        self.__sut = SqlAlchemyAudienceGenderRepository(data_manager=self.__data_manager,
+                                                        logger=logger_factory())
+
+    def test_write_for_influencer(self):
+        # arrange
+        audience_gender_split = AutoFixture().create(dto=AudienceGenderSplit, list_limit=15)
+        self.__sut._write_new_for_owner = MagicMock(return_value=audience_gender_split)
+
+        # act
+        returned_audience_gender_split = \
+            self.__sut.write_new_for_influencer(payload=audience_gender_split,
+                                                auth_user_id="user1234")
+
+        # assert
+        for audience_gender in audience_gender_split.audience_genders:
+            captor = Captor()
+            with self.subTest(msg=f"base repo was called for gender"
+                                  f"{audience_gender.gender}"):
+                self.__sut._write_new_for_owner.assert_any_call(payload=audience_gender,
+                                                                foreign_key_setter=captor)
+
+            with self.subTest(msg=f"field setter sets correct field for gender"
+                                  f"{audience_gender.gender}"):
+                captor.arg(audience_gender)
+                self.assertEqual(audience_gender.influencer_auth_user_id, "user1234")
+
+            with self.subTest(msg="captured repo value was returned for gender"
+                                  f"{audience_gender.gender}"):
+                self.assertEqual(returned_audience_gender_split, audience_gender_split)
+
+    def test_load_for_influencer(self):
+        # arrange
+        audience_genders = AutoFixture().create_many(dto=AudienceGender, ammount=5)
+        self.__sut._load_for_auth_owner = MagicMock(return_value=audience_genders)
+
+        # act
+        returned_audience_gender_split = self.__sut.load_for_influencer(auth_user_id="user1234")
+
+        # assert
+        with self.subTest(msg=f"base repo was called"):
+            self.__sut._load_for_auth_owner.assert_called_once_with(auth_user_id="user1234",
+                                                                    model=AudienceGender,
+                                                                    model_entity_field=AudienceGender.influencer_auth_user_id)
+
+        with self.subTest(msg="captured repo value was returned gender ranges"):
+            self.assertEqual(returned_audience_gender_split, AudienceGenderSplit(audience_genders=audience_genders))
 
 
 class TestAudienceAgeRepository(TestCase):

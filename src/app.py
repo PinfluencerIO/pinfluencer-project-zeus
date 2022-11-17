@@ -4,21 +4,22 @@ from simple_injection import ServiceCollection
 
 from src import ServiceLocator
 from src._types import DataManager, BrandRepository, InfluencerRepository, CampaignRepository, ImageRepository, \
-    Deserializer, Serializer, AuthUserRepository, Logger, NotificationRepository, AudienceAgeRepository
+    Deserializer, Serializer, AuthUserRepository, Logger, NotificationRepository, AudienceAgeRepository, \
+    AudienceGenderRepository
 from src.crosscutting import JsonCamelToSnakeCaseDeserializer, JsonSnakeToCamelSerializer, \
     PinfluencerObjectMapper, FlexiUpdater, ConsoleLogger, DummyLogger
 from src.data import SqlAlchemyDataManager
 from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository, \
     SqlAlchemyCampaignRepository, S3ImageRepository, CognitoAuthUserRepository, CognitoAuthService, \
-    SqlAlchemyNotificationRepository, SqlAlchemyAudienceAgeRepository
+    SqlAlchemyNotificationRepository, SqlAlchemyAudienceAgeRepository, SqlAlchemyAudienceGenderRepository
 from src.domain.validation import BrandValidator, CampaignValidator, InfluencerValidator
 from src.web import PinfluencerResponse, PinfluencerContext, Route
 from src.web.controllers import BrandController, InfluencerController, CampaignController, NotificationController, \
-    AudienceAgeController
+    AudienceAgeController, AudienceGenderController
 from src.web.hooks import HooksFacade, CommonBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, UserBeforeHooks, \
     UserAfterHooks, InfluencerBeforeHooks, BrandBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, CommonAfterHooks, \
-    NotificationAfterHooks, NotificationBeforeHooks, AudienceAgeBeforeHooks, AudienceAgeCommonHooks, \
-    AudienceAgeAfterHooks
+    NotificationAfterHooks, NotificationBeforeHooks, AudienceAgeBeforeHooks, AudienceCommonHooks, \
+    AudienceAgeAfterHooks, AudienceGenderAfterHooks, AudienceGenderBeforeHooks
 from src.web.mapping import MappingRules
 from src.web.middleware import MiddlewarePipeline
 from src.web.routing import Dispatcher
@@ -31,7 +32,7 @@ from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdat
     GetAllInfluencersSequenceBuilder, UpdateBrandImageSequenceBuilder, UpdateBrandSequenceBuilder, \
     CreateBrandSequenceBuilder, GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder, \
     CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder, CreateAudienceAgeSequenceBuilder, \
-    GetAudienceAgeSequenceBuilder, UpdateAudienceAgeSequenceBuilder
+    GetAudienceAgeSequenceBuilder, UpdateAudienceAgeSequenceBuilder, CreateAudienceGenderSequenceBuilder
 
 
 def lambda_handler(event, context):
@@ -133,9 +134,11 @@ def register_middleware(ioc):
     ioc.add_singleton(CommonAfterHooks)
     ioc.add_singleton(NotificationAfterHooks)
     ioc.add_singleton(NotificationBeforeHooks)
-    ioc.add_singleton(AudienceAgeCommonHooks)
+    ioc.add_singleton(AudienceCommonHooks)
     ioc.add_singleton(AudienceAgeBeforeHooks)
     ioc.add_singleton(AudienceAgeAfterHooks)
+    ioc.add_singleton(AudienceGenderAfterHooks)
+    ioc.add_singleton(AudienceGenderBeforeHooks)
 
 
 def register_auth(ioc):
@@ -153,6 +156,7 @@ def register_controllers(ioc):
     ioc.add_singleton(CampaignController)
     ioc.add_singleton(NotificationController)
     ioc.add_singleton(AudienceAgeController)
+    ioc.add_singleton(AudienceGenderController)
 
 
 def register_object_mapping(ioc):
@@ -173,14 +177,15 @@ def register_data_layer(ioc):
     ioc.add_singleton(CampaignRepository, SqlAlchemyCampaignRepository)
     ioc.add_singleton(NotificationRepository, SqlAlchemyNotificationRepository)
     ioc.add_singleton(AudienceAgeRepository, SqlAlchemyAudienceAgeRepository)
+    ioc.add_singleton(AudienceGenderRepository, SqlAlchemyAudienceGenderRepository)
 
     # s3
     ioc.add_singleton(ImageRepository, S3ImageRepository)
 
 
 def register_sequences(ioc: ServiceCollection):
-    ioc.add_singleton(PreGenericUpdateCreateSubsequenceBuilder)
     ioc.add_singleton(PreUpdateCreateCampaignSubsequenceBuilder)
+    ioc.add_singleton(PreGenericUpdateCreateSubsequenceBuilder)
     ioc.add_singleton(PostSingleCampaignSubsequenceBuilder)
     ioc.add_singleton(PostMultipleCampaignSubsequenceBuilder)
     ioc.add_singleton(PostSingleUserSubsequenceBuilder)
@@ -208,3 +213,4 @@ def register_sequences(ioc: ServiceCollection):
     ioc.add_singleton(CreateAudienceAgeSequenceBuilder)
     ioc.add_singleton(GetAudienceAgeSequenceBuilder)
     ioc.add_singleton(UpdateAudienceAgeSequenceBuilder)
+    ioc.add_singleton(CreateAudienceGenderSequenceBuilder)

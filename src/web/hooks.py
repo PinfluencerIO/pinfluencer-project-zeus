@@ -3,7 +3,8 @@ from typing import Any, Callable
 from jsonschema.exceptions import ValidationError
 
 from src._types import AuthUserRepository, Deserializer, BrandRepository, ImageRepository, Logger, \
-    NotificationRepository, AudienceAgeRepository, InfluencerRepository, CampaignRepository, Repository
+    NotificationRepository, AudienceAgeRepository, InfluencerRepository, CampaignRepository, Repository, \
+    AudienceGenderRepository
 from src.crosscutting import PinfluencerObjectMapper
 from src.domain.models import CategoryEnum, ValueEnum, CampaignStateEnum, User
 from src.domain.validation import BrandValidator, InfluencerValidator, CampaignValidator
@@ -499,12 +500,13 @@ class NotificationAfterHooks(SaveableHook):
         super().__init__(repository)
 
 
-class AudienceAgeCommonHooks:
+class AudienceCommonHooks:
 
     def check_audience_data_is_empty(self, context: PinfluencerContext,
-                                     repo_method: Callable[[str], Any]):
+                                     repo_method: Callable[[str], Any],
+                                     audience_splits_getter: Callable[[Any], list[Any]]):
         audience_split = repo_method(context.auth_user_id)
-        if audience_split.audience_ages != []:
+        if audience_splits_getter(audience_split) != []:
             context.error_capsule.append(AudienceDataAlreadyExistsErrorCapsule(auth_user_id=context.auth_user_id))
 
 
@@ -514,13 +516,33 @@ class AudienceAgeAfterHooks(SaveableHook):
         super().__init__(repository)
 
 
+class AudienceGenderAfterHooks(SaveableHook):
+
+    def __init__(self, repository: AudienceGenderRepository):
+        super().__init__(repository)
+
+
 class AudienceAgeBeforeHooks:
 
     def __init__(self, repository: AudienceAgeRepository,
-                 audience_age_common_hooks: AudienceAgeCommonHooks):
+                 audience_age_common_hooks: AudienceCommonHooks):
         self.__audience_age_common_hooks = audience_age_common_hooks
         self.__repository = repository
 
     def check_audience_ages_are_empty(self, context: PinfluencerContext):
         self.__audience_age_common_hooks.check_audience_data_is_empty(context=context,
-                                                                      repo_method=self.__repository.load_for_influencer)
+                                                                      repo_method=self.__repository.load_for_influencer,
+                                                                      audience_splits_getter=lambda x: x.audience_ages)
+
+
+class AudienceGenderBeforeHooks:
+
+    def __init__(self, repository: AudienceGenderRepository,
+                 audience_common_hooks: AudienceCommonHooks):
+        self.__audience_age_common_hooks = audience_common_hooks
+        self.__repository = repository
+
+    def check_audience_genders_are_empty(self, context: PinfluencerContext):
+        self.__audience_age_common_hooks.check_audience_data_is_empty(context=context,
+                                                                      repo_method=self.__repository.load_for_influencer,
+                                                                      audience_splits_getter=lambda x: x.audience_genders)
