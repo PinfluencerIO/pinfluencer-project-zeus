@@ -18,7 +18,8 @@ from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdat
     UpdateBrandImageSequenceBuilder, UpdateBrandSequenceBuilder, CreateBrandSequenceBuilder, \
     GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder, \
     CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder, CreateAudienceAgeSequenceBuilder, \
-    GetAudienceAgeSequenceBuilder, UpdateAudienceAgeSequenceBuilder, CreateAudienceGenderSequenceBuilder
+    GetAudienceAgeSequenceBuilder, UpdateAudienceAgeSequenceBuilder, CreateAudienceGenderSequenceBuilder, \
+    GetAudienceGenderSequenceBuilder
 
 
 def setup(ioc: ServiceCollection):
@@ -626,4 +627,25 @@ class TestCreateAudienceGenderSequenceBuilder(TestCase):
                 ioc.resolve(InfluencerBeforeHooks).validate_auth_influencer,
                 ioc.resolve(AudienceGenderController).create_for_influencer,
                 ioc.resolve(AudienceGenderAfterHooks).save_state,
+            ])
+
+
+class TestGetAudienceGenderSequenceBuilder(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(GetAudienceGenderSequenceBuilder)
+
+        # act
+        sut.build()
+
+        # assert
+        with self.subTest(msg="components match"):
+            self.maxDiff = None
+            self.assertEqual(sut.components, [
+                ioc.resolve(UserBeforeHooks).set_auth_user_id,
+                ioc.resolve(InfluencerBeforeHooks).validate_auth_influencer,
+                ioc.resolve(AudienceGenderController).get_for_influencer
             ])

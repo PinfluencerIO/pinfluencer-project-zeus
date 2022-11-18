@@ -148,6 +148,10 @@ def update_audience_age_splits():
 def create_audience_gender_splits():
     return generic_handler(routeKey="POST /influencers/me/audience-gender-splits", params={})
 
+@app.route("/influencers/me/audience-gender-splits", methods=['GET'])
+def get_audience_gender_splits():
+    return generic_handler(routeKey="GET /influencers/me/audience-gender-splits", params={})
+
 def generic_handler(routeKey: str, params: dict):
     body_string = None
     try:

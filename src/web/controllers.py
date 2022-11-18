@@ -177,7 +177,7 @@ class BaseAudienceController(BaseController):
                             repo_call: Callable[[str], Any],
                             error_capsule: ErrorCapsule,
                             response,
-                            not_empty_check: Callable[[Any], bool], ):
+                            not_empty_check: Callable[[Any], bool]):
         children = repo_call(context.auth_user_id)
         if not_empty_check(children):
             context.response.status_code = 200
@@ -304,7 +304,12 @@ class AudienceGenderController(BaseAudienceController, BaseOwnerController):
                                model=AudienceGenderSplit)
 
     def get_for_influencer(self, context: PinfluencerContext):
-        ...
+        self._get_for_influencer(context=context,
+                                 repo_call=self._repository.load_for_influencer,
+                                 error_capsule=AudienceDataNotFoundErrorCapsule(type="gender",
+                                                                                auth_user_id=context.auth_user_id),
+                                 response=AudienceGenderViewDto,
+                                 not_empty_check=lambda x: x.audience_genders != [])
 
     def update_for_influencer(self, context: PinfluencerContext):
         ...

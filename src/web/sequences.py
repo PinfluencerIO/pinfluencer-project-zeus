@@ -575,6 +575,22 @@ class UpdateAudienceAgeSequenceBuilder(FluentSequenceBuilder):
             ._add_command(command=self.__audience_age_after_hooks.save_state)
 
 
+class GetAudienceGenderSequenceBuilder(FluentSequenceBuilder):
+
+    def __init__(self, audience_gender_controller: AudienceGenderController,
+                 influencer_before_hooks: InfluencerBeforeHooks,
+                 user_before_hooks: UserBeforeHooks):
+        super().__init__()
+        self.__user_before_hooks = user_before_hooks
+        self.__influencer_before_hooks = influencer_before_hooks
+        self.__audience_gender_controller = audience_gender_controller
+
+    def build(self):
+        self._add_command(command=self.__user_before_hooks.set_auth_user_id)\
+            ._add_command(command=self.__influencer_before_hooks.validate_auth_influencer)\
+            ._add_command(command=self.__audience_gender_controller.get_for_influencer)
+
+
 class NotImplementedSequenceBuilder(FluentSequenceBuilder):
 
     def __init__(self):

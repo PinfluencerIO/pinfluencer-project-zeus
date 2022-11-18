@@ -10,7 +10,8 @@ from src._types import BrandRepository, InfluencerRepository, CampaignRepository
     AudienceAgeRepository, AudienceGenderRepository
 from src.app import logger_factory
 from src.crosscutting import AutoFixture, FlexiUpdater
-from src.domain.models import Influencer, Campaign, Brand, Notification, AudienceAgeSplit, AudienceGenderSplit
+from src.domain.models import Influencer, Campaign, Brand, Notification, AudienceAgeSplit, AudienceGenderSplit, \
+    AudienceGender
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.controllers import BrandController, InfluencerController, CampaignController, NotificationController, \
@@ -763,6 +764,33 @@ class TestAudienceGenderController(TestCase):
                                                              response=AudienceGenderViewDto,
                                                              model=AudienceGenderSplit)
 
+    def test_get_for_influencer(self):
+        # arrange
+        context = PinfluencerContext(auth_user_id="1234")
+        self.__sut._get_for_influencer = MagicMock()
+
+        # act
+        self.__sut.get_for_influencer(context=context)
+
+        error_capsule_cator = Captor()
+        not_empty_check_captor = Captor()
+        # assert
+        with self.subTest(msg="repo was called"):
+            self.__sut._get_for_influencer.assert_called_once_with(context=context,
+                                                                   repo_call=self.__audience_gender_repository.load_for_influencer,
+                                                                   error_capsule=error_capsule_cator,
+                                                                   response=AudienceGenderViewDto,
+                                                                   not_empty_check=not_empty_check_captor)
+
+        with self.subTest(msg="non empty check occurs"):
+            self.assertEqual(False, not_empty_check_captor.arg(AudienceGenderSplit()))
+            self.assertEqual(True, not_empty_check_captor.arg(AudienceGenderSplit(audience_genders=[AudienceGender()])))
+
+        with self.subTest(msg="error capsule type matches"):
+            self.assertEqual(AudienceDataNotFoundErrorCapsule(type="gender",
+                                                              auth_user_id="1234"),
+                             error_capsule_cator.arg)
+
 class TestAudienceAgeController(TestCase):
 
     def setUp(self) -> None:
@@ -794,7 +822,10 @@ class TestAudienceAgeController(TestCase):
         # arrange
         context = PinfluencerContext(auth_user_id="1234",
                                      response=PinfluencerResponse())
-        audience_age_split = AutoFixture().create(dto=AudienceAgeSplit, list_limit=15)
+        ages = []
+        while(ages == []):
+            audience_age_split = AutoFixture().create(dto=AudienceAgeSplit, list_limit=15)
+            ages = audience_age_split.audience_ages
         self.__audience_age_repository.load_for_influencer = MagicMock(return_value=audience_age_split)
 
         # act
@@ -807,7 +838,8 @@ class TestAudienceAgeController(TestCase):
                 .assert_called_once_with("1234")
 
         with self.subTest(msg="body is set to response"):
-            self.assertEqual(context.response.body, self.__object_mapper.map(_from=audience_age_split, to=AudienceAgeViewDto).__dict__)
+            self.assertEqual(context.response.body,
+                             self.__object_mapper.map(_from=audience_age_split, to=AudienceAgeViewDto).__dict__)
 
         with self.subTest(msg="response is set to 200"):
             self.assertEqual(context.response.status_code, 200)
@@ -925,10 +957,10 @@ class TestAudienceAgeController(TestCase):
             self.assertEqual(AudienceDataNotFoundErrorCapsule, type(context.error_capsule[0]))
 
     def __get_split(self,
-                  audience_ages_split: AudienceAgeSplit,
-                  min: int,
-                  max: Optional[int]):
+                    audience_ages_split: AudienceAgeSplit,
+                    min: int,
+                    max: Optional[int]):
         return list(filter(lambda x:
-               x.max_age == max and
-               x.min_age == min,
-               audience_ages_split.audience_ages))[0].split
+                           x.max_age == max and
+                           x.min_age == min,
+                           audience_ages_split.audience_ages))[0].split
