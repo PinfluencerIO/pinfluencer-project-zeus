@@ -312,7 +312,11 @@ class AudienceGenderController(BaseAudienceController, BaseOwnerController):
                                  not_empty_check=lambda x: x.audience_genders != [])
 
     def update_for_influencer(self, context: PinfluencerContext):
-        ...
+        self._update_for_influencer(context=context,
+                                    repo_call=self._repository.load_for_influencer,
+                                    type="gender",
+                                    view=AudienceGenderViewDto,
+                                    audience_splits_getter=lambda x: x.audience_genders)
 
 
 class AudienceAgeController(BaseAudienceController, BaseOwnerController):

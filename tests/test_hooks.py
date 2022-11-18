@@ -8,7 +8,8 @@ from ddt import data, ddt
 from src._types import AuthUserRepository, BrandRepository, ImageRepository, NotificationRepository, \
     AudienceAgeRepository, InfluencerRepository, AudienceGenderRepository
 from src.crosscutting import JsonCamelToSnakeCaseDeserializer, AutoFixture
-from src.domain.models import User, ValueEnum, CategoryEnum, CampaignStateEnum, AudienceAgeSplit, AudienceGenderSplit
+from src.domain.models import User, ValueEnum, CategoryEnum, CampaignStateEnum, AudienceAgeSplit, AudienceGenderSplit, \
+    AudienceAge
 from src.domain.validation import InfluencerValidator, BrandValidator, CampaignValidator
 from src.exceptions import NotFoundException
 from src.web import PinfluencerContext, PinfluencerResponse
@@ -1257,9 +1258,9 @@ class TestAudienceAgeBeforeHooks(TestCase):
     def test_when_audience_data_is_already_populated(self):
         # arrange
         context = PinfluencerContext(auth_user_id="1234")
-        self.__repository.load_for_influencer = MagicMock(return_value=AutoFixture()
-                                                                     .create(dto=AudienceAgeSplit,
-                                                                             list_limit=15))
+        self.__repository.load_for_influencer = MagicMock(return_value=AudienceAgeSplit(audience_ages=AutoFixture()
+                                                                     .create_many(dto=AudienceAge,
+                                                                             ammount=15)))
 
         # act
         self.__sut.check_audience_ages_are_empty(context=context)

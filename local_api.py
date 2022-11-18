@@ -152,6 +152,10 @@ def create_audience_gender_splits():
 def get_audience_gender_splits():
     return generic_handler(routeKey="GET /influencers/me/audience-gender-splits", params={})
 
+@app.route("/influencers/me/audience-gender-splits", methods=['PATCH'])
+def update_audience_gender_splits():
+    return generic_handler(routeKey="PATCH /influencers/me/audience-gender-splits", params={})
+
 def generic_handler(routeKey: str, params: dict):
     body_string = None
     try:

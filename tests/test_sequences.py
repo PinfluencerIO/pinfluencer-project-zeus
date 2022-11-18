@@ -19,7 +19,7 @@ from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdat
     GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder, \
     CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder, CreateAudienceAgeSequenceBuilder, \
     GetAudienceAgeSequenceBuilder, UpdateAudienceAgeSequenceBuilder, CreateAudienceGenderSequenceBuilder, \
-    GetAudienceGenderSequenceBuilder
+    GetAudienceGenderSequenceBuilder, UpdateAudienceGenderSequenceBuilder
 
 
 def setup(ioc: ServiceCollection):
@@ -648,4 +648,26 @@ class TestGetAudienceGenderSequenceBuilder(TestCase):
                 ioc.resolve(UserBeforeHooks).set_auth_user_id,
                 ioc.resolve(InfluencerBeforeHooks).validate_auth_influencer,
                 ioc.resolve(AudienceGenderController).get_for_influencer
+            ])
+
+
+class TestUpdateAudienceGenderSequenceBuilder(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(UpdateAudienceGenderSequenceBuilder)
+
+        # act
+        sut.build()
+
+        # assert
+        with self.subTest(msg="components match"):
+            self.maxDiff = None
+            self.assertEqual(sut.components, [
+                ioc.resolve(PreGenericUpdateCreateSubsequenceBuilder),
+                ioc.resolve(InfluencerBeforeHooks).validate_auth_influencer,
+                ioc.resolve(AudienceGenderController).update_for_influencer,
+                ioc.resolve(AudienceGenderAfterHooks).save_state
             ])

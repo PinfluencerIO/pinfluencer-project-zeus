@@ -591,6 +591,28 @@ class GetAudienceGenderSequenceBuilder(FluentSequenceBuilder):
             ._add_command(command=self.__audience_gender_controller.get_for_influencer)
 
 
+class UpdateAudienceGenderSequenceBuilder(FluentSequenceBuilder):
+
+    def __init__(self,
+                 audience_gender_controller: AudienceGenderController,
+                 pre_generic_update_create_subsequence_builder: PreGenericUpdateCreateSubsequenceBuilder,
+                 influencer_before_hooks: InfluencerBeforeHooks,
+                 audience_gender_after_hooks: AudienceGenderAfterHooks,
+                 audience_gender_before_hooks: AudienceGenderBeforeHooks):
+        super().__init__()
+        self.__pre_generic_update_create_subsequence_builder = pre_generic_update_create_subsequence_builder
+        self.__audience_gender_controller = audience_gender_controller
+        self.__influencer_before_hooks = influencer_before_hooks
+        self.__audience_gender_after_hooks = audience_gender_after_hooks
+        self.__audience_gender_before_hooks = audience_gender_before_hooks
+
+    def build(self):
+        self._add_sequence_builder(sequence_builder=self.__pre_generic_update_create_subsequence_builder)\
+            ._add_command(command=self.__influencer_before_hooks.validate_auth_influencer)\
+            ._add_command(command=self.__audience_gender_controller.update_for_influencer)\
+            ._add_command(command=self.__audience_gender_after_hooks.save_state)
+
+
 class NotImplementedSequenceBuilder(FluentSequenceBuilder):
 
     def __init__(self):

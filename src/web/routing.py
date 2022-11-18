@@ -10,7 +10,7 @@ from src.web.sequences import UpdateCampaignSequenceBuilder, UpdateImageForCampa
     CreateBrandSequenceBuilder, GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder, \
     CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder, CreateAudienceAgeSequenceBuilder, \
     GetAudienceAgeSequenceBuilder, UpdateAudienceAgeSequenceBuilder, CreateAudienceGenderSequenceBuilder, \
-    GetAudienceGenderSequenceBuilder
+    GetAudienceGenderSequenceBuilder, UpdateAudienceGenderSequenceBuilder
 
 
 class Dispatcher:
@@ -146,7 +146,7 @@ class Dispatcher:
                     Route(sequence_builder=self.__service_locator.locate(UpdateAudienceAgeSequenceBuilder)),
 
                 'PATCH /influencers/me/audience-gender-splits':
-                    Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder))
+                    Route(sequence_builder=self.__service_locator.locate(UpdateAudienceGenderSequenceBuilder))
             }
         )
 

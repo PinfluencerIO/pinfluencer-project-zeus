@@ -19,7 +19,7 @@ from src.web.sequences import NotImplementedSequenceBuilder, UpdateImageForCampa
     CreateBrandSequenceBuilder, GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder, \
     CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder, CreateAudienceAgeSequenceBuilder, \
     GetAudienceAgeSequenceBuilder, UpdateAudienceAgeSequenceBuilder, CreateAudienceGenderSequenceBuilder, \
-    GetAudienceGenderSequenceBuilder
+    GetAudienceGenderSequenceBuilder, UpdateAudienceGenderSequenceBuilder
 from tests import get_as_json
 
 
@@ -512,7 +512,22 @@ class TestRoutes(TestCase):
                                      sequence=self.__ioc.resolve(UpdateAudienceAgeSequenceBuilder))
 
     def test_update_audience_gender_splits(self):
-        self.__assert_not_implemented(route="PATCH /influencers/me/audience-gender-splits")
+        # arrange
+        self.__mock_middleware_pipeline.execute_middleware = MagicMock()
+
+        # act
+        bootstrap(event={"routeKey": "PATCH /influencers/me/audience-gender-splits"},
+                  context={},
+                  middleware=self.__mock_middleware_pipeline,
+                  ioc=self.__ioc,
+                  data_manager=Mock(),
+                  cognito_auth_service=Mock())
+
+        # assert
+        self.__mock_middleware_pipeline \
+            .execute_middleware \
+            .assert_called_once_with(context=Any(),
+                                     sequence=self.__ioc.resolve(UpdateAudienceGenderSequenceBuilder))
 
     def test_template_matches_routes(self):
         template_file_path = f"./../template.yaml"

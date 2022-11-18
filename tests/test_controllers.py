@@ -791,6 +791,29 @@ class TestAudienceGenderController(TestCase):
                                                               auth_user_id="1234"),
                              error_capsule_cator.arg)
 
+    def test_update_for_influencer(self):
+        # arrange
+        context = PinfluencerContext(auth_user_id="1234")
+        self.__sut._update_for_influencer = MagicMock()
+
+        # act
+        self.__sut.update_for_influencer(context=context)
+
+        captor = Captor()
+
+        # assert
+        with self.subTest(msg="repo was called"):
+            self.__sut._update_for_influencer.assert_called_once_with(context=context,
+                                                                      repo_call=self.__audience_gender_repository.load_for_influencer,
+                                                                      type="gender",
+                                                                      view=AudienceGenderViewDto,
+                                                                      audience_splits_getter=captor)
+
+        with self.subTest(msg="audience splits getter returned audience splits"):
+            splits = AutoFixture().create_many(dto=AudienceGender, ammount=15)
+            self.assertEqual(splits, captor.arg(AudienceGenderSplit(audience_genders=splits)))
+
+
 class TestAudienceAgeController(TestCase):
 
     def setUp(self) -> None:
@@ -823,7 +846,7 @@ class TestAudienceAgeController(TestCase):
         context = PinfluencerContext(auth_user_id="1234",
                                      response=PinfluencerResponse())
         ages = []
-        while(ages == []):
+        while (ages == []):
             audience_age_split = AutoFixture().create(dto=AudienceAgeSplit, list_limit=15)
             ages = audience_age_split.audience_ages
         self.__audience_age_repository.load_for_influencer = MagicMock(return_value=audience_age_split)
