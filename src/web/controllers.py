@@ -168,7 +168,7 @@ class BaseAudienceController(BaseController):
                                                                           auth_user_id=context.auth_user_id))
         else:
             self._flexi_updater.update(request=self._mapper.map_from_dict(_from=context.body,
-                                                                          to=AudienceAgeViewDto),
+                                                                          to=view),
                                        object_to_update=audience_splits)
             context.response.body.update(self._mapper.map(_from=audience_splits, to=view).__dict__)
 
