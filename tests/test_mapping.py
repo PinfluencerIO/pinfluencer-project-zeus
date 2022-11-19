@@ -297,42 +297,6 @@ class TestMappingRules(TestCase):
             self.assertEqual(influencer_request.bio, influencer.bio)
 
         # assert
-        with self.subTest(msg="audience_male_splits match"):
-            self.assertEqual(influencer_request.audience_male_split, influencer.audience_male_split)
-
-        # assert
-        with self.subTest(msg="audience_female_splits match"):
-            self.assertEqual(influencer_request.audience_female_split, influencer.audience_female_split)
-
-        # assert
-        with self.subTest(msg="audience_age_65_plus_splits match"):
-            self.assertEqual(influencer_request.audience_age_65_plus_split, influencer.audience_age_65_plus_split)
-
-        # assert
-        with self.subTest(msg="audience_age_55_to_64_splits match"):
-            self.assertEqual(influencer_request.audience_age_55_to_64_split, influencer.audience_age_55_to_64_split)
-
-        # assert
-        with self.subTest(msg="audience_age_45_to_54_splits match"):
-            self.assertEqual(influencer_request.audience_age_45_to_54_split, influencer.audience_age_45_to_54_split)
-
-        # assert
-        with self.subTest(msg="audience_age_35_to_44_splits match"):
-            self.assertEqual(influencer_request.audience_age_35_to_44_split, influencer.audience_age_35_to_44_split)
-
-        # assert
-        with self.subTest(msg="audience_age_25_to_34_splits match"):
-            self.assertEqual(influencer_request.audience_age_25_to_34_split, influencer.audience_age_25_to_34_split)
-
-        # assert
-        with self.subTest(msg="audience_age_18_to_24_splits match"):
-            self.assertEqual(influencer_request.audience_age_18_to_24_split, influencer.audience_age_18_to_24_split)
-
-        # assert
-        with self.subTest(msg="audience_age_13_to_17_splits match"):
-            self.assertEqual(influencer_request.audience_age_13_to_17_split, influencer.audience_age_13_to_17_split)
-
-        # assert
         with self.subTest(msg="addresses match"):
             self.assertEqual(influencer_request.address, influencer.address)
 
@@ -363,42 +327,6 @@ class TestMappingRules(TestCase):
         # assert
         with self.subTest(msg="bios match"):
             self.assertEqual(influencer_request.bio, influencer.bio)
-
-        # assert
-        with self.subTest(msg="audience_male_splits match"):
-            self.assertEqual(influencer_request.audience_male_split, influencer.audience_male_split)
-
-        # assert
-        with self.subTest(msg="audience_female_splits match"):
-            self.assertEqual(influencer_request.audience_female_split, influencer.audience_female_split)
-
-        # assert
-        with self.subTest(msg="audience_age_65_plus_splits match"):
-            self.assertEqual(influencer_request.audience_age_65_plus_split, influencer.audience_age_65_plus_split)
-
-        # assert
-        with self.subTest(msg="audience_age_55_to_64_splits match"):
-            self.assertEqual(influencer_request.audience_age_55_to_64_split, influencer.audience_age_55_to_64_split)
-
-        # assert
-        with self.subTest(msg="audience_age_45_to_54_splits match"):
-            self.assertEqual(influencer_request.audience_age_45_to_54_split, influencer.audience_age_45_to_54_split)
-
-        # assert
-        with self.subTest(msg="audience_age_35_to_44_splits match"):
-            self.assertEqual(influencer_request.audience_age_35_to_44_split, influencer.audience_age_35_to_44_split)
-
-        # assert
-        with self.subTest(msg="audience_age_25_to_34_splits match"):
-            self.assertEqual(influencer_request.audience_age_25_to_34_split, influencer.audience_age_25_to_34_split)
-
-        # assert
-        with self.subTest(msg="audience_age_18_to_24_splits match"):
-            self.assertEqual(influencer_request.audience_age_18_to_24_split, influencer.audience_age_18_to_24_split)
-
-        # assert
-        with self.subTest(msg="audience_age_13_to_17_splits match"):
-            self.assertEqual(influencer_request.audience_age_13_to_17_split, influencer.audience_age_13_to_17_split)
 
         # assert
         with self.subTest(msg="addresses match"):
@@ -449,42 +377,6 @@ class TestMappingRules(TestCase):
             self.assertEqual(influencer_response.created, influencer.created)
 
         # assert
-        with self.subTest(msg="audience_male_splits match"):
-            self.assertEqual(influencer_response.audience_male_split, influencer.audience_male_split)
-
-        # assert
-        with self.subTest(msg="audience_female_splits match"):
-            self.assertEqual(influencer_response.audience_female_split, influencer.audience_female_split)
-
-        # assert
-        with self.subTest(msg="audience_age_65_plus_splits match"):
-            self.assertEqual(influencer_response.audience_age_65_plus_split, influencer.audience_age_65_plus_split)
-
-        # assert
-        with self.subTest(msg="audience_age_55_to_64_splits match"):
-            self.assertEqual(influencer_response.audience_age_55_to_64_split, influencer.audience_age_55_to_64_split)
-
-        # assert
-        with self.subTest(msg="audience_age_45_to_54_splits match"):
-            self.assertEqual(influencer_response.audience_age_45_to_54_split, influencer.audience_age_45_to_54_split)
-
-        # assert
-        with self.subTest(msg="audience_age_35_to_44_splits match"):
-            self.assertEqual(influencer_response.audience_age_35_to_44_split, influencer.audience_age_35_to_44_split)
-
-        # assert
-        with self.subTest(msg="audience_age_25_to_34_splits match"):
-            self.assertEqual(influencer_response.audience_age_25_to_34_split, influencer.audience_age_25_to_34_split)
-
-        # assert
-        with self.subTest(msg="audience_age_18_to_24_splits match"):
-            self.assertEqual(influencer_response.audience_age_18_to_24_split, influencer.audience_age_18_to_24_split)
-
-        # assert
-        with self.subTest(msg="audience_age_13_to_17_splits match"):
-            self.assertEqual(influencer_response.audience_age_13_to_17_split, influencer.audience_age_13_to_17_split)
-
-        # assert
         with self.subTest(msg="addresses match"):
             self.assertEqual(influencer_response.address, influencer.address)
 
@@ -531,42 +423,6 @@ class TestMappingRules(TestCase):
         # assert
         with self.subTest(msg="created dates match"):
             self.assertEqual(influencer_response.created, influencer.created)
-
-        # assert
-        with self.subTest(msg="audience_male_splits match"):
-            self.assertEqual(influencer_response.audience_male_split, influencer.audience_male_split)
-
-        # assert
-        with self.subTest(msg="audience_female_splits match"):
-            self.assertEqual(influencer_response.audience_female_split, influencer.audience_female_split)
-
-        # assert
-        with self.subTest(msg="audience_age_65_plus_splits match"):
-            self.assertEqual(influencer_response.audience_age_65_plus_split, influencer.audience_age_65_plus_split)
-
-        # assert
-        with self.subTest(msg="audience_age_55_to_64_splits match"):
-            self.assertEqual(influencer_response.audience_age_55_to_64_split, influencer.audience_age_55_to_64_split)
-
-        # assert
-        with self.subTest(msg="audience_age_45_to_54_splits match"):
-            self.assertEqual(influencer_response.audience_age_45_to_54_split, influencer.audience_age_45_to_54_split)
-
-        # assert
-        with self.subTest(msg="audience_age_35_to_44_splits match"):
-            self.assertEqual(influencer_response.audience_age_35_to_44_split, influencer.audience_age_35_to_44_split)
-
-        # assert
-        with self.subTest(msg="audience_age_25_to_34_splits match"):
-            self.assertEqual(influencer_response.audience_age_25_to_34_split, influencer.audience_age_25_to_34_split)
-
-        # assert
-        with self.subTest(msg="audience_age_18_to_24_splits match"):
-            self.assertEqual(influencer_response.audience_age_18_to_24_split, influencer.audience_age_18_to_24_split)
-
-        # assert
-        with self.subTest(msg="audience_age_13_to_17_splits match"):
-            self.assertEqual(influencer_response.audience_age_13_to_17_split, influencer.audience_age_13_to_17_split)
 
         # assert
         with self.subTest(msg="addresses match"):

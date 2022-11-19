@@ -84,15 +84,6 @@ class Influencer(DataModel):
     website: str = None
     bio: str = None
     image: str = None
-    audience_age_13_to_17_split: float = None
-    audience_age_18_to_24_split: float = None
-    audience_age_25_to_34_split: float = None
-    audience_age_35_to_44_split: float = None
-    audience_age_45_to_54_split: float = None
-    audience_age_55_to_64_split: float = None
-    audience_age_65_plus_split: float = None
-    audience_male_split: float = None
-    audience_female_split: float = None
     categories: list[Category] = field(default_factory=list[Value])
     values: list[Value] = field(default_factory=list[Value])
     address: str = None

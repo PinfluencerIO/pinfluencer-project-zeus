@@ -117,27 +117,3 @@ def create_for_auth_user_event(auth_id, payload):
         "requestContext": {"authorizer": {"jwt": {"claims": {"cognito:username": auth_id}}}},
         "body": JsonSnakeToCamelSerializer().serialize(payload)
     }
-
-
-def update_influencer_payload():
-    return {
-        "first_name": "first_name",
-        "last_name": "first_name",
-        "email": "email@gmail.com",
-        "bio": "bio",
-        "website": "https://website.com",
-        "insta_handle": "instahandle",
-        "values": ["VALUE7", "VALUE8", "VALUE9"],
-        "categories": ["CATEGORY7", "CATEGORY6", "CATEGORY5"],
-        "auth_user_id": "1234",
-        "audience_male_split": 0.5,
-        "audience_female_split": 0.5,
-        "audience_age_13_to_17_split": 0.142,
-        "audience_age_18_to_24_split": 0.142,
-        "audience_age_25_to_34_split": 0.142,
-        "audience_age_35_to_44_split": 0.142,
-        "audience_age_45_to_54_split": 0.142,
-        "audience_age_55_to_64_split": 0.142,
-        "audience_age_65_plus_split": 0.143,
-        "address": "69 beans road"
-    }

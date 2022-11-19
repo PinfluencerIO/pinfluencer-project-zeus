@@ -209,42 +209,6 @@ class TestMapping(TestCase):
             self.assertEqual(influencer_in_db.address, influencer.address)
 
         # assert
-        with self.subTest(msg="influencer audience_age_13_to_17_split match"):
-            self.assertEqual(influencer_in_db.audience_age_13_to_17_split, influencer.audience_age_13_to_17_split)
-
-        # assert
-        with self.subTest(msg="influencer audience_age_18_to_24_split match"):
-            self.assertEqual(influencer_in_db.audience_age_18_to_24_split, influencer.audience_age_18_to_24_split)
-
-        # assert
-        with self.subTest(msg="influencer audience_age_25_to_34_split match"):
-            self.assertEqual(influencer_in_db.audience_age_25_to_34_split, influencer.audience_age_25_to_34_split)
-
-        # assert
-        with self.subTest(msg="influencer audience_age_35_to_44_split match"):
-            self.assertEqual(influencer_in_db.audience_age_35_to_44_split, influencer.audience_age_35_to_44_split)
-
-        # assert
-        with self.subTest(msg="influencer audience_age_45_to_54_split match"):
-            self.assertEqual(influencer_in_db.audience_age_45_to_54_split, influencer.audience_age_45_to_54_split)
-
-        # assert
-        with self.subTest(msg="influencer audience_age_45_to_54_split match"):
-            self.assertEqual(influencer_in_db.audience_age_55_to_64_split, influencer.audience_age_55_to_64_split)
-
-        # assert
-        with self.subTest(msg="influencer audience_age_65_plus_split match"):
-            self.assertEqual(influencer_in_db.audience_age_65_plus_split, influencer.audience_age_65_plus_split)
-
-        # assert
-        with self.subTest(msg="influencer audience_female_split match"):
-            self.assertEqual(influencer_in_db.audience_female_split, influencer.audience_female_split)
-
-        # assert
-        with self.subTest(msg="influencer audience_male_split match"):
-            self.assertEqual(influencer_in_db.audience_male_split, influencer.audience_male_split)
-
-        # assert
         with self.subTest(msg="influencer bio match"):
             self.assertEqual(influencer_in_db.bio, influencer.bio)
 

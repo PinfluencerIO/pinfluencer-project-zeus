@@ -27,6 +27,10 @@ ONBOARDING-INFLUENCER:
 
     -- influencer-specific --
     bio:                        str
+
+
+AUDIENCE-AGE-SPLITS:
+
     audienceAge13To17Split:     float fraction
     audienceAge18To24Split:     float fraction
     audienceAge25To34Split:     float fraction
@@ -34,6 +38,10 @@ ONBOARDING-INFLUENCER:
     audienceAge45To54Split:     float fraction
     audienceAge55To64Split:     float fraction
     audienceAge65PlusSplit:     float fraction
+
+
+AUDIENCE-GENDER-SPLITS
+
     audienceMaleSplit:          float fraction
     audienceFemaleSplit:        float fraction
 
