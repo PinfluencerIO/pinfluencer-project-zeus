@@ -136,6 +136,15 @@ class InfluencerResponseDto(BaseResponseDto):
     website: str = None
     bio: str = None
     image: str = None
+    audience_age_13_to_17_split: float = 0.0
+    audience_age_18_to_24_split: float = 0.0
+    audience_age_25_to_34_split: float = 0.0
+    audience_age_35_to_44_split: float = 0.0
+    audience_age_45_to_54_split: float = 0.0
+    audience_age_55_to_64_split: float = 0.0
+    audience_age_65_plus_split: float = 0.0
+    audience_male_split: float = 0.0
+    audience_female_split: float = 0.0
     values: list[ValueEnum] = None
     categories: list[CategoryEnum] = None
     address: str = None
