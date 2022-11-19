@@ -45,7 +45,7 @@ class BaseController:
             try:
                 brand = repo_func()
                 setattr(brand, request.image_field, request.image_path)
-                context.response.body.update(self._mapper.map(_from=brand, to=response).__dict__)
+                context.response.body = self._mapper.map(_from=brand, to=response).__dict__
             except NotFoundException as e:
                 self._logger.log_error(str(e))
                 context.short_circuit = True
@@ -66,7 +66,7 @@ class BaseController:
         try:
             user = self._repository.load_by_id(id_=context.id)
             context.response.status_code = 200
-            context.response.body.update(self._mapper.map(_from=user, to=response).__dict__)
+            context.response.body = self._mapper.map(_from=user, to=response).__dict__
             return
         except NotFoundException as e:
             self._logger.log_exception(e)
@@ -109,7 +109,7 @@ class BaseController:
                 context.response.status_code = 404
                 return
             mapped_response = self._mapper.map(_from=entity_in_db, to=response)
-            context.response.body.update(mapped_response.__dict__)
+            context.response.body = mapped_response.__dict__
             context.response.status_code = 200
 
     def _create(self,
@@ -136,7 +136,7 @@ class BaseController:
             self._logger.log_trace(f"mapping {model.__name__} to {response.__name__}")
             response = self._mapper.map(_from=entity_to_return, to=response)
             self._logger.log_trace(f"mapped response: {response}")
-            context.response.body.update(response.__dict__)
+            context.response.body = response.__dict__
             context.response.status_code = 201
 
 
@@ -170,7 +170,7 @@ class BaseAudienceController(BaseController):
             self._flexi_updater.update(request=self._mapper.map_from_dict(_from=context.body,
                                                                           to=view),
                                        object_to_update=audience_splits)
-            context.response.body.update(self._mapper.map(_from=audience_splits, to=view).__dict__)
+            context.response.body = self._mapper.map(_from=audience_splits, to=view).__dict__
 
     def _get_for_influencer(self,
                             context: PinfluencerContext,
@@ -181,7 +181,7 @@ class BaseAudienceController(BaseController):
         children = repo_call(context.auth_user_id)
         if not_empty_check(children):
             context.response.status_code = 200
-            context.response.body.update(self._mapper.map(_from=children, to=response).__dict__)
+            context.response.body = self._mapper.map(_from=children, to=response).__dict__
             return
         context.error_capsule.append(error_capsule)
 
@@ -216,7 +216,7 @@ class BaseOwnerController(BaseController):
             context.auth_user_id)
         self._logger.log_trace(f"{returned_model}")
         self._logger.log_trace(f"{returned_model.__dict__}")
-        context.response.body.update(self._mapper.map(_from=returned_model, to=response).__dict__)
+        context.response.body = self._mapper.map(_from=returned_model, to=response).__dict__
         context.response.status_code = 201
         return
 
@@ -239,7 +239,7 @@ class BaseUserController(BaseController):
             try:
                 brand = self._repository.load_for_auth_user(auth_user_id=auth_user_id)
                 context.response.status_code = 200
-                context.response.body.update(self._mapper.map(_from=brand, to=response).__dict__)
+                context.response.body = self._mapper.map(_from=brand, to=response).__dict__
                 return
             except NotFoundException as e:
                 self._logger.log_exception(e)
