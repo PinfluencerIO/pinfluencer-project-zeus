@@ -8,21 +8,21 @@ from ddt import data, ddt
 from src._types import AuthUserRepository, BrandRepository, ImageRepository, NotificationRepository, \
     AudienceAgeRepository, InfluencerRepository, AudienceGenderRepository
 from src.crosscutting import JsonCamelToSnakeCaseDeserializer, AutoFixture
-from src.domain.models import User, ValueEnum, CategoryEnum, CampaignStateEnum, AudienceAgeSplit, AudienceGenderSplit, \
+from src.domain.models import User, ValueEnum, CategoryEnum, AudienceAgeSplit, AudienceGenderSplit, \
     AudienceAge
-from src.domain.validation import InfluencerValidator, BrandValidator, CampaignValidator
+from src.domain.validation import InfluencerValidator, BrandValidator, ListingValidator
 from src.exceptions import NotFoundException
 from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.error_capsules import AudienceDataAlreadyExistsErrorCapsule, BrandNotFoundErrorCapsule, \
     InfluencerNotFoundErrorCapsule
 from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, CommonBeforeHooks, \
-    InfluencerBeforeHooks, BrandBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, CommonAfterHooks, \
+    InfluencerBeforeHooks, BrandBeforeHooks, ListingBeforeHooks, ListingAfterHooks, CommonAfterHooks, \
     NotificationAfterHooks, NotificationBeforeHooks, AudienceAgeBeforeHooks, AudienceCommonHooks, \
     AudienceGenderBeforeHooks
-from src.web.views import ImageRequestDto, BrandResponseDto, BrandRequestDto, CampaignResponseDto, \
+from src.web.views import ImageRequestDto, BrandResponseDto, BrandRequestDto, ListingResponseDto, \
     NotificationCreateRequestDto
 from tests import get_auth_user_event, create_for_auth_user_event, get_brand_id_event, \
-    get_influencer_id_event, get_campaign_id_event, get_notification_id_event, test_mapper
+    get_influencer_id_event, get_listing_id_event, get_notification_id_event, test_mapper
 
 TEST_S3_URL = "https://pinfluencer-product-images.s3.eu-west-2.amazonaws.com"
 
@@ -485,35 +485,35 @@ class TestInfluencerBeforeHooks(TestCase):
         self.assertEqual(type(captor.arg), InfluencerNotFoundErrorCapsule)
 
 
-class TestCampaignBeforeHooks(TestCase):
+class TestListingBeforeHooks(TestCase):
 
     def setUp(self) -> None:
-        self.__campaign_validator = CampaignValidator()
+        self.__listing_validator = ListingValidator()
         self.__common_before_hooks: CommonBeforeHooks = Mock()
-        self.__sut = CampaignBeforeHooks(campaign_validator=self.__campaign_validator,
-                                         common_before_hooks=self.__common_before_hooks,
-                                         logger=Mock())
+        self.__sut = ListingBeforeHooks(listing_validator=self.__listing_validator,
+                                        common_before_hooks=self.__common_before_hooks,
+                                        logger=Mock())
 
-    def test_validate_campaign_when_valid(self):
+    def test_validate_listing_when_valid(self):
         # arrange
         context = PinfluencerContext(body={
-            "campaign_hashtag": "nocountryforoldmenisthebestfilmfightme"
+            "title": "nocountryforoldmenisthebestfilmfightme"
         }, response=PinfluencerResponse(), short_circuit=False)
 
         # act
-        self.__sut.validate_campaign(context=context)
+        self.__sut.validate_listing(context=context)
 
         # assert
         assert not context.short_circuit
 
-    def test_validate_campaign_when_not_valid(self):
+    def test_validate_listing_when_not_valid(self):
         # arrange
         context = PinfluencerContext(body={
-            "campaign_hashtag": "jfjfjfjfjfjfjfjfjfjfjfufhdsaihfdsuiafhduisahfuiewhasnfherawifujdsabvgfiujbhvgefawbhfewafewaihjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjefwaaaaaaaaa"
+            "title": "jfjfjfjfjfjfjfjfjfjfjfufhdsaihfdsuiafhduisahfuiewhasnfherawifujdsabvgfiujbhvgefawbhfewafewaihjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjefwaaaaaaaaa"
         }, response=PinfluencerResponse(), short_circuit=False)
 
         # act
-        self.__sut.validate_campaign(context=context)
+        self.__sut.validate_listing(context=context)
 
         # assert
         assert context.short_circuit == True
@@ -523,7 +523,7 @@ class TestCampaignBeforeHooks(TestCase):
     def test_validate_id(self):
         # arrange
         id = str(uuid4())
-        context = PinfluencerContext(event=get_campaign_id_event(campaign_id=id),
+        context = PinfluencerContext(event=get_listing_id_event(listing_id=id),
                                      short_circuit=False)
 
         # act
@@ -539,33 +539,20 @@ class TestCampaignBeforeHooks(TestCase):
         context = PinfluencerContext()
 
         # act
-        self.__sut.map_campaign_categories_and_values(context=context)
+        self.__sut.map_categories_and_values(context=context)
 
         # assert
         self.__common_before_hooks.map_enums.assert_any_call(context=context,
-                                                             key="campaign_categories",
+                                                             key="categories",
                                                              enum_value=CategoryEnum)
         self.__common_before_hooks.map_enums.assert_any_call(context=context,
-                                                             key="campaign_values",
+                                                             key="values",
                                                              enum_value=ValueEnum)
-
-    def test_map_state(self):
-        # arrange
-        self.__common_before_hooks.map_enum = MagicMock()
-        context = PinfluencerContext()
-
-        # act
-        self.__sut.map_campaign_state(context=context)
-
-        # assert
-        self.__common_before_hooks.map_enum.assert_any_call(context=context,
-                                                            key="campaign_state",
-                                                            enum_value=CampaignStateEnum)
 
     def test_validate_id_when_invalid(self):
         # arrange
         id = "1234567"
-        context = PinfluencerContext(event=get_campaign_id_event(campaign_id=id),
+        context = PinfluencerContext(event=get_listing_id_event(listing_id=id),
                                      short_circuit=False,
                                      response=PinfluencerResponse())
 
@@ -587,7 +574,7 @@ class TestCampaignBeforeHooks(TestCase):
 
         # assert
         with self.subTest(msg="image was uploaded once"):
-            self.__common_before_hooks.upload_image.assert_called_once_with(path="campaigns/12345",
+            self.__common_before_hooks.upload_image.assert_called_once_with(path="listings/12345",
                                                                             context=context,
                                                                             map_list={
                                                                                 "product-image": "product_image"
@@ -897,12 +884,12 @@ class TestInfluencerAfterHooks(TestCase):
                                                                         collection=True)
 
 
-class TestCampaignAfterHooks(TestCase):
+class TestListingAfterHooks(TestCase):
 
     def setUp(self) -> None:
         self.__common_after_hooks: CommonAfterHooks = Mock()
         self.__mapper = test_mapper()
-        self.__sut = CampaignAfterHooks(common_after_hooks=self.__common_after_hooks,
+        self.__sut = ListingAfterHooks(common_after_hooks=self.__common_after_hooks,
                                         mapper=self.__mapper,
                                         repository=Mock())
 
@@ -928,8 +915,8 @@ class TestCampaignAfterHooks(TestCase):
         self.__sut.format_values_and_categories(context=context)
 
         # assert
-        self.__common_after_hooks.map_enums.assert_any_call(context=context, key="campaign_categories")
-        self.__common_after_hooks.map_enums.assert_any_call(context=context, key="campaign_values")
+        self.__common_after_hooks.map_enums.assert_any_call(context=context, key="categories")
+        self.__common_after_hooks.map_enums.assert_any_call(context=context, key="values")
 
     def test_format_values_and_categories_collection(self):
         # arrange
@@ -940,8 +927,8 @@ class TestCampaignAfterHooks(TestCase):
         self.__sut.format_values_and_categories_collection(context=context)
 
         # assert
-        self.__common_after_hooks.map_enums_collection.assert_any_call(context=context, key="campaign_categories")
-        self.__common_after_hooks.map_enums_collection.assert_any_call(context=context, key="campaign_values")
+        self.__common_after_hooks.map_enums_collection.assert_any_call(context=context, key="categories")
+        self.__common_after_hooks.map_enums_collection.assert_any_call(context=context, key="values")
 
     def test_tag_bucket_url_to_images_collection(self):
         # arrange
@@ -956,43 +943,19 @@ class TestCampaignAfterHooks(TestCase):
                                                                         image_fields=["product_image"],
                                                                         collection=True)
 
-    def test_format_campaign_state(self):
+    def test_validate_listing_belongs_to_brand(self):
         # arrange
-        context = PinfluencerContext()
-        self.__common_after_hooks.map_enum = MagicMock()
-
-        # act
-        self.__sut.format_campaign_state(context=context)
-
-        # assert
-        self.__common_after_hooks.map_enum(context=context,
-                                           key="campaign_state")
-
-    def test_format_campaign_state_collection(self):
-        # arrange
-        context = PinfluencerContext()
-        self.__common_after_hooks.map_enum_collection = MagicMock()
-
-        # act
-        self.__sut.format_campaign_state_collection(context=context)
-
-        # assert
-        self.__common_after_hooks.map_enums(context=context,
-                                            key="campaign_state")
-
-    def test_validate_campaign_belongs_to_brand(self):
-        # arrange
-        campaign_response: CampaignResponseDto = AutoFixture().create(dto=CampaignResponseDto, list_limit=5)
-        context = PinfluencerContext(auth_user_id=campaign_response.brand_auth_user_id,
-                                     response=PinfluencerResponse(body=campaign_response.__dict__),
+        listing_response: ListingResponseDto = AutoFixture().create(dto=ListingResponseDto, list_limit=5)
+        context = PinfluencerContext(auth_user_id=listing_response.brand_auth_user_id,
+                                     response=PinfluencerResponse(body=listing_response.__dict__),
                                      short_circuit=False)
 
         # act
-        self.__sut.validate_campaign_belongs_to_brand(context=context)
+        self.__sut.validate_listing_belongs_to_brand(context=context)
 
         # assert
         with self.subTest(msg="then mapped response stays the same"):
-            assert self.__mapper.map_from_dict(_from=context.response.body, to=CampaignResponseDto) == campaign_response
+            assert self.__mapper.map_from_dict(_from=context.response.body, to=ListingResponseDto) == listing_response
 
         # assert
         with self.subTest(msg="middleware does not short"):
@@ -1002,15 +965,15 @@ class TestCampaignAfterHooks(TestCase):
         with self.subTest(msg="response status code is 200"):
             assert context.response.status_code == 200
 
-    def test_validate_campaign_belongs_to_brand_when_brand_doesnt_belong(self):
+    def test_validate_listing_belongs_to_brand_when_brand_doesnt_belong(self):
         # arrange
-        campaign_response: CampaignResponseDto = AutoFixture().create(dto=CampaignResponseDto, list_limit=5)
+        listing_response: ListingResponseDto = AutoFixture().create(dto=ListingResponseDto, list_limit=5)
         context = PinfluencerContext(auth_user_id="12345",
-                                     response=PinfluencerResponse(body=campaign_response.__dict__),
+                                     response=PinfluencerResponse(body=listing_response.__dict__),
                                      short_circuit=False)
 
         # act
-        self.__sut.validate_campaign_belongs_to_brand(context=context)
+        self.__sut.validate_listing_belongs_to_brand(context=context)
 
         # assert
         with self.subTest(msg="body is empty"):

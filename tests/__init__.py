@@ -84,8 +84,8 @@ def get_notification_id_event(notification_id):
     return {'pathParameters': {'notification_id': notification_id}}
 
 
-def get_campaign_id_event(campaign_id):
-    return {'pathParameters': {'campaign_id': campaign_id}}
+def get_listing_id_event(listing_id):
+    return {'pathParameters': {'listing_id': listing_id}}
 
 
 def get_auth_user_event(auth_id):

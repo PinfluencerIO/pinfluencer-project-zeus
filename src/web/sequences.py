@@ -1,7 +1,7 @@
 from src.web import FluentSequenceBuilder, PinfluencerContext
-from src.web.controllers import CampaignController, InfluencerController, BrandController, NotificationController, \
+from src.web.controllers import ListingController, InfluencerController, BrandController, NotificationController, \
     AudienceAgeController, AudienceGenderController
-from src.web.hooks import CommonBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, UserAfterHooks, UserBeforeHooks, \
+from src.web.hooks import CommonBeforeHooks, ListingBeforeHooks, ListingAfterHooks, UserAfterHooks, UserBeforeHooks, \
     BrandBeforeHooks, BrandAfterHooks, InfluencerBeforeHooks, InfluencerAfterHooks, NotificationBeforeHooks, \
     AudienceAgeBeforeHooks, CommonAfterHooks, AudienceAgeAfterHooks, AudienceGenderAfterHooks, AudienceGenderBeforeHooks
 
@@ -19,37 +19,34 @@ class PreGenericUpdateCreateSubsequenceBuilder(FluentSequenceBuilder):
             ._add_command(self.__user_before_hooks.set_auth_user_id)
 
 
-class PreUpdateCreateCampaignSubsequenceBuilder(FluentSequenceBuilder):
+class PreUpdateCreateListingSubsequenceBuilder(FluentSequenceBuilder):
 
-    def __init__(self, campaign_before_hooks: CampaignBeforeHooks):
+    def __init__(self, listing_before_hooks: ListingBeforeHooks):
         super().__init__()
-        self.__campaign_before_hooks = campaign_before_hooks
+        self.__listing_before_hooks = listing_before_hooks
 
     def build(self):
-        self._add_command(self.__campaign_before_hooks.map_campaign_state) \
-            ._add_command(self.__campaign_before_hooks.map_campaign_categories_and_values)
+        self._add_command(self.__listing_before_hooks.map_categories_and_values)
 
 
-class PostSingleCampaignSubsequenceBuilder(FluentSequenceBuilder):
+class PostSingleListingSubsequenceBuilder(FluentSequenceBuilder):
 
-    def __init__(self, campaign_after_hooks: CampaignAfterHooks):
+    def __init__(self, listing_after_hooks: ListingAfterHooks):
         super().__init__()
-        self.__campaign_after_hooks = campaign_after_hooks
+        self.__listing_after_hooks = listing_after_hooks
 
     def build(self):
-        self._add_command(self.__campaign_after_hooks.format_campaign_state) \
-            ._add_command(self.__campaign_after_hooks.format_values_and_categories)
+        self._add_command(self.__listing_after_hooks.format_values_and_categories)
 
 
-class PostMultipleCampaignSubsequenceBuilder(FluentSequenceBuilder):
+class PostMultipleListingSubsequenceBuilder(FluentSequenceBuilder):
 
-    def __init__(self, campaign_after_hooks: CampaignAfterHooks):
+    def __init__(self, listing_after_hooks: ListingAfterHooks):
         super().__init__()
-        self.__campaign_after_hooks = campaign_after_hooks
+        self.__listing_after_hooks = listing_after_hooks
 
     def build(self):
-        self._add_command(self.__campaign_after_hooks.format_campaign_state_collection) \
-            ._add_command(self.__campaign_after_hooks.format_values_and_categories_collection)
+        self._add_command(self.__listing_after_hooks.format_values_and_categories_collection)
 
 
 class PostSingleUserSubsequenceBuilder(FluentSequenceBuilder):
@@ -74,135 +71,133 @@ class PostMultipleUserSubsequenceBuilder(FluentSequenceBuilder):
             ._add_command(self.__user_after_hooks.tag_auth_user_claims_to_response_collection)
 
 
-class UpdateImageForCampaignSequenceBuilder(FluentSequenceBuilder):
+class UpdateImageForListingSequenceBuilder(FluentSequenceBuilder):
 
     def __init__(self,
-                 campaign_before_hooks: CampaignBeforeHooks,
+                 listing_before_hooks: ListingBeforeHooks,
                  brand_before_hooks: BrandBeforeHooks,
-                 campaign_controller: CampaignController,
+                 listing_controller: ListingController,
                  generic_update_sequence: PreGenericUpdateCreateSubsequenceBuilder,
-                 post_single_campaign_sequence: PostSingleCampaignSubsequenceBuilder,
-                 campaign_after_hooks: CampaignAfterHooks):
+                 post_single_listing_sequence: PostSingleListingSubsequenceBuilder,
+                 listing_after_hooks: ListingAfterHooks):
         super().__init__()
-        self.__campaign_after_hooks = campaign_after_hooks
-        self.__post_single_campaign_sequence = post_single_campaign_sequence
+        self.__listing_after_hooks = listing_after_hooks
+        self.__post_single_listing_sequence = post_single_listing_sequence
         self.__generic_update_sequence = generic_update_sequence
-        self.__campaign_controller = campaign_controller
+        self.__listing_controller = listing_controller
         self.__brand_before_hooks = brand_before_hooks
-        self.__campaign_before_hooks = campaign_before_hooks
+        self.__listing_before_hooks = listing_before_hooks
 
     def build(self):
         self._add_sequence_builder(sequence_builder=self.__generic_update_sequence)\
-            ._add_command(command=self.__campaign_before_hooks.validate_id) \
+            ._add_command(command=self.__listing_before_hooks.validate_id) \
             ._add_command(command=self.__brand_before_hooks.validate_auth_brand) \
-            ._add_command(command=self.__campaign_before_hooks.validate_image_key) \
-            ._add_command(command=self.__campaign_before_hooks.upload_image)\
-            ._add_command(command=self.__campaign_controller.update_campaign_image) \
-            ._add_sequence_builder(sequence_builder=self.__post_single_campaign_sequence)\
-            ._add_command(command=self.__campaign_after_hooks.tag_bucket_url_to_images)
+            ._add_command(command=self.__listing_before_hooks.validate_image_key) \
+            ._add_command(command=self.__listing_before_hooks.upload_image)\
+            ._add_command(command=self.__listing_controller.update_listing_image) \
+            ._add_sequence_builder(sequence_builder=self.__post_single_listing_sequence)\
+            ._add_command(command=self.__listing_after_hooks.tag_bucket_url_to_images)
 
 
-class UpdateCampaignSequenceBuilder(FluentSequenceBuilder):
+class UpdateListingSequenceBuilder(FluentSequenceBuilder):
 
     def __init__(self,
-                 campaign_before_hooks: CampaignBeforeHooks,
+                 listing_before_hooks: ListingBeforeHooks,
                  brand_before_hooks: BrandBeforeHooks,
-                 campaign_controller: CampaignController,
+                 listing_controller: ListingController,
                  generic_update_sequence: PreGenericUpdateCreateSubsequenceBuilder,
-                 post_single_campaign_sequence: PostSingleCampaignSubsequenceBuilder,
-                 campaign_after_hooks: CampaignAfterHooks):
+                 post_single_listing_sequence: PostSingleListingSubsequenceBuilder,
+                 listing_after_hooks: ListingAfterHooks):
         super().__init__()
-        self.__campaign_after_hooks = campaign_after_hooks
-        self.__post_single_campaign_sequence = post_single_campaign_sequence
+        self.__listing_after_hooks = listing_after_hooks
+        self.__post_single_listing_sequence = post_single_listing_sequence
         self.__generic_update_sequence = generic_update_sequence
         self.__brand_before_hooks = brand_before_hooks
-        self.__campaign_controller = campaign_controller
-        self.__campaign_before_hooks = campaign_before_hooks
+        self.__listing_controller = listing_controller
+        self.__listing_before_hooks = listing_before_hooks
 
     def build(self):
         self._add_sequence_builder(sequence_builder=self.__generic_update_sequence)\
-            ._add_command(command=self.__campaign_before_hooks.validate_id)\
-            ._add_command(command=self.__campaign_before_hooks.validate_campaign)\
+            ._add_command(command=self.__listing_before_hooks.validate_id)\
+            ._add_command(command=self.__listing_before_hooks.validate_listing)\
             ._add_command(command=self.__brand_before_hooks.validate_auth_brand) \
-            ._add_command(command=self.__campaign_before_hooks.map_campaign_state) \
-            ._add_command(command=self.__campaign_before_hooks.map_campaign_categories_and_values) \
-            ._add_command(command=self.__campaign_controller.update_campaign)\
-            ._add_sequence_builder(sequence_builder=self.__post_single_campaign_sequence)\
-            ._add_command(command=self.__campaign_after_hooks.tag_bucket_url_to_images)
+            ._add_command(command=self.__listing_before_hooks.map_categories_and_values) \
+            ._add_command(command=self.__listing_controller.update_listing)\
+            ._add_sequence_builder(sequence_builder=self.__post_single_listing_sequence)\
+            ._add_command(command=self.__listing_after_hooks.tag_bucket_url_to_images)
 
 
-class CreateCampaignSequenceBuilder(FluentSequenceBuilder):
+class CreateListingSequenceBuilder(FluentSequenceBuilder):
 
     def __init__(self,
-                 campaign_before_hooks: CampaignBeforeHooks,
+                 listing_before_hooks: ListingBeforeHooks,
                  brand_before_hooks: BrandBeforeHooks,
-                 campaign_controller: CampaignController,
+                 listing_controller: ListingController,
                  generic_update_sequence: PreGenericUpdateCreateSubsequenceBuilder,
-                 post_single_campaign_sequence: PostSingleCampaignSubsequenceBuilder,
+                 post_single_listing_sequence: PostSingleListingSubsequenceBuilder,
                  common_after_hooks: CommonAfterHooks,
-                 campaign_after_hooks: CampaignAfterHooks):
+                 listing_after_hooks: ListingAfterHooks):
         super().__init__()
         self.__common_after_hooks = common_after_hooks
-        self.__campaign_after_hooks = campaign_after_hooks
-        self.__post_single_campaign_sequence = post_single_campaign_sequence
+        self.__listing_after_hooks = listing_after_hooks
+        self.__post_single_listing_sequence = post_single_listing_sequence
         self.__generic_update_sequence = generic_update_sequence
         self.__brand_before_hooks = brand_before_hooks
-        self.__campaign_controller = campaign_controller
-        self.__campaign_before_hooks = campaign_before_hooks
+        self.__listing_controller = listing_controller
+        self.__listing_before_hooks = listing_before_hooks
 
     def build(self):
         self._add_sequence_builder(sequence_builder=self.__generic_update_sequence) \
-            ._add_command(command=self.__campaign_before_hooks.validate_campaign) \
+            ._add_command(command=self.__listing_before_hooks.validate_listing) \
             ._add_command(command=self.__brand_before_hooks.validate_auth_brand) \
-            ._add_command(command=self.__campaign_before_hooks.map_campaign_state) \
-            ._add_command(command=self.__campaign_before_hooks.map_campaign_categories_and_values) \
-            ._add_command(command=self.__campaign_controller.create_for_brand) \
-            ._add_command(command=self.__campaign_after_hooks.save_state) \
-            ._add_sequence_builder(sequence_builder=self.__post_single_campaign_sequence) \
-            ._add_command(command=self.__campaign_after_hooks.tag_bucket_url_to_images)
+            ._add_command(command=self.__listing_before_hooks.map_categories_and_values) \
+            ._add_command(command=self.__listing_controller.create_for_brand) \
+            ._add_command(command=self.__listing_after_hooks.save_state) \
+            ._add_sequence_builder(sequence_builder=self.__post_single_listing_sequence) \
+            ._add_command(command=self.__listing_after_hooks.tag_bucket_url_to_images)
 
 
-class GetCampaignByIdSequenceBuilder(FluentSequenceBuilder):
+class GetListingByIdSequenceBuilder(FluentSequenceBuilder):
 
     def __init__(self,
-                 campaign_before_hooks: CampaignBeforeHooks,
-                 campaign_controller: CampaignController,
-                 post_single_campaign_sequence: PostSingleCampaignSubsequenceBuilder,
-                 campaign_after_hooks: CampaignAfterHooks):
+                 listing_before_hooks: ListingBeforeHooks,
+                 listing_controller: ListingController,
+                 post_single_listing_sequence: PostSingleListingSubsequenceBuilder,
+                 listing_after_hooks: ListingAfterHooks):
         super().__init__()
-        self.__campaign_after_hooks = campaign_after_hooks
-        self.__post_single_campaign_sequence = post_single_campaign_sequence
-        self.__campaign_controller = campaign_controller
-        self.__campaign_before_hooks = campaign_before_hooks
+        self.__listing_after_hooks = listing_after_hooks
+        self.__post_single_listing_sequence = post_single_listing_sequence
+        self.__listing_controller = listing_controller
+        self.__listing_before_hooks = listing_before_hooks
 
     def build(self):
-        self._add_command(command=self.__campaign_before_hooks.validate_id) \
-            ._add_command(command=self.__campaign_controller.get_by_id)\
-            ._add_sequence_builder(sequence_builder=self.__post_single_campaign_sequence)\
-            ._add_command(command=self.__campaign_after_hooks.tag_bucket_url_to_images)
+        self._add_command(command=self.__listing_before_hooks.validate_id) \
+            ._add_command(command=self.__listing_controller.get_by_id)\
+            ._add_sequence_builder(sequence_builder=self.__post_single_listing_sequence)\
+            ._add_command(command=self.__listing_after_hooks.tag_bucket_url_to_images)
 
 
-class GetCampaignsForBrandSequenceBuilder(FluentSequenceBuilder):
+class GetListingsForBrandSequenceBuilder(FluentSequenceBuilder):
 
     def __init__(self,
                  user_before_hooks: UserBeforeHooks,
                  brand_before_hooks: BrandBeforeHooks,
-                 campaign_controller: CampaignController,
-                 post_multiple_campaign_sequence: PostMultipleCampaignSubsequenceBuilder,
-                 campaign_after_hooks: CampaignAfterHooks):
+                 listing_controller: ListingController,
+                 post_multiple_listing_sequence: PostMultipleListingSubsequenceBuilder,
+                 listing_after_hooks: ListingAfterHooks):
         super().__init__()
         self.__brand_before_hooks = brand_before_hooks
-        self.__post_multiple_campaign_sequence = post_multiple_campaign_sequence
-        self.__campaign_after_hooks = campaign_after_hooks
-        self.__campaign_controller = campaign_controller
+        self.__post_multiple_listing_sequence = post_multiple_listing_sequence
+        self.__listing_after_hooks = listing_after_hooks
+        self.__listing_controller = listing_controller
         self.__user_before_hooks = user_before_hooks
 
     def build(self):
         self._add_command(command=self.__user_before_hooks.set_auth_user_id) \
             ._add_command(command=self.__brand_before_hooks.validate_auth_brand) \
-            ._add_command(command=self.__campaign_controller.get_for_brand) \
-            ._add_sequence_builder(sequence_builder=self.__post_multiple_campaign_sequence) \
-            ._add_command(command=self.__campaign_after_hooks.tag_bucket_url_to_images_collection)
+            ._add_command(command=self.__listing_controller.get_for_brand) \
+            ._add_sequence_builder(sequence_builder=self.__post_multiple_listing_sequence) \
+            ._add_command(command=self.__listing_after_hooks.tag_bucket_url_to_images_collection)
 
 
 class UpdateInfluencerImageSequenceBuilder(FluentSequenceBuilder):

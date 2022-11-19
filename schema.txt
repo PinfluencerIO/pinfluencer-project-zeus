@@ -1,7 +1,8 @@
 COGNITO-USER:
-firstName:                  str
-lastName:                   str
-email:                      str email
+
+    familyName:                  str
+    givenName:                   str
+    email:                      str email
     custom:usertype:            str allowed-values{null, "influencer", "brand"}
 
 ONBOARDING-BRAND:
@@ -46,25 +47,11 @@ AUDIENCE-GENDER-SPLITS
     audienceFemaleSplit:        float fraction
 
 
-CAMPAIGN:
+LISTING:
 
-    objective:                  str allowed-values{<objectives>}
-    successDescription:         str
-    campaignTitle:              str
-    campaignDescription:        str
-    campaignCategories:         str[] allowed-values{<categories>}
-    campaignValues:             str[] allowed-values{<values>}
-    campaignProductLink:        str url
-    campaignHashtag:            str
-    campaignDiscountCode:       str
-    productTitle:               str
+    title:                      str
+    creativeGuidance:           str
+    categories:                 str[] allowed-values{<categories>}
+    values:                     str[] allowed-values{<values>}
+    productName:                str
     productDescription:         str
-
-
-CAMPAIGN-STATES:
-
-    DRAFT -> ACTIVE
-    DRAFT -> ACTIVE -> CLOSED
-    DRAFT -> ACTIVE -> CLOSED -> DELETED
-    DRAFT -> ACTIVE -> DRAFT
-

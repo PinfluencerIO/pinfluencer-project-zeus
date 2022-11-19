@@ -47,11 +47,11 @@ influencer_payload_schema = {
     "required": []
 }
 
-campaign_payload_schema = {
+listing_payload_schema = {
     "type": "object",
     "properties":
         {
-            "campaign_hashtag": {
+            "title": {
                 "type": "string",
                 "pattern": "^.{1,120}$"
             }
@@ -60,10 +60,10 @@ campaign_payload_schema = {
 }
 
 
-class CampaignValidator:
+class ListingValidator:
 
-    def validate_campaign(self, payload):
-        validate(instance=payload, schema=campaign_payload_schema)
+    def validate_listing(self, payload):
+        validate(instance=payload, schema=listing_payload_schema)
 
 
 class BaseValidator:

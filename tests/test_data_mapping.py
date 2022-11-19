@@ -3,7 +3,7 @@ from unittest import TestCase
 from src.app import logger_factory
 from src.crosscutting import AutoFixture, PinfluencerObjectMapper
 from src.data.entities import create_mappings
-from src.domain.models import Brand, Influencer, Campaign, AudienceAge, AudienceGender
+from src.domain.models import Brand, Influencer, Listing, AudienceAge, AudienceGender
 from tests import InMemorySqliteDataManager
 
 
@@ -145,8 +145,8 @@ class TestMapping(TestCase):
                 self.assertEqual(getattr(value_from_db, 'influencer_id'), None)
 
             # assert
-            with self.subTest(msg=f"value {i} campaign id is null"):
-                self.assertEqual(getattr(value_from_db, 'campaign_id'), None)
+            with self.subTest(msg=f"value {i} listing id is null"):
+                self.assertEqual(getattr(value_from_db, 'listing_id'), None)
 
         for i in range(0, (len(expected_brand.categories) - 1)):
             expected_category = expected_brand.categories[i]
@@ -173,8 +173,8 @@ class TestMapping(TestCase):
                 self.assertEqual(getattr(category_from_db, 'influencer_id'), None)
 
             # assert
-            with self.subTest(msg=f"category {i} campaign id is null"):
-                self.assertEqual(getattr(category_from_db, 'campaign_id'), None)
+            with self.subTest(msg=f"category {i} listing id is null"):
+                self.assertEqual(getattr(category_from_db, 'listing_id'), None)
 
     def test_influencer_fetch_mapping(self):
         # arrange
@@ -241,8 +241,8 @@ class TestMapping(TestCase):
                 self.assertEqual(getattr(value_from_db, 'influencer_id'), influencer.auth_user_id)
 
             # assert
-            with self.subTest(msg=f"value {i} campaign id is null"):
-                self.assertEqual(getattr(value_from_db, 'campaign_id'), None)
+            with self.subTest(msg=f"value {i} listing id is null"):
+                self.assertEqual(getattr(value_from_db, 'listing_id'), None)
 
         for i in range(0, (len(influencer.categories) - 1)):
             expected_category = influencer.categories[i]
@@ -269,72 +269,52 @@ class TestMapping(TestCase):
                 self.assertEqual(getattr(category_from_db, 'influencer_id'), influencer.auth_user_id)
 
             # assert
-            with self.subTest(msg=f"category {i} campaign id is null"):
-                self.assertEqual(getattr(category_from_db, 'campaign_id'), None)
+            with self.subTest(msg=f"category {i} listing id is null"):
+                self.assertEqual(getattr(category_from_db, 'listing_id'), None)
 
-    def test_campaign_map_fetch(self):
+    def test_listing_map_fetch(self):
         # arrange
-        campaign = AutoFixture().create(dto=Campaign, list_limit=10)
-        self.__data_manager.create_fake_data([campaign])
+        listing = AutoFixture().create(dto=Listing, list_limit=10)
+        self.__data_manager.create_fake_data([listing])
 
         # act
-        camapign_from_db = self.__data_manager.session.query(Campaign).first()
+        camapign_from_db = self.__data_manager.session.query(Listing).first()
 
         # assert
-        with self.subTest(msg="campaign ids match"):
-            self.assertEqual(camapign_from_db.id, campaign.id)
+        with self.subTest(msg="listing ids match"):
+            self.assertEqual(camapign_from_db.id, listing.id)
 
         # assert
-        with self.subTest(msg="campaign created dates match"):
-            self.assertEqual(camapign_from_db.created, campaign.created)
+        with self.subTest(msg="listing created dates match"):
+            self.assertEqual(camapign_from_db.created, listing.created)
 
         # assert
-        with self.subTest(msg="campaign brand auth id match"):
-            self.assertEqual(camapign_from_db.brand_auth_user_id, campaign.brand_auth_user_id)
+        with self.subTest(msg="listing brand auth id match"):
+            self.assertEqual(camapign_from_db.brand_auth_user_id, listing.brand_auth_user_id)
 
         # assert
-        with self.subTest(msg="campaign campaign titles match"):
-            self.assertEqual(camapign_from_db.campaign_title, campaign.campaign_title)
+        with self.subTest(msg="listing listing titles match"):
+            self.assertEqual(camapign_from_db.title, listing.title)
 
         # assert
-        with self.subTest(msg="campaign success descriptions match"):
-            self.assertEqual(camapign_from_db.success_description, campaign.success_description)
+        with self.subTest(msg="listing product titles match"):
+            self.assertEqual(camapign_from_db.product_name, listing.product_name)
 
         # assert
-        with self.subTest(msg="campaign product titles match"):
-            self.assertEqual(camapign_from_db.product_title, campaign.product_title)
+        with self.subTest(msg="listing product descriptions match"):
+            self.assertEqual(camapign_from_db.product_description, listing.product_description)
 
         # assert
-        with self.subTest(msg="campaign product descriptions match"):
-            self.assertEqual(camapign_from_db.product_description, campaign.product_description)
+        with self.subTest(msg="listing product descriptions match"):
+            self.assertEqual(camapign_from_db.creative_guidance, listing.creative_guidance)
 
         # assert
-        with self.subTest(msg="campaign product descriptions match"):
-            self.assertEqual(camapign_from_db.objective, campaign.objective)
+        with self.subTest(msg="listing listing product images match"):
+            self.assertEqual(camapign_from_db.product_image, listing.product_image)
 
-        # assert
-        with self.subTest(msg="campaign campaign discount codes match"):
-            self.assertEqual(camapign_from_db.campaign_discount_code, campaign.campaign_discount_code)
-
-        # assert
-        with self.subTest(msg="campaign campaign states match"):
-            self.assertEqual(camapign_from_db.campaign_state, campaign.campaign_state)
-
-        # assert
-        with self.subTest(msg="campaign campaign hashtags match"):
-            self.assertEqual(camapign_from_db.campaign_hashtag, campaign.campaign_hashtag)
-
-        # assert
-        with self.subTest(msg="campaign campaign hashtags match"):
-            self.assertEqual(camapign_from_db.campaign_product_link, campaign.campaign_product_link)
-
-        # assert
-        with self.subTest(msg="campaign campaign product images match"):
-            self.assertEqual(camapign_from_db.product_image, campaign.product_image)
-
-        for i in range(0, (len(campaign.campaign_values) - 1)):
-            expected_value = campaign.campaign_values[i]
-            value_from_db = camapign_from_db.campaign_values[i]
+        for i in range(0, (len(listing.values) - 1)):
+            expected_value = listing.values[i]
+            value_from_db = camapign_from_db.values[i]
 
             # assert
             with self.subTest(msg=f"value {i} ids match"):
@@ -357,12 +337,12 @@ class TestMapping(TestCase):
                 self.assertEqual(getattr(value_from_db, 'influencer_id'), None)
 
             # assert
-            with self.subTest(msg=f"value {i} campaign id matches"):
-                self.assertEqual(getattr(value_from_db, 'campaign_id'), campaign.id)
+            with self.subTest(msg=f"value {i} listing id matches"):
+                self.assertEqual(getattr(value_from_db, 'listing_id'), listing.id)
 
-        for i in range(0, (len(campaign.campaign_categories) - 1)):
-            expected_category = campaign.campaign_categories[i]
-            category_from_db = camapign_from_db.campaign_categories[i]
+        for i in range(0, (len(listing.categories) - 1)):
+            expected_category = listing.categories[i]
+            category_from_db = camapign_from_db.categories[i]
 
             # assert
             with self.subTest(msg=f"category {i} ids match"):
@@ -385,5 +365,5 @@ class TestMapping(TestCase):
                 self.assertEqual(getattr(category_from_db, 'influencer_id'), None)
 
             # assert
-            with self.subTest(msg=f"category {i} campaign id matches"):
-                self.assertEqual(getattr(category_from_db, 'campaign_id'), campaign.id)
+            with self.subTest(msg=f"category {i} listing id matches"):
+                self.assertEqual(getattr(category_from_db, 'listing_id'), listing.id)

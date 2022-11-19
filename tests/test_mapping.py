@@ -4,11 +4,11 @@ from unittest import TestCase
 from ddt import data, ddt
 
 from src.crosscutting import AutoFixture
-from src.domain.models import Brand, Influencer, Campaign, AudienceAge, AudienceAgeSplit, AudienceGenderSplit, \
+from src.domain.models import Brand, Influencer, Listing, AudienceAge, AudienceAgeSplit, AudienceGenderSplit, \
     AudienceGender, GenderEnum
 from src.web.mapping import MappingRules
 from src.web.views import BrandRequestDto, BrandResponseDto, InfluencerRequestDto, InfluencerResponseDto, \
-    CampaignResponseDto, CampaignRequestDto, AudienceAgeViewDto, \
+    ListingResponseDto, ListingRequestDto, AudienceAgeViewDto, \
     AudienceGenderViewDto
 from tests import test_mapper
 
@@ -464,262 +464,166 @@ class TestMappingRules(TestCase):
         with self.subTest(msg="addresses match"):
             self.assertEqual(influencer_response.address, influencer.address)
 
-    def test_map_campaign_to_campaign_response(self):
+    def test_map_listing_to_listing_response(self):
         # arrange
-        campaign = AutoFixture().create(dto=Campaign, list_limit=5)
+        listing = AutoFixture().create(dto=Listing, list_limit=5)
 
         # act
         self.__sut.add_rules()
-        campaign_response = self.__mapper.map(_from=campaign, to=CampaignResponseDto)
+        listing_response = self.__mapper.map(_from=listing, to=ListingResponseDto)
 
         # assert
         with self.subTest(msg="values match"):
-            self.assertEqual(campaign_response.campaign_values, list(map(lambda x: x.value, campaign.campaign_values)))
+            self.assertEqual(listing_response.values, list(map(lambda x: x.value, listing.values)))
 
         # assert
         with self.subTest(msg="categories match"):
-            self.assertEqual(campaign_response.campaign_categories,
-                             list(map(lambda x: x.category, campaign.campaign_categories)))
+            self.assertEqual(listing_response.categories,
+                             list(map(lambda x: x.category, listing.categories)))
 
         # assert
         with self.subTest(msg="ids match"):
-            self.assertEqual(campaign_response.id, campaign.id)
+            self.assertEqual(listing_response.id, listing.id)
 
         # assert
         with self.subTest(msg="created dates match"):
-            self.assertEqual(campaign_response.created, campaign.created)
-
-        # assert
-        with self.subTest(msg="hashtag match"):
-            self.assertEqual(campaign_response.campaign_hashtag, campaign.campaign_hashtag)
+            self.assertEqual(listing_response.created, listing.created)
 
         # assert
         with self.subTest(msg="product image match"):
-            self.assertEqual(campaign_response.product_image, campaign.product_image)
+            self.assertEqual(listing_response.product_image, listing.product_image)
 
         # assert
-        with self.subTest(msg="product links match"):
-            self.assertEqual(campaign_response.campaign_product_link, campaign.campaign_product_link)
-
-        # assert
-        with self.subTest(msg="campaign states match"):
-            self.assertEqual(campaign_response.campaign_state, campaign.campaign_state)
-
-        # assert
-        with self.subTest(msg="discount codes match"):
-            self.assertEqual(campaign_response.campaign_discount_code, campaign.campaign_discount_code)
-
-        # assert
-        with self.subTest(msg="objectives match"):
-            self.assertEqual(campaign_response.objective, campaign.objective)
+        with self.subTest(msg="creative guidancess match"):
+            self.assertEqual(listing_response.creative_guidance, listing.creative_guidance)
 
         # assert
         with self.subTest(msg="product descriptions match"):
-            self.assertEqual(campaign_response.product_description, campaign.product_description)
+            self.assertEqual(listing_response.product_description, listing.product_description)
 
         # assert
         with self.subTest(msg="product titles match"):
-            self.assertEqual(campaign_response.product_title, campaign.product_title)
+            self.assertEqual(listing_response.product_name, listing.product_name)
 
         # assert
-        with self.subTest(msg="success descriptions match"):
-            self.assertEqual(campaign_response.success_description, campaign.success_description)
-
-        # assert
-        with self.subTest(msg="campaign titles match"):
-            self.assertEqual(campaign_response.campaign_title, campaign.campaign_title)
+        with self.subTest(msg="listing titles match"):
+            self.assertEqual(listing_response.title, listing.title)
 
         # assert
         with self.subTest(msg="brand auth user ids match"):
-            self.assertEqual(campaign_response.brand_auth_user_id, campaign.brand_auth_user_id)
+            self.assertEqual(listing_response.brand_auth_user_id, listing.brand_auth_user_id)
 
-        # assert
-        with self.subTest(msg="campaign descriptions match"):
-            self.assertEqual(campaign_response.campaign_description, campaign.campaign_description)
-
-    def test_map_campaign_response_to_campaign(self):
+    def test_map_listing_response_to_listing(self):
         # arrange
-        campaign_response = AutoFixture().create(dto=CampaignResponseDto, list_limit=5)
+        listing_response = AutoFixture().create(dto=ListingResponseDto, list_limit=5)
 
         # act
         self.__sut.add_rules()
-        campaign = self.__mapper.map(_from=campaign_response, to=Campaign)
+        listing = self.__mapper.map(_from=listing_response, to=Listing)
 
         # assert
         with self.subTest(msg="values match"):
-            self.assertEqual(campaign_response.campaign_values, list(map(lambda x: x.value, campaign.campaign_values)))
+            self.assertEqual(listing_response.values, list(map(lambda x: x.value, listing.values)))
 
         # assert
         with self.subTest(msg="categories match"):
-            self.assertEqual(campaign_response.campaign_categories,
-                             list(map(lambda x: x.category, campaign.campaign_categories)))
+            self.assertEqual(listing_response.categories,
+                             list(map(lambda x: x.category, listing.categories)))
 
         # assert
         with self.subTest(msg="ids match"):
-            self.assertEqual(campaign_response.id, campaign.id)
+            self.assertEqual(listing_response.id, listing.id)
 
         # assert
         with self.subTest(msg="created dates match"):
-            self.assertEqual(campaign_response.created, campaign.created)
-
-        # assert
-        with self.subTest(msg="hashtag match"):
-            self.assertEqual(campaign_response.campaign_hashtag, campaign.campaign_hashtag)
+            self.assertEqual(listing_response.created, listing.created)
 
         # assert
         with self.subTest(msg="product image match"):
-            self.assertEqual(campaign_response.product_image, campaign.product_image)
+            self.assertEqual(listing_response.product_image, listing.product_image)
 
         # assert
-        with self.subTest(msg="product links match"):
-            self.assertEqual(campaign_response.campaign_product_link, campaign.campaign_product_link)
-
-        # assert
-        with self.subTest(msg="campaign states match"):
-            self.assertEqual(campaign_response.campaign_state, campaign.campaign_state)
-
-        # assert
-        with self.subTest(msg="discount codes match"):
-            self.assertEqual(campaign_response.campaign_discount_code, campaign.campaign_discount_code)
-
-        # assert
-        with self.subTest(msg="objectives match"):
-            self.assertEqual(campaign_response.objective, campaign.objective)
+        with self.subTest(msg="creative gudiancess match"):
+            self.assertEqual(listing_response.creative_guidance, listing.creative_guidance)
 
         # assert
         with self.subTest(msg="product descriptions match"):
-            self.assertEqual(campaign_response.product_description, campaign.product_description)
+            self.assertEqual(listing_response.product_description, listing.product_description)
 
         # assert
         with self.subTest(msg="product titles match"):
-            self.assertEqual(campaign_response.product_title, campaign.product_title)
+            self.assertEqual(listing_response.product_name, listing.product_name)
 
         # assert
-        with self.subTest(msg="success descriptions match"):
-            self.assertEqual(campaign_response.success_description, campaign.success_description)
-
-        # assert
-        with self.subTest(msg="campaign titles match"):
-            self.assertEqual(campaign_response.campaign_title, campaign.campaign_title)
+        with self.subTest(msg="listing titles match"):
+            self.assertEqual(listing_response.title, listing.title)
 
         # assert
         with self.subTest(msg="brand auth user ids match"):
-            self.assertEqual(campaign_response.brand_auth_user_id, campaign.brand_auth_user_id)
+            self.assertEqual(listing_response.brand_auth_user_id, listing.brand_auth_user_id)
 
-        # assert
-        with self.subTest(msg="campaign descriptions match"):
-            self.assertEqual(campaign_response.campaign_description, campaign.campaign_description)
-
-    def test_map_campaign_to_campaign_request(self):
+    def test_map_listing_to_listing_request(self):
         # arrange
-        campaign = AutoFixture().create(dto=Campaign, list_limit=5)
+        listing = AutoFixture().create(dto=Listing, list_limit=5)
 
         # act
         self.__sut.add_rules()
-        campaign_request = self.__mapper.map(_from=campaign, to=CampaignRequestDto)
+        listing_request = self.__mapper.map(_from=listing, to=ListingRequestDto)
 
         # assert
         with self.subTest(msg="values match"):
-            self.assertEqual(campaign_request.campaign_values, list(map(lambda x: x.value, campaign.campaign_values)))
+            self.assertEqual(listing_request.values, list(map(lambda x: x.value, listing.values)))
 
         # assert
         with self.subTest(msg="categories match"):
-            self.assertEqual(campaign_request.campaign_categories,
-                             list(map(lambda x: x.category, campaign.campaign_categories)))
+            self.assertEqual(listing_request.categories,
+                             list(map(lambda x: x.category, listing.categories)))
 
         # assert
-        with self.subTest(msg="hashtag match"):
-            self.assertEqual(campaign_request.campaign_hashtag, campaign.campaign_hashtag)
-
-        # assert
-        with self.subTest(msg="product links match"):
-            self.assertEqual(campaign_request.campaign_product_link, campaign.campaign_product_link)
-
-        # assert
-        with self.subTest(msg="campaign states match"):
-            self.assertEqual(campaign_request.campaign_state, campaign.campaign_state)
-
-        # assert
-        with self.subTest(msg="discount codes match"):
-            self.assertEqual(campaign_request.campaign_discount_code, campaign.campaign_discount_code)
-
-        # assert
-        with self.subTest(msg="objectives match"):
-            self.assertEqual(campaign_request.objective, campaign.objective)
+        with self.subTest(msg="creative gudiances match"):
+            self.assertEqual(listing_request.creative_guidance, listing.creative_guidance)
 
         # assert
         with self.subTest(msg="product descriptions match"):
-            self.assertEqual(campaign_request.product_description, campaign.product_description)
+            self.assertEqual(listing_request.product_description, listing.product_description)
 
         # assert
         with self.subTest(msg="product titles match"):
-            self.assertEqual(campaign_request.product_title, campaign.product_title)
+            self.assertEqual(listing_request.product_name, listing.product_name)
 
         # assert
-        with self.subTest(msg="success descriptions match"):
-            self.assertEqual(campaign_request.success_description, campaign.success_description)
+        with self.subTest(msg="listing titles match"):
+            self.assertEqual(listing_request.title, listing.title)
 
-        # assert
-        with self.subTest(msg="campaign titles match"):
-            self.assertEqual(campaign_request.campaign_title, campaign.campaign_title)
-
-        # assert
-        with self.subTest(msg="campaign descriptions match"):
-            self.assertEqual(campaign_request.campaign_description, campaign.campaign_description)
-
-    def test_map_campaign_request_to_campaign(self):
+    def test_map_listing_request_to_listing(self):
         # arrange
-        campaign_request = AutoFixture().create(dto=CampaignRequestDto, list_limit=5)
+        listing_request = AutoFixture().create(dto=ListingRequestDto, list_limit=5)
 
         # act
         self.__sut.add_rules()
-        campaign = self.__mapper.map(_from=campaign_request, to=Campaign)
+        listing = self.__mapper.map(_from=listing_request, to=Listing)
 
         # assert
         with self.subTest(msg="values match"):
-            self.assertEqual(campaign_request.campaign_values, list(map(lambda x: x.value, campaign.campaign_values)))
+            self.assertEqual(listing_request.values, list(map(lambda x: x.value, listing.values)))
 
         # assert
         with self.subTest(msg="categories match"):
-            self.assertEqual(campaign_request.campaign_categories,
-                             list(map(lambda x: x.category, campaign.campaign_categories)))
+            self.assertEqual(listing_request.categories,
+                             list(map(lambda x: x.category, listing.categories)))
 
         # assert
-        with self.subTest(msg="hashtag match"):
-            self.assertEqual(campaign_request.campaign_hashtag, campaign.campaign_hashtag)
-
-        # assert
-        with self.subTest(msg="product links match"):
-            self.assertEqual(campaign_request.campaign_product_link, campaign.campaign_product_link)
-
-        # assert
-        with self.subTest(msg="campaign states match"):
-            self.assertEqual(campaign_request.campaign_state, campaign.campaign_state)
-
-        # assert
-        with self.subTest(msg="discount codes match"):
-            self.assertEqual(campaign_request.campaign_discount_code, campaign.campaign_discount_code)
-
-        # assert
-        with self.subTest(msg="objectives match"):
-            self.assertEqual(campaign_request.objective, campaign.objective)
+        with self.subTest(msg="creative gudiances match"):
+            self.assertEqual(listing_request.creative_guidance, listing.creative_guidance)
 
         # assert
         with self.subTest(msg="product descriptions match"):
-            self.assertEqual(campaign_request.product_description, campaign.product_description)
+            self.assertEqual(listing_request.product_description, listing.product_description)
 
         # assert
         with self.subTest(msg="product titles match"):
-            self.assertEqual(campaign_request.product_title, campaign.product_title)
+            self.assertEqual(listing_request.product_name, listing.product_name)
 
         # assert
-        with self.subTest(msg="success descriptions match"):
-            self.assertEqual(campaign_request.success_description, campaign.success_description)
-
-        # assert
-        with self.subTest(msg="campaign titles match"):
-            self.assertEqual(campaign_request.campaign_title, campaign.campaign_title)
-
-        # assert
-        with self.subTest(msg="campaign descriptions match"):
-            self.assertEqual(campaign_request.campaign_description, campaign.campaign_description)
+        with self.subTest(msg="listing titles match"):
+            self.assertEqual(listing_request.title, listing.title)

@@ -1,7 +1,7 @@
 import datetime
 from dataclasses import dataclass
 
-from src.domain.models import ValueEnum, CategoryEnum, CampaignStateEnum, CollaborationState
+from src.domain.models import ValueEnum, CategoryEnum, CollaborationStateEnum
 
 
 @dataclass(unsafe_hash=True)
@@ -29,18 +29,12 @@ class BrandRequestDto:
 
 
 @dataclass(unsafe_hash=True)
-class CampaignRequestDto:
-    objective: str = None
-    success_description: str = None
-    campaign_title: str = None
-    campaign_description: str = None
-    campaign_categories: list[CategoryEnum] = None
-    campaign_values: list[ValueEnum] = None
-    campaign_state: CampaignStateEnum = None
-    campaign_product_link: str = None
-    campaign_hashtag: str = None
-    campaign_discount_code: str = None
-    product_title: str = None
+class ListingRequestDto:
+    creative_guidance: str = None
+    title: str = None
+    categories: list[CategoryEnum] = None
+    values: list[ValueEnum] = None
+    product_name: str = None
     product_description: str = None
 
 
@@ -81,7 +75,7 @@ class CollaborationCreateRequestDto:
     number_of_pictures: int = None
     number_of_videos: int = None
     number_of_stories: int = None
-    campaign_id: str = None
+    listing_id: str = None
 
 
 @dataclass(unsafe_hash=True)
@@ -91,7 +85,7 @@ class CollaborationUpdateRequestDto:
     number_of_pictures: int = None
     number_of_videos: int = None
     number_of_stories: int = None
-    collaboration_state: CollaborationState = None
+    collaboration_state: CollaborationStateEnum = None
 
 
 @dataclass(unsafe_hash=True)
@@ -152,19 +146,13 @@ class InfluencerResponseDto(BaseResponseDto):
 
 
 @dataclass(unsafe_hash=True)
-class CampaignResponseDto(BaseResponseDto):
+class ListingResponseDto(BaseResponseDto):
     brand_auth_user_id: str = None
-    objective: str = None
-    success_description: str = None
-    campaign_title: str = None
-    campaign_description: str = None
-    campaign_state: CampaignStateEnum = None
-    campaign_categories: list[CategoryEnum] = None
-    campaign_values: list[ValueEnum] = None
-    campaign_product_link: str = None
-    campaign_hashtag: str = None
-    campaign_discount_code: str = None
-    product_title: str = None
+    creative_guidance: str = None
+    title: str = None
+    categories: list[CategoryEnum] = None
+    values: list[ValueEnum] = None
+    product_name: str = None
     product_description: str = None
     product_image: str = None
 
@@ -178,8 +166,8 @@ class CollaborationResponseDto(BaseResponseDto):
     number_of_pictures: int = None
     number_of_videos: int = None
     number_of_stories: int = None
-    campaign_id: str = None
-    collaboration_state: CollaborationState = None
+    listing_id: str = None
+    collaboration_state: CollaborationStateEnum = None
 
 
 @dataclass(unsafe_hash=True)

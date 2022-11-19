@@ -11,9 +11,9 @@ from src.app import bootstrap
 from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.middleware import MiddlewarePipeline
 from src.web.routing import Dispatcher
-from src.web.sequences import NotImplementedSequenceBuilder, UpdateImageForCampaignSequenceBuilder, \
-    UpdateCampaignSequenceBuilder, CreateCampaignSequenceBuilder, GetCampaignByIdSequenceBuilder, \
-    GetCampaignsForBrandSequenceBuilder, UpdateInfluencerImageSequenceBuilder, UpdateInfluencerSequenceBuilder, \
+from src.web.sequences import NotImplementedSequenceBuilder, UpdateImageForListingSequenceBuilder, \
+    UpdateListingSequenceBuilder, CreateListingSequenceBuilder, GetListingByIdSequenceBuilder, \
+    GetListingsForBrandSequenceBuilder, UpdateInfluencerImageSequenceBuilder, UpdateInfluencerSequenceBuilder, \
     CreateInfluencerSequenceBuilder, GetAuthInfluencerSequenceBuilder, GetInfluencerByIdSequenceBuilder, \
     GetAllInfluencersSequenceBuilder, UpdateBrandImageSequenceBuilder, UpdateBrandSequenceBuilder, \
     CreateBrandSequenceBuilder, GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder, \
@@ -269,11 +269,11 @@ class TestRoutes(TestCase):
             .assert_called_once_with(context=Any(),
                                      sequence=self.__ioc.resolve(UpdateInfluencerSequenceBuilder))
 
-    def test_create_auth_brand_campaign(self):  # arrange
+    def test_create_auth_brand_listing(self):  # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
 
         # act
-        bootstrap(event={"routeKey": "POST /brands/me/campaigns"},
+        bootstrap(event={"routeKey": "POST /brands/me/listings"},
                   context={},
                   middleware=self.__mock_middleware_pipeline,
                   ioc=self.__ioc,
@@ -284,14 +284,14 @@ class TestRoutes(TestCase):
         self.__mock_middleware_pipeline \
             .execute_middleware \
             .assert_called_once_with(context=Any(),
-                                     sequence=self.__ioc.resolve(CreateCampaignSequenceBuilder))
+                                     sequence=self.__ioc.resolve(CreateListingSequenceBuilder))
 
-    def test_get_campaign_by_id(self):
+    def test_get_listing_by_id(self):
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
 
         # act
-        bootstrap(event={"routeKey": "GET /campaigns/{campaign_id}"},
+        bootstrap(event={"routeKey": "GET /listings/{listing_id}"},
                   context={},
                   middleware=self.__mock_middleware_pipeline,
                   ioc=self.__ioc,
@@ -302,14 +302,14 @@ class TestRoutes(TestCase):
         self.__mock_middleware_pipeline \
             .execute_middleware \
             .assert_called_once_with(context=Any(),
-                                     sequence=self.__ioc.resolve(GetCampaignByIdSequenceBuilder))
+                                     sequence=self.__ioc.resolve(GetListingByIdSequenceBuilder))
 
-    def test_get_auth_brand_campaigns(self):
+    def test_get_auth_brand_listings(self):
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
 
         # act
-        bootstrap(event={"routeKey": "GET /brands/me/campaigns"},
+        bootstrap(event={"routeKey": "GET /brands/me/listings"},
                   context={},
                   middleware=self.__mock_middleware_pipeline,
                   ioc=self.__ioc,
@@ -320,14 +320,14 @@ class TestRoutes(TestCase):
         self.__mock_middleware_pipeline \
             .execute_middleware \
             .assert_called_once_with(context=Any(),
-                                     sequence=self.__ioc.resolve(GetCampaignsForBrandSequenceBuilder))
+                                     sequence=self.__ioc.resolve(GetListingsForBrandSequenceBuilder))
 
-    def test_update_brand_auth_campaign_by_id(self):
+    def test_update_brand_auth_listing_by_id(self):
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
 
         # act
-        bootstrap(event={"routeKey": "PATCH /brands/me/campaigns/{campaign_id}"},
+        bootstrap(event={"routeKey": "PATCH /brands/me/listings/{listing_id}"},
                   context={},
                   middleware=self.__mock_middleware_pipeline,
                   ioc=self.__ioc,
@@ -338,17 +338,17 @@ class TestRoutes(TestCase):
         self.__mock_middleware_pipeline \
             .execute_middleware \
             .assert_called_once_with(context=Any(),
-                                     sequence=self.__ioc.resolve(UpdateCampaignSequenceBuilder))
+                                     sequence=self.__ioc.resolve(UpdateListingSequenceBuilder))
 
-    def test_delete_brand_auth_campaign_by_id(self):
-        self.__assert_not_implemented(route="DELETE /brands/me/campaigns/{campaign_id}")
+    def test_delete_brand_auth_listing_by_id(self):
+        self.__assert_not_implemented(route="DELETE /brands/me/listings/{listing_id}")
 
-    def test_create_campaign_product_image(self):
+    def test_create_listing_product_image(self):
         # arrange
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
 
         # act
-        bootstrap(event={"routeKey": "POST /brands/me/campaigns/{campaign_id}/images/{image_field}"},
+        bootstrap(event={"routeKey": "POST /brands/me/listings/{listing_id}/images/{image_field}"},
                   context={},
                   middleware=self.__mock_middleware_pipeline,
                   ioc=self.__ioc,
@@ -359,7 +359,7 @@ class TestRoutes(TestCase):
         self.__mock_middleware_pipeline \
             .execute_middleware \
             .assert_called_once_with(context=Any(),
-                                     sequence=self.__ioc.resolve(UpdateImageForCampaignSequenceBuilder))
+                                     sequence=self.__ioc.resolve(UpdateImageForListingSequenceBuilder))
 
     def test_get_notification_by_id(self):
         # arrange

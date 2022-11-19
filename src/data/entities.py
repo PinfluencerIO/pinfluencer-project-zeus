@@ -5,8 +5,8 @@ from sqlalchemy import Column, String, DateTime, Float, PickleType, Table, Integ
 
 from src import T
 from src.data import Base
-from src.domain.models import Brand, Influencer, Campaign, Collaboration, Notification, ValueEnum, Value, CategoryEnum, \
-    Category, CampaignStateEnum, GenderEnum, AudienceAge, AudienceGender
+from src.domain.models import Brand, Influencer, Listing, Collaboration, Notification, ValueEnum, Value, CategoryEnum, \
+    Category, GenderEnum, AudienceAge, AudienceGender, CollaborationStateEnum
 
 
 class SqlAlchemyBaseEntity:
@@ -24,7 +24,7 @@ value_table = Table('value', Base.metadata,
                     Column('value', Enum(ValueEnum)),
                     Column('brand_id', String(length=64)),
                     Column('influencer_id', String(length=64)),
-                    Column('campaign_id', String(length=64)))
+                    Column('listing_id', String(length=64)))
 
 audience_age_table = Table('audience_age', Base.metadata,
                            Column('id', String(length=36), primary_key=True),
@@ -47,7 +47,7 @@ category_table = Table('category', Base.metadata,
                        Column('category', Enum(CategoryEnum)),
                        Column('brand_id', String(length=64)),
                        Column('influencer_id', String(length=64)),
-                       Column('campaign_id', String(length=64)))
+                       Column('listing_id', String(length=64)))
 
 brand_table = Table('brand', Base.metadata,
                     Column('id', String(length=36), primary_key=True),
@@ -70,21 +70,15 @@ influencer_table = Table('influencer', Base.metadata,
                          Column('insta_handle', String(length=30)),
                          Column('address', String(length=500)))
 
-campaign_table = Table('campaign', Base.metadata,
-                       Column('id', String(length=36), primary_key=True),
-                       Column('created', DateTime),
-                       Column('brand_auth_user_id', String(length=360)),
-                       Column('objective', String(length=120)),
-                       Column('success_description', String(length=500)),
-                       Column('campaign_title', String(length=120)),
-                       Column('campaign_description', String(length=500)),
-                       Column('campaign_state', Enum(CampaignStateEnum)),
-                       Column('campaign_product_link', String(length=120)),
-                       Column('campaign_hashtag', String(length=120)),
-                       Column('campaign_discount_code', String(length=120)),
-                       Column('product_title', String(length=120)),
-                       Column('product_description', String(length=500)),
-                       Column('product_image', String(length=360)))
+listing_table = Table('listing', Base.metadata,
+                      Column('id', String(length=36), primary_key=True),
+                      Column('created', DateTime),
+                      Column('brand_auth_user_id', String(length=360)),
+                      Column('creative_guidance', String(length=120)),
+                      Column('title', String(length=120)),
+                      Column('product_name', String(length=120)),
+                      Column('product_description', String(length=500)),
+                      Column('product_image', String(length=360)))
 
 collaboration_table = Table('collaboration', Base.metadata,
                             Column('id', String(length=36), primary_key=True),
@@ -96,8 +90,8 @@ collaboration_table = Table('collaboration', Base.metadata,
                             Column('number_of_pictures', Integer),
                             Column('number_of_videos', Integer),
                             Column('number_of_stories', Integer),
-                            Column('campaign_id', PickleType),
-                            Column('collaboration_state', PickleType))
+                            Column('listing_id', String(length=64)),
+                            Column('collaboration_state', Enum(CollaborationStateEnum)))
 
 notifications_table = Table('notification', Base.metadata,
                             Column('id', String(length=36), primary_key=True),
@@ -131,12 +125,12 @@ def create_mappings(logger):
                                                      key_to=category_table.c.influencer_id,
                                                      _type=Category)
         })
-        sqlalchemy.orm.mapper(Campaign, campaign_table, properties={
-            'campaign_values': create_joined_relationship(key_from=campaign_table.c.id,
-                                                          key_to=value_table.c.campaign_id,
+        sqlalchemy.orm.mapper(Listing, listing_table, properties={
+            'values': create_joined_relationship(key_from=listing_table.c.id,
+                                                          key_to=value_table.c.listing_id,
                                                           _type=Value),
-            'campaign_categories': create_joined_relationship(key_from=campaign_table.c.id,
-                                                              key_to=category_table.c.campaign_id,
+            'categories': create_joined_relationship(key_from=listing_table.c.id,
+                                                              key_to=category_table.c.listing_id,
                                                               _type=Category)
         })
         sqlalchemy.orm.mapper(Collaboration, collaboration_table)

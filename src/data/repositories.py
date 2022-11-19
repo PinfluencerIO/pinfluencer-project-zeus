@@ -10,7 +10,7 @@ from filetype import filetype
 
 from src._types import DataManager, ImageRepository, Model, UserModel, Logger
 from src.data.entities import create_mappings
-from src.domain.models import Brand, Influencer, Campaign, User, Notification, AudienceAgeSplit, AudienceAge, \
+from src.domain.models import Brand, Influencer, Listing, User, Notification, AudienceAgeSplit, AudienceAge, \
     AudienceGenderSplit, AudienceGender
 from src.exceptions import AlreadyExistsException, ImageException, NotFoundException
 
@@ -114,7 +114,7 @@ class SqlAlchemyAudienceAgeRepository(BaseSqlAlchemyOwnerRepository):
     def __init__(self, data_manager: DataManager,
                  logger: Logger):
         super().__init__(data_manager,
-                         Campaign,
+                         Listing,
                          logger=logger)
 
     def write_new_for_influencer(self,
@@ -143,7 +143,7 @@ class SqlAlchemyAudienceGenderRepository(BaseSqlAlchemyOwnerRepository):
     def __init__(self, data_manager: DataManager,
                  logger: Logger):
         super().__init__(data_manager,
-                         Campaign,
+                         Listing,
                          logger=logger)
 
     def write_new_for_influencer(self,
@@ -189,29 +189,29 @@ class SqlAlchemyInfluencerRepository(BaseSqlAlchemyUserRepository):
                          logger=logger)
 
 
-class SqlAlchemyCampaignRepository(BaseSqlAlchemyOwnerRepository):
+class SqlAlchemyListingRepository(BaseSqlAlchemyOwnerRepository):
 
     def __init__(self, data_manager: DataManager,
                  image_repository: ImageRepository,
                  logger: Logger):
         super().__init__(data_manager,
-                         Campaign,
+                         Listing,
                          logger=logger)
 
     def write_new_for_brand(self,
-                            payload: Campaign,
-                            auth_user_id: str) -> Campaign:
+                            payload: Listing,
+                            auth_user_id: str) -> Listing:
         return self._write_new_for_owner(payload=payload,
                                          foreign_key_setter=lambda x: self.__brand_auth_user_id_setter(payload=x,
                                                                                                        auth_user_id=auth_user_id))
 
-    def __brand_auth_user_id_setter(self, payload: Campaign, auth_user_id: str):
+    def __brand_auth_user_id_setter(self, payload: Listing, auth_user_id: str):
         payload.brand_auth_user_id = auth_user_id
 
-    def load_for_auth_brand(self, auth_user_id: str) -> list[Campaign]:
+    def load_for_auth_brand(self, auth_user_id: str) -> list[Listing]:
         return self._load_for_auth_owner(auth_user_id=auth_user_id,
-                                         model_entity_field=Campaign.brand_auth_user_id,
-                                         model=Campaign)
+                                         model_entity_field=Listing.brand_auth_user_id,
+                                         model=Listing)
 
 
 class SqlAlchemyNotificationRepository(BaseSqlAlchemyRepository):

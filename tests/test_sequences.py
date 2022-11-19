@@ -4,15 +4,15 @@ from unittest.mock import Mock
 from simple_injection import ServiceCollection
 
 from src.app import bootstrap
-from src.web.controllers import CampaignController, InfluencerController, BrandController, NotificationController, \
+from src.web.controllers import ListingController, InfluencerController, BrandController, NotificationController, \
     AudienceAgeController, AudienceGenderController
-from src.web.hooks import CommonBeforeHooks, UserBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, UserAfterHooks, \
+from src.web.hooks import CommonBeforeHooks, UserBeforeHooks, ListingBeforeHooks, ListingAfterHooks, UserAfterHooks, \
     BrandBeforeHooks, InfluencerBeforeHooks, InfluencerAfterHooks, BrandAfterHooks, NotificationBeforeHooks, \
     AudienceAgeBeforeHooks, AudienceAgeAfterHooks, AudienceGenderAfterHooks, AudienceGenderBeforeHooks
-from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdateCreateCampaignSubsequenceBuilder, \
-    PostSingleCampaignSubsequenceBuilder, PostMultipleCampaignSubsequenceBuilder, PostSingleUserSubsequenceBuilder, \
-    PostMultipleUserSubsequenceBuilder, UpdateImageForCampaignSequenceBuilder, UpdateCampaignSequenceBuilder, \
-    CreateCampaignSequenceBuilder, GetCampaignByIdSequenceBuilder, GetCampaignsForBrandSequenceBuilder, \
+from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdateCreateListingSubsequenceBuilder, \
+    PostSingleListingSubsequenceBuilder, PostMultipleListingSubsequenceBuilder, PostSingleUserSubsequenceBuilder, \
+    PostMultipleUserSubsequenceBuilder, UpdateImageForListingSequenceBuilder, UpdateListingSequenceBuilder, \
+    CreateListingSequenceBuilder, GetListingByIdSequenceBuilder, GetListingsForBrandSequenceBuilder, \
     UpdateInfluencerImageSequenceBuilder, UpdateInfluencerSequenceBuilder, CreateInfluencerSequenceBuilder, \
     GetAuthInfluencerSequenceBuilder, GetInfluencerByIdSequenceBuilder, GetAllInfluencersSequenceBuilder, \
     UpdateBrandImageSequenceBuilder, UpdateBrandSequenceBuilder, CreateBrandSequenceBuilder, \
@@ -48,55 +48,52 @@ class TestPreGenericUpdateCreateSubsequence(TestCase):
                                               ioc.resolve(UserBeforeHooks).set_auth_user_id])
 
 
-class TestPreUpdateCreateCampaignSubsequence(TestCase):
+class TestPreUpdateCreateListingSubsequence(TestCase):
 
     def test_sequence(self):
         # arrange
         ioc = ServiceCollection()
         setup(ioc)
-        sut = ioc.resolve(PreUpdateCreateCampaignSubsequenceBuilder)
+        sut = ioc.resolve(PreUpdateCreateListingSubsequenceBuilder)
 
         # act
         sut.build()
 
         # assert
         with self.subTest(msg="components match"):
-            self.assertEqual(sut.components, [ioc.resolve(CampaignBeforeHooks).map_campaign_state,
-                                              ioc.resolve(CampaignBeforeHooks).map_campaign_categories_and_values])
+            self.assertEqual(sut.components, [ioc.resolve(ListingBeforeHooks).map_categories_and_values])
 
 
-class TestPostSingleCampaignSubsequence(TestCase):
+class TestPostSingleListingSubsequence(TestCase):
 
     def test_sequence(self):
         # arrange
         ioc = ServiceCollection()
         setup(ioc)
-        sut = ioc.resolve(PostSingleCampaignSubsequenceBuilder)
+        sut = ioc.resolve(PostSingleListingSubsequenceBuilder)
 
         # act
         sut.build()
 
         # assert
         with self.subTest(msg="components match"):
-            self.assertEqual(sut.components, [ioc.resolve(CampaignAfterHooks).format_campaign_state,
-                                              ioc.resolve(CampaignAfterHooks).format_values_and_categories])
+            self.assertEqual(sut.components, [ioc.resolve(ListingAfterHooks).format_values_and_categories])
 
 
-class TestPostMultipleCampaignSubsequence(TestCase):
+class TestPostMultipleListingSubsequence(TestCase):
 
     def test_sequence(self):
         # arrange
         ioc = ServiceCollection()
         setup(ioc)
-        sut = ioc.resolve(PostMultipleCampaignSubsequenceBuilder)
+        sut = ioc.resolve(PostMultipleListingSubsequenceBuilder)
 
         # act
         sut.build()
 
         # assert
         with self.subTest(msg="components match"):
-            self.assertEqual(sut.components, [ioc.resolve(CampaignAfterHooks).format_campaign_state_collection,
-                                              ioc.resolve(CampaignAfterHooks).format_values_and_categories_collection])
+            self.assertEqual(sut.components, [ioc.resolve(ListingAfterHooks).format_values_and_categories_collection])
 
 
 class TestPostSingleUserSubsequence(TestCase):
@@ -133,13 +130,13 @@ class TestPostMultipleUserSubsequence(TestCase):
                                               ioc.resolve(UserAfterHooks).tag_auth_user_claims_to_response_collection])
 
 
-class TestUpdateImageForCampaignSequence(TestCase):
+class TestUpdateImageForListingSequence(TestCase):
 
     def test_sequence(self):
         # arrange
         ioc = ServiceCollection()
         setup(ioc)
-        sut = ioc.resolve(UpdateImageForCampaignSequenceBuilder)
+        sut = ioc.resolve(UpdateImageForListingSequenceBuilder)
 
         # act
         sut.build()
@@ -148,22 +145,22 @@ class TestUpdateImageForCampaignSequence(TestCase):
         with self.subTest(msg="components match"):
             self.maxDiff = None
             self.assertEqual(sut.components, [ioc.resolve(PreGenericUpdateCreateSubsequenceBuilder),
-                                              ioc.resolve(CampaignBeforeHooks).validate_id,
+                                              ioc.resolve(ListingBeforeHooks).validate_id,
                                               ioc.resolve(BrandBeforeHooks).validate_auth_brand,
-                                              ioc.resolve(CampaignBeforeHooks).validate_image_key,
-                                              ioc.resolve(CampaignBeforeHooks).upload_image,
-                                              ioc.resolve(CampaignController).update_campaign_image,
-                                              ioc.resolve(PostSingleCampaignSubsequenceBuilder),
-                                              ioc.resolve(CampaignAfterHooks).tag_bucket_url_to_images])
+                                              ioc.resolve(ListingBeforeHooks).validate_image_key,
+                                              ioc.resolve(ListingBeforeHooks).upload_image,
+                                              ioc.resolve(ListingController).update_listing_image,
+                                              ioc.resolve(PostSingleListingSubsequenceBuilder),
+                                              ioc.resolve(ListingAfterHooks).tag_bucket_url_to_images])
 
 
-class TestUpdateCampaignSequenceBuilder(TestCase):
+class TestUpdateListingSequenceBuilder(TestCase):
 
     def test_sequence(self):
         # arrange
         ioc = ServiceCollection()
         setup(ioc)
-        sut = ioc.resolve(UpdateCampaignSequenceBuilder)
+        sut = ioc.resolve(UpdateListingSequenceBuilder)
 
         # act
         sut.build()
@@ -172,23 +169,22 @@ class TestUpdateCampaignSequenceBuilder(TestCase):
         with self.subTest(msg="components match"):
             self.maxDiff = None
             self.assertEqual(sut.components, [ioc.resolve(PreGenericUpdateCreateSubsequenceBuilder),
-                                              ioc.resolve(CampaignBeforeHooks).validate_id,
-                                              ioc.resolve(CampaignBeforeHooks).validate_campaign,
+                                              ioc.resolve(ListingBeforeHooks).validate_id,
+                                              ioc.resolve(ListingBeforeHooks).validate_listing,
                                               ioc.resolve(BrandBeforeHooks).validate_auth_brand,
-                                              ioc.resolve(CampaignBeforeHooks).map_campaign_state,
-                                              ioc.resolve(CampaignBeforeHooks).map_campaign_categories_and_values,
-                                              ioc.resolve(CampaignController).update_campaign,
-                                              ioc.resolve(PostSingleCampaignSubsequenceBuilder),
-                                              ioc.resolve(CampaignAfterHooks).tag_bucket_url_to_images])
+                                              ioc.resolve(ListingBeforeHooks).map_categories_and_values,
+                                              ioc.resolve(ListingController).update_listing,
+                                              ioc.resolve(PostSingleListingSubsequenceBuilder),
+                                              ioc.resolve(ListingAfterHooks).tag_bucket_url_to_images])
 
 
-class TestCreateCampaignSequenceBuilder(TestCase):
+class TestCreateListingSequenceBuilder(TestCase):
 
     def test_sequence(self):
         # arrange
         ioc = ServiceCollection()
         setup(ioc)
-        sut = ioc.resolve(CreateCampaignSequenceBuilder)
+        sut = ioc.resolve(CreateListingSequenceBuilder)
 
         # act
         sut.build()
@@ -197,23 +193,22 @@ class TestCreateCampaignSequenceBuilder(TestCase):
         with self.subTest(msg="components match"):
             self.maxDiff = None
             self.assertEqual(sut.components, [ioc.resolve(PreGenericUpdateCreateSubsequenceBuilder),
-                                              ioc.resolve(CampaignBeforeHooks).validate_campaign,
+                                              ioc.resolve(ListingBeforeHooks).validate_listing,
                                               ioc.resolve(BrandBeforeHooks).validate_auth_brand,
-                                              ioc.resolve(CampaignBeforeHooks).map_campaign_state,
-                                              ioc.resolve(CampaignBeforeHooks).map_campaign_categories_and_values,
-                                              ioc.resolve(CampaignController).create_for_brand,
-                                              ioc.resolve(CampaignAfterHooks).save_state,
-                                              ioc.resolve(PostSingleCampaignSubsequenceBuilder),
-                                              ioc.resolve(CampaignAfterHooks).tag_bucket_url_to_images])
+                                              ioc.resolve(ListingBeforeHooks).map_categories_and_values,
+                                              ioc.resolve(ListingController).create_for_brand,
+                                              ioc.resolve(ListingAfterHooks).save_state,
+                                              ioc.resolve(PostSingleListingSubsequenceBuilder),
+                                              ioc.resolve(ListingAfterHooks).tag_bucket_url_to_images])
 
 
-class TestGetCampaignByIdSequenceBuilder(TestCase):
+class TestGetListingByIdSequenceBuilder(TestCase):
 
     def test_sequence(self):
         # arrange
         ioc = ServiceCollection()
         setup(ioc)
-        sut = ioc.resolve(GetCampaignByIdSequenceBuilder)
+        sut = ioc.resolve(GetListingByIdSequenceBuilder)
 
         # act
         sut.build()
@@ -221,19 +216,19 @@ class TestGetCampaignByIdSequenceBuilder(TestCase):
         # assert
         with self.subTest(msg="components match"):
             self.maxDiff = None
-            self.assertEqual(sut.components, [ioc.resolve(CampaignBeforeHooks).validate_id,
-                                              ioc.resolve(CampaignController).get_by_id,
-                                              ioc.resolve(PostSingleCampaignSubsequenceBuilder),
-                                              ioc.resolve(CampaignAfterHooks).tag_bucket_url_to_images])
+            self.assertEqual(sut.components, [ioc.resolve(ListingBeforeHooks).validate_id,
+                                              ioc.resolve(ListingController).get_by_id,
+                                              ioc.resolve(PostSingleListingSubsequenceBuilder),
+                                              ioc.resolve(ListingAfterHooks).tag_bucket_url_to_images])
 
 
-class TestGetCampaignsForBrandSequenceBuilder(TestCase):
+class TestGetListingsForBrandSequenceBuilder(TestCase):
 
     def test_sequence(self):
         # arrange
         ioc = ServiceCollection()
         setup(ioc)
-        sut = ioc.resolve(GetCampaignsForBrandSequenceBuilder)
+        sut = ioc.resolve(GetListingsForBrandSequenceBuilder)
 
         # act
         sut.build()
@@ -243,9 +238,9 @@ class TestGetCampaignsForBrandSequenceBuilder(TestCase):
             self.maxDiff = None
             self.assertEqual(sut.components, [ioc.resolve(UserBeforeHooks).set_auth_user_id,
                                               ioc.resolve(BrandBeforeHooks).validate_auth_brand,
-                                              ioc.resolve(CampaignController).get_for_brand,
-                                              ioc.resolve(PostMultipleCampaignSubsequenceBuilder),
-                                              ioc.resolve(CampaignAfterHooks).tag_bucket_url_to_images_collection])
+                                              ioc.resolve(ListingController).get_for_brand,
+                                              ioc.resolve(PostMultipleListingSubsequenceBuilder),
+                                              ioc.resolve(ListingAfterHooks).tag_bucket_url_to_images_collection])
 
 
 class TestUpdateImageForInfluencerSequenceBuilder(TestCase):

@@ -1,15 +1,15 @@
 from contextlib import contextmanager
 from typing import Callable, Any
 
-from src._types import BrandRepository, UserRepository, InfluencerRepository, Repository, CampaignRepository, Logger, \
+from src._types import BrandRepository, UserRepository, InfluencerRepository, Repository, ListingRepository, Logger, \
     Model, NotificationRepository, AudienceAgeRepository, AudienceGenderRepository
 from src.crosscutting import PinfluencerObjectMapper, FlexiUpdater
-from src.domain.models import Brand, Influencer, Campaign, Notification, AudienceAgeSplit, AudienceGenderSplit
+from src.domain.models import Brand, Influencer, Listing, Notification, AudienceAgeSplit, AudienceGenderSplit
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.web import BRAND_ID_PATH_KEY, INFLUENCER_ID_PATH_KEY, PinfluencerContext, ErrorCapsule
 from src.web.error_capsules import AudienceDataNotFoundErrorCapsule
 from src.web.views import BrandRequestDto, BrandResponseDto, ImageRequestDto, InfluencerRequestDto, \
-    InfluencerResponseDto, CampaignRequestDto, CampaignResponseDto, NotificationCreateRequestDto, \
+    InfluencerResponseDto, ListingRequestDto, ListingResponseDto, NotificationCreateRequestDto, \
     NotificationResponseDto, AudienceAgeViewDto, AudienceGenderViewDto
 
 
@@ -355,36 +355,36 @@ class AudienceAgeController(BaseAudienceController, BaseOwnerController):
                                     audience_splits_getter=lambda x: x.audience_ages)
 
 
-class CampaignController(BaseOwnerController):
+class ListingController(BaseOwnerController):
 
-    def __init__(self, repository: CampaignRepository, object_mapper: PinfluencerObjectMapper,
+    def __init__(self, repository: ListingRepository, object_mapper: PinfluencerObjectMapper,
                  flexi_updater: FlexiUpdater, logger: Logger):
         super().__init__(repository, object_mapper, flexi_updater, logger,
-                         response=CampaignResponseDto,
-                         request=CampaignRequestDto)
+                         response=ListingResponseDto,
+                         request=ListingRequestDto)
 
     def create_for_brand(self, context: PinfluencerContext) -> None:
         self._create_for_owner(context=context,
                                repo_method=self._repository.write_new_for_brand,
-                               request=CampaignRequestDto,
-                               response=CampaignResponseDto,
-                               model=Campaign)
+                               request=ListingRequestDto,
+                               response=ListingResponseDto,
+                               model=Listing)
 
     def get_for_brand(self, context: PinfluencerContext) -> None:
         children = self._repository.load_for_auth_brand(context.auth_user_id)
         context.response.status_code = 200
         context.response.body = (list(
-            map(lambda x: self._mapper.map(_from=x, to=CampaignResponseDto).__dict__, children)))
+            map(lambda x: self._mapper.map(_from=x, to=ListingResponseDto).__dict__, children)))
 
-    def update_campaign(self, context: PinfluencerContext):
+    def update_listing(self, context: PinfluencerContext):
         self._generic_update(context=context,
-                             request=CampaignRequestDto,
-                             response=CampaignResponseDto,
+                             request=ListingRequestDto,
+                             response=ListingResponseDto,
                              repo_func=lambda: self._repository.load_by_id(id_=context.id))
 
-    def update_campaign_image(self, context: PinfluencerContext):
+    def update_listing_image(self, context: PinfluencerContext):
         self._generic_update_image_field(context=context,
-                                         response=CampaignResponseDto,
+                                         response=ListingResponseDto,
                                          repo_func=lambda: self._repository.load_by_id(id_=context.id))
 
 

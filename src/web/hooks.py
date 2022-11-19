@@ -3,16 +3,16 @@ from typing import Any, Callable
 from jsonschema.exceptions import ValidationError
 
 from src._types import AuthUserRepository, Deserializer, BrandRepository, ImageRepository, Logger, \
-    NotificationRepository, AudienceAgeRepository, InfluencerRepository, CampaignRepository, Repository, \
+    NotificationRepository, AudienceAgeRepository, InfluencerRepository, ListingRepository, Repository, \
     AudienceGenderRepository
 from src.crosscutting import PinfluencerObjectMapper
-from src.domain.models import CategoryEnum, ValueEnum, CampaignStateEnum, User
-from src.domain.validation import BrandValidator, InfluencerValidator, CampaignValidator
+from src.domain.models import CategoryEnum, ValueEnum, User
+from src.domain.validation import BrandValidator, InfluencerValidator, ListingValidator
 from src.exceptions import NotFoundException
 from src.web import PinfluencerContext, valid_path_resource_id, ErrorCapsule
 from src.web.error_capsules import AudienceDataAlreadyExistsErrorCapsule, BrandNotFoundErrorCapsule, \
     InfluencerNotFoundErrorCapsule
-from src.web.views import RawImageRequestDto, ImageRequestDto, CampaignResponseDto, NotificationCreateRequestDto
+from src.web.views import RawImageRequestDto, ImageRequestDto, ListingResponseDto, NotificationCreateRequestDto
 
 S3_URL = "https://pinfluencer-product-images.s3.eu-west-2.amazonaws.com"
 
@@ -114,31 +114,26 @@ class CommonBeforeHooks:
         context.body = self.__deserializer.deserialize(data=context.event["body"])
 
 
-class CampaignBeforeHooks:
+class ListingBeforeHooks:
 
-    def __init__(self, campaign_validator: CampaignValidator,
+    def __init__(self, listing_validator: ListingValidator,
                  common_before_hooks: CommonBeforeHooks,
                  logger: Logger):
         self.__logger = logger
         self.__common_before_hooks = common_before_hooks
-        self.__campaign_validator = campaign_validator
+        self.__listing_validator = listing_validator
 
-    def map_campaign_categories_and_values(self, context: PinfluencerContext):
+    def map_categories_and_values(self, context: PinfluencerContext):
         self.__common_before_hooks.map_enums(context=context,
-                                             key="campaign_categories",
+                                             key="categories",
                                              enum_value=CategoryEnum)
         self.__common_before_hooks.map_enums(context=context,
-                                             key="campaign_values",
+                                             key="values",
                                              enum_value=ValueEnum)
 
-    def map_campaign_state(self, context: PinfluencerContext):
-        self.__common_before_hooks.map_enum(context=context,
-                                            key="campaign_state",
-                                            enum_value=CampaignStateEnum)
-
-    def validate_campaign(self, context: PinfluencerContext):
+    def validate_listing(self, context: PinfluencerContext):
         try:
-            self.__campaign_validator.validate_campaign(payload=context.body)
+            self.__listing_validator.validate_listing(payload=context.body)
         except ValidationError as e:
             self.__logger.log_exception(e)
             context.short_circuit = True
@@ -146,7 +141,7 @@ class CampaignBeforeHooks:
             context.response.status_code = 400
 
     def validate_id(self, context: PinfluencerContext):
-        id = valid_path_resource_id(event=context.event, resource_key="campaign_id", logger=self.__logger)
+        id = valid_path_resource_id(event=context.event, resource_key="listing_id", logger=self.__logger)
         if not id:
             context.short_circuit = True
             context.response.body = {}
@@ -155,7 +150,7 @@ class CampaignBeforeHooks:
             context.id = id
 
     def upload_image(self, context: PinfluencerContext):
-        self.__common_before_hooks.upload_image(path=f"campaigns/{context.auth_user_id}", context=context, map_list={
+        self.__common_before_hooks.upload_image(path=f"listings/{context.auth_user_id}", context=context, map_list={
             "product-image": "product_image"
         })
 
@@ -171,10 +166,10 @@ class SaveableHook:
         self.__repository.save()
 
 
-class CampaignAfterHooks(SaveableHook):
+class ListingAfterHooks(SaveableHook):
 
     def __init__(self, common_after_hooks: CommonAfterHooks, mapper: PinfluencerObjectMapper,
-                 repository: CampaignRepository):
+                 repository: ListingRepository):
         super().__init__(repository)
         self.__mapper = mapper
         self.__common_after_hooks = common_after_hooks
@@ -186,9 +181,9 @@ class CampaignAfterHooks(SaveableHook):
 
     def format_values_and_categories(self, context: PinfluencerContext):
         self.__common_after_hooks.map_enums(context=context,
-                                            key="campaign_values")
+                                            key="values")
         self.__common_after_hooks.map_enums(context=context,
-                                            key="campaign_categories")
+                                            key="categories")
 
     def tag_bucket_url_to_images_collection(self, context: PinfluencerContext):
         self.__common_after_hooks.set_image_url(context=context,
@@ -197,20 +192,12 @@ class CampaignAfterHooks(SaveableHook):
 
     def format_values_and_categories_collection(self, context: PinfluencerContext):
         self.__common_after_hooks.map_enums_collection(context=context,
-                                                       key="campaign_values")
+                                                       key="values")
         self.__common_after_hooks.map_enums_collection(context=context,
-                                                       key="campaign_categories")
+                                                       key="categories")
 
-    def format_campaign_state_collection(self, context: PinfluencerContext):
-        self.__common_after_hooks.map_enum_collection(context=context,
-                                                      key="campaign_state")
-
-    def format_campaign_state(self, context: PinfluencerContext):
-        self.__common_after_hooks.map_enum(context=context,
-                                           key="campaign_state")
-
-    def validate_campaign_belongs_to_brand(self, context: PinfluencerContext):
-        brand_response: CampaignResponseDto = self.__mapper.map_from_dict(_from=context.response.body, to=CampaignResponseDto)
+    def validate_listing_belongs_to_brand(self, context: PinfluencerContext):
+        brand_response: ListingResponseDto = self.__mapper.map_from_dict(_from=context.response.body, to=ListingResponseDto)
         if not (brand_response.brand_auth_user_id == context.auth_user_id):
             context.short_circuit = True
             context.response.body = {}
@@ -431,9 +418,9 @@ class HooksFacade:
                  user_after_hooks: UserAfterHooks,
                  influencer_before_hooks: InfluencerBeforeHooks,
                  brand_before_hooks: BrandBeforeHooks,
-                 campaign_before_hooks: CampaignBeforeHooks,
-                 campaign_after_hooks: CampaignAfterHooks):
-        self.__campaign_before_hooks = campaign_before_hooks
+                 listing_before_hooks: ListingBeforeHooks,
+                 listing_after_hooks: ListingAfterHooks):
+        self.__listing_before_hooks = listing_before_hooks
         self.__brand_before_hooks = brand_before_hooks
         self.__influencer_before_hooks = influencer_before_hooks
         self.__user_after_hooks = user_after_hooks
@@ -441,13 +428,13 @@ class HooksFacade:
         self.__user_before_hooks = user_before_hooks
         self.__brand_after_hooks = brand_after_hooks
         self.__common_before_hooks = common_hooks
-        self.__campaign_after_hooks = campaign_after_hooks
+        self.__listing_after_hooks = listing_after_hooks
 
-    def get_campaign_after_hooks(self) -> CampaignAfterHooks:
-        return self.__campaign_after_hooks
+    def get_listing_after_hooks(self) -> ListingAfterHooks:
+        return self.__listing_after_hooks
 
-    def get_campaign_before_hooks(self) -> CampaignBeforeHooks:
-        return self.__campaign_before_hooks
+    def get_listing_before_hooks(self) -> ListingBeforeHooks:
+        return self.__listing_before_hooks
 
     def get_brand_before_hooks(self) -> BrandBeforeHooks:
         return self.__brand_before_hooks

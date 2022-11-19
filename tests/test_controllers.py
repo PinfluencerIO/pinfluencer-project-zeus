@@ -6,19 +6,19 @@ from unittest.mock import Mock, MagicMock
 from callee import Captor
 from ddt import ddt, data
 
-from src._types import BrandRepository, InfluencerRepository, CampaignRepository, NotificationRepository, \
+from src._types import BrandRepository, InfluencerRepository, ListingRepository, NotificationRepository, \
     AudienceAgeRepository, AudienceGenderRepository
 from src.app import logger_factory
 from src.crosscutting import AutoFixture, FlexiUpdater
-from src.domain.models import Influencer, Campaign, Brand, Notification, AudienceAgeSplit, AudienceGenderSplit, \
+from src.domain.models import Influencer, Listing, Brand, Notification, AudienceAgeSplit, AudienceGenderSplit, \
     AudienceGender
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.web import PinfluencerContext, PinfluencerResponse
-from src.web.controllers import BrandController, InfluencerController, CampaignController, NotificationController, \
+from src.web.controllers import BrandController, InfluencerController, ListingController, NotificationController, \
     AudienceAgeController, AudienceGenderController
 from src.web.error_capsules import AudienceDataNotFoundErrorCapsule
 from src.web.views import BrandRequestDto, BrandResponseDto, ImageRequestDto, InfluencerRequestDto, \
-    InfluencerResponseDto, CampaignRequestDto, CampaignResponseDto, NotificationCreateRequestDto, \
+    InfluencerResponseDto, ListingRequestDto, ListingResponseDto, NotificationCreateRequestDto, \
     NotificationResponseDto, AudienceAgeViewDto, AudienceGenderViewDto
 from tests import test_mapper
 
@@ -564,26 +564,26 @@ class TestBrandController(TestCase):
             assert context.short_circuit == True
 
 
-class TestCampaignController(TestCase):
+class TestListingController(TestCase):
 
     def setUp(self) -> None:
-        self.__campaign_repository: CampaignRepository = Mock()
+        self.__listing_repository: ListingRepository = Mock()
         self.__object_mapper = test_mapper()
         self.__flexi_updater = FlexiUpdater(mapper=self.__object_mapper)
-        self.__sut = CampaignController(repository=self.__campaign_repository,
+        self.__sut = ListingController(repository=self.__listing_repository,
                                         object_mapper=self.__object_mapper,
                                         flexi_updater=self.__flexi_updater,
                                         logger=Mock())
 
-    def test_write_for_campaign(self):
+    def test_write_for_listing(self):
         # arrange
-        campaign_from_db = AutoFixture().create(dto=Campaign, list_limit=5)
-        campaign_request: CampaignRequestDto = self.__object_mapper.map(_from=campaign_from_db, to=CampaignRequestDto)
+        listing_from_db = AutoFixture().create(dto=Listing, list_limit=5)
+        listing_request: ListingRequestDto = self.__object_mapper.map(_from=listing_from_db, to=ListingRequestDto)
         context = PinfluencerContext(response=PinfluencerResponse(),
                                      short_circuit=False,
                                      auth_user_id="12341",
-                                     body=campaign_request.__dict__)
-        self.__campaign_repository.write_new_for_brand = MagicMock(return_value=campaign_from_db)
+                                     body=listing_request.__dict__)
+        self.__listing_repository.write_new_for_brand = MagicMock(return_value=listing_from_db)
 
         # act
         self.__sut.create_for_brand(context=context)
@@ -593,39 +593,33 @@ class TestCampaignController(TestCase):
 
         # assert
         with self.subTest(msg="repo was called"):
-            self.__campaign_repository.write_new_for_brand.assert_called_once_with(
+            self.__listing_repository.write_new_for_brand.assert_called_once_with(
                 payload_captor,
                 "12341")
-        payload_campaign: Campaign = payload_captor.arg
+        payload_listing: Listing = payload_captor.arg
 
         # assert
         with self.subTest(msg="middleware does not short"):
             assert context.short_circuit == False
 
         # assert
-        with self.subTest(msg="body equals returned campaign"):
-            assert self.__object_mapper.map_from_dict(_from=context.response.body, to=CampaignResponseDto) == \
-                   self.__object_mapper.map(_from=campaign_from_db, to=CampaignResponseDto)
+        with self.subTest(msg="body equals returned listing"):
+            assert self.__object_mapper.map_from_dict(_from=context.response.body, to=ListingResponseDto) == \
+                   self.__object_mapper.map(_from=listing_from_db, to=ListingResponseDto)
 
         # assert
         with self.subTest(msg="success response is returned"):
             assert context.response.status_code == 201
 
         # assert
-        with self.subTest(msg="campaign fields match"):
-            assert payload_campaign.campaign_hashtag == campaign_request.campaign_hashtag
+        with self.subTest(msg="listing fields match"):
             assert list(
-                map(lambda x: x.category, payload_campaign.campaign_categories)) == campaign_request.campaign_categories
-            assert list(map(lambda x: x.value, payload_campaign.campaign_values)) == campaign_request.campaign_values
-            assert payload_campaign.campaign_state == campaign_request.campaign_state
-            assert payload_campaign.campaign_description == campaign_request.campaign_description
-            assert payload_campaign.campaign_discount_code == campaign_request.campaign_discount_code
-            assert payload_campaign.campaign_product_link == campaign_request.campaign_product_link
-            assert payload_campaign.campaign_title == campaign_request.campaign_title
-            assert payload_campaign.objective == campaign_request.objective
-            assert payload_campaign.product_description == campaign_request.product_description
-            assert payload_campaign.product_title == campaign_request.product_title
-            assert payload_campaign.success_description == campaign_request.success_description
+                map(lambda x: x.category, payload_listing.categories)) == listing_request.categories
+            assert list(map(lambda x: x.value, payload_listing.values)) == listing_request.values
+            assert payload_listing.title == listing_request.title
+            assert payload_listing.creative_guidance == listing_request.creative_guidance
+            assert payload_listing.product_description == listing_request.product_description
+            assert payload_listing.product_name == listing_request.product_name
 
     def test_get_by_id(self):
         # arrange
@@ -636,32 +630,32 @@ class TestCampaignController(TestCase):
         self.__sut.get_by_id(context)
 
         # assert
-        self.__sut._get_by_id.assert_called_once_with(context=context, response=CampaignResponseDto)
+        self.__sut._get_by_id.assert_called_once_with(context=context, response=ListingResponseDto)
 
     def test_get_for_brand(self):
         # arrange
-        campaigns = AutoFixture().create_many(dto=Campaign, list_limit=5, ammount=10)
+        listings = AutoFixture().create_many(dto=Listing, list_limit=5, ammount=10)
         auth_user_id = "1234"
         context = PinfluencerContext(auth_user_id=auth_user_id,
                                      response=PinfluencerResponse(body=[]),
                                      short_circuit=False)
-        self.__campaign_repository.load_for_auth_brand = MagicMock(return_value=campaigns)
+        self.__listing_repository.load_for_auth_brand = MagicMock(return_value=listings)
 
         # act
         self.__sut.get_for_brand(context=context)
 
         # assert
         with self.subTest(msg="repo is called"):
-            self.__campaign_repository.load_for_auth_brand.assert_called_once_with(auth_user_id)
+            self.__listing_repository.load_for_auth_brand.assert_called_once_with(auth_user_id)
 
         # assert
         with self.subTest(msg="middleware does not short"):
             assert context.short_circuit == False
 
         # assert
-        with self.subTest(msg="campaigns are returned"):
+        with self.subTest(msg="listings are returned"):
             assert context.response.body == list(
-                map(lambda x: self.__object_mapper.map(_from=x, to=CampaignResponseDto).__dict__, campaigns))
+                map(lambda x: self.__object_mapper.map(_from=x, to=ListingResponseDto).__dict__, listings))
 
         # assert
         with self.subTest(msg="response is success"):
@@ -671,44 +665,44 @@ class TestCampaignController(TestCase):
         # arrange
         context = PinfluencerContext(id="12345")
         self.__sut._generic_update = MagicMock()
-        self.__campaign_repository.load_by_id = MagicMock()
+        self.__listing_repository.load_by_id = MagicMock()
 
         # act
-        self.__sut.update_campaign(context=context)
+        self.__sut.update_listing(context=context)
 
         # assert
         captor = Captor()
 
         with self.subTest(msg="generic update was made"):
             self.__sut._generic_update.assert_called_once_with(context=context,
-                                                               request=CampaignRequestDto,
-                                                               response=CampaignResponseDto,
+                                                               request=ListingRequestDto,
+                                                               response=ListingResponseDto,
                                                                repo_func=captor)
 
         with self.subTest(msg="repo was called"):
             captor.arg()
-            self.__campaign_repository.load_by_id.assert_called_once_with(id_=context.id)
+            self.__listing_repository.load_by_id.assert_called_once_with(id_=context.id)
 
     def test_update_image_field(self):
         # arrange
         context = PinfluencerContext(id="12345")
         self.__sut._generic_update_image_field = MagicMock()
-        self.__campaign_repository.load_by_id = MagicMock()
+        self.__listing_repository.load_by_id = MagicMock()
 
         # act
-        self.__sut.update_campaign_image(context=context)
+        self.__sut.update_listing_image(context=context)
 
         # assert
         captor = Captor()
 
         with self.subTest(msg="generic update was made"):
             self.__sut._generic_update_image_field.assert_called_once_with(context=context,
-                                                                           response=CampaignResponseDto,
+                                                                           response=ListingResponseDto,
                                                                            repo_func=captor)
 
         with self.subTest(msg="repo was called"):
             captor.arg()
-            self.__campaign_repository.load_by_id.assert_called_once_with(id_=context.id)
+            self.__listing_repository.load_by_id.assert_called_once_with(id_=context.id)
 
 
 class TestNotificationController(TestCase):

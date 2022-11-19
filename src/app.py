@@ -3,31 +3,31 @@ import os
 from simple_injection import ServiceCollection
 
 from src import ServiceLocator
-from src._types import DataManager, BrandRepository, InfluencerRepository, CampaignRepository, ImageRepository, \
+from src._types import DataManager, BrandRepository, InfluencerRepository, ListingRepository, ImageRepository, \
     Deserializer, Serializer, AuthUserRepository, Logger, NotificationRepository, AudienceAgeRepository, \
     AudienceGenderRepository
 from src.crosscutting import JsonCamelToSnakeCaseDeserializer, JsonSnakeToCamelSerializer, \
     PinfluencerObjectMapper, FlexiUpdater, ConsoleLogger, DummyLogger
 from src.data import SqlAlchemyDataManager
 from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository, \
-    SqlAlchemyCampaignRepository, S3ImageRepository, CognitoAuthUserRepository, CognitoAuthService, \
+    SqlAlchemyListingRepository, S3ImageRepository, CognitoAuthUserRepository, CognitoAuthService, \
     SqlAlchemyNotificationRepository, SqlAlchemyAudienceAgeRepository, SqlAlchemyAudienceGenderRepository
-from src.domain.validation import BrandValidator, CampaignValidator, InfluencerValidator
+from src.domain.validation import BrandValidator, ListingValidator, InfluencerValidator
 from src.web import PinfluencerResponse, PinfluencerContext, Route
-from src.web.controllers import BrandController, InfluencerController, CampaignController, NotificationController, \
+from src.web.controllers import BrandController, InfluencerController, ListingController, NotificationController, \
     AudienceAgeController, AudienceGenderController
 from src.web.hooks import HooksFacade, CommonBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, UserBeforeHooks, \
-    UserAfterHooks, InfluencerBeforeHooks, BrandBeforeHooks, CampaignBeforeHooks, CampaignAfterHooks, CommonAfterHooks, \
+    UserAfterHooks, InfluencerBeforeHooks, BrandBeforeHooks, ListingBeforeHooks, ListingAfterHooks, CommonAfterHooks, \
     NotificationAfterHooks, NotificationBeforeHooks, AudienceAgeBeforeHooks, AudienceCommonHooks, \
     AudienceAgeAfterHooks, AudienceGenderAfterHooks, AudienceGenderBeforeHooks
 from src.web.mapping import MappingRules
 from src.web.middleware import MiddlewarePipeline
 from src.web.routing import Dispatcher
-from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdateCreateCampaignSubsequenceBuilder, \
-    PostSingleCampaignSubsequenceBuilder, PostMultipleCampaignSubsequenceBuilder, PostSingleUserSubsequenceBuilder, \
-    PostMultipleUserSubsequenceBuilder, UpdateImageForCampaignSequenceBuilder, NotImplementedSequenceBuilder, \
-    UpdateCampaignSequenceBuilder, CreateCampaignSequenceBuilder, GetCampaignByIdSequenceBuilder, \
-    GetCampaignsForBrandSequenceBuilder, UpdateInfluencerImageSequenceBuilder, UpdateInfluencerSequenceBuilder, \
+from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdateCreateListingSubsequenceBuilder, \
+    PostSingleListingSubsequenceBuilder, PostMultipleListingSubsequenceBuilder, PostSingleUserSubsequenceBuilder, \
+    PostMultipleUserSubsequenceBuilder, UpdateImageForListingSequenceBuilder, NotImplementedSequenceBuilder, \
+    UpdateListingSequenceBuilder, CreateListingSequenceBuilder, GetListingByIdSequenceBuilder, \
+    GetListingsForBrandSequenceBuilder, UpdateInfluencerImageSequenceBuilder, UpdateInfluencerSequenceBuilder, \
     CreateInfluencerSequenceBuilder, GetAuthInfluencerSequenceBuilder, GetInfluencerByIdSequenceBuilder, \
     GetAllInfluencersSequenceBuilder, UpdateBrandImageSequenceBuilder, UpdateBrandSequenceBuilder, \
     CreateBrandSequenceBuilder, GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder, \
@@ -130,8 +130,8 @@ def register_middleware(ioc):
     ioc.add_singleton(UserAfterHooks)
     ioc.add_singleton(InfluencerBeforeHooks)
     ioc.add_singleton(BrandBeforeHooks)
-    ioc.add_singleton(CampaignBeforeHooks)
-    ioc.add_singleton(CampaignAfterHooks)
+    ioc.add_singleton(ListingBeforeHooks)
+    ioc.add_singleton(ListingAfterHooks)
     ioc.add_singleton(CommonAfterHooks)
     ioc.add_singleton(NotificationAfterHooks)
     ioc.add_singleton(NotificationBeforeHooks)
@@ -154,7 +154,7 @@ def register_serialization(ioc):
 def register_controllers(ioc):
     ioc.add_singleton(BrandController)
     ioc.add_singleton(InfluencerController)
-    ioc.add_singleton(CampaignController)
+    ioc.add_singleton(ListingController)
     ioc.add_singleton(NotificationController)
     ioc.add_singleton(AudienceAgeController)
     ioc.add_singleton(AudienceGenderController)
@@ -167,7 +167,7 @@ def register_object_mapping(ioc):
 
 def register_domain(ioc):
     ioc.add_singleton(BrandValidator)
-    ioc.add_singleton(CampaignValidator)
+    ioc.add_singleton(ListingValidator)
     ioc.add_singleton(InfluencerValidator)
 
 
@@ -175,7 +175,7 @@ def register_data_layer(ioc):
     # sql alchemy
     ioc.add_singleton(BrandRepository, SqlAlchemyBrandRepository)
     ioc.add_singleton(InfluencerRepository, SqlAlchemyInfluencerRepository)
-    ioc.add_singleton(CampaignRepository, SqlAlchemyCampaignRepository)
+    ioc.add_singleton(ListingRepository, SqlAlchemyListingRepository)
     ioc.add_singleton(NotificationRepository, SqlAlchemyNotificationRepository)
     ioc.add_singleton(AudienceAgeRepository, SqlAlchemyAudienceAgeRepository)
     ioc.add_singleton(AudienceGenderRepository, SqlAlchemyAudienceGenderRepository)
@@ -185,18 +185,18 @@ def register_data_layer(ioc):
 
 
 def register_sequences(ioc: ServiceCollection):
-    ioc.add_singleton(PreUpdateCreateCampaignSubsequenceBuilder)
+    ioc.add_singleton(PreUpdateCreateListingSubsequenceBuilder)
     ioc.add_singleton(PreGenericUpdateCreateSubsequenceBuilder)
-    ioc.add_singleton(PostSingleCampaignSubsequenceBuilder)
-    ioc.add_singleton(PostMultipleCampaignSubsequenceBuilder)
+    ioc.add_singleton(PostSingleListingSubsequenceBuilder)
+    ioc.add_singleton(PostMultipleListingSubsequenceBuilder)
     ioc.add_singleton(PostSingleUserSubsequenceBuilder)
     ioc.add_singleton(PostMultipleUserSubsequenceBuilder)
-    ioc.add_singleton(UpdateImageForCampaignSequenceBuilder)
+    ioc.add_singleton(UpdateImageForListingSequenceBuilder)
     ioc.add_singleton(NotImplementedSequenceBuilder)
-    ioc.add_singleton(UpdateCampaignSequenceBuilder)
-    ioc.add_singleton(CreateCampaignSequenceBuilder)
-    ioc.add_singleton(GetCampaignByIdSequenceBuilder)
-    ioc.add_singleton(GetCampaignsForBrandSequenceBuilder)
+    ioc.add_singleton(UpdateListingSequenceBuilder)
+    ioc.add_singleton(CreateListingSequenceBuilder)
+    ioc.add_singleton(GetListingByIdSequenceBuilder)
+    ioc.add_singleton(GetListingsForBrandSequenceBuilder)
     ioc.add_singleton(UpdateInfluencerImageSequenceBuilder)
     ioc.add_singleton(UpdateInfluencerSequenceBuilder)
     ioc.add_singleton(CreateInfluencerSequenceBuilder)

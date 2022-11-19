@@ -7,9 +7,9 @@ from src._types import ImageRepository
 from src.app import logger_factory
 from src.crosscutting import AutoFixture
 from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository, CognitoAuthUserRepository, \
-    CognitoAuthService, SqlAlchemyCampaignRepository, SqlAlchemyNotificationRepository, SqlAlchemyAudienceAgeRepository, \
+    CognitoAuthService, SqlAlchemyListingRepository, SqlAlchemyNotificationRepository, SqlAlchemyAudienceAgeRepository, \
     SqlAlchemyAudienceGenderRepository
-from src.domain.models import Brand, Influencer, User, Campaign, Notification, AudienceAgeSplit, AudienceAge, \
+from src.domain.models import Brand, Influencer, User, Listing, Notification, AudienceAgeSplit, AudienceAge, \
     AudienceGenderSplit, AudienceGender
 from src.exceptions import AlreadyExistsException, NotFoundException
 from tests import InMemorySqliteDataManager
@@ -332,60 +332,60 @@ class TestAuthUserRepository(TestCase):
             assert actual_brand.email == expected_brand.email
 
 
-class TestCampaignRepository(TestCase):
+class TestListingRepository(TestCase):
 
     def setUp(self) -> None:
         self.__data_manager = InMemorySqliteDataManager()
         self.__image_repository: ImageRepository = Mock()
-        self.__sut = SqlAlchemyCampaignRepository(data_manager=self.__data_manager,
-                                                  image_repository=self.__image_repository,
-                                                  logger=Mock())
+        self.__sut = SqlAlchemyListingRepository(data_manager=self.__data_manager,
+                                                 image_repository=self.__image_repository,
+                                                 logger=Mock())
 
     def test_write_for_new_brand(self):
         # arrange
         brand_in_db = AutoFixture().create(dto=Brand, list_limit=5)
-        campaign_payload: Campaign = AutoFixture().create(dto=Campaign, list_limit=5)
+        listing_payload: Listing = AutoFixture().create(dto=Listing, list_limit=5)
 
         # act
         self.__data_manager.create_fake_data(objects=[brand_in_db])
-        returned_campaign: Campaign = self.__sut.write_new_for_brand(payload=campaign_payload,
-                                                                     auth_user_id=brand_in_db.auth_user_id)
+        returned_listing: Listing = self.__sut.write_new_for_brand(payload=listing_payload,
+                                                                    auth_user_id=brand_in_db.auth_user_id)
 
-        campaign_loaded_from_db: Campaign = self.__sut.load_by_id(id_=campaign_payload.id)
+        listing_loaded_from_db: Listing = self.__sut.load_by_id(id_=listing_payload.id)
 
         # assert
         with self.subTest(msg="brand ids match"):
-            assert returned_campaign.brand_auth_user_id == campaign_loaded_from_db.brand_auth_user_id == brand_in_db.auth_user_id
+            assert returned_listing.brand_auth_user_id == listing_loaded_from_db.brand_auth_user_id == brand_in_db.auth_user_id
 
         # assert
-        with self.subTest(msg="campaign fields match"):
-            assert campaign_payload == campaign_loaded_from_db == returned_campaign
+        with self.subTest(msg="listing fields match"):
+            assert listing_payload == listing_loaded_from_db == returned_listing
 
     def test_get_by_id(self):
         # arrange
-        campaign = AutoFixture().create(dto=Campaign, list_limit=5)
-        self.__data_manager.create_fake_data([campaign])
+        listing = AutoFixture().create(dto=Listing, list_limit=5)
+        self.__data_manager.create_fake_data([listing])
 
         # act
-        campaign_returned = self.__sut.load_by_id(id_=campaign.id)
+        listing_returned = self.__sut.load_by_id(id_=listing.id)
 
         # assert
-        assert campaign_returned == campaign
+        assert listing_returned == listing
 
     def test_load_for_brand(self):
         # arrange
         brand = AutoFixture().create(dto=Brand, list_limit=5)
-        campaigns = AutoFixture().create_many(dto=Campaign, list_limit=5, ammount=10)
-        for campaign in campaigns:
-            campaign.brand_auth_user_id = brand.auth_user_id
+        listings = AutoFixture().create_many(dto=Listing, list_limit=5, ammount=10)
+        for listing in listings:
+            listing.brand_auth_user_id = brand.auth_user_id
         self.__data_manager.create_fake_data([brand])
-        self.__data_manager.create_fake_data(campaigns)
+        self.__data_manager.create_fake_data(listings)
 
         # act
-        returned_campaigns = self.__sut.load_for_auth_brand(auth_user_id=brand.auth_user_id)
+        returned_listings = self.__sut.load_for_auth_brand(auth_user_id=brand.auth_user_id)
 
         # assert
-        self.assertEquals(campaigns, returned_campaigns)
+        self.assertEquals(listings, returned_listings)
 
 
 class TestNotificationRepository(TestCase):

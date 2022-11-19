@@ -119,10 +119,10 @@ Resources:
             Method: get
             ApiId: !Ref PinfluencerHttpApi
 
-        GetMyCampaignById:
+        GetMyListingById:
           Type: HttpApi
           Properties:
-            Path: /campaigns/{campaign_id}
+            Path: /listings/{listing_id}
             Method: get
             ApiId: !Ref PinfluencerHttpApi
         #PUBLIC Endpoints END
@@ -248,48 +248,48 @@ Resources:
             ApiId: !Ref PinfluencerHttpApi
         #Authenticated Brand endpoints END
 
-        #Authenticated Campaign endpoints START
-        CreateMyBrandCampaign:
+        #Authenticated Listing endpoints START
+        CreateMyBrandListing:
           Type: HttpApi
           Properties:
             Auth:
               Authorizer: UserAuth
-            Path: /brands/me/campaigns
+            Path: /brands/me/listings
             Method: post
             ApiId: !Ref PinfluencerHttpApi
-        CreateCampaignProductImage:
+        CreateListingProductImage:
           Type: HttpApi
           Properties:
             Auth:
               Authorizer: UserAuth
-            Path: /brands/me/campaigns/{campaign_id}/images/{image_field}
+            Path: /brands/me/listings/{listing_id}/images/{image_field}
             Method: post
             ApiId: !Ref PinfluencerHttpApi
-        GetAllMyBrandCampaigns:
+        GetAllMyBrandListings:
           Type: HttpApi
           Properties:
             Auth:
               Authorizer: UserAuth
-            Path: /brands/me/campaigns
+            Path: /brands/me/listings
             Method: get
             ApiId: !Ref PinfluencerHttpApi
-        UpdateMyCampaignById:
+        UpdateMyListingById:
           Type: HttpApi
           Properties:
             Auth:
               Authorizer: UserAuth
-            Path: /brands/me/campaigns/{campaign_id}
+            Path: /brands/me/listings/{listing_id}
             Method: patch
             ApiId: !Ref PinfluencerHttpApi
-        DeleteMyCampaignById:
+        DeleteMyListingById:
           Type: HttpApi
           Properties:
             Auth:
               Authorizer: UserAuth
-            Path: /brands/me/campaigns/{campaign_id}
+            Path: /brands/me/listings/{listing_id}
             Method: delete
             ApiId: !Ref PinfluencerHttpApi
-        #Authenticated Campaign endpoints END
+        #Authenticated Listing endpoints END
 
         #Public Collaboration endpoints START
         GetCollaborationById:

@@ -2,9 +2,9 @@ from collections import OrderedDict
 
 from src import ServiceLocator
 from src.web import Route
-from src.web.sequences import UpdateCampaignSequenceBuilder, UpdateImageForCampaignSequenceBuilder, \
-    NotImplementedSequenceBuilder, CreateCampaignSequenceBuilder, GetCampaignByIdSequenceBuilder, \
-    GetCampaignsForBrandSequenceBuilder, UpdateInfluencerImageSequenceBuilder, UpdateInfluencerSequenceBuilder, \
+from src.web.sequences import UpdateListingSequenceBuilder, UpdateImageForListingSequenceBuilder, \
+    NotImplementedSequenceBuilder, CreateListingSequenceBuilder, GetListingByIdSequenceBuilder, \
+    GetListingsForBrandSequenceBuilder, UpdateInfluencerImageSequenceBuilder, UpdateInfluencerSequenceBuilder, \
     CreateInfluencerSequenceBuilder, GetAuthInfluencerSequenceBuilder, GetInfluencerByIdSequenceBuilder, \
     GetAllInfluencersSequenceBuilder, UpdateBrandImageSequenceBuilder, UpdateBrandSequenceBuilder, \
     CreateBrandSequenceBuilder, GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder, \
@@ -68,25 +68,25 @@ class Dispatcher:
             }
         )
 
-        campaign_routes = OrderedDict(
+        listing_routes = OrderedDict(
             {
-                'GET /brands/me/campaigns':
-                    Route(sequence_builder=self.__service_locator.locate(GetCampaignsForBrandSequenceBuilder)),
+                'GET /brands/me/listings':
+                    Route(sequence_builder=self.__service_locator.locate(GetListingsForBrandSequenceBuilder)),
 
-                'DELETE /brands/me/campaigns/{campaign_id}':
+                'DELETE /brands/me/listings/{listing_id}':
                     Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),
 
-                'GET /campaigns/{campaign_id}':
-                    Route(sequence_builder=self.__service_locator.locate(GetCampaignByIdSequenceBuilder)),
+                'GET /listings/{listing_id}':
+                    Route(sequence_builder=self.__service_locator.locate(GetListingByIdSequenceBuilder)),
 
-                'POST /brands/me/campaigns':
-                    Route(sequence_builder=self.__service_locator.locate(CreateCampaignSequenceBuilder)),
+                'POST /brands/me/listings':
+                    Route(sequence_builder=self.__service_locator.locate(CreateListingSequenceBuilder)),
 
-                'PATCH /brands/me/campaigns/{campaign_id}':
-                    Route(sequence_builder=self.__service_locator.locate(UpdateCampaignSequenceBuilder)),
+                'PATCH /brands/me/listings/{listing_id}':
+                    Route(sequence_builder=self.__service_locator.locate(UpdateListingSequenceBuilder)),
 
-                'POST /brands/me/campaigns/{campaign_id}/images/{image_field}':
-                    Route(sequence_builder=self.__service_locator.locate(UpdateImageForCampaignSequenceBuilder))
+                'POST /brands/me/listings/{listing_id}/images/{image_field}':
+                    Route(sequence_builder=self.__service_locator.locate(UpdateImageForListingSequenceBuilder))
             }
         )
 
@@ -153,7 +153,7 @@ class Dispatcher:
         routes = {}
         routes.update(feed_routes)
         routes.update(user_routes)
-        routes.update(campaign_routes)
+        routes.update(listing_routes)
         routes.update(collaboration_routes)
         routes.update(notification_routes)
         routes.update(audience_routes)

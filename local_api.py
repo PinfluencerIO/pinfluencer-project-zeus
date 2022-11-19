@@ -94,32 +94,32 @@ def get_influencer_by_id(id):
     return generic_handler(routeKey="GET /influencers/{influencer_id}", params={"influencer_id": id})
 
 
-@app.route("/brands/me/campaigns", methods=['GET'])
-def get_list_of_campaigns_for_brand():
-    return generic_handler(routeKey="GET /brands/me/campaigns", params={})
+@app.route("/brands/me/listings", methods=['GET'])
+def get_list_of_listings_for_brand():
+    return generic_handler(routeKey="GET /brands/me/listings", params={})
 
 
-@app.route("/brands/me/campaigns", methods=['POST'])
-def create_campaign_for_brand():
-    return generic_handler(routeKey="POST /brands/me/campaigns", params={})
+@app.route("/brands/me/listings", methods=['POST'])
+def create_listing_for_brand():
+    return generic_handler(routeKey="POST /brands/me/listings", params={})
 
 
-@app.route("/brands/me/campaigns/<id>", methods=['PATCH'])
-def update_campaign(id):
-    return generic_handler(routeKey="PATCH /brands/me/campaigns/{campaign_id}", params={"campaign_id": id})
+@app.route("/brands/me/listings/<id>", methods=['PATCH'])
+def update_listing(id):
+    return generic_handler(routeKey="PATCH /brands/me/listings/{listing_id}", params={"listing_id": id})
 
 
-@app.route("/brands/me/campaigns/<id>/images/<image>", methods=['POST'])
-def update_campaign_image(id, image):
-    return generic_handler(routeKey="POST /brands/me/campaigns/{campaign_id}/images/{image_field}", params={
-        "campaign_id": id,
+@app.route("/brands/me/listings/<id>/images/<image>", methods=['POST'])
+def update_listing_image(id, image):
+    return generic_handler(routeKey="POST /brands/me/listings/{listing_id}/images/{image_field}", params={
+        "listing_id": id,
         "image_field": image
     })
 
 
-@app.route("/campaigns/<id>", methods=['GET'])
-def get_campaign_by_id(id):
-    return generic_handler(routeKey="GET /campaigns/{campaign_id}", params={"campaign_id": id})
+@app.route("/listings/<id>", methods=['GET'])
+def get_listing_by_id(id):
+    return generic_handler(routeKey="GET /listings/{listing_id}", params={"listing_id": id})
 
 
 @app.route("/users/me/notifications", methods=['POST'])

@@ -1,6 +1,6 @@
 from typing import Protocol, Optional, Union
 
-from src.domain.models import Brand, Influencer, Campaign, User, Notification, Collaboration, AudienceAgeSplit, \
+from src.domain.models import Brand, Influencer, Listing, User, Notification, Collaboration, AudienceAgeSplit, \
     AudienceGenderSplit
 
 
@@ -46,19 +46,19 @@ class AudienceGenderRepository(Protocol):
         ...
 
 
-class CampaignRepository(Protocol):
+class ListingRepository(Protocol):
 
-    def load_collection(self) -> list[Campaign]:
+    def load_collection(self) -> list[Listing]:
         ...
 
-    def load_by_id(self, id_: str) -> Campaign:
+    def load_by_id(self, id_: str) -> Listing:
         ...
 
-    def write_new_for_brand(self, payload: Campaign,
-                            auth_user_id: str) -> Campaign:
+    def write_new_for_brand(self, payload: Listing,
+                            auth_user_id: str) -> Listing:
         ...
 
-    def load_for_auth_brand(self, auth_user_id: str) -> list[Campaign]:
+    def load_for_auth_brand(self, auth_user_id: str) -> list[Listing]:
         ...
 
     def save(self):
@@ -118,7 +118,7 @@ class NotificationRepository(Protocol):
 
 Repository = Union[BrandRepository,
                    InfluencerRepository,
-                   CampaignRepository,
+                   ListingRepository,
                    NotificationRepository,
                    AudienceAgeRepository,
                    AudienceGenderRepository]
@@ -176,7 +176,7 @@ class ImageRepository(Protocol):
 UserModel = Union[Brand, Influencer]
 
 # TODO: add rest
-Model = Union[UserModel, Campaign, Notification, Collaboration]
+Model = Union[UserModel, Listing, Notification, Collaboration]
 
 
 class Serializer(Protocol):
