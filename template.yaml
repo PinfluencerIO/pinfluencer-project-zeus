@@ -152,31 +152,6 @@ Resources:
             Path: /influencer-profile
             Method: get
             ApiId: !Ref PinfluencerHttpApi
-
-        CreateBrandProfile:
-          Type: HttpApi
-          Properties:
-            Auth:
-              Authorizer: UserAuth
-            Path: /brand-profile
-            Method: post
-            ApiId: !Ref PinfluencerHttpApi
-        UpdateBrandProfile:
-          Type: HttpApi
-          Properties:
-            Auth:
-              Authorizer: UserAuth
-            Path: /brand-profile
-            Method: patch
-            ApiId: !Ref PinfluencerHttpApi
-        GetBrandProfile:
-          Type: HttpApi
-          Properties:
-            Auth:
-              Authorizer: UserAuth
-            Path: /brand-profile
-            Method: get
-            ApiId: !Ref PinfluencerHttpApi
         #Authneticated Onboarding Endpoints END
 
         #Authenticated Influencer endpoints START
