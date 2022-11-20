@@ -19,7 +19,8 @@ from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdat
     GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder, \
     CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder, CreateAudienceAgeSequenceBuilder, \
     GetAudienceAgeSequenceBuilder, UpdateAudienceAgeSequenceBuilder, CreateAudienceGenderSequenceBuilder, \
-    GetAudienceGenderSequenceBuilder, UpdateAudienceGenderSequenceBuilder
+    GetAudienceGenderSequenceBuilder, UpdateAudienceGenderSequenceBuilder, CreateInfluencerSubsequenceBuilder, \
+    CreateAudienceAgeSubsequenceBuilder, CreateAudienceGenderSubsequenceBuilder, CreateInfluencerProfileSequenceBuilder
 
 
 def setup(ioc: ServiceCollection):
@@ -303,8 +304,24 @@ class TestCreateInfluencerSequenceBuilder(TestCase):
         with self.subTest(msg="components match"):
             self.maxDiff = None
             self.assertEqual(sut.components, [ioc.resolve(PreGenericUpdateCreateSubsequenceBuilder),
-                                              ioc.resolve(UserBeforeHooks).set_categories_and_values,
-                                              # ioc.resolve(InfluencerBeforeHooks).validate_influencer,
+                                              ioc.resolve(CreateInfluencerSubsequenceBuilder)])
+
+
+class TestCreateInfluencerSubsequenceBuilder(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(CreateInfluencerSubsequenceBuilder)
+
+        # act
+        sut.build()
+
+        # assert
+        with self.subTest(msg="components match"):
+            self.maxDiff = None
+            self.assertEqual(sut.components, [ioc.resolve(UserBeforeHooks).set_categories_and_values,
                                               ioc.resolve(InfluencerController).create,
                                               ioc.resolve(InfluencerAfterHooks).set_influencer_claims,
                                               ioc.resolve(PostSingleUserSubsequenceBuilder),
@@ -552,6 +569,25 @@ class TestCreateAudienceAgeSequenceBuilder(TestCase):
             self.maxDiff = None
             self.assertEqual(sut.components, [
                 ioc.resolve(PreGenericUpdateCreateSubsequenceBuilder),
+                ioc.resolve(CreateAudienceAgeSubsequenceBuilder),
+            ])
+
+
+class TestCreateAudienceAgeSubsequenceBuilder(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(CreateAudienceAgeSubsequenceBuilder)
+
+        # act
+        sut.build()
+
+        # assert
+        with self.subTest(msg="components match"):
+            self.maxDiff = None
+            self.assertEqual(sut.components, [
                 ioc.resolve(AudienceAgeBeforeHooks).check_audience_ages_are_empty,
                 ioc.resolve(InfluencerBeforeHooks).validate_auth_influencer,
                 ioc.resolve(AudienceAgeController).create_for_influencer,
@@ -618,6 +654,25 @@ class TestCreateAudienceGenderSequenceBuilder(TestCase):
             self.maxDiff = None
             self.assertEqual(sut.components, [
                 ioc.resolve(PreGenericUpdateCreateSubsequenceBuilder),
+                ioc.resolve(CreateAudienceGenderSubsequenceBuilder)
+            ])
+
+
+class TestCreateAudienceGenderSubsequenceBuilder(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(CreateAudienceGenderSubsequenceBuilder)
+
+        # act
+        sut.build()
+
+        # assert
+        with self.subTest(msg="components match"):
+            self.maxDiff = None
+            self.assertEqual(sut.components, [
                 ioc.resolve(AudienceGenderBeforeHooks).check_audience_genders_are_empty,
                 ioc.resolve(InfluencerBeforeHooks).validate_auth_influencer,
                 ioc.resolve(AudienceGenderController).create_for_influencer,
@@ -665,4 +720,30 @@ class TestUpdateAudienceGenderSequenceBuilder(TestCase):
                 ioc.resolve(InfluencerBeforeHooks).validate_auth_influencer,
                 ioc.resolve(AudienceGenderController).update_for_influencer,
                 ioc.resolve(AudienceGenderAfterHooks).save_state
+            ])
+
+
+class TestCreateInfluencerProfileSequenceBuilder(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(CreateInfluencerProfileSequenceBuilder)
+
+        # act
+        sut.build()
+
+        # assert
+        with self.subTest(msg="components match"):
+            self.maxDiff = None
+            self.assertEqual(sut.components, [
+                ioc.resolve(PreGenericUpdateCreateSubsequenceBuilder),
+                ioc.resolve(CreateInfluencerSubsequenceBuilder),
+                sut.cache_influencer_details,
+                ioc.resolve(CreateAudienceGenderSubsequenceBuilder),
+                sut.cache_audience_gender_data,
+                ioc.resolve(CreateAudienceAgeSubsequenceBuilder),
+                sut.cache_audience_age_data,
+                sut.merge_cache
             ])
