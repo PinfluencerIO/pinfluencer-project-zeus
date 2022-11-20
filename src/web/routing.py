@@ -10,7 +10,7 @@ from src.web.sequences import UpdateListingSequenceBuilder, UpdateImageForListin
     CreateBrandSequenceBuilder, GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder, \
     CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder, CreateAudienceAgeSequenceBuilder, \
     GetAudienceAgeSequenceBuilder, UpdateAudienceAgeSequenceBuilder, CreateAudienceGenderSequenceBuilder, \
-    GetAudienceGenderSequenceBuilder, UpdateAudienceGenderSequenceBuilder
+    GetAudienceGenderSequenceBuilder, UpdateAudienceGenderSequenceBuilder, CreateInfluencerProfileSequenceBuilder
 
 
 class Dispatcher:
@@ -70,7 +70,7 @@ class Dispatcher:
 
         onboarding_routes = OrderedDict({
             'POST /influencer-profile':
-                Route(self.__service_locator.locate(NotImplementedSequenceBuilder)),
+                Route(self.__service_locator.locate(CreateInfluencerProfileSequenceBuilder)),
 
             'PATCH /influencer-profile':
                 Route(self.__service_locator.locate(NotImplementedSequenceBuilder)),
