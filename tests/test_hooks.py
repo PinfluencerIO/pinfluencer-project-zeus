@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from unittest import TestCase
 from unittest.mock import Mock, MagicMock, call
 from uuid import uuid4
@@ -160,6 +161,56 @@ class TestCommonAfterHooks(TestCase):
 
         # assert
         assert context.response.body["image"] is None
+
+    def test_save_response_body_to_cache(self):
+        # arrange
+        body = {
+            "field": 1,
+            "field2": "another"
+        }
+        context = PinfluencerContext(response=PinfluencerResponse(body=body))
+
+        # act
+        self.__sut.save_response_body_to_cache(context=context,
+                                               key="body_1")
+
+        # assert
+        body_from_cache = context.cached_values["body_1"]
+        self.assertEqual(body_from_cache, body)
+
+    def test_merge_cached_values_to_response(self):
+        # arrange
+        body = {
+            "field": 1,
+            "field2": "another"
+        }
+        body2 = {
+            "field3": 2,
+            "field4": "another2"
+        }
+        body3 = {
+            "field5": 5,
+            "field6": "another5"
+        }
+        merged_body = {
+            "field": 1,
+            "field2": "another",
+            "field3": 2,
+            "field4": "another2"
+        }
+        context = PinfluencerContext(cached_values=OrderedDict({
+            "body_1": body,
+            "body_2": body2,
+            "body_3": body3
+        }), response=PinfluencerResponse(body={}))
+
+        # act
+        self.__sut.merge_cached_values_to_response(context=context,
+                                                   keys=["body_1", "body_2"])
+
+        # assert
+        body = context.response.body
+        self.assertEqual(body, merged_body)
 
 
 @ddt
@@ -890,8 +941,8 @@ class TestListingAfterHooks(TestCase):
         self.__common_after_hooks: CommonAfterHooks = Mock()
         self.__mapper = test_mapper()
         self.__sut = ListingAfterHooks(common_after_hooks=self.__common_after_hooks,
-                                        mapper=self.__mapper,
-                                        repository=Mock())
+                                       mapper=self.__mapper,
+                                       repository=Mock())
 
     def test_tag_bucket_url_to_images(self):
         # arrange
@@ -1222,8 +1273,8 @@ class TestAudienceAgeBeforeHooks(TestCase):
         # arrange
         context = PinfluencerContext(auth_user_id="1234")
         self.__repository.load_for_influencer = MagicMock(return_value=AudienceAgeSplit(audience_ages=AutoFixture()
-                                                                     .create_many(dto=AudienceAge,
-                                                                             ammount=15)))
+                                                                                        .create_many(dto=AudienceAge,
+                                                                                                     ammount=15)))
 
         # act
         self.__sut.check_audience_ages_are_empty(context=context)

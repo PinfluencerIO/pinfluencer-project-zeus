@@ -70,6 +70,19 @@ class CommonAfterHooks:
         if entity[field] is not None:
             entity[field] = f'{S3_URL}/{entity[field]}'
 
+    def save_response_body_to_cache(self,
+                                    context: PinfluencerContext,
+                                    key: str):
+        context.cached_values[key] = context.response.body
+
+    def merge_cached_values_to_response(self,
+                                        context: PinfluencerContext,
+                                        keys: list[str]):
+        merged_body = {}
+        for key in keys:
+            merged_body.update(context.cached_values[key])
+        context.response.body = merged_body
+
 
 class CommonBeforeHooks:
 

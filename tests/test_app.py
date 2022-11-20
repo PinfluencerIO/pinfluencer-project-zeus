@@ -529,6 +529,24 @@ class TestRoutes(TestCase):
             .assert_called_once_with(context=Any(),
                                      sequence=self.__ioc.resolve(UpdateAudienceGenderSequenceBuilder))
 
+    def test_create_influencer_profile(self):
+        self.__assert_not_implemented(route="POST /influencer-profile")
+
+    def test_update_influencer_profile(self):
+        self.__assert_not_implemented(route="PATCH /influencer-profile")
+
+    def test_get_influencer_profile(self):
+        self.__assert_not_implemented(route="GET /influencer-profile")
+
+    def test_create_brand_profile(self):
+        self.__assert_not_implemented(route="POST /brand-profile")
+
+    def test_update_brand_profile(self):
+        self.__assert_not_implemented(route="PATCH /brand-profile")
+
+    def test_get_brand_profile(self):
+        self.__assert_not_implemented(route="GET /brand-profile")
+
     def test_template_matches_routes(self):
         template_file_path = f"./../template.yaml"
         if not exists(template_file_path):

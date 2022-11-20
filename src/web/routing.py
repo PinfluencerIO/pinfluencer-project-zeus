@@ -68,6 +68,26 @@ class Dispatcher:
             }
         )
 
+        onboarding_routes = OrderedDict({
+            'POST /influencer-profile':
+                Route(self.__service_locator.locate(NotImplementedSequenceBuilder)),
+
+            'PATCH /influencer-profile':
+                Route(self.__service_locator.locate(NotImplementedSequenceBuilder)),
+
+            'GET /influencer-profile':
+                Route(self.__service_locator.locate(NotImplementedSequenceBuilder)),
+
+            'POST /brand-profile':
+                Route(self.__service_locator.locate(NotImplementedSequenceBuilder)),
+
+            'PATCH /brand-profile':
+                Route(self.__service_locator.locate(NotImplementedSequenceBuilder)),
+
+            'GET /brand-profile':
+                Route(self.__service_locator.locate(NotImplementedSequenceBuilder))
+        })
+
         listing_routes = OrderedDict(
             {
                 'GET /brands/me/listings':
@@ -157,4 +177,5 @@ class Dispatcher:
         routes.update(collaboration_routes)
         routes.update(notification_routes)
         routes.update(audience_routes)
+        routes.update(onboarding_routes)
         return routes
