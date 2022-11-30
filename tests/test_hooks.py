@@ -19,7 +19,7 @@ from src.web.error_capsules import AudienceDataAlreadyExistsErrorCapsule, BrandN
 from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, CommonBeforeHooks, \
     InfluencerBeforeHooks, BrandBeforeHooks, ListingBeforeHooks, ListingAfterHooks, CommonAfterHooks, \
     NotificationAfterHooks, NotificationBeforeHooks, AudienceAgeBeforeHooks, AudienceCommonHooks, \
-    AudienceGenderBeforeHooks
+    AudienceGenderBeforeHooks, InfluencerOnBoardingAfterHooks
 from src.web.views import ImageRequestDto, BrandResponseDto, BrandRequestDto, ListingResponseDto, \
     NotificationCreateRequestDto
 from tests import get_auth_user_event, create_for_auth_user_event, get_brand_id_event, \
@@ -1295,3 +1295,24 @@ class TestAudienceAgeBeforeHooks(TestCase):
         # assert
         with self.subTest(msg="error capsule list is empty"):
             self.assertEqual(0, len(context.error_capsule))
+
+
+class TestInfluencerOnBoardingAfterHooks(TestCase):
+
+    def setUp(self):
+        self.__common_after_hooks: CommonAfterHooks = Mock()
+        self.__sut = InfluencerOnBoardingAfterHooks(self.__common_after_hooks)
+
+    def test_cache_audience_age_data(self):
+        # arrange
+        context = PinfluencerContext()
+        self.__common_after_hooks.save_response_body_to_cache = MagicMock()
+
+        # act
+        self.__sut.cache_audience_age_data(context=context)
+
+        # assert
+        self.__common_after_hooks\
+            .save_response_body_to_cache\
+            .assert_called_once_with(context=context,
+                                     key="audience_age_cache")

@@ -546,3 +546,12 @@ class AudienceGenderBeforeHooks:
         self.__audience_age_common_hooks.check_audience_data_is_empty(context=context,
                                                                       repo_method=self.__repository.load_for_influencer,
                                                                       audience_splits_getter=lambda x: x.audience_genders)
+
+
+class InfluencerOnBoardingAfterHooks:
+
+    def __init__(self, common_after_hooks: CommonAfterHooks):
+        self.__common_after_hooks = common_after_hooks
+
+    def cache_audience_age_data(self, context: PinfluencerContext):
+        ...
