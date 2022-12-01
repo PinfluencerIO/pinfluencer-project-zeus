@@ -20,7 +20,8 @@ from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdat
     GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder, \
     CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder, CreateAudienceAgeSequenceBuilder, \
     GetAudienceAgeSequenceBuilder, UpdateAudienceAgeSequenceBuilder, CreateAudienceGenderSequenceBuilder, \
-    GetAudienceGenderSequenceBuilder, UpdateAudienceGenderSequenceBuilder, CreateInfluencerProfileSequenceBuilder
+    GetAudienceGenderSequenceBuilder, UpdateAudienceGenderSequenceBuilder, CreateInfluencerProfileSequenceBuilder, \
+    UpdateInfluencerProfileSequenceBuilder, GetInfluencerProfileSequenceBuilder
 
 
 def setup(ioc: ServiceCollection):
@@ -682,12 +683,61 @@ class TestCreateInfluencerProfileSequenceBuilder(TestCase):
         with self.subTest(msg="components match"):
             self.maxDiff = None
             self.assertEqual(sut.components, [
-                ioc.resolve(PreGenericUpdateCreateSubsequenceBuilder),
                 ioc.resolve(CreateInfluencerSequenceBuilder),
                 ioc.resolve(InfluencerOnBoardingAfterHooks).cache_influencer_data,
                 ioc.resolve(CreateAudienceGenderSequenceBuilder),
                 ioc.resolve(InfluencerOnBoardingAfterHooks).cache_audience_gender_data,
                 ioc.resolve(CreateAudienceAgeSequenceBuilder),
+                ioc.resolve(InfluencerOnBoardingAfterHooks).cache_audience_age_data,
+                ioc.resolve(InfluencerOnBoardingAfterHooks).merge_influencer_cache,
+            ])
+
+
+class TestUpdateInfluencerProfileSequenceBuilder(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(UpdateInfluencerProfileSequenceBuilder)
+
+        # act
+        sut.build()
+
+        # assert
+        with self.subTest(msg="components match"):
+            self.maxDiff = None
+            self.assertEqual(sut.components, [
+                ioc.resolve(UpdateInfluencerSequenceBuilder),
+                ioc.resolve(InfluencerOnBoardingAfterHooks).cache_influencer_data,
+                ioc.resolve(UpdateAudienceGenderSequenceBuilder),
+                ioc.resolve(InfluencerOnBoardingAfterHooks).cache_audience_gender_data,
+                ioc.resolve(UpdateAudienceAgeSequenceBuilder),
+                ioc.resolve(InfluencerOnBoardingAfterHooks).cache_audience_age_data,
+                ioc.resolve(InfluencerOnBoardingAfterHooks).merge_influencer_cache,
+            ])
+
+
+class TestGetInfluencerProfileSequenceBuilder(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(GetInfluencerProfileSequenceBuilder)
+
+        # act
+        sut.build()
+
+        # assert
+        with self.subTest(msg="components match"):
+            self.maxDiff = None
+            self.assertEqual(sut.components, [
+                ioc.resolve(GetAuthInfluencerSequenceBuilder),
+                ioc.resolve(InfluencerOnBoardingAfterHooks).cache_influencer_data,
+                ioc.resolve(GetAudienceGenderSequenceBuilder),
+                ioc.resolve(InfluencerOnBoardingAfterHooks).cache_audience_gender_data,
+                ioc.resolve(GetAudienceAgeSequenceBuilder),
                 ioc.resolve(InfluencerOnBoardingAfterHooks).cache_audience_age_data,
                 ioc.resolve(InfluencerOnBoardingAfterHooks).merge_influencer_cache,
             ])
