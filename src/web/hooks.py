@@ -10,6 +10,7 @@ from src.domain.models import CategoryEnum, ValueEnum, User
 from src.domain.validation import BrandValidator, InfluencerValidator, ListingValidator
 from src.exceptions import NotFoundException
 from src.web import PinfluencerContext, valid_path_resource_id, ErrorCapsule
+from src.web.constants import AudienceAgeCacheKey
 from src.web.error_capsules import AudienceDataAlreadyExistsErrorCapsule, BrandNotFoundErrorCapsule, \
     InfluencerNotFoundErrorCapsule
 from src.web.views import RawImageRequestDto, ImageRequestDto, ListingResponseDto, NotificationCreateRequestDto
@@ -554,4 +555,8 @@ class InfluencerOnBoardingAfterHooks:
         self.__common_after_hooks = common_after_hooks
 
     def cache_audience_age_data(self, context: PinfluencerContext):
+        self.__common_after_hooks.save_response_body_to_cache(context=context,
+                                                              key=AudienceAgeCacheKey)
+
+    def cache_influencer_data(self, context: PinfluencerContext):
         ...
