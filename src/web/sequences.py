@@ -647,7 +647,13 @@ class UpdateInfluencerProfileSequenceBuilder(FluentSequenceBuilder):
         self.__update_audience_gender_subsequence_builder = update_audience_gender_subsequence_builder
 
     def build(self):
-        ...
+        self._add_sequence_builder(sequence_builder=self.__update_influencer_subsequence_builder) \
+            ._add_command(command=self.__influencer_onboarding_hooks.cache_influencer_data) \
+            ._add_sequence_builder(sequence_builder=self.__update_audience_gender_subsequence_builder) \
+            ._add_command(command=self.__influencer_onboarding_hooks.cache_audience_gender_data) \
+            ._add_sequence_builder(sequence_builder=self.__update_audience_age_subsequence_builder) \
+            ._add_command(command=self.__influencer_onboarding_hooks.cache_audience_age_data) \
+            ._add_command(command=self.__influencer_onboarding_hooks.merge_influencer_cache)
 
 
 class GetInfluencerProfileSequenceBuilder(FluentSequenceBuilder):
@@ -664,7 +670,13 @@ class GetInfluencerProfileSequenceBuilder(FluentSequenceBuilder):
         self.__get_audience_gender_subsequence_builder = get_audience_gender_subsequence_builder
 
     def build(self):
-        ...
+        self._add_sequence_builder(sequence_builder=self.__get_influencer_subsequence_builder) \
+            ._add_command(command=self.__influencer_onboarding_hooks.cache_influencer_data) \
+            ._add_sequence_builder(sequence_builder=self.__get_audience_gender_subsequence_builder) \
+            ._add_command(command=self.__influencer_onboarding_hooks.cache_audience_gender_data) \
+            ._add_sequence_builder(sequence_builder=self.__get_audience_age_subsequence_builder) \
+            ._add_command(command=self.__influencer_onboarding_hooks.cache_audience_age_data) \
+            ._add_command(command=self.__influencer_onboarding_hooks.merge_influencer_cache)
 
 
 class NotImplementedSequenceBuilder(FluentSequenceBuilder):
