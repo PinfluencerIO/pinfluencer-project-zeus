@@ -10,7 +10,8 @@ from src.web.sequences import UpdateListingSequenceBuilder, UpdateImageForListin
     CreateBrandSequenceBuilder, GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder, \
     CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder, CreateAudienceAgeSequenceBuilder, \
     GetAudienceAgeSequenceBuilder, UpdateAudienceAgeSequenceBuilder, CreateAudienceGenderSequenceBuilder, \
-    GetAudienceGenderSequenceBuilder, UpdateAudienceGenderSequenceBuilder, CreateInfluencerProfileSequenceBuilder
+    GetAudienceGenderSequenceBuilder, UpdateAudienceGenderSequenceBuilder, CreateInfluencerProfileSequenceBuilder, \
+    GetInfluencerProfileSequenceBuilder, UpdateInfluencerProfileSequenceBuilder
 
 
 class Dispatcher:
@@ -73,10 +74,10 @@ class Dispatcher:
                 Route(self.__service_locator.locate(CreateInfluencerProfileSequenceBuilder)),
 
             'PATCH /influencer-profile':
-                Route(self.__service_locator.locate(NotImplementedSequenceBuilder)),
+                Route(self.__service_locator.locate(UpdateInfluencerProfileSequenceBuilder)),
 
             'GET /influencer-profile':
-                Route(self.__service_locator.locate(NotImplementedSequenceBuilder)),
+                Route(self.__service_locator.locate(GetInfluencerProfileSequenceBuilder)),
 
         })
 

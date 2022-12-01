@@ -553,7 +553,7 @@ class TestRoutes(TestCase):
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
 
         # act
-        bootstrap(event={"routeKey": "POST /influencer-profile"},
+        bootstrap(event={"routeKey": "PATCHK /influencer-profile"},
                   context={},
                   middleware=self.__mock_middleware_pipeline,
                   ioc=self.__ioc,
@@ -571,7 +571,7 @@ class TestRoutes(TestCase):
         self.__mock_middleware_pipeline.execute_middleware = MagicMock()
 
         # act
-        bootstrap(event={"routeKey": "POST /influencer-profile"},
+        bootstrap(event={"routeKey": "GET /influencer-profile"},
                   context={},
                   middleware=self.__mock_middleware_pipeline,
                   ioc=self.__ioc,
