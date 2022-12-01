@@ -19,7 +19,8 @@ from src.web.sequences import NotImplementedSequenceBuilder, UpdateImageForListi
     CreateBrandSequenceBuilder, GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder, \
     CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder, CreateAudienceAgeSequenceBuilder, \
     GetAudienceAgeSequenceBuilder, UpdateAudienceAgeSequenceBuilder, CreateAudienceGenderSequenceBuilder, \
-    GetAudienceGenderSequenceBuilder, UpdateAudienceGenderSequenceBuilder, CreateInfluencerProfileSequenceBuilder
+    GetAudienceGenderSequenceBuilder, UpdateAudienceGenderSequenceBuilder, CreateInfluencerProfileSequenceBuilder, \
+    UpdateInfluencerProfileSequenceBuilder, GetInfluencerProfileSequenceBuilder
 from tests import get_as_json
 
 
@@ -548,10 +549,40 @@ class TestRoutes(TestCase):
                                      sequence=self.__ioc.resolve(CreateInfluencerProfileSequenceBuilder))
 
     def test_update_influencer_profile(self):
-        self.__assert_not_implemented(route="PATCH /influencer-profile")
+        # arrange
+        self.__mock_middleware_pipeline.execute_middleware = MagicMock()
+
+        # act
+        bootstrap(event={"routeKey": "POST /influencer-profile"},
+                  context={},
+                  middleware=self.__mock_middleware_pipeline,
+                  ioc=self.__ioc,
+                  data_manager=Mock(),
+                  cognito_auth_service=Mock())
+
+        # assert
+        self.__mock_middleware_pipeline \
+            .execute_middleware \
+            .assert_called_once_with(context=Any(),
+                                     sequence=self.__ioc.resolve(UpdateInfluencerProfileSequenceBuilder))
 
     def test_get_influencer_profile(self):
-        self.__assert_not_implemented(route="GET /influencer-profile")
+        # arrange
+        self.__mock_middleware_pipeline.execute_middleware = MagicMock()
+
+        # act
+        bootstrap(event={"routeKey": "POST /influencer-profile"},
+                  context={},
+                  middleware=self.__mock_middleware_pipeline,
+                  ioc=self.__ioc,
+                  data_manager=Mock(),
+                  cognito_auth_service=Mock())
+
+        # assert
+        self.__mock_middleware_pipeline \
+            .execute_middleware \
+            .assert_called_once_with(context=Any(),
+                                     sequence=self.__ioc.resolve(GetInfluencerProfileSequenceBuilder))
 
     def test_template_matches_routes(self):
         template_file_path = f"./../template.yaml"
