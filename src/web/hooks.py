@@ -558,6 +558,14 @@ class InfluencerOnBoardingAfterHooks:
         self.__common_after_hooks.save_response_body_to_cache(context=context,
                                                               key=AudienceAgeCacheKey)
 
+    def merge_influencer_cache(self, context: PinfluencerContext):
+        self.__common_after_hooks.merge_cached_values_to_response(context=context,
+                                                                  keys=[
+                                                                      InfluencerDetailsCacheKey,
+                                                                      AudienceAgeCacheKey,
+                                                                      AudienceGenderCacheKey
+                                                                  ])
+
     def cache_influencer_data(self, context: PinfluencerContext):
         self.__common_after_hooks.save_response_body_to_cache(context=context,
                                                               key=InfluencerDetailsCacheKey)

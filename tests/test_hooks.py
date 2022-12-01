@@ -1344,3 +1344,21 @@ class TestInfluencerOnBoardingAfterHooks(TestCase):
             .save_response_body_to_cache\
             .assert_called_once_with(context=context,
                                      key="influencer_details_cache")
+
+    def test_merge_influencer_cache(self):
+        # arrange
+        context = PinfluencerContext()
+        self.__common_after_hooks.merge_cached_values_to_response = MagicMock()
+
+        # act
+        self.__sut.merge_influencer_cache(context=context)
+
+        # assert
+        self.__common_after_hooks\
+            .merge_cached_values_to_response\
+            .assert_called_once_with(context=context,
+                                     keys=[
+                                         "influencer_details_cache",
+                                         "audience_age_cache",
+                                         "audience_gender_cache"
+                                     ])
