@@ -8,7 +8,8 @@ from src.web.controllers import ListingController, InfluencerController, BrandCo
     AudienceAgeController, AudienceGenderController
 from src.web.hooks import CommonBeforeHooks, UserBeforeHooks, ListingBeforeHooks, ListingAfterHooks, UserAfterHooks, \
     BrandBeforeHooks, InfluencerBeforeHooks, InfluencerAfterHooks, BrandAfterHooks, NotificationBeforeHooks, \
-    AudienceAgeBeforeHooks, AudienceAgeAfterHooks, AudienceGenderAfterHooks, AudienceGenderBeforeHooks
+    AudienceAgeBeforeHooks, AudienceAgeAfterHooks, AudienceGenderAfterHooks, AudienceGenderBeforeHooks, \
+    InfluencerOnBoardingAfterHooks
 from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdateCreateListingSubsequenceBuilder, \
     PostSingleListingSubsequenceBuilder, PostMultipleListingSubsequenceBuilder, PostSingleUserSubsequenceBuilder, \
     PostMultipleUserSubsequenceBuilder, UpdateImageForListingSequenceBuilder, UpdateListingSequenceBuilder, \
@@ -683,10 +684,10 @@ class TestCreateInfluencerProfileSequenceBuilder(TestCase):
             self.assertEqual(sut.components, [
                 ioc.resolve(PreGenericUpdateCreateSubsequenceBuilder),
                 ioc.resolve(CreateInfluencerSequenceBuilder),
-                sut.cache_influencer_details,
+                ioc.resolve(InfluencerOnBoardingAfterHooks).cache_influencer_data,
                 ioc.resolve(CreateAudienceGenderSequenceBuilder),
-                sut.cache_audience_gender_data,
+                ioc.resolve(InfluencerOnBoardingAfterHooks).cache_audience_gender_data,
                 ioc.resolve(CreateAudienceAgeSequenceBuilder),
-                sut.cache_audience_age_data,
-                sut.merge_cache
+                ioc.resolve(InfluencerOnBoardingAfterHooks).cache_audience_age_data,
+                ioc.resolve(InfluencerOnBoardingAfterHooks).merge_influencer_cache,
             ])

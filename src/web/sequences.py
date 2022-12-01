@@ -628,12 +628,12 @@ class CreateInfluencerProfileSequenceBuilder(FluentSequenceBuilder):
     def build(self):
         self._add_sequence_builder(sequence_builder=self.__pre_generic_update_create_subsequence_builder)\
             ._add_sequence_builder(sequence_builder=self.__create_influencer_subsequence_builder) \
-            ._add_command(command=self.__influencer_onboarding_hooks.cache_audience_age_data)\
+            ._add_command(command=self.__influencer_onboarding_hooks.cache_influencer_data)\
             ._add_sequence_builder(sequence_builder=self.__create_audience_gender_subsequence_builder) \
             ._add_command(command=self.__influencer_onboarding_hooks.cache_audience_gender_data) \
             ._add_sequence_builder(sequence_builder=self.__create_audience_age_subsequence_builder) \
-            ._add_command(command=self.__influencer_onboarding_hooks.cache_audience_gender_data) \
-            ._add_command(command=self.merge_cache)
+            ._add_command(command=self.__influencer_onboarding_hooks.cache_audience_age_data) \
+            ._add_command(command=self.__influencer_onboarding_hooks.merge_influencer_cache)
 
 
 class NotImplementedSequenceBuilder(FluentSequenceBuilder):
