@@ -1317,6 +1317,20 @@ class TestInfluencerOnBoardingAfterHooks(TestCase):
             .assert_called_once_with(context=context,
                                      key="audience_age_cache")
 
+    def test_cache_audience_gender_data(self):
+        # arrange
+        context = PinfluencerContext()
+        self.__common_after_hooks.save_response_body_to_cache = MagicMock()
+
+        # act
+        self.__sut.cache_audience_gender_data(context=context)
+
+        # assert
+        self.__common_after_hooks\
+            .save_response_body_to_cache\
+            .assert_called_once_with(context=context,
+                                     key="audience_gender_cache")
+
     def test_cache_influencer_data(self):
         # arrange
         context = PinfluencerContext()
