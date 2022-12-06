@@ -1,5 +1,4 @@
 from src.web import FluentSequenceBuilder, PinfluencerContext
-from src.web.constants import AudienceAgeCacheKey, AudienceGenderCacheKey, InfluencerDetailsCacheKey
 from src.web.controllers import ListingController, InfluencerController, BrandController, NotificationController, \
     AudienceAgeController, AudienceGenderController
 from src.web.hooks import CommonBeforeHooks, ListingBeforeHooks, ListingAfterHooks, UserAfterHooks, UserBeforeHooks, \
@@ -613,70 +612,114 @@ class UpdateAudienceGenderSequenceBuilder(FluentSequenceBuilder):
 class CreateInfluencerProfileSequenceBuilder(FluentSequenceBuilder):
 
     def __init__(self,
-                 create_audience_gender_subsequence_builder: CreateAudienceGenderSequenceBuilder,
-                 create_audience_age_subsequence_builder: CreateAudienceAgeSequenceBuilder,
-                 create_influencer_subsequence_builder: CreateInfluencerSequenceBuilder,
-                 influencer_onboarding_hooks: InfluencerOnBoardingAfterHooks):
+                 post_user_single_sequence_builder: PostSingleUserSubsequenceBuilder,
+                 influencer_controller: InfluencerController,
+                 influencer_after_hooks: InfluencerAfterHooks,
+                 influencer_onboarding_hooks: InfluencerOnBoardingAfterHooks,
+                 user_before_hooks: UserBeforeHooks,
+                 audience_age_controller: AudienceAgeController,
+                 audience_age_before_hooks: AudienceAgeBeforeHooks,
+                 audience_gender_controller: AudienceGenderController,
+                 influencer_before_hooks: InfluencerBeforeHooks,
+                 audience_gender_before_hooks: AudienceGenderBeforeHooks,
+                 pre_generic_update_create_subsequence_builder: PreGenericUpdateCreateSubsequenceBuilder):
         super().__init__()
+        self.__post_user_single_sequence_builder = post_user_single_sequence_builder
+        self.__influencer_controller = influencer_controller
+        self.__influencer_after_hooks = influencer_after_hooks
+        self.__user_before_hooks = user_before_hooks
+        self.__audience_age_controller = audience_age_controller
+        self.__audience_age_before_hooks = audience_age_before_hooks
+        self.__audience_gender_controller = audience_gender_controller
+        self.__influencer_before_hooks = influencer_before_hooks
+        self.__audience_gender_before_hooks = audience_gender_before_hooks
+        self.__pre_generic_update_create_subsequence_builder = pre_generic_update_create_subsequence_builder
         self.__influencer_onboarding_hooks = influencer_onboarding_hooks
-        self.__create_influencer_subsequence_builder = create_influencer_subsequence_builder
-        self.__create_audience_age_subsequence_builder = create_audience_age_subsequence_builder
-        self.__create_audience_gender_subsequence_builder = create_audience_gender_subsequence_builder
 
     def build(self):
-        self._add_sequence_builder(sequence_builder=self.__create_influencer_subsequence_builder) \
-            ._add_command(command=self.__influencer_onboarding_hooks.cache_influencer_data)\
-            ._add_sequence_builder(sequence_builder=self.__create_audience_gender_subsequence_builder) \
+        self._add_sequence_builder(sequence_builder=self.__pre_generic_update_create_subsequence_builder) \
+            ._add_command(command=self.__audience_gender_before_hooks.check_audience_genders_are_empty) \
+            ._add_command(command=self.__audience_gender_controller.create_for_influencer) \
             ._add_command(command=self.__influencer_onboarding_hooks.cache_audience_gender_data) \
-            ._add_sequence_builder(sequence_builder=self.__create_audience_age_subsequence_builder) \
+            ._add_command(command=self.__audience_age_before_hooks.check_audience_ages_are_empty) \
+            ._add_command(command=self.__audience_age_controller.create_for_influencer) \
             ._add_command(command=self.__influencer_onboarding_hooks.cache_audience_age_data) \
-            ._add_command(command=self.__influencer_onboarding_hooks.merge_influencer_cache)
+            ._add_command(command=self.__user_before_hooks.set_categories_and_values) \
+            ._add_command(command=self.__influencer_controller.create) \
+            ._add_command(command=self.__influencer_onboarding_hooks.cache_influencer_data) \
+            ._add_command(command=self.__influencer_onboarding_hooks.merge_influencer_cache) \
+            ._add_command(command=self.__influencer_after_hooks.set_influencer_claims) \
+            ._add_sequence_builder(sequence_builder=self.__post_user_single_sequence_builder) \
+            ._add_command(command=self.__influencer_after_hooks.tag_bucket_url_to_images)
 
 
 class UpdateInfluencerProfileSequenceBuilder(FluentSequenceBuilder):
 
     def __init__(self,
-                 update_audience_gender_subsequence_builder: UpdateAudienceGenderSequenceBuilder,
-                 update_audience_age_subsequence_builder: UpdateAudienceAgeSequenceBuilder,
-                 update_influencer_subsequence_builder: UpdateInfluencerSequenceBuilder,
-                 influencer_onboarding_hooks: InfluencerOnBoardingAfterHooks):
+                 influencer_onboarding_hooks: InfluencerOnBoardingAfterHooks,
+                 pre_generic_update_create_subsequence_builder: PreGenericUpdateCreateSubsequenceBuilder,
+                 audience_gender_controller: AudienceGenderController,
+                 audience_age_controller: AudienceAgeController,
+                 user_before_hooks: UserBeforeHooks,
+                 influencer_before_hooks: InfluencerBeforeHooks,
+                 influencer_controller: InfluencerController,
+                 influencer_after_hooks: InfluencerAfterHooks,
+                 post_user_single_sequence_builder: PostSingleUserSubsequenceBuilder):
         super().__init__()
+        self.__post_user_single_sequence_builder = post_user_single_sequence_builder
+        self.__influencer_after_hooks = influencer_after_hooks
+        self.__influencer_controller = influencer_controller
+        self.__influencer_before_hooks = influencer_before_hooks
+        self.__user_before_hooks = user_before_hooks
+        self.__audience_age_controller = audience_age_controller
+        self.__audience_gender_controller = audience_gender_controller
+        self.__pre_generic_update_create_subsequence_builder = pre_generic_update_create_subsequence_builder
         self.__influencer_onboarding_hooks = influencer_onboarding_hooks
-        self.__update_influencer_subsequence_builder = update_influencer_subsequence_builder
-        self.__update_audience_age_subsequence_builder = update_audience_age_subsequence_builder
-        self.__update_audience_gender_subsequence_builder = update_audience_gender_subsequence_builder
 
     def build(self):
-        self._add_sequence_builder(sequence_builder=self.__update_influencer_subsequence_builder) \
-            ._add_command(command=self.__influencer_onboarding_hooks.cache_influencer_data) \
-            ._add_sequence_builder(sequence_builder=self.__update_audience_gender_subsequence_builder) \
+        self._add_sequence_builder(sequence_builder=self.__pre_generic_update_create_subsequence_builder)\
+            ._add_command(command=self.__audience_gender_controller.update_for_influencer) \
             ._add_command(command=self.__influencer_onboarding_hooks.cache_audience_gender_data) \
-            ._add_sequence_builder(sequence_builder=self.__update_audience_age_subsequence_builder) \
+            ._add_command(command=self.__audience_age_controller.update_for_influencer) \
             ._add_command(command=self.__influencer_onboarding_hooks.cache_audience_age_data) \
-            ._add_command(command=self.__influencer_onboarding_hooks.merge_influencer_cache)
+            ._add_command(command=self.__user_before_hooks.set_categories_and_values) \
+            ._add_command(command=self.__influencer_before_hooks.validate_influencer) \
+            ._add_command(command=self.__influencer_controller.update_for_user) \
+            ._add_command(command=self.__influencer_onboarding_hooks.cache_influencer_data) \
+            ._add_command(command=self.__influencer_onboarding_hooks.merge_influencer_cache) \
+            ._add_command(command=self.__influencer_after_hooks.set_influencer_claims) \
+            ._add_sequence_builder(sequence_builder=self.__post_user_single_sequence_builder)
 
 
 class GetInfluencerProfileSequenceBuilder(FluentSequenceBuilder):
 
     def __init__(self,
-                 get_audience_gender_subsequence_builder: GetAudienceGenderSequenceBuilder,
-                 get_audience_age_subsequence_builder: GetAudienceAgeSequenceBuilder,
-                 get_influencer_subsequence_builder: GetAuthInfluencerSequenceBuilder,
-                 influencer_onboarding_hooks: InfluencerOnBoardingAfterHooks):
+                 influencer_onboarding_hooks: InfluencerOnBoardingAfterHooks,
+                 user_before_hooks: UserBeforeHooks,
+                 audience_gender_controller: AudienceGenderController,
+                 audience_age_controller: AudienceAgeController,
+                 influencer_controller: InfluencerController,
+                 post_user_single_sequence_builder: PostSingleUserSubsequenceBuilder,
+                 influencer_after_hooks: InfluencerAfterHooks):
         super().__init__()
+        self.__influencer_after_hooks = influencer_after_hooks
+        self.__post_user_single_sequence_builder = post_user_single_sequence_builder
+        self.__influencer_controller = influencer_controller
+        self.__audience_age_controller = audience_age_controller
+        self.__audience_gender_controller = audience_gender_controller
+        self.__user_before_hooks = user_before_hooks
         self.__influencer_onboarding_hooks = influencer_onboarding_hooks
-        self.__get_influencer_subsequence_builder = get_influencer_subsequence_builder
-        self.__get_audience_age_subsequence_builder = get_audience_age_subsequence_builder
-        self.__get_audience_gender_subsequence_builder = get_audience_gender_subsequence_builder
 
     def build(self):
-        self._add_sequence_builder(sequence_builder=self.__get_influencer_subsequence_builder) \
-            ._add_command(command=self.__influencer_onboarding_hooks.cache_influencer_data) \
-            ._add_sequence_builder(sequence_builder=self.__get_audience_gender_subsequence_builder) \
+        self._add_command(command=self.__user_before_hooks.set_auth_user_id) \
+            ._add_command(command=self.__audience_gender_controller.get_for_influencer) \
             ._add_command(command=self.__influencer_onboarding_hooks.cache_audience_gender_data) \
-            ._add_sequence_builder(sequence_builder=self.__get_audience_age_subsequence_builder) \
+            ._add_command(command=self.__audience_age_controller.get_for_influencer) \
             ._add_command(command=self.__influencer_onboarding_hooks.cache_audience_age_data) \
-            ._add_command(command=self.__influencer_onboarding_hooks.merge_influencer_cache)
+            ._add_command(command=self.__influencer_controller.get) \
+            ._add_command(command=self.__influencer_onboarding_hooks.cache_influencer_data) \
+            ._add_command(command=self.__influencer_onboarding_hooks.merge_influencer_cache) \
+            ._add_sequence_builder(sequence_builder=self.__post_user_single_sequence_builder)
 
 
 class NotImplementedSequenceBuilder(FluentSequenceBuilder):

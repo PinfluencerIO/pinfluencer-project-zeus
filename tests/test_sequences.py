@@ -683,13 +683,20 @@ class TestCreateInfluencerProfileSequenceBuilder(TestCase):
         with self.subTest(msg="components match"):
             self.maxDiff = None
             self.assertEqual(sut.components, [
-                ioc.resolve(CreateInfluencerSequenceBuilder),
-                ioc.resolve(InfluencerOnBoardingAfterHooks).cache_influencer_data,
-                ioc.resolve(CreateAudienceGenderSequenceBuilder),
+                ioc.resolve(PreGenericUpdateCreateSubsequenceBuilder),
+                ioc.resolve(AudienceGenderBeforeHooks).check_audience_genders_are_empty,
+                ioc.resolve(AudienceGenderController).create_for_influencer,
                 ioc.resolve(InfluencerOnBoardingAfterHooks).cache_audience_gender_data,
-                ioc.resolve(CreateAudienceAgeSequenceBuilder),
+                ioc.resolve(AudienceAgeBeforeHooks).check_audience_ages_are_empty,
+                ioc.resolve(AudienceAgeController).create_for_influencer,
                 ioc.resolve(InfluencerOnBoardingAfterHooks).cache_audience_age_data,
+                ioc.resolve(UserBeforeHooks).set_categories_and_values,
+                ioc.resolve(InfluencerController).create,
+                ioc.resolve(InfluencerOnBoardingAfterHooks).cache_influencer_data,
                 ioc.resolve(InfluencerOnBoardingAfterHooks).merge_influencer_cache,
+                ioc.resolve(InfluencerAfterHooks).set_influencer_claims,
+                ioc.resolve(PostSingleUserSubsequenceBuilder),
+                ioc.resolve(InfluencerAfterHooks).tag_bucket_url_to_images
             ])
 
 
@@ -708,13 +715,18 @@ class TestUpdateInfluencerProfileSequenceBuilder(TestCase):
         with self.subTest(msg="components match"):
             self.maxDiff = None
             self.assertEqual(sut.components, [
-                ioc.resolve(UpdateInfluencerSequenceBuilder),
-                ioc.resolve(InfluencerOnBoardingAfterHooks).cache_influencer_data,
-                ioc.resolve(UpdateAudienceGenderSequenceBuilder),
+                ioc.resolve(PreGenericUpdateCreateSubsequenceBuilder),
+                ioc.resolve(AudienceGenderController).update_for_influencer,
                 ioc.resolve(InfluencerOnBoardingAfterHooks).cache_audience_gender_data,
-                ioc.resolve(UpdateAudienceAgeSequenceBuilder),
+                ioc.resolve(AudienceAgeController).update_for_influencer,
                 ioc.resolve(InfluencerOnBoardingAfterHooks).cache_audience_age_data,
+                ioc.resolve(UserBeforeHooks).set_categories_and_values,
+                ioc.resolve(InfluencerBeforeHooks).validate_influencer,
+                ioc.resolve(InfluencerController).update_for_user,
+                ioc.resolve(InfluencerOnBoardingAfterHooks).cache_influencer_data,
                 ioc.resolve(InfluencerOnBoardingAfterHooks).merge_influencer_cache,
+                ioc.resolve(InfluencerAfterHooks).set_influencer_claims,
+                ioc.resolve(PostSingleUserSubsequenceBuilder),
             ])
 
 
@@ -733,11 +745,13 @@ class TestGetInfluencerProfileSequenceBuilder(TestCase):
         with self.subTest(msg="components match"):
             self.maxDiff = None
             self.assertEqual(sut.components, [
-                ioc.resolve(GetAuthInfluencerSequenceBuilder),
-                ioc.resolve(InfluencerOnBoardingAfterHooks).cache_influencer_data,
-                ioc.resolve(GetAudienceGenderSequenceBuilder),
+                ioc.resolve(UserBeforeHooks).set_auth_user_id,
+                ioc.resolve(AudienceGenderController).get_for_influencer,
                 ioc.resolve(InfluencerOnBoardingAfterHooks).cache_audience_gender_data,
-                ioc.resolve(GetAudienceAgeSequenceBuilder),
+                ioc.resolve(AudienceAgeController).get_for_influencer,
                 ioc.resolve(InfluencerOnBoardingAfterHooks).cache_audience_age_data,
+                ioc.resolve(InfluencerController).get,
+                ioc.resolve(InfluencerOnBoardingAfterHooks).cache_influencer_data,
                 ioc.resolve(InfluencerOnBoardingAfterHooks).merge_influencer_cache,
+                ioc.resolve(PostSingleUserSubsequenceBuilder)
             ])
