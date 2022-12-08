@@ -70,8 +70,7 @@ class AudienceGenderViewDto:
 
 @dataclass(unsafe_hash=True)
 class CollaborationCreateRequestDto:
-    request_details: str = None
-    creative_idea: str = None
+    content_proposal: str = None
     number_of_pictures: int = None
     number_of_videos: int = None
     number_of_stories: int = None
@@ -80,8 +79,7 @@ class CollaborationCreateRequestDto:
 
 @dataclass(unsafe_hash=True)
 class CollaborationUpdateRequestDto:
-    request_details: str = None
-    creative_idea: str = None
+    content_proposal: str = None
     number_of_pictures: int = None
     number_of_videos: int = None
     number_of_stories: int = None
@@ -161,8 +159,7 @@ class ListingResponseDto(BaseResponseDto):
 class CollaborationResponseDto(BaseResponseDto):
     brand_auth_user_id: str = None
     influencer_auth_user_id: str = None
-    request_details: str = None
-    creative_idea: str = None
+    content_proposal: str = None
     number_of_pictures: int = None
     number_of_videos: int = None
     number_of_stories: int = None

@@ -1,7 +1,7 @@
 from typing import Type
 
 import sqlalchemy.orm
-from sqlalchemy import Column, String, DateTime, Float, PickleType, Table, Integer, Boolean, Enum, orm
+from sqlalchemy import Column, String, DateTime, Float, Table, Integer, Boolean, Enum, orm
 
 from src import T
 from src.data import Base
@@ -85,8 +85,7 @@ collaboration_table = Table('collaboration', Base.metadata,
                             Column('created', DateTime),
                             Column('brand_auth_user_id', String(length=64)),
                             Column('influencer_auth_user_id', String(length=64)),
-                            Column('request_details', String(length=500)),
-                            Column('creative_idea', String(length=500)),
+                            Column('content_proposal', String(length=500)),
                             Column('number_of_pictures', Integer),
                             Column('number_of_videos', Integer),
                             Column('number_of_stories', Integer),

@@ -22,11 +22,9 @@ class ValueEnum(Enum):
 
 
 class CollaborationStateEnum(Enum):
-    SUBMITTED = "SUBMITTED"
-    ACCEPTED = "ACCEPTED"
-    REJECTED = "REJECTED"
-    RESUBMITTED = "RESUBMITTED"
-    COMPLETE = "COMPLETE"
+    SUBMITTED = "APPLIED"
+    ACCEPTED = "APPROVED"
+    COMPLETE = "DELIVERED"
 
 
 class CategoryEnum(Enum):
@@ -43,8 +41,12 @@ class CategoryEnum(Enum):
 
 
 @dataclass(unsafe_hash=True)
-class DataModel:
+class Resource:
     id: str = field(default_factory=uuid4_str)
+
+
+@dataclass(unsafe_hash=True)
+class DataModel(Resource):
     created: datetime = field(default_factory=datetime.utcnow)
 
 
@@ -66,8 +68,8 @@ class Brand(DataModel):
     logo: str = None
     header_image: str = None
     insta_handle: str = None
-    categories: list[Category] = field(default_factory=list[Category])
-    values: list[Value] = field(default_factory=list[Value])
+    categories: list[Category] = field(default_factory=list)
+    values: list[Value] = field(default_factory=list)
     auth_user_id: str = None
 
 
@@ -84,8 +86,8 @@ class Influencer(DataModel):
     website: str = None
     bio: str = None
     image: str = None
-    categories: list[Category] = field(default_factory=list[Value])
-    values: list[Value] = field(default_factory=list[Value])
+    categories: list[Category] = field(default_factory=list)
+    values: list[Value] = field(default_factory=list)
     address: str = None
     auth_user_id: str = None
 
@@ -126,8 +128,8 @@ class Listing(DataModel):
     brand_auth_user_id: str = None
     creative_guidance: str = None
     title: str = None
-    categories: list[Category] = field(default_factory=list[Value])
-    values: list[Value] = field(default_factory=list[Value])
+    categories: list[Category] = field(default_factory=list)
+    values: list[Value] = field(default_factory=list)
     product_name: str = None
     product_description: str = None
     product_image: str = None
@@ -137,13 +139,36 @@ class Listing(DataModel):
 class Collaboration(DataModel):
     brand_auth_user_id: str = None
     influencer_auth_user_id: str = None
-    request_details: str = None
-    creative_idea: str = None
+    content_proposal: str = None
     number_of_pictures: int = None
     number_of_videos: int = None
     number_of_stories: int = None
     listing_id: str = None
     collaboration_state: CollaborationStateEnum = None
+
+
+@dataclass(unsafe_hash=True)
+class InfluencerCollaboration(Collaboration):
+    brand: Brand = None
+    listing: Listing = None
+
+
+@dataclass(unsafe_hash=True)
+class BrandCollaboration(Collaboration):
+    influencer: Influencer = None
+    listing: Listing = None
+
+
+@dataclass(unsafe_hash=True)
+class InfluencerListing(Listing):
+    brand: Brand = None
+
+
+@dataclass(unsafe_hash=True)
+class BrandListing(Listing):
+    submitted_collaborations: list[Collaboration] = field(default_factory=list)
+    accepted_collaborations: list[Collaboration] = field(default_factory=list)
+    complete_collaborations: list[Collaboration] = field(default_factory=list)
 
 
 @dataclass(unsafe_hash=True)
