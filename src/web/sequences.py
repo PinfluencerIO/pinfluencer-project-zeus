@@ -30,26 +30,6 @@ class PreUpdateCreateListingSubsequenceBuilder(FluentSequenceBuilder):
         self._add_command(self.__listing_before_hooks.map_categories_and_values)
 
 
-class PostSingleListingSubsequenceBuilder(FluentSequenceBuilder):
-
-    def __init__(self, listing_after_hooks: ListingAfterHooks):
-        super().__init__()
-        self.__listing_after_hooks = listing_after_hooks
-
-    def build(self):
-        self._add_command(self.__listing_after_hooks.format_values_and_categories)
-
-
-class PostMultipleListingSubsequenceBuilder(FluentSequenceBuilder):
-
-    def __init__(self, listing_after_hooks: ListingAfterHooks):
-        super().__init__()
-        self.__listing_after_hooks = listing_after_hooks
-
-    def build(self):
-        self._add_command(self.__listing_after_hooks.format_values_and_categories_collection)
-
-
 class PostSingleUserSubsequenceBuilder(FluentSequenceBuilder):
 
     def __init__(self, user_after_hooks: UserAfterHooks):
@@ -57,8 +37,7 @@ class PostSingleUserSubsequenceBuilder(FluentSequenceBuilder):
         self.__user_after_hooks = user_after_hooks
 
     def build(self):
-        self._add_command(self.__user_after_hooks.format_values_and_categories) \
-            ._add_command(self.__user_after_hooks.tag_auth_user_claims_to_response)
+        self._add_command(self.__user_after_hooks.tag_auth_user_claims_to_response)
 
 
 class PostMultipleUserSubsequenceBuilder(FluentSequenceBuilder):
@@ -68,8 +47,7 @@ class PostMultipleUserSubsequenceBuilder(FluentSequenceBuilder):
         self.__user_after_hooks = user_after_hooks
 
     def build(self):
-        self._add_command(self.__user_after_hooks.format_values_and_categories_collection) \
-            ._add_command(self.__user_after_hooks.tag_auth_user_claims_to_response_collection)
+        self._add_command(self.__user_after_hooks.tag_auth_user_claims_to_response_collection)
 
 
 class UpdateImageForListingSequenceBuilder(FluentSequenceBuilder):
@@ -79,11 +57,9 @@ class UpdateImageForListingSequenceBuilder(FluentSequenceBuilder):
                  brand_before_hooks: BrandBeforeHooks,
                  listing_controller: ListingController,
                  generic_update_sequence: PreGenericUpdateCreateSubsequenceBuilder,
-                 post_single_listing_sequence: PostSingleListingSubsequenceBuilder,
                  listing_after_hooks: ListingAfterHooks):
         super().__init__()
         self.__listing_after_hooks = listing_after_hooks
-        self.__post_single_listing_sequence = post_single_listing_sequence
         self.__generic_update_sequence = generic_update_sequence
         self.__listing_controller = listing_controller
         self.__brand_before_hooks = brand_before_hooks
@@ -96,7 +72,6 @@ class UpdateImageForListingSequenceBuilder(FluentSequenceBuilder):
             ._add_command(command=self.__listing_before_hooks.validate_image_key) \
             ._add_command(command=self.__listing_before_hooks.upload_image)\
             ._add_command(command=self.__listing_controller.update_listing_image) \
-            ._add_sequence_builder(sequence_builder=self.__post_single_listing_sequence)\
             ._add_command(command=self.__listing_after_hooks.tag_bucket_url_to_images)
 
 
@@ -107,11 +82,9 @@ class UpdateListingSequenceBuilder(FluentSequenceBuilder):
                  brand_before_hooks: BrandBeforeHooks,
                  listing_controller: ListingController,
                  generic_update_sequence: PreGenericUpdateCreateSubsequenceBuilder,
-                 post_single_listing_sequence: PostSingleListingSubsequenceBuilder,
                  listing_after_hooks: ListingAfterHooks):
         super().__init__()
         self.__listing_after_hooks = listing_after_hooks
-        self.__post_single_listing_sequence = post_single_listing_sequence
         self.__generic_update_sequence = generic_update_sequence
         self.__brand_before_hooks = brand_before_hooks
         self.__listing_controller = listing_controller
@@ -124,7 +97,6 @@ class UpdateListingSequenceBuilder(FluentSequenceBuilder):
             ._add_command(command=self.__brand_before_hooks.validate_auth_brand) \
             ._add_command(command=self.__listing_before_hooks.map_categories_and_values) \
             ._add_command(command=self.__listing_controller.update_listing)\
-            ._add_sequence_builder(sequence_builder=self.__post_single_listing_sequence)\
             ._add_command(command=self.__listing_after_hooks.tag_bucket_url_to_images)
 
 
@@ -135,13 +107,11 @@ class CreateListingSequenceBuilder(FluentSequenceBuilder):
                  brand_before_hooks: BrandBeforeHooks,
                  listing_controller: ListingController,
                  generic_update_sequence: PreGenericUpdateCreateSubsequenceBuilder,
-                 post_single_listing_sequence: PostSingleListingSubsequenceBuilder,
                  common_after_hooks: CommonAfterHooks,
                  listing_after_hooks: ListingAfterHooks):
         super().__init__()
         self.__common_after_hooks = common_after_hooks
         self.__listing_after_hooks = listing_after_hooks
-        self.__post_single_listing_sequence = post_single_listing_sequence
         self.__generic_update_sequence = generic_update_sequence
         self.__brand_before_hooks = brand_before_hooks
         self.__listing_controller = listing_controller
@@ -154,7 +124,6 @@ class CreateListingSequenceBuilder(FluentSequenceBuilder):
             ._add_command(command=self.__listing_before_hooks.map_categories_and_values) \
             ._add_command(command=self.__listing_controller.create_for_brand) \
             ._add_command(command=self.__listing_after_hooks.save_state) \
-            ._add_sequence_builder(sequence_builder=self.__post_single_listing_sequence) \
             ._add_command(command=self.__listing_after_hooks.tag_bucket_url_to_images)
 
 
@@ -163,18 +132,15 @@ class GetListingByIdSequenceBuilder(FluentSequenceBuilder):
     def __init__(self,
                  listing_before_hooks: ListingBeforeHooks,
                  listing_controller: ListingController,
-                 post_single_listing_sequence: PostSingleListingSubsequenceBuilder,
                  listing_after_hooks: ListingAfterHooks):
         super().__init__()
         self.__listing_after_hooks = listing_after_hooks
-        self.__post_single_listing_sequence = post_single_listing_sequence
         self.__listing_controller = listing_controller
         self.__listing_before_hooks = listing_before_hooks
 
     def build(self):
         self._add_command(command=self.__listing_before_hooks.validate_id) \
             ._add_command(command=self.__listing_controller.get_by_id)\
-            ._add_sequence_builder(sequence_builder=self.__post_single_listing_sequence)\
             ._add_command(command=self.__listing_after_hooks.tag_bucket_url_to_images)
 
 
@@ -184,11 +150,9 @@ class GetListingsForBrandSequenceBuilder(FluentSequenceBuilder):
                  user_before_hooks: UserBeforeHooks,
                  brand_before_hooks: BrandBeforeHooks,
                  listing_controller: ListingController,
-                 post_multiple_listing_sequence: PostMultipleListingSubsequenceBuilder,
                  listing_after_hooks: ListingAfterHooks):
         super().__init__()
         self.__brand_before_hooks = brand_before_hooks
-        self.__post_multiple_listing_sequence = post_multiple_listing_sequence
         self.__listing_after_hooks = listing_after_hooks
         self.__listing_controller = listing_controller
         self.__user_before_hooks = user_before_hooks
@@ -197,7 +161,6 @@ class GetListingsForBrandSequenceBuilder(FluentSequenceBuilder):
         self._add_command(command=self.__user_before_hooks.set_auth_user_id) \
             ._add_command(command=self.__brand_before_hooks.validate_auth_brand) \
             ._add_command(command=self.__listing_controller.get_for_brand) \
-            ._add_sequence_builder(sequence_builder=self.__post_multiple_listing_sequence) \
             ._add_command(command=self.__listing_after_hooks.tag_bucket_url_to_images_collection)
 
 

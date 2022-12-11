@@ -20,39 +20,6 @@ S3_URL = "https://pinfluencer-product-images.s3.eu-west-2.amazonaws.com"
 
 class CommonAfterHooks:
 
-    def map_enum(self,
-                 context: PinfluencerContext,
-                 key: str):
-        self.__map_enum_base(entity=context.response.body,
-                             key=key)
-
-    def map_enum_collection(self,
-                            context: PinfluencerContext,
-                            key: str):
-        for entity in context.response.body:
-            self.__map_enum_base(entity=entity,
-                                 key=key)
-
-    def map_enums(self,
-                  context: PinfluencerContext,
-                  key: str):
-        self.__map_enums_base(entity=context.response.body,
-                              key=key)
-
-    def __map_enum_base(self, entity: dict,
-                        key: str):
-        entity[key] = entity[key].name
-
-    def __map_enums_base(self, entity: dict,
-                         key: str):
-        entity[key] = list(map(lambda x: x.name, entity[key]))
-
-    def map_enums_collection(self,
-                             context: PinfluencerContext,
-                             key: str):
-        for entity in context.response.body:
-            self.__map_enums_base(entity=entity, key=key)
-
     def set_image_url(self,
                       context: PinfluencerContext,
                       image_fields: list[str],
@@ -193,22 +160,10 @@ class ListingAfterHooks(SaveableHook):
                                                 image_fields=["product_image"],
                                                 collection=False)
 
-    def format_values_and_categories(self, context: PinfluencerContext):
-        self.__common_after_hooks.map_enums(context=context,
-                                            key="values")
-        self.__common_after_hooks.map_enums(context=context,
-                                            key="categories")
-
     def tag_bucket_url_to_images_collection(self, context: PinfluencerContext):
         self.__common_after_hooks.set_image_url(context=context,
                                                 image_fields=["product_image"],
                                                 collection=True)
-
-    def format_values_and_categories_collection(self, context: PinfluencerContext):
-        self.__common_after_hooks.map_enums_collection(context=context,
-                                                       key="values")
-        self.__common_after_hooks.map_enums_collection(context=context,
-                                                       key="categories")
 
     def validate_listing_belongs_to_brand(self, context: PinfluencerContext):
         brand_response: ListingResponseDto = self.__mapper.map_from_dict(_from=context.response.body, to=ListingResponseDto)
@@ -409,18 +364,6 @@ class UserAfterHooks:
     def tag_auth_user_claims_to_response_collection(self, context: PinfluencerContext):
         for user in context.response.body:
             self._generic_claims_tagger(entity=user)
-
-    def format_values_and_categories(self, context: PinfluencerContext):
-        self.__common_after_hooks.map_enums(context=context,
-                                            key="values")
-        self.__common_after_hooks.map_enums(context=context,
-                                            key="categories")
-
-    def format_values_and_categories_collection(self, context: PinfluencerContext):
-        self.__common_after_hooks.map_enums_collection(context=context,
-                                                       key="values")
-        self.__common_after_hooks.map_enums_collection(context=context,
-                                                       key="categories")
 
 
 class HooksFacade:

@@ -33,85 +33,6 @@ class TestCommonAfterHooks(TestCase):
     def setUp(self) -> None:
         self.__sut = CommonAfterHooks()
 
-    def test_map_enum_collection(self):
-        # arrange
-        context = PinfluencerContext(response=PinfluencerResponse(body=[
-            {"values": ValueEnum.SUSTAINABLE},
-            {"values": ValueEnum.VALUE7}
-        ]))
-
-        # act
-        self.__sut.map_enum_collection(context=context,
-                                       key="values")
-
-        # assert
-        with self.subTest(msg="first value is correct"):
-            assert context.response.body[0]["values"] == "SUSTAINABLE"
-
-        # assert
-        with self.subTest(msg="first value is correct"):
-            assert context.response.body[1]["values"] == "VALUE7"
-
-    def test_map_enum(self):
-        # arrange
-        context = PinfluencerContext(
-            response=PinfluencerResponse(body={"values": ValueEnum.ORGANIC}))
-
-        # act
-        self.__sut.map_enum(context=context,
-                            key="values")
-
-        # assert
-        assert context.response.body["values"] == "ORGANIC"
-
-    def test_map_enums_collection(self):
-        # arrange
-        context = PinfluencerContext(response=PinfluencerResponse(body=[
-            {"values": [ValueEnum.SUSTAINABLE, ValueEnum.ORGANIC]},
-            {"values": [ValueEnum.VALUE7, ValueEnum.VALUE6, ValueEnum.RECYCLED]}
-        ]))
-
-        # act
-        self.__sut.map_enums_collection(context=context,
-                                        key="values")
-
-        # assert
-        with self.subTest(msg="first value of first entity is correct"):
-            assert context.response.body[0]["values"][0] == "SUSTAINABLE"
-
-        # assert
-        with self.subTest(msg="second value of first entity is correct"):
-            assert context.response.body[0]["values"][1] == "ORGANIC"
-
-        # assert
-        with self.subTest(msg="first value of second entity is correct"):
-            assert context.response.body[1]["values"][0] == "VALUE7"
-
-        # assert
-        with self.subTest(msg="second value of second entity is correct"):
-            assert context.response.body[1]["values"][1] == "VALUE6"
-
-        # assert
-        with self.subTest(msg="third value of second entity is correct"):
-            assert context.response.body[1]["values"][2] == "RECYCLED"
-
-    def test_map_enums(self):
-        # arrange
-        context = PinfluencerContext(
-            response=PinfluencerResponse(body={"values": [ValueEnum.SUSTAINABLE, ValueEnum.ORGANIC]}))
-
-        # act
-        self.__sut.map_enums(context=context,
-                             key="values")
-
-        # assert
-        with self.subTest(msg="first value is correct"):
-            assert context.response.body["values"][0] == "SUSTAINABLE"
-
-        # assert
-        with self.subTest(msg="second value is correct"):
-            assert context.response.body["values"][1] == "ORGANIC"
-
     def test_set_image_url(self):
         # arrange
         path = "image_path"
@@ -957,30 +878,6 @@ class TestListingAfterHooks(TestCase):
                                                                         image_fields=["product_image"],
                                                                         collection=False)
 
-    def test_format_values_and_categories(self):
-        # arrange
-        self.__common_after_hooks.map_enums = MagicMock()
-        context = PinfluencerContext()
-
-        # act
-        self.__sut.format_values_and_categories(context=context)
-
-        # assert
-        self.__common_after_hooks.map_enums.assert_any_call(context=context, key="categories")
-        self.__common_after_hooks.map_enums.assert_any_call(context=context, key="values")
-
-    def test_format_values_and_categories_collection(self):
-        # arrange
-        self.__common_after_hooks.map_enums_collection = MagicMock()
-        context = PinfluencerContext()
-
-        # act
-        self.__sut.format_values_and_categories_collection(context=context)
-
-        # assert
-        self.__common_after_hooks.map_enums_collection.assert_any_call(context=context, key="categories")
-        self.__common_after_hooks.map_enums_collection.assert_any_call(context=context, key="values")
-
     def test_tag_bucket_url_to_images_collection(self):
         # arrange
         self.__common_after_hooks.set_image_url = MagicMock()
@@ -1122,34 +1019,6 @@ class TestUserAfterHooks(TestCase):
                 call(entity=users[1].__dict__),
                 call(entity=users[2].__dict__)
             ])
-
-    def test_format_values_and_categories(self):
-        # arrange
-        context = PinfluencerContext()
-        self.__common_after_hooks.map_enums = MagicMock()
-
-        # act
-        self.__sut.format_values_and_categories(context=context)
-
-        # assert
-        self.__common_after_hooks.map_enums.assert_any_call(context=context,
-                                                            key="values")
-        self.__common_after_hooks.map_enums.assert_any_call(context=context,
-                                                            key="categories")
-
-    def test_format_values_and_categories_collection(self):
-        # arrange
-        context = PinfluencerContext()
-        self.__common_after_hooks.map_enums_collection = MagicMock()
-
-        # act
-        self.__sut.format_values_and_categories_collection(context=context)
-
-        # assert
-        self.__common_after_hooks.map_enums_collection.assert_any_call(context=context,
-                                                                       key="values")
-        self.__common_after_hooks.map_enums_collection.assert_any_call(context=context,
-                                                                       key="categories")
 
 
 class TestNotificationAfterHooks(TestCase):

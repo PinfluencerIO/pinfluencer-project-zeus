@@ -11,7 +11,7 @@ from src.web.hooks import CommonBeforeHooks, UserBeforeHooks, ListingBeforeHooks
     AudienceAgeBeforeHooks, AudienceAgeAfterHooks, AudienceGenderAfterHooks, AudienceGenderBeforeHooks, \
     InfluencerOnBoardingAfterHooks
 from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdateCreateListingSubsequenceBuilder, \
-    PostSingleListingSubsequenceBuilder, PostMultipleListingSubsequenceBuilder, PostSingleUserSubsequenceBuilder, \
+    PostSingleUserSubsequenceBuilder, \
     PostMultipleUserSubsequenceBuilder, UpdateImageForListingSequenceBuilder, UpdateListingSequenceBuilder, \
     CreateListingSequenceBuilder, GetListingByIdSequenceBuilder, GetListingsForBrandSequenceBuilder, \
     UpdateInfluencerImageSequenceBuilder, UpdateInfluencerSequenceBuilder, CreateInfluencerSequenceBuilder, \
@@ -66,38 +66,6 @@ class TestPreUpdateCreateListingSubsequence(TestCase):
             self.assertEqual(sut.components, [ioc.resolve(ListingBeforeHooks).map_categories_and_values])
 
 
-class TestPostSingleListingSubsequence(TestCase):
-
-    def test_sequence(self):
-        # arrange
-        ioc = ServiceCollection()
-        setup(ioc)
-        sut = ioc.resolve(PostSingleListingSubsequenceBuilder)
-
-        # act
-        sut.build()
-
-        # assert
-        with self.subTest(msg="components match"):
-            self.assertEqual(sut.components, [ioc.resolve(ListingAfterHooks).format_values_and_categories])
-
-
-class TestPostMultipleListingSubsequence(TestCase):
-
-    def test_sequence(self):
-        # arrange
-        ioc = ServiceCollection()
-        setup(ioc)
-        sut = ioc.resolve(PostMultipleListingSubsequenceBuilder)
-
-        # act
-        sut.build()
-
-        # assert
-        with self.subTest(msg="components match"):
-            self.assertEqual(sut.components, [ioc.resolve(ListingAfterHooks).format_values_and_categories_collection])
-
-
 class TestPostSingleUserSubsequence(TestCase):
 
     def test_sequence(self):
@@ -111,8 +79,7 @@ class TestPostSingleUserSubsequence(TestCase):
 
         # assert
         with self.subTest(msg="components match"):
-            self.assertEqual(sut.components, [ioc.resolve(UserAfterHooks).format_values_and_categories,
-                                              ioc.resolve(UserAfterHooks).tag_auth_user_claims_to_response])
+            self.assertEqual(sut.components, [ioc.resolve(UserAfterHooks).tag_auth_user_claims_to_response])
 
 
 class TestPostMultipleUserSubsequence(TestCase):
@@ -128,8 +95,7 @@ class TestPostMultipleUserSubsequence(TestCase):
 
         # assert
         with self.subTest(msg="components match"):
-            self.assertEqual(sut.components, [ioc.resolve(UserAfterHooks).format_values_and_categories_collection,
-                                              ioc.resolve(UserAfterHooks).tag_auth_user_claims_to_response_collection])
+            self.assertEqual(sut.components, [ioc.resolve(UserAfterHooks).tag_auth_user_claims_to_response_collection])
 
 
 class TestUpdateImageForListingSequence(TestCase):
@@ -152,7 +118,6 @@ class TestUpdateImageForListingSequence(TestCase):
                                               ioc.resolve(ListingBeforeHooks).validate_image_key,
                                               ioc.resolve(ListingBeforeHooks).upload_image,
                                               ioc.resolve(ListingController).update_listing_image,
-                                              ioc.resolve(PostSingleListingSubsequenceBuilder),
                                               ioc.resolve(ListingAfterHooks).tag_bucket_url_to_images])
 
 
@@ -176,7 +141,6 @@ class TestUpdateListingSequenceBuilder(TestCase):
                                               ioc.resolve(BrandBeforeHooks).validate_auth_brand,
                                               ioc.resolve(ListingBeforeHooks).map_categories_and_values,
                                               ioc.resolve(ListingController).update_listing,
-                                              ioc.resolve(PostSingleListingSubsequenceBuilder),
                                               ioc.resolve(ListingAfterHooks).tag_bucket_url_to_images])
 
 
@@ -200,7 +164,6 @@ class TestCreateListingSequenceBuilder(TestCase):
                                               ioc.resolve(ListingBeforeHooks).map_categories_and_values,
                                               ioc.resolve(ListingController).create_for_brand,
                                               ioc.resolve(ListingAfterHooks).save_state,
-                                              ioc.resolve(PostSingleListingSubsequenceBuilder),
                                               ioc.resolve(ListingAfterHooks).tag_bucket_url_to_images])
 
 
@@ -220,7 +183,6 @@ class TestGetListingByIdSequenceBuilder(TestCase):
             self.maxDiff = None
             self.assertEqual(sut.components, [ioc.resolve(ListingBeforeHooks).validate_id,
                                               ioc.resolve(ListingController).get_by_id,
-                                              ioc.resolve(PostSingleListingSubsequenceBuilder),
                                               ioc.resolve(ListingAfterHooks).tag_bucket_url_to_images])
 
 
@@ -241,7 +203,6 @@ class TestGetListingsForBrandSequenceBuilder(TestCase):
             self.assertEqual(sut.components, [ioc.resolve(UserBeforeHooks).set_auth_user_id,
                                               ioc.resolve(BrandBeforeHooks).validate_auth_brand,
                                               ioc.resolve(ListingController).get_for_brand,
-                                              ioc.resolve(PostMultipleListingSubsequenceBuilder),
                                               ioc.resolve(ListingAfterHooks).tag_bucket_url_to_images_collection])
 
 

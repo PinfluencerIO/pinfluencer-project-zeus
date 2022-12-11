@@ -24,7 +24,7 @@ from src.web.mapping import MappingRules
 from src.web.middleware import MiddlewarePipeline
 from src.web.routing import Dispatcher
 from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdateCreateListingSubsequenceBuilder, \
-    PostSingleListingSubsequenceBuilder, PostMultipleListingSubsequenceBuilder, PostSingleUserSubsequenceBuilder, \
+    PostSingleUserSubsequenceBuilder, \
     PostMultipleUserSubsequenceBuilder, UpdateImageForListingSequenceBuilder, NotImplementedSequenceBuilder, \
     UpdateListingSequenceBuilder, CreateListingSequenceBuilder, GetListingByIdSequenceBuilder, \
     GetListingsForBrandSequenceBuilder, UpdateInfluencerImageSequenceBuilder, UpdateInfluencerSequenceBuilder, \
@@ -189,8 +189,6 @@ def register_data_layer(ioc):
 def register_sequences(ioc: ServiceCollection):
     ioc.add_singleton(PreUpdateCreateListingSubsequenceBuilder)
     ioc.add_singleton(PreGenericUpdateCreateSubsequenceBuilder)
-    ioc.add_singleton(PostSingleListingSubsequenceBuilder)
-    ioc.add_singleton(PostMultipleListingSubsequenceBuilder)
     ioc.add_singleton(PostSingleUserSubsequenceBuilder)
     ioc.add_singleton(PostMultipleUserSubsequenceBuilder)
     ioc.add_singleton(UpdateImageForListingSequenceBuilder)

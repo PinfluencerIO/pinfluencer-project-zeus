@@ -500,9 +500,16 @@ class JsonSnakeToCamelSerializer:
 
     def __snake_case_to_camel_case_dict(self, d):
         if isinstance(d, list):
-            return [self.__snake_case_to_camel_case_dict(i) if isinstance(i, (dict, list)) else i for i in d]
+            return [self.__snake_case_to_camel_case_dict(i) if isinstance(i, (dict, list)) else self.__format_value(i) for i in d]
         return {self.__snake_case_key_to_camel_case(a): self.__snake_case_to_camel_case_dict(b) if isinstance(b, (
-            dict, list)) else b for a, b in d.items()}
+            dict, list)) else self.__format_value(b) for a, b in d.items()}
+
+    @staticmethod
+    def __format_value(value) -> typing.Any:
+        if(isinstance(value, Enum)):
+            return value.value
+        return value
+
 
     @staticmethod
     def __snake_case_key_to_camel_case(key: str) -> str:

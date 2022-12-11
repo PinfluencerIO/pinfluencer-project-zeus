@@ -1,5 +1,6 @@
 import datetime
 from dataclasses import dataclass, field
+from typing import Union
 from unittest import TestCase
 
 from ddt import ddt, data
@@ -15,6 +16,11 @@ TEST_LIST_SERIALIZATION_JSON = "[{\"name\": \"adam raymond\", \"snakeInValue\": 
 TEST_LIST_SERIALIZATION_EMPTY_JSON = "[]"
 TEST_DICT_NESTED_JSON = "{\"name\": \"adam raymond\", \"snakeInValue\": \"snake_in_value\", \"value2To3Values\": 2, \"nestedObject\": {\"name\": \"dennis reynolds\", \"snakeValue\": 3}, \"arrayValue\": [\"apples\", \"pears\", \"oranges\"]}"
 TEST_DICT_JSON_WITH_CAPS_KEY = "{\"name\": \"adam raymond\", \"snakeInValue\": \"snake_in_value\", \"value2To3Values\": 2, \"capitalLETTERSValue\": 1}"
+TEST_DICT_WITH_ENUM_JSON = "{\"name\": \"adam raymond\", \"enum\": \"ORGANIC\"}"
+TEST_DICT_WITH_ENUM_LIST_JSON = "{\"name\": \"adam raymond\", \"enum\": [\"ORGANIC\", \"VEGAN\"]}"
+TEST_LIST_OF_DICTS_WITH_ENUM_JSON = "[{\"name\": \"adam raymond\", \"enum\": \"ORGANIC\"}, {\"name\": \"adam raymond\", \"enum\": \"RECYCLED\"}]"
+TEST_LIST_OF_DICTS_WITH_ENUM_LIST_JSON = "[{\"name\": \"adam raymond\", \"enum\": [\"VALUE6\", \"VALUE7\"]}, {\"name\": \"adam raymond\", \"enum\": [\"ORGANIC\", \"RECYCLED\"]}]"
+
 
 TEST_DICT = {
     "name": "adam raymond",
@@ -55,6 +61,42 @@ TEST_DICT_WITH_CAPS_KEY = {
     "value_2_to_3_values": 2,
     "capital_letters_value": 1
 }
+
+
+TEST_DICT_WITH_ENUM = {
+    "name": "adam raymond",
+    "enum": ValueEnum.ORGANIC
+}
+
+
+TEST_DICT_WITH_ENUM_LIST = {
+    "name": "adam raymond",
+    "enum": [ValueEnum.ORGANIC, ValueEnum.VEGAN]
+}
+
+
+TEST_LIST_OF_DICTS_WITH_ENUM = [
+    {
+        "name": "adam raymond",
+        "enum": ValueEnum.ORGANIC
+    },
+    {
+        "name": "adam raymond",
+        "enum": ValueEnum.RECYCLED
+    }
+]
+
+
+TEST_LIST_OF_DICTS_WITH_ENUM_LIST = [
+    {
+        "name": "adam raymond",
+        "enum": [ValueEnum.VALUE6, ValueEnum.VALUE7]
+    },
+    {
+        "name": "adam raymond",
+        "enum": [ValueEnum.ORGANIC, ValueEnum.RECYCLED]
+    }
+]
 
 
 @dataclass(unsafe_hash=True)
@@ -307,6 +349,7 @@ class TestAutoFixture:
         assert dto.nested_list[1].name == "name1234"
 
 
+@ddt
 class TestJsonSnakeToCamelSerializer(TestCase):
 
     def setUp(self):
@@ -316,6 +359,20 @@ class TestJsonSnakeToCamelSerializer(TestCase):
         # arrange
         input_data = TEST_DICT
         expected = TEST_DICT_JSON
+
+        # act
+        actual = self.__json_snake_to_camel_serializer.serialize(input_data)
+
+        # assert
+        assert expected == actual
+
+    @data((TEST_DICT_WITH_ENUM, TEST_DICT_WITH_ENUM_JSON),
+          (TEST_DICT_WITH_ENUM_LIST, TEST_DICT_WITH_ENUM_LIST_JSON),
+          (TEST_LIST_OF_DICTS_WITH_ENUM, TEST_LIST_OF_DICTS_WITH_ENUM_JSON),
+          (TEST_LIST_OF_DICTS_WITH_ENUM_LIST, TEST_LIST_OF_DICTS_WITH_ENUM_LIST_JSON))
+    def test_serialize_with_enum(self, data: tuple[Union[list, dict], str]):
+        # arrange
+        (input_data, expected) = data
 
         # act
         actual = self.__json_snake_to_camel_serializer.serialize(input_data)
