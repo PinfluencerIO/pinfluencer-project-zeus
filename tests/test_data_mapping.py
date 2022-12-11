@@ -1,9 +1,11 @@
+from operator import itemgetter
 from unittest import TestCase
 
 from src.app import logger_factory
 from src.crosscutting import AutoFixture, PinfluencerObjectMapper
 from src.data.entities import create_mappings
-from src.domain.models import Brand, Influencer, Listing, AudienceAge, AudienceGender
+from src.domain.models import Brand, Influencer, Listing, AudienceAge, AudienceGender, BrandListing, Collaboration, \
+    CollaborationStateEnum, InfluencerListing, BrandCollaboration, InfluencerCollaboration
 from tests import InMemorySqliteDataManager
 
 
@@ -42,6 +44,125 @@ class TestMapping(TestCase):
         with self.subTest(msg="influencer auth user ids match"):
             self.assertEqual(expected_audience_gender.influencer_auth_user_id,
                              audience_gender_fetched_from_db.influencer_auth_user_id)
+
+    def test_brand_collaboration_fetch_mapping(self):
+        # arrange
+        expected_influencer = AutoFixture().create(dto=Influencer, list_limit=5)
+        expected_listing = AutoFixture().create(dto=Listing, list_limit=5)
+        expected_collaboration = AutoFixture().create(dto=Collaboration, list_limit=5)
+        expected_collaboration.listing_id = expected_listing.id
+        expected_collaboration.influencer_auth_user_id = expected_influencer.auth_user_id
+
+        self.__data_manager.create_fake_data([expected_collaboration, expected_listing, expected_influencer])
+
+        # act
+        brand_collaboration_from_db = self.__data_manager.session.query(BrandCollaboration).first()
+
+        # assert
+        with self.subTest(msg="collaboration ids match"):
+            self.assertEqual(brand_collaboration_from_db.id, expected_collaboration.id)
+
+        # assert
+        with self.subTest(msg="influencers match"):
+            self.assertEqual(brand_collaboration_from_db.influencer, expected_influencer)
+
+        # assert
+        with self.subTest(msg="listings match"):
+            self.assertEqual(brand_collaboration_from_db.listing, expected_listing)
+
+    def test_influencer_collaboration_fetch_mapping(self):
+        # arrange
+        expected_brand = AutoFixture().create(dto=Brand, list_limit=5)
+        expected_listing = AutoFixture().create(dto=Listing, list_limit=5)
+        expected_collaboration = AutoFixture().create(dto=Collaboration, list_limit=5)
+        expected_collaboration.listing_id = expected_listing.id
+        expected_collaboration.brand_auth_user_id = expected_brand.auth_user_id
+
+        self.__data_manager.create_fake_data([expected_collaboration, expected_listing, expected_brand])
+
+        # act
+        brand_collaboration_from_db = self.__data_manager.session.query(InfluencerCollaboration).first()
+
+        # assert
+        with self.subTest(msg="collaboration ids match"):
+            self.assertEqual(brand_collaboration_from_db.id, expected_collaboration.id)
+
+        # assert
+        with self.subTest(msg="brands match"):
+            self.assertEqual(brand_collaboration_from_db.brand, expected_brand)
+
+        # assert
+        with self.subTest(msg="listings match"):
+            self.assertEqual(brand_collaboration_from_db.listing, expected_listing)
+
+    def test_influencer_listing_fetch_mapping(self):
+        # arrange
+        expected_brand = AutoFixture().create(dto=Brand, list_limit=5)
+        listing = AutoFixture().create(dto=Listing, list_limit=5)
+        listing.brand_auth_user_id = expected_brand.auth_user_id
+
+        self.__data_manager.create_fake_data([expected_brand, listing])
+
+        # act
+        influencer_listing_in_db = self.__data_manager.session.query(InfluencerListing).first()
+
+        # assert
+        with self.subTest(msg="listing ids match"):
+            self.assertEqual(listing.id, influencer_listing_in_db.id)
+
+        # assert
+        with self.subTest(msg="brands match"):
+            self.assertEqual(expected_brand, influencer_listing_in_db.brand)
+
+        # assert
+        with self.subTest(msg=f"categories match"):
+            self.assertCountEqual(influencer_listing_in_db.categories, listing.categories)
+
+        # assert
+        with self.subTest(msg=f"values match"):
+            self.assertCountEqual(influencer_listing_in_db.values, listing.values)
+
+    def test_brand_listing_fetch_mapping(self):
+        # arrange
+        listing = AutoFixture().create(dto=Listing, list_limit=5)
+
+        collabs: list[Collaboration] = AutoFixture().create_many(dto=Collaboration, ammount=9, list_limit=5)
+        for delivered_collab in collabs[0:3]:
+            delivered_collab.collaboration_state = CollaborationStateEnum.DELIVERED
+            delivered_collab.listing_id = listing.id
+
+        for approved_collab in collabs[3:6]:
+            approved_collab.collaboration_state = CollaborationStateEnum.APPROVED
+            approved_collab.listing_id = listing.id
+
+        for applied_collab in collabs[6:9]:
+            applied_collab.collaboration_state = CollaborationStateEnum.APPLIED
+            applied_collab.listing_id = listing.id
+
+        self.__data_manager.create_fake_data([*collabs, listing])
+
+        # act
+        brand_listing_fetched_from_db = self.__data_manager.session.query(BrandListing).first()
+
+        # assert
+        with self.subTest(msg="ids match"):
+            self.assertEqual(brand_listing_fetched_from_db.id, listing.id)
+
+
+        with self.subTest(msg=f"delivered collabs match"):
+            self.assertCountEqual(brand_listing_fetched_from_db.delivered_collaborations, collabs[0:3])
+
+        with self.subTest(msg=f"approved collabs match"):
+            self.assertCountEqual(brand_listing_fetched_from_db.approved_collaborations, collabs[3:6])
+
+        with self.subTest(msg=f"applied collabs match"):
+            self.assertCountEqual(brand_listing_fetched_from_db.applied_collaborations, collabs[6:9])
+
+        with self.subTest(msg=f"categories match"):
+            self.assertCountEqual(brand_listing_fetched_from_db.categories, listing.categories)
+
+        with self.subTest(msg=f"values match"):
+            self.assertCountEqual(brand_listing_fetched_from_db.values, listing.values)
 
     def test_audience_age_fetch_mapping(self):
         # arrange

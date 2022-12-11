@@ -1,12 +1,14 @@
 from typing import Type
 
 import sqlalchemy.orm
-from sqlalchemy import Column, String, DateTime, Float, Table, Integer, Boolean, Enum, orm
+from sqlalchemy import Column, String, DateTime, Float, Table, Integer, Boolean, Enum, orm, and_
+from sqlalchemy.orm import foreign
 
 from src import T
 from src.data import Base
 from src.domain.models import Brand, Influencer, Listing, Collaboration, Notification, ValueEnum, Value, CategoryEnum, \
-    Category, GenderEnum, AudienceAge, AudienceGender, CollaborationStateEnum
+    Category, GenderEnum, AudienceAge, AudienceGender, CollaborationStateEnum, BrandListing, InfluencerListing, \
+    BrandCollaboration, InfluencerCollaboration
 
 
 class SqlAlchemyBaseEntity:
@@ -101,39 +103,84 @@ notifications_table = Table('notification', Base.metadata,
                             Column('read', Boolean))
 
 
+def create_single_mappings():
+    sqlalchemy.orm.mapper(AudienceGender, audience_gender_table)
+    sqlalchemy.orm.mapper(AudienceAge, audience_age_table)
+    sqlalchemy.orm.mapper(Value, value_table)
+    sqlalchemy.orm.mapper(Category, category_table)
+    sqlalchemy.orm.mapper(Brand, brand_table, properties={
+        'values': create_joined_relationship(key_from=brand_table.c.auth_user_id,
+                                             key_to=value_table.c.brand_id,
+                                             _type=Value),
+        'categories': create_joined_relationship(key_from=brand_table.c.auth_user_id,
+                                                 key_to=category_table.c.brand_id,
+                                                 _type=Category)
+    })
+    sqlalchemy.orm.mapper(Influencer, influencer_table, properties={
+        'values': create_joined_relationship(key_from=influencer_table.c.auth_user_id,
+                                             key_to=value_table.c.influencer_id,
+                                             _type=Value),
+        'categories': create_joined_relationship(key_from=influencer_table.c.auth_user_id,
+                                                 key_to=category_table.c.influencer_id,
+                                                 _type=Category)
+    })
+    sqlalchemy.orm.mapper(Listing, listing_table, properties={
+        'values': create_joined_relationship(key_from=listing_table.c.id,
+                                             key_to=value_table.c.listing_id,
+                                             _type=Value),
+        'categories': create_joined_relationship(key_from=listing_table.c.id,
+                                                 key_to=category_table.c.listing_id,
+                                                 _type=Category)
+    })
+    sqlalchemy.orm.mapper(Collaboration, collaboration_table)
+    sqlalchemy.orm.mapper(Notification, notifications_table)
+
+
+def create_aggregate_mappings():
+    sqlalchemy.orm.mapper(InfluencerListing, listing_table, properties={
+        'values': create_joined_relationship(key_from=listing_table.c.id,
+                                             key_to=value_table.c.listing_id,
+                                             _type=Value),
+        'categories': create_joined_relationship(key_from=listing_table.c.id,
+                                                 key_to=category_table.c.listing_id,
+                                                 _type=Category),
+        'brand': create_joined_relationship_wo_delete(key_from=brand_table.c.auth_user_id,
+                                                      key_to=listing_table.c.brand_auth_user_id,
+                                                      _type=Brand),
+    })
+    sqlalchemy.orm.mapper(BrandListing, listing_table, properties={
+        'values': create_joined_relationship(key_from=listing_table.c.id,
+                                             key_to=value_table.c.listing_id,
+                                             _type=Value),
+        'categories': create_joined_relationship(key_from=listing_table.c.id,
+                                                 key_to=category_table.c.listing_id,
+                                                 _type=Category),
+        'delivered_collaborations': create_collab_filtered_joined_relationship(CollaborationStateEnum.DELIVERED),
+        'applied_collaborations': create_collab_filtered_joined_relationship(CollaborationStateEnum.APPLIED),
+        'approved_collaborations': create_collab_filtered_joined_relationship(CollaborationStateEnum.APPROVED)
+    })
+    sqlalchemy.orm.mapper(BrandCollaboration, collaboration_table, properties={
+        'listing': create_joined_relationship_wo_delete(key_from=listing_table.c.id,
+                                                        key_to=collaboration_table.c.listing_id,
+                                                        _type=Listing),
+        'influencer': create_joined_relationship_wo_delete(key_from=influencer_table.c.auth_user_id,
+                                                           key_to=collaboration_table.c.influencer_auth_user_id,
+                                                           _type=Influencer)
+    })
+    sqlalchemy.orm.mapper(InfluencerCollaboration, collaboration_table, properties={
+        'listing': create_joined_relationship_wo_delete(key_from=listing_table.c.id,
+                                                        key_to=collaboration_table.c.listing_id,
+                                                        _type=Listing),
+        'brand': create_joined_relationship_wo_delete(key_from=brand_table.c.auth_user_id,
+                                                      key_to=collaboration_table.c.brand_auth_user_id,
+                                                      _type=Brand)
+    })
+
+
 def create_mappings(logger):
     try:
-        # sqlalchemy mappings
-        sqlalchemy.orm.mapper(AudienceGender, audience_gender_table)
-        sqlalchemy.orm.mapper(AudienceAge, audience_age_table)
-        sqlalchemy.orm.mapper(Value, value_table)
-        sqlalchemy.orm.mapper(Category, category_table)
-        sqlalchemy.orm.mapper(Brand, brand_table, properties={
-            'values': create_joined_relationship(key_from=brand_table.c.auth_user_id,
-                                                 key_to=value_table.c.brand_id,
-                                                 _type=Value),
-            'categories': create_joined_relationship(key_from=brand_table.c.auth_user_id,
-                                                     key_to=category_table.c.brand_id,
-                                                     _type=Category)
-        })
-        sqlalchemy.orm.mapper(Influencer, influencer_table, properties={
-            'values': create_joined_relationship(key_from=influencer_table.c.auth_user_id,
-                                                 key_to=value_table.c.influencer_id,
-                                                 _type=Value),
-            'categories': create_joined_relationship(key_from=influencer_table.c.auth_user_id,
-                                                     key_to=category_table.c.influencer_id,
-                                                     _type=Category)
-        })
-        sqlalchemy.orm.mapper(Listing, listing_table, properties={
-            'values': create_joined_relationship(key_from=listing_table.c.id,
-                                                          key_to=value_table.c.listing_id,
-                                                          _type=Value),
-            'categories': create_joined_relationship(key_from=listing_table.c.id,
-                                                              key_to=category_table.c.listing_id,
-                                                              _type=Category)
-        })
-        sqlalchemy.orm.mapper(Collaboration, collaboration_table)
-        sqlalchemy.orm.mapper(Notification, notifications_table)
+        create_single_mappings()
+        create_aggregate_mappings()
     except Exception as e:
         logger.log_error(f"mappings tried to be created more than once")
         logger.log_exception(e)
@@ -145,3 +192,18 @@ def create_joined_relationship(key_from, key_to, _type: Type[T]):
                             primaryjoin=key_from == key_to,
                             lazy='joined',
                             cascade="all, delete-orphan")
+
+
+def create_joined_relationship_wo_delete(key_from, key_to, _type: Type[T]):
+    return orm.relationship(_type,
+                            foreign_keys=key_to,
+                            primaryjoin=key_from == key_to,
+                            lazy='joined')
+
+
+def create_collab_filtered_joined_relationship(state: CollaborationStateEnum):
+    return orm.relationship(Collaboration,
+                            foreign_keys=collaboration_table.c.listing_id,
+                            primaryjoin=and_(listing_table.c.id == collaboration_table.c.listing_id,
+                                             collaboration_table.c.collaboration_state == state),
+                            lazy='joined')

@@ -22,9 +22,9 @@ class ValueEnum(Enum):
 
 
 class CollaborationStateEnum(Enum):
-    SUBMITTED = "APPLIED"
-    ACCEPTED = "APPROVED"
-    COMPLETE = "DELIVERED"
+    APPLIED = "APPLIED"
+    APPROVED = "APPROVED"
+    DELIVERED = "DELIVERED"
 
 
 class CategoryEnum(Enum):
@@ -166,9 +166,9 @@ class InfluencerListing(Listing):
 
 @dataclass(unsafe_hash=True)
 class BrandListing(Listing):
-    submitted_collaborations: list[Collaboration] = field(default_factory=list)
-    accepted_collaborations: list[Collaboration] = field(default_factory=list)
-    complete_collaborations: list[Collaboration] = field(default_factory=list)
+    approved_collaborations: list[Collaboration] = field(default_factory=list)
+    delivered_collaborations: list[Collaboration] = field(default_factory=list)
+    applied_collaborations: list[Collaboration] = field(default_factory=list)
 
 
 @dataclass(unsafe_hash=True)
