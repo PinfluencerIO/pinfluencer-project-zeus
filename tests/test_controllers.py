@@ -7,7 +7,7 @@ from callee import Captor
 from ddt import ddt, data
 
 from src._types import BrandRepository, InfluencerRepository, ListingRepository, NotificationRepository, \
-    AudienceAgeRepository, AudienceGenderRepository
+    AudienceAgeRepository, AudienceGenderRepository, BrandListingRepository
 from src.app import logger_factory
 from src.crosscutting import AutoFixture, FlexiUpdater
 from src.domain.models import Influencer, Listing, Brand, Notification, AudienceAgeSplit, AudienceGenderSplit, \
@@ -15,11 +15,11 @@ from src.domain.models import Influencer, Listing, Brand, Notification, Audience
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.controllers import BrandController, InfluencerController, ListingController, NotificationController, \
-    AudienceAgeController, AudienceGenderController
+    AudienceAgeController, AudienceGenderController, BrandListingController
 from src.web.error_capsules import AudienceDataNotFoundErrorCapsule
 from src.web.views import BrandRequestDto, BrandResponseDto, ImageRequestDto, InfluencerRequestDto, \
     InfluencerResponseDto, ListingRequestDto, ListingResponseDto, NotificationCreateRequestDto, \
-    NotificationResponseDto, AudienceAgeViewDto, AudienceGenderViewDto
+    NotificationResponseDto, AudienceAgeViewDto, AudienceGenderViewDto, BrandListingResponseDto
 from tests import test_mapper
 
 
@@ -981,3 +981,25 @@ class TestAudienceAgeController(TestCase):
                            x.max_age == max and
                            x.min_age == min,
                            audience_ages_split.audience_ages))[0].split
+
+
+class TestBrandListingController(TestCase):
+
+    def setUp(self):
+        self.__repository: BrandListingRepository = Mock()
+        self.__sut = BrandListingController(user_repository=self.__repository,
+                                            object_mapper=test_mapper(),
+                                            flexi_updater=FlexiUpdater(mapper=test_mapper()),
+                                            logger=Mock())
+
+    def test_get_for_brand(self):
+        # arrange
+        context = PinfluencerContext()
+        self.__sut._get_for_auth_user = MagicMock()
+
+        # act
+        self.__sut.get_for_brand(context=context)
+
+        # assert
+        with self.subTest(msg="repo was called"):
+            self.__sut._get_for_auth_user.assert_called_once_with(context=context, response=BrandListingResponseDto)

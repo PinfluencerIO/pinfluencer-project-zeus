@@ -2,9 +2,9 @@ from typing import Union, Optional
 
 from src.crosscutting import PinfluencerObjectMapper, Rule
 from src.domain.models import Brand, Value, Category, Influencer, Listing, AudienceAgeSplit, AudienceAge, \
-    AudienceGenderSplit, GenderEnum, AudienceGender
+    AudienceGenderSplit, GenderEnum, AudienceGender, BrandListing
 from src.web.views import BrandRequestDto, BrandResponseDto, InfluencerRequestDto, InfluencerResponseDto, \
-    ListingRequestDto, ListingResponseDto, AudienceAgeViewDto, AudienceGenderViewDto
+    ListingRequestDto, ListingResponseDto, AudienceAgeViewDto, AudienceGenderViewDto, BrandListingResponseDto
 
 
 class MappingRules:
@@ -109,6 +109,15 @@ class MappingRules:
                                field='values',
                                expression=self.__map_values_view_to_listing)
 
+        self.__mapper.add_rule(_type_from=BrandListing,
+                               _type_to=BrandListingResponseDto,
+                               field='values',
+                               expression=self.__map_values_to_listing_view)
+        self.__mapper.add_rule(_type_from=BrandListingResponseDto,
+                               _type_to=BrandListing,
+                               field='values',
+                               expression=self.__map_values_view_to_listing)
+
         # categories
         self.__mapper.add_rule(_type_from=Listing,
                                _type_to=ListingRequestDto,
@@ -126,6 +135,16 @@ class MappingRules:
                                _type_to=Listing,
                                field='categories',
                                expression=self.__map_categories_view_to_listing)
+        self.__mapper.add_rule(_type_from=BrandListing,
+                               _type_to=BrandListingResponseDto,
+                               field='categories',
+                               expression=self.__map_categories_to_listing_view)
+        self.__mapper.add_rule(_type_from=BrandListingResponseDto,
+                               _type_to=BrandListing,
+                               field='categories',
+                               expression=self.__map_categories_view_to_listing)
+
+
 
     def __add_audience_age_rules(self):
         self.__mapper.add_rule(_type_from=AudienceAgeViewDto,
@@ -221,21 +240,21 @@ class MappingRules:
         to.categories = list(map(lambda x: Category(category=x), _from.categories))
 
     @staticmethod
-    def __map_values_to_listing_view(to: Union[ListingRequestDto, ListingResponseDto], _from: Listing):
+    def __map_values_to_listing_view(to: Union[ListingRequestDto, ListingResponseDto, BrandListingResponseDto], _from: Union[Listing, BrandListing]):
         to.values = list(map(lambda x: x.value, _from.values))
 
     @staticmethod
-    def __map_values_view_to_listing(to: Listing, _from: Union[ListingRequestDto, ListingResponseDto]):
+    def __map_values_view_to_listing(to: Union[BrandListing, Listing], _from: Union[ListingRequestDto, ListingResponseDto, BrandListingResponseDto]):
         to.values = list(map(lambda x: Value(value=x), _from.values))
 
     @staticmethod
     def __map_categories_to_listing_view(
-            to: Union[ListingRequestDto, ListingResponseDto],
-            _from: Listing):
+            to: Union[ListingRequestDto, ListingResponseDto, BrandListingResponseDto],
+            _from: Union[Listing, BrandListing]):
         to.categories = list(map(lambda x: x.category, _from.categories))
 
     @staticmethod
-    def __map_categories_view_to_listing(to: Listing, _from: Union[ListingRequestDto, ListingResponseDto]):
+    def __map_categories_view_to_listing(to: Union[Listing, BrandListing], _from: Union[ListingRequestDto, ListingResponseDto, BrandListingResponseDto]):
         to.categories = list(map(lambda x: Category(category=x), _from.categories))
 
     def __map_audience_male_view_to_split(self,

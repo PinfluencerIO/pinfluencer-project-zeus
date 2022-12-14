@@ -5,17 +5,18 @@ from simple_injection import ServiceCollection
 from src import ServiceLocator
 from src._types import DataManager, BrandRepository, InfluencerRepository, ListingRepository, ImageRepository, \
     Deserializer, Serializer, AuthUserRepository, Logger, NotificationRepository, AudienceAgeRepository, \
-    AudienceGenderRepository
+    AudienceGenderRepository, BrandListingRepository
 from src.crosscutting import JsonCamelToSnakeCaseDeserializer, JsonSnakeToCamelSerializer, \
     PinfluencerObjectMapper, FlexiUpdater, ConsoleLogger, DummyLogger
 from src.data import SqlAlchemyDataManager
 from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository, \
     SqlAlchemyListingRepository, S3ImageRepository, CognitoAuthUserRepository, CognitoAuthService, \
-    SqlAlchemyNotificationRepository, SqlAlchemyAudienceAgeRepository, SqlAlchemyAudienceGenderRepository
+    SqlAlchemyNotificationRepository, SqlAlchemyAudienceAgeRepository, SqlAlchemyAudienceGenderRepository, \
+    SqlAlchemyBrandListingRepository
 from src.domain.validation import BrandValidator, ListingValidator, InfluencerValidator
 from src.web import PinfluencerResponse, PinfluencerContext, Route
 from src.web.controllers import BrandController, InfluencerController, ListingController, NotificationController, \
-    AudienceAgeController, AudienceGenderController
+    AudienceAgeController, AudienceGenderController, BrandListingController
 from src.web.hooks import HooksFacade, CommonBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, UserBeforeHooks, \
     UserAfterHooks, InfluencerBeforeHooks, BrandBeforeHooks, ListingBeforeHooks, ListingAfterHooks, CommonAfterHooks, \
     NotificationAfterHooks, NotificationBeforeHooks, AudienceAgeBeforeHooks, AudienceCommonHooks, \
@@ -34,7 +35,7 @@ from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdat
     CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder, CreateAudienceAgeSequenceBuilder, \
     GetAudienceAgeSequenceBuilder, UpdateAudienceAgeSequenceBuilder, CreateAudienceGenderSequenceBuilder, \
     GetAudienceGenderSequenceBuilder, UpdateAudienceGenderSequenceBuilder, CreateInfluencerProfileSequenceBuilder, \
-    UpdateInfluencerProfileSequenceBuilder, GetInfluencerProfileSequenceBuilder
+    UpdateInfluencerProfileSequenceBuilder, GetInfluencerProfileSequenceBuilder, GetBrandListingsForBrandSequenceBuilder
 
 
 def lambda_handler(event, context):
@@ -160,6 +161,7 @@ def register_controllers(ioc):
     ioc.add_singleton(NotificationController)
     ioc.add_singleton(AudienceAgeController)
     ioc.add_singleton(AudienceGenderController)
+    ioc.add_singleton(BrandListingController)
 
 
 def register_object_mapping(ioc):
@@ -181,6 +183,7 @@ def register_data_layer(ioc):
     ioc.add_singleton(NotificationRepository, SqlAlchemyNotificationRepository)
     ioc.add_singleton(AudienceAgeRepository, SqlAlchemyAudienceAgeRepository)
     ioc.add_singleton(AudienceGenderRepository, SqlAlchemyAudienceGenderRepository)
+    ioc.add_singleton(BrandListingRepository, SqlAlchemyBrandListingRepository)
 
     # s3
     ioc.add_singleton(ImageRepository, S3ImageRepository)
@@ -220,3 +223,4 @@ def register_sequences(ioc: ServiceCollection):
     ioc.add_singleton(CreateInfluencerProfileSequenceBuilder)
     ioc.add_singleton(UpdateInfluencerProfileSequenceBuilder)
     ioc.add_singleton(GetInfluencerProfileSequenceBuilder)
+    ioc.add_singleton(GetBrandListingsForBrandSequenceBuilder)

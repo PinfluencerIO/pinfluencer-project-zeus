@@ -1,5 +1,5 @@
 import datetime
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from src.domain.models import ValueEnum, CategoryEnum, CollaborationStateEnum
 
@@ -165,6 +165,13 @@ class CollaborationResponseDto(BaseResponseDto):
     number_of_stories: int = None
     listing_id: str = None
     collaboration_state: CollaborationStateEnum = None
+
+
+@dataclass(unsafe_hash=True)
+class BrandListingResponseDto(ListingResponseDto):
+    approved_collaborations: list[CollaborationResponseDto] = field(default_factory=list)
+    delivered_collaborations: list[CollaborationResponseDto] = field(default_factory=list)
+    applied_collaborations: list[CollaborationResponseDto] = field(default_factory=list)
 
 
 @dataclass(unsafe_hash=True)

@@ -123,7 +123,7 @@ class PinfluencerObjectMapper:
                     rule_match.expression(new_dto, _from)
             except IndexError:
                 if property in dict_to:
-                    setattr(new_dto, property, value)
+                    new_dto.__dict__[property] = value
                     if bool(typing.get_type_hints(dict_to[property])):
                         setattr(new_dto, property, self.map(_from=value, to=dict_to[property]))
         self.__logger.log_trace(f"__generic_map from {type(_from)} {to} and mapped {_from} out -> {new_dto}")

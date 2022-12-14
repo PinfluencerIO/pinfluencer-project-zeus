@@ -8,9 +8,9 @@ from src.app import logger_factory
 from src.crosscutting import AutoFixture
 from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository, CognitoAuthUserRepository, \
     CognitoAuthService, SqlAlchemyListingRepository, SqlAlchemyNotificationRepository, SqlAlchemyAudienceAgeRepository, \
-    SqlAlchemyAudienceGenderRepository
+    SqlAlchemyAudienceGenderRepository, SqlAlchemyBrandListingRepository
 from src.domain.models import Brand, Influencer, User, Listing, Notification, AudienceAgeSplit, AudienceAge, \
-    AudienceGenderSplit, AudienceGender
+    AudienceGenderSplit, AudienceGender, BrandListing
 from src.exceptions import AlreadyExistsException, NotFoundException
 from tests import InMemorySqliteDataManager
 
@@ -332,6 +332,32 @@ class TestAuthUserRepository(TestCase):
             assert actual_brand.email == expected_brand.email
 
 
+class TestBrandListingRepository(TestCase):
+
+    def setUp(self) -> None:
+        self.__data_manager = InMemorySqliteDataManager()
+        self.__sut = SqlAlchemyBrandListingRepository(data_manager=self.__data_manager,
+                                                      logger=Mock())
+
+    def test_load_for_auth_brand(self):
+        # arrange
+        brand_listings = AutoFixture().create_many(dto=BrandListing, ammount=5, list_limit=5)
+        self.__sut._load_for_auth_owner = MagicMock(return_value=brand_listings)
+
+        # act
+        returned_listings = self.__sut.load_for_auth_brand(auth_user_id="1234")
+
+        # assert
+        with self.subTest(msg="repo was called"):
+            self.__sut._load_for_auth_owner.assert_called_once_with(auth_user_id="1234",
+                                                                    model_entity_field=BrandListing.brand_auth_user_id,
+                                                                    model=BrandListing)
+
+        # assert
+        with self.subTest(msg="listings were returned"):
+            self.assertCountEqual(returned_listings, brand_listings)
+
+
 class TestListingRepository(TestCase):
 
     def setUp(self) -> None:
@@ -349,7 +375,7 @@ class TestListingRepository(TestCase):
         # act
         self.__data_manager.create_fake_data(objects=[brand_in_db])
         returned_listing: Listing = self.__sut.write_new_for_brand(payload=listing_payload,
-                                                                    auth_user_id=brand_in_db.auth_user_id)
+                                                                   auth_user_id=brand_in_db.auth_user_id)
 
         listing_loaded_from_db: Listing = self.__sut.load_by_id(id_=listing_payload.id)
 

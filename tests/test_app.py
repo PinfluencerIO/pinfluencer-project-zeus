@@ -20,7 +20,7 @@ from src.web.sequences import NotImplementedSequenceBuilder, UpdateImageForListi
     CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder, CreateAudienceAgeSequenceBuilder, \
     GetAudienceAgeSequenceBuilder, UpdateAudienceAgeSequenceBuilder, CreateAudienceGenderSequenceBuilder, \
     GetAudienceGenderSequenceBuilder, UpdateAudienceGenderSequenceBuilder, CreateInfluencerProfileSequenceBuilder, \
-    UpdateInfluencerProfileSequenceBuilder, GetInfluencerProfileSequenceBuilder
+    UpdateInfluencerProfileSequenceBuilder, GetInfluencerProfileSequenceBuilder, GetBrandListingsForBrandSequenceBuilder
 from tests import get_as_json
 
 
@@ -321,7 +321,7 @@ class TestRoutes(TestCase):
         self.__mock_middleware_pipeline \
             .execute_middleware \
             .assert_called_once_with(context=Any(),
-                                     sequence=self.__ioc.resolve(GetListingsForBrandSequenceBuilder))
+                                     sequence=self.__ioc.resolve(GetBrandListingsForBrandSequenceBuilder))
 
     def test_update_brand_auth_listing_by_id(self):
         # arrange

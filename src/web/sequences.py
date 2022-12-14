@@ -1,6 +1,6 @@
 from src.web import FluentSequenceBuilder, PinfluencerContext
 from src.web.controllers import ListingController, InfluencerController, BrandController, NotificationController, \
-    AudienceAgeController, AudienceGenderController
+    AudienceAgeController, AudienceGenderController, BrandListingController
 from src.web.hooks import CommonBeforeHooks, ListingBeforeHooks, ListingAfterHooks, UserAfterHooks, UserBeforeHooks, \
     BrandBeforeHooks, BrandAfterHooks, InfluencerBeforeHooks, InfluencerAfterHooks, NotificationBeforeHooks, \
     AudienceAgeBeforeHooks, CommonAfterHooks, AudienceAgeAfterHooks, AudienceGenderAfterHooks, \
@@ -683,6 +683,26 @@ class GetInfluencerProfileSequenceBuilder(FluentSequenceBuilder):
             ._add_command(command=self.__influencer_onboarding_hooks.cache_influencer_data) \
             ._add_command(command=self.__influencer_onboarding_hooks.merge_influencer_cache) \
             ._add_sequence_builder(sequence_builder=self.__post_user_single_sequence_builder)
+
+
+class GetBrandListingsForBrandSequenceBuilder(FluentSequenceBuilder):
+
+    def __init__(self,
+                 user_before_hooks: UserBeforeHooks,
+                 brand_before_hooks: BrandBeforeHooks,
+                 brand_listing_controller: BrandListingController,
+                 listing_after_hooks: ListingAfterHooks):
+        super().__init__()
+        self.__brand_before_hooks = brand_before_hooks
+        self.__listing_after_hooks = listing_after_hooks
+        self.__brand_listing_controller = brand_listing_controller
+        self.__user_before_hooks = user_before_hooks
+
+    def build(self):
+        self._add_command(command=self.__user_before_hooks.set_auth_user_id)\
+            ._add_command(command=self.__brand_before_hooks.validate_brand)\
+            ._add_command(command=self.__brand_listing_controller.get_for_brand)\
+            ._add_command(command=self.__listing_after_hooks.tag_bucket_url_to_images_collection)
 
 
 class NotImplementedSequenceBuilder(FluentSequenceBuilder):

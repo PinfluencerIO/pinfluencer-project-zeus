@@ -4,14 +4,14 @@ from src import ServiceLocator
 from src.web import Route
 from src.web.sequences import UpdateListingSequenceBuilder, UpdateImageForListingSequenceBuilder, \
     NotImplementedSequenceBuilder, CreateListingSequenceBuilder, GetListingByIdSequenceBuilder, \
-    GetListingsForBrandSequenceBuilder, UpdateInfluencerImageSequenceBuilder, UpdateInfluencerSequenceBuilder, \
+    UpdateInfluencerImageSequenceBuilder, UpdateInfluencerSequenceBuilder, \
     CreateInfluencerSequenceBuilder, GetAuthInfluencerSequenceBuilder, GetInfluencerByIdSequenceBuilder, \
     GetAllInfluencersSequenceBuilder, UpdateBrandImageSequenceBuilder, UpdateBrandSequenceBuilder, \
     CreateBrandSequenceBuilder, GetAuthBrandSequenceBuilder, GetBrandByIdSequenceBuilder, GetAllBrandsSequenceBuilder, \
     CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder, CreateAudienceAgeSequenceBuilder, \
     GetAudienceAgeSequenceBuilder, UpdateAudienceAgeSequenceBuilder, CreateAudienceGenderSequenceBuilder, \
     GetAudienceGenderSequenceBuilder, UpdateAudienceGenderSequenceBuilder, CreateInfluencerProfileSequenceBuilder, \
-    GetInfluencerProfileSequenceBuilder, UpdateInfluencerProfileSequenceBuilder
+    GetInfluencerProfileSequenceBuilder, UpdateInfluencerProfileSequenceBuilder, GetBrandListingsForBrandSequenceBuilder
 
 
 class Dispatcher:
@@ -84,7 +84,7 @@ class Dispatcher:
         listing_routes = OrderedDict(
             {
                 'GET /brands/me/listings':
-                    Route(sequence_builder=self.__service_locator.locate(GetListingsForBrandSequenceBuilder)),
+                    Route(sequence_builder=self.__service_locator.locate(GetBrandListingsForBrandSequenceBuilder)),
 
                 'DELETE /brands/me/listings/{listing_id}':
                     Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),

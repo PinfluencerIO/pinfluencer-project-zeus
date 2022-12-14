@@ -11,7 +11,7 @@ from filetype import filetype
 from src._types import DataManager, ImageRepository, Model, UserModel, Logger
 from src.data.entities import create_mappings
 from src.domain.models import Brand, Influencer, Listing, User, Notification, AudienceAgeSplit, AudienceAge, \
-    AudienceGenderSplit, AudienceGender
+    AudienceGenderSplit, AudienceGender, BrandListing
 from src.exceptions import AlreadyExistsException, ImageException, NotFoundException
 
 TPayload = TypeVar("TPayload")
@@ -212,6 +212,20 @@ class SqlAlchemyListingRepository(BaseSqlAlchemyOwnerRepository):
         return self._load_for_auth_owner(auth_user_id=auth_user_id,
                                          model_entity_field=Listing.brand_auth_user_id,
                                          model=Listing)
+
+
+class SqlAlchemyBrandListingRepository(BaseSqlAlchemyOwnerRepository):
+
+    def __init__(self, data_manager: DataManager,
+                 logger: Logger):
+        super().__init__(data_manager,
+                         Listing,
+                         logger=logger)
+
+    def load_for_auth_brand(self, auth_user_id: str) -> list[BrandListing]:
+        return self._load_for_auth_owner(auth_user_id=auth_user_id,
+                                         model_entity_field=BrandListing.brand_auth_user_id,
+                                         model=BrandListing)
 
 
 class SqlAlchemyNotificationRepository(BaseSqlAlchemyRepository):

@@ -5,7 +5,7 @@ from simple_injection import ServiceCollection
 
 from src.app import bootstrap
 from src.web.controllers import ListingController, InfluencerController, BrandController, NotificationController, \
-    AudienceAgeController, AudienceGenderController
+    AudienceAgeController, AudienceGenderController, BrandListingController
 from src.web.hooks import CommonBeforeHooks, UserBeforeHooks, ListingBeforeHooks, ListingAfterHooks, UserAfterHooks, \
     BrandBeforeHooks, InfluencerBeforeHooks, InfluencerAfterHooks, BrandAfterHooks, NotificationBeforeHooks, \
     AudienceAgeBeforeHooks, AudienceAgeAfterHooks, AudienceGenderAfterHooks, AudienceGenderBeforeHooks, \
@@ -21,7 +21,7 @@ from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdat
     CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder, CreateAudienceAgeSequenceBuilder, \
     GetAudienceAgeSequenceBuilder, UpdateAudienceAgeSequenceBuilder, CreateAudienceGenderSequenceBuilder, \
     GetAudienceGenderSequenceBuilder, UpdateAudienceGenderSequenceBuilder, CreateInfluencerProfileSequenceBuilder, \
-    UpdateInfluencerProfileSequenceBuilder, GetInfluencerProfileSequenceBuilder
+    UpdateInfluencerProfileSequenceBuilder, GetInfluencerProfileSequenceBuilder, GetBrandListingsForBrandSequenceBuilder
 
 
 def setup(ioc: ServiceCollection):
@@ -715,4 +715,26 @@ class TestGetInfluencerProfileSequenceBuilder(TestCase):
                 ioc.resolve(InfluencerOnBoardingAfterHooks).cache_influencer_data,
                 ioc.resolve(InfluencerOnBoardingAfterHooks).merge_influencer_cache,
                 ioc.resolve(PostSingleUserSubsequenceBuilder)
+            ])
+
+
+class TestGetBrandListingsForBrandSequenceBuilder(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(GetBrandListingsForBrandSequenceBuilder)
+
+        # act
+        sut.build()
+
+        # assert
+        with self.subTest(msg="components match"):
+            self.maxDiff = None
+            self.assertEqual(sut.components, [
+                ioc.resolve(UserBeforeHooks).set_auth_user_id,
+                ioc.resolve(BrandBeforeHooks).validate_brand,
+                ioc.resolve(BrandListingController).get_for_brand,
+                ioc.resolve(ListingAfterHooks).tag_bucket_url_to_images_collection
             ])

@@ -5,11 +5,11 @@ from ddt import data, ddt
 
 from src.crosscutting import AutoFixture
 from src.domain.models import Brand, Influencer, Listing, AudienceAge, AudienceAgeSplit, AudienceGenderSplit, \
-    AudienceGender, GenderEnum
+    AudienceGender, GenderEnum, BrandListing
 from src.web.mapping import MappingRules
 from src.web.views import BrandRequestDto, BrandResponseDto, InfluencerRequestDto, InfluencerResponseDto, \
     ListingResponseDto, ListingRequestDto, AudienceAgeViewDto, \
-    AudienceGenderViewDto
+    AudienceGenderViewDto, BrandListingResponseDto
 from tests import test_mapper
 
 
@@ -627,3 +627,45 @@ class TestMappingRules(TestCase):
         # assert
         with self.subTest(msg="listing titles match"):
             self.assertEqual(listing_request.title, listing.title)
+
+    def test_map_brand_listing_response_to_brand_listing(self):
+        # arrange
+        listing_response = AutoFixture().create(dto=BrandListingResponseDto, list_limit=5)
+
+        # act
+        self.__sut.add_rules()
+        listing = self.__mapper.map(_from=listing_response, to=BrandListing)
+
+        # assert
+        with self.subTest(msg="values match"):
+            self.assertEqual(listing_response.values, list(map(lambda x: x.value, listing.values)))
+
+        # assert
+        with self.subTest(msg="categories match"):
+            self.assertEqual(listing_response.categories,
+                             list(map(lambda x: x.category, listing.categories)))
+
+        # assert
+        with self.subTest(msg="listings match"):
+            self.assertEqual(listing_response.id, listing.id)
+
+    def test_map_brand_listing_to_brand_listing_response(self):
+        # arrange
+        listing = AutoFixture().create(dto=BrandListing, list_limit=5)
+
+        # act
+        self.__sut.add_rules()
+        listing_request = self.__mapper.map(_from=listing, to=BrandListingResponseDto)
+
+        # assert
+        with self.subTest(msg="values match"):
+            self.assertEqual(listing_request.values, list(map(lambda x: x.value, listing.values)))
+
+        # assert
+        with self.subTest(msg="categories match"):
+            self.assertEqual(listing_request.categories,
+                             list(map(lambda x: x.category, listing.categories)))
+
+        # assert
+        with self.subTest(msg="listings match"):
+            self.assertEqual(listing_request.id, listing.id)

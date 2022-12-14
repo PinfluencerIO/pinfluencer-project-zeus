@@ -1,7 +1,7 @@
 from typing import Protocol, Optional, Union
 
 from src.domain.models import Brand, Influencer, Listing, User, Notification, Collaboration, AudienceAgeSplit, \
-    AudienceGenderSplit
+    AudienceGenderSplit, BrandListing
 
 
 class AuthUserRepository(Protocol):
@@ -65,6 +65,12 @@ class ListingRepository(Protocol):
         ...
 
 
+class BrandListingRepository(Protocol):
+
+    def load_for_auth_brand(self, auth_user_id: str) -> list[BrandListing]:
+        ...
+
+
 class BrandRepository(Protocol):
 
     def load_collection(self) -> list[Brand]:
@@ -121,7 +127,8 @@ Repository = Union[BrandRepository,
                    ListingRepository,
                    NotificationRepository,
                    AudienceAgeRepository,
-                   AudienceGenderRepository]
+                   AudienceGenderRepository,
+                   BrandListingRepository]
 
 UserRepository = Union[BrandRepository, InfluencerRepository]
 
