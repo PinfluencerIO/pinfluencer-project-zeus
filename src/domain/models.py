@@ -151,6 +151,7 @@ class Collaboration(DataModel):
 class InfluencerCollaboration(Collaboration):
     brand: Brand = None
     listing: Listing = None
+    influencer: Influencer = None
 
 
 @dataclass(unsafe_hash=True)

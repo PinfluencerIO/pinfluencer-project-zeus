@@ -173,7 +173,10 @@ def create_aggregate_mappings():
                                                         _type=Listing),
         'brand': create_joined_relationship_wo_delete(key_from=brand_table.c.auth_user_id,
                                                       key_to=collaboration_table.c.brand_auth_user_id,
-                                                      _type=Brand)
+                                                      _type=Brand),
+        'influencer': create_joined_relationship_wo_delete(key_from=influencer_table.c.auth_user_id,
+                                                           key_to=collaboration_table.c.influencer_auth_user_id,
+                                                           _type=Influencer)
     })
 
 

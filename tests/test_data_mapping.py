@@ -73,12 +73,14 @@ class TestMapping(TestCase):
     def test_influencer_collaboration_fetch_mapping(self):
         # arrange
         expected_brand = AutoFixture().create(dto=Brand, list_limit=5)
+        expected_influencer = AutoFixture().create(dto=Influencer, list_limit=5)
         expected_listing = AutoFixture().create(dto=Listing, list_limit=5)
         expected_collaboration = AutoFixture().create(dto=Collaboration, list_limit=5)
         expected_collaboration.listing_id = expected_listing.id
         expected_collaboration.brand_auth_user_id = expected_brand.auth_user_id
+        expected_collaboration.influencer_auth_user_id = expected_influencer.auth_user_id
 
-        self.__data_manager.create_fake_data([expected_collaboration, expected_listing, expected_brand])
+        self.__data_manager.create_fake_data([expected_collaboration, expected_listing, expected_brand, expected_influencer])
 
         # act
         brand_collaboration_from_db = self.__data_manager.session.query(InfluencerCollaboration).first()
@@ -90,6 +92,10 @@ class TestMapping(TestCase):
         # assert
         with self.subTest(msg="brands match"):
             self.assertEqual(brand_collaboration_from_db.brand, expected_brand)
+
+        # assert
+        with self.subTest(msg="influencers match"):
+            self.assertEqual(brand_collaboration_from_db.influencer, expected_influencer)
 
         # assert
         with self.subTest(msg="listings match"):
