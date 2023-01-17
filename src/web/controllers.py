@@ -2,16 +2,18 @@ from contextlib import contextmanager
 from typing import Callable, Any
 
 from src._types import BrandRepository, UserRepository, InfluencerRepository, Repository, ListingRepository, Logger, \
-    Model, NotificationRepository, AudienceAgeRepository, AudienceGenderRepository, BrandListingRepository
+    Model, NotificationRepository, AudienceAgeRepository, AudienceGenderRepository, BrandListingRepository, \
+    CollaborationRepository
 from src.crosscutting import PinfluencerObjectMapper, FlexiUpdater
 from src.domain.models import Brand, Influencer, Listing, Notification, AudienceAgeSplit, AudienceGenderSplit, \
-    BrandListing
+    BrandListing, Collaboration
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.web import BRAND_ID_PATH_KEY, INFLUENCER_ID_PATH_KEY, PinfluencerContext, ErrorCapsule
 from src.web.error_capsules import AudienceDataNotFoundErrorCapsule
 from src.web.views import BrandRequestDto, BrandResponseDto, ImageRequestDto, InfluencerRequestDto, \
     InfluencerResponseDto, ListingRequestDto, ListingResponseDto, NotificationCreateRequestDto, \
-    NotificationResponseDto, AudienceAgeViewDto, AudienceGenderViewDto, BrandListingResponseDto
+    NotificationResponseDto, AudienceAgeViewDto, AudienceGenderViewDto, BrandListingResponseDto, \
+    CollaborationResponseDto, CollaborationInfluencerCreateRequestDto
 
 
 class BaseController:
@@ -394,6 +396,29 @@ class ListingController(BaseOwnerController):
         self._generic_update_image_field(context=context,
                                          response=ListingResponseDto,
                                          repo_func=lambda: self._repository.load_by_id(id_=context.id))
+
+
+class CollaborationController(BaseOwnerController):
+
+    def __init__(self,
+                 collaboration_repository: CollaborationRepository,
+                 object_mapper: PinfluencerObjectMapper,
+                 flexi_updater: FlexiUpdater,
+                 logger: Logger):
+        super().__init__(user_repository=collaboration_repository,
+                         object_mapper=object_mapper,
+                         flexi_updater=flexi_updater,
+                         logger=logger,
+                         response=CollaborationResponseDto,
+                         request=CollaborationInfluencerCreateRequestDto,
+                         model=Collaboration)
+
+    def create_for_influencer(self, context: PinfluencerContext):
+        return self._create_for_owner(context=context,
+                                      repo_method=self._repository.write_new_for_influencer,
+                                      request=CollaborationInfluencerCreateRequestDto,
+                                      response=CollaborationResponseDto,
+                                      model=Collaboration)
 
 
 class BrandListingController(BaseOwnerController):

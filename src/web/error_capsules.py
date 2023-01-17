@@ -27,3 +27,10 @@ class InfluencerNotFoundErrorCapsule(ErrorCapsule):
     def __init__(self, auth_user_id: str):
         self.message = f"influencer {auth_user_id} not found"
         self.status = 404
+
+
+class ListingNotFoundErrorCapsule(ErrorCapsule):
+
+    def __init__(self, id: str):
+        self.message = f"listing {id} not found"
+        self.status = 404

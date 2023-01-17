@@ -12,7 +12,7 @@ from src.exceptions import NotFoundException
 from src.web import PinfluencerContext, valid_path_resource_id, ErrorCapsule
 from src.web.constants import AudienceAgeCacheKey, InfluencerDetailsCacheKey, AudienceGenderCacheKey
 from src.web.error_capsules import AudienceDataAlreadyExistsErrorCapsule, BrandNotFoundErrorCapsule, \
-    InfluencerNotFoundErrorCapsule
+    InfluencerNotFoundErrorCapsule, ListingNotFoundErrorCapsule
 from src.web.views import RawImageRequestDto, ImageRequestDto, ListingResponseDto, NotificationCreateRequestDto
 
 S3_URL = "https://pinfluencer-product-images.s3.eu-west-2.amazonaws.com"
@@ -222,6 +222,18 @@ class InfluencerAfterHooks:
         self.__common_after_hooks.set_image_url(context=context,
                                                 image_fields=["image"],
                                                 collection=True)
+
+
+class CollaborationBeforeHooks:
+
+    def __init__(self, listings_repository: ListingRepository):
+        self.__listings_repository = listings_repository
+
+    def load_brand_from_listing_to_request_body(self, context: PinfluencerContext):
+        try:
+            context.body["brand_auth_user_id"] = self.__listings_repository.load_by_id(id_=context.body["listing_id"]).brand_auth_user_id
+        except NotFoundException:
+            context.error_capsule = [ListingNotFoundErrorCapsule(id=context.body["listing_id"])]
 
 
 class UserBeforeHooks:

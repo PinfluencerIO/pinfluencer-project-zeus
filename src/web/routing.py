@@ -11,7 +11,8 @@ from src.web.sequences import UpdateListingSequenceBuilder, UpdateImageForListin
     CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder, CreateAudienceAgeSequenceBuilder, \
     GetAudienceAgeSequenceBuilder, UpdateAudienceAgeSequenceBuilder, CreateAudienceGenderSequenceBuilder, \
     GetAudienceGenderSequenceBuilder, UpdateAudienceGenderSequenceBuilder, CreateInfluencerProfileSequenceBuilder, \
-    GetInfluencerProfileSequenceBuilder, UpdateInfluencerProfileSequenceBuilder, GetBrandListingsForBrandSequenceBuilder
+    GetInfluencerProfileSequenceBuilder, UpdateInfluencerProfileSequenceBuilder, \
+    GetBrandListingsForBrandSequenceBuilder, CreateCollaborationForInfluencerSequenceBuilder
 
 
 class Dispatcher:
@@ -109,7 +110,7 @@ class Dispatcher:
                     Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),
 
                 'POST /influencers/me/collaborations':
-                    Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),
+                    Route(sequence_builder=self.__service_locator.locate(CreateCollaborationForInfluencerSequenceBuilder)),
 
                 'PATCH /influencers/me/collaborations/{collaboration_id}':
                     Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),

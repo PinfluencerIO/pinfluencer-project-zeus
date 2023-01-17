@@ -8,9 +8,9 @@ from src.app import logger_factory
 from src.crosscutting import AutoFixture
 from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository, CognitoAuthUserRepository, \
     CognitoAuthService, SqlAlchemyListingRepository, SqlAlchemyNotificationRepository, SqlAlchemyAudienceAgeRepository, \
-    SqlAlchemyAudienceGenderRepository, SqlAlchemyBrandListingRepository
+    SqlAlchemyAudienceGenderRepository, SqlAlchemyBrandListingRepository, SqlAlchemyCollaborationRepository
 from src.domain.models import Brand, Influencer, User, Listing, Notification, AudienceAgeSplit, AudienceAge, \
-    AudienceGenderSplit, AudienceGender, BrandListing
+    AudienceGenderSplit, AudienceGender, BrandListing, Collaboration, CollaborationStateEnum
 from src.exceptions import AlreadyExistsException, NotFoundException
 from tests import InMemorySqliteDataManager
 
@@ -412,6 +412,40 @@ class TestListingRepository(TestCase):
 
         # assert
         self.assertEquals(listings, returned_listings)
+
+
+class TestCollaborationRepository(TestCase):
+
+    def setUp(self) -> None:
+        self.__data_manager = InMemorySqliteDataManager()
+        self.__sut = SqlAlchemyCollaborationRepository(data_manager=self.__data_manager,
+                                                       logger=Mock())
+
+    def test_create_for_influencer(self):
+        # arrange
+        collaboration = AutoFixture().create(dto=Collaboration, list_limit=5)
+        collaboration.influencer_auth_user_id = ""
+        collaboration.collaboration_state = None
+        self.__sut._write_new_for_owner = MagicMock()
+
+        # act
+        self.__sut.write_new_for_influencer(payload=collaboration,
+                                            auth_user_id="1234")
+
+        captor = Captor()
+
+        # assert
+        with self.subTest(msg="repo was called"):
+            self.__sut._write_new_for_owner.assert_called_once_with(payload=collaboration,
+                                                                    foreign_key_setter=captor)
+        # assert
+        with self.subTest(msg="field setter set auth user id"):
+            captor.arg(collaboration)
+            self.assertEqual("1234", collaboration.influencer_auth_user_id)
+
+        # assert
+        with self.subTest(msg="field setter set collab state"):
+            self.assertEqual(CollaborationStateEnum.APPLIED, collaboration.collaboration_state)
 
 
 class TestNotificationRepository(TestCase):

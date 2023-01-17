@@ -7,19 +7,19 @@ from callee import Captor
 from ddt import data, ddt
 
 from src._types import AuthUserRepository, BrandRepository, ImageRepository, NotificationRepository, \
-    AudienceAgeRepository, InfluencerRepository, AudienceGenderRepository
+    AudienceAgeRepository, InfluencerRepository, AudienceGenderRepository, ListingRepository
 from src.crosscutting import JsonCamelToSnakeCaseDeserializer, AutoFixture
 from src.domain.models import User, ValueEnum, CategoryEnum, AudienceAgeSplit, AudienceGenderSplit, \
-    AudienceAge
+    AudienceAge, Listing
 from src.domain.validation import InfluencerValidator, BrandValidator, ListingValidator
 from src.exceptions import NotFoundException
 from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.error_capsules import AudienceDataAlreadyExistsErrorCapsule, BrandNotFoundErrorCapsule, \
-    InfluencerNotFoundErrorCapsule
+    InfluencerNotFoundErrorCapsule, ListingNotFoundErrorCapsule
 from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, CommonBeforeHooks, \
     InfluencerBeforeHooks, BrandBeforeHooks, ListingBeforeHooks, ListingAfterHooks, CommonAfterHooks, \
     NotificationAfterHooks, NotificationBeforeHooks, AudienceAgeBeforeHooks, AudienceCommonHooks, \
-    AudienceGenderBeforeHooks, InfluencerOnBoardingAfterHooks
+    AudienceGenderBeforeHooks, InfluencerOnBoardingAfterHooks, CollaborationBeforeHooks
 from src.web.views import ImageRequestDto, BrandResponseDto, BrandRequestDto, ListingResponseDto, \
     NotificationCreateRequestDto
 from tests import get_auth_user_event, create_for_auth_user_event, get_brand_id_event, \
@@ -1231,3 +1231,47 @@ class TestInfluencerOnBoardingAfterHooks(TestCase):
                                          "audience_age_cache",
                                          "audience_gender_cache"
                                      ])
+
+
+class TestCollaborationBeforeHooks(TestCase):
+
+    def setUp(self) -> None:
+        self.__listings_repository: ListingRepository = Mock()
+        self.__sut = CollaborationBeforeHooks(listings_repository=self.__listings_repository)
+
+    def test_load_brand_from_listing_to_request_body(self):
+        # arrange
+        listing = AutoFixture().create(dto=Listing)
+        context = PinfluencerContext(body={
+            "listing_id": "1234"
+        })
+        self.__listings_repository.load_by_id = MagicMock(return_value=listing)
+
+        # act
+        self.__sut.load_brand_from_listing_to_request_body(context=context)
+
+        # assert
+        with self.subTest(msg="repo was called"):
+            self.__listings_repository.load_by_id.assert_called_once_with(id_="1234")
+
+        # assert
+        with self.subTest(msg="brand auth user id was set"):
+            self.assertEqual(context.body["brand_auth_user_id"], listing.brand_auth_user_id)
+
+    def test_load_brand_from_listing_to_request_body_when_not_found(self):
+        # arrange
+        context = PinfluencerContext(body={
+            "listing_id": "1234"
+        })
+        self.__listings_repository.load_by_id = MagicMock(side_effect=NotFoundException())
+
+        # act
+        self.__sut.load_brand_from_listing_to_request_body(context=context)
+
+        # assert
+        with self.subTest(msg="error capsule was set"):
+            self.assertEqual(context.error_capsule[0], ListingNotFoundErrorCapsule(id="1234"))
+
+        # assert
+        with self.subTest(msg="1 error capsule was set"):
+            self.assertEqual(len(context.error_capsule), 1)

@@ -254,7 +254,7 @@ class AutoFixture:
                seed=None,
                num=None,
                nest=0,
-               list_limit=100) -> T:
+               list_limit=10) -> T:
         self.__validate_predictable_data(num, seed)
 
         try:

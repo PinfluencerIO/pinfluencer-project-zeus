@@ -71,6 +71,14 @@ class BrandListingRepository(Protocol):
         ...
 
 
+class CollaborationRepository(Protocol):
+
+    def write_new_for_influencer(self,
+                                 payload: Collaboration,
+                                 auth_user_id: str) -> Collaboration:
+        ...
+
+
 class BrandRepository(Protocol):
 
     def load_collection(self) -> list[Brand]:
@@ -128,7 +136,8 @@ Repository = Union[BrandRepository,
                    NotificationRepository,
                    AudienceAgeRepository,
                    AudienceGenderRepository,
-                   BrandListingRepository]
+                   BrandListingRepository,
+                   CollaborationRepository]
 
 UserRepository = Union[BrandRepository, InfluencerRepository]
 

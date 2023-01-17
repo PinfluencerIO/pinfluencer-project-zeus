@@ -5,11 +5,11 @@ from simple_injection import ServiceCollection
 
 from src.app import bootstrap
 from src.web.controllers import ListingController, InfluencerController, BrandController, NotificationController, \
-    AudienceAgeController, AudienceGenderController, BrandListingController
+    AudienceAgeController, AudienceGenderController, BrandListingController, CollaborationController
 from src.web.hooks import CommonBeforeHooks, UserBeforeHooks, ListingBeforeHooks, ListingAfterHooks, UserAfterHooks, \
     BrandBeforeHooks, InfluencerBeforeHooks, InfluencerAfterHooks, BrandAfterHooks, NotificationBeforeHooks, \
     AudienceAgeBeforeHooks, AudienceAgeAfterHooks, AudienceGenderAfterHooks, AudienceGenderBeforeHooks, \
-    InfluencerOnBoardingAfterHooks
+    InfluencerOnBoardingAfterHooks, CollaborationBeforeHooks
 from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdateCreateListingSubsequenceBuilder, \
     PostSingleUserSubsequenceBuilder, \
     PostMultipleUserSubsequenceBuilder, UpdateImageForListingSequenceBuilder, UpdateListingSequenceBuilder, \
@@ -21,7 +21,8 @@ from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdat
     CreateNotificationSequenceBuilder, GetNotificationByIdSequenceBuilder, CreateAudienceAgeSequenceBuilder, \
     GetAudienceAgeSequenceBuilder, UpdateAudienceAgeSequenceBuilder, CreateAudienceGenderSequenceBuilder, \
     GetAudienceGenderSequenceBuilder, UpdateAudienceGenderSequenceBuilder, CreateInfluencerProfileSequenceBuilder, \
-    UpdateInfluencerProfileSequenceBuilder, GetInfluencerProfileSequenceBuilder, GetBrandListingsForBrandSequenceBuilder
+    UpdateInfluencerProfileSequenceBuilder, GetInfluencerProfileSequenceBuilder, \
+    GetBrandListingsForBrandSequenceBuilder, CreateCollaborationForInfluencerSequenceBuilder
 
 
 def setup(ioc: ServiceCollection):
@@ -737,4 +738,26 @@ class TestGetBrandListingsForBrandSequenceBuilder(TestCase):
                 ioc.resolve(BrandBeforeHooks).validate_brand,
                 ioc.resolve(BrandListingController).get_for_brand,
                 ioc.resolve(ListingAfterHooks).tag_bucket_url_to_images_collection
+            ])
+
+
+class TestCreateCollaborationForInfluencerSequenceBuilder(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(CreateCollaborationForInfluencerSequenceBuilder)
+
+        # act
+        sut.build()
+
+        # assert
+        with self.subTest(msg="components match"):
+            self.maxDiff = None
+            self.assertEqual(sut.components, [
+                ioc.resolve(CommonBeforeHooks).set_body,
+                ioc.resolve(UserBeforeHooks).set_auth_user_id,
+                ioc.resolve(CollaborationBeforeHooks).load_brand_from_listing_to_request_body,
+                ioc.resolve(CollaborationController).create_for_influencer
             ])

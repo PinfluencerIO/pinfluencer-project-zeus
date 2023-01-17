@@ -11,7 +11,7 @@ from filetype import filetype
 from src._types import DataManager, ImageRepository, Model, UserModel, Logger
 from src.data.entities import create_mappings
 from src.domain.models import Brand, Influencer, Listing, User, Notification, AudienceAgeSplit, AudienceAge, \
-    AudienceGenderSplit, AudienceGender, BrandListing
+    AudienceGenderSplit, AudienceGender, BrandListing, Collaboration, CollaborationStateEnum
 from src.exceptions import AlreadyExistsException, ImageException, NotFoundException
 
 TPayload = TypeVar("TPayload")
@@ -212,6 +212,28 @@ class SqlAlchemyListingRepository(BaseSqlAlchemyOwnerRepository):
         return self._load_for_auth_owner(auth_user_id=auth_user_id,
                                          model_entity_field=Listing.brand_auth_user_id,
                                          model=Listing)
+
+
+class SqlAlchemyCollaborationRepository(BaseSqlAlchemyOwnerRepository):
+
+    def __init__(self, data_manager: DataManager,
+                 logger: Logger):
+        super().__init__(data_manager,
+                         Listing,
+                         logger=logger)
+
+    def write_new_for_influencer(self,
+                                 payload: Collaboration,
+                                 auth_user_id: str) -> Collaboration:
+        return self._write_new_for_owner(payload=payload,
+                                         foreign_key_setter=lambda x: self.__collaboration_foreign_key_setter(
+                                             payload=x,
+                                             auth_user_id=auth_user_id))
+
+    def __collaboration_foreign_key_setter(self, payload: Collaboration,
+                                           auth_user_id: str):
+        payload.influencer_auth_user_id = auth_user_id
+        payload.collaboration_state = CollaborationStateEnum.APPLIED
 
 
 class SqlAlchemyBrandListingRepository(BaseSqlAlchemyOwnerRepository):

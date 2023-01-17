@@ -39,6 +39,16 @@ class ListingRequestDto:
 
 
 @dataclass(unsafe_hash=True)
+class CollaborationInfluencerCreateRequestDto:
+    content_proposal: str = None
+    number_of_pictures: int = None
+    number_of_videos: int = None
+    number_of_stories: int = None
+    listing_id: str = None
+    brand_auth_user_id: str = None
+
+
+@dataclass(unsafe_hash=True)
 class InfluencerRequestDto:
     insta_handle: str = None
     website: str = None

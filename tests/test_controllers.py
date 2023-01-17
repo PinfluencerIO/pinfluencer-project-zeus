@@ -7,19 +7,20 @@ from callee import Captor
 from ddt import ddt, data
 
 from src._types import BrandRepository, InfluencerRepository, ListingRepository, NotificationRepository, \
-    AudienceAgeRepository, AudienceGenderRepository, BrandListingRepository
+    AudienceAgeRepository, AudienceGenderRepository, BrandListingRepository, CollaborationRepository
 from src.app import logger_factory
 from src.crosscutting import AutoFixture, FlexiUpdater
 from src.domain.models import Influencer, Listing, Brand, Notification, AudienceAgeSplit, AudienceGenderSplit, \
-    AudienceGender
+    AudienceGender, Collaboration
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.controllers import BrandController, InfluencerController, ListingController, NotificationController, \
-    AudienceAgeController, AudienceGenderController, BrandListingController
+    AudienceAgeController, AudienceGenderController, BrandListingController, CollaborationController
 from src.web.error_capsules import AudienceDataNotFoundErrorCapsule
 from src.web.views import BrandRequestDto, BrandResponseDto, ImageRequestDto, InfluencerRequestDto, \
     InfluencerResponseDto, ListingRequestDto, ListingResponseDto, NotificationCreateRequestDto, \
-    NotificationResponseDto, AudienceAgeViewDto, AudienceGenderViewDto, BrandListingResponseDto
+    NotificationResponseDto, AudienceAgeViewDto, AudienceGenderViewDto, BrandListingResponseDto, \
+    CollaborationInfluencerCreateRequestDto, CollaborationResponseDto
 from tests import test_mapper
 
 
@@ -571,9 +572,9 @@ class TestListingController(TestCase):
         self.__object_mapper = test_mapper()
         self.__flexi_updater = FlexiUpdater(mapper=self.__object_mapper)
         self.__sut = ListingController(repository=self.__listing_repository,
-                                        object_mapper=self.__object_mapper,
-                                        flexi_updater=self.__flexi_updater,
-                                        logger=Mock())
+                                       object_mapper=self.__object_mapper,
+                                       flexi_updater=self.__flexi_updater,
+                                       logger=Mock())
 
     def test_write_for_listing(self):
         # arrange
@@ -703,6 +704,34 @@ class TestListingController(TestCase):
         with self.subTest(msg="repo was called"):
             captor.arg()
             self.__listing_repository.load_by_id.assert_called_once_with(id_=context.id)
+
+
+class TestCollaborationController(TestCase):
+
+    def setUp(self) -> None:
+        self.__collaboration_repository: CollaborationRepository = Mock()
+        self.__object_mapper = test_mapper()
+        self.__flexi_updater = FlexiUpdater(mapper=self.__object_mapper)
+        self.__sut = CollaborationController(collaboration_repository=self.__collaboration_repository,
+                                             object_mapper=self.__object_mapper,
+                                             flexi_updater=self.__flexi_updater,
+                                             logger=Mock())
+
+    def test_create_for_influencer(self):
+        # arrange
+        context = PinfluencerContext()
+        self.__sut._create_for_owner = MagicMock()
+
+        # act
+        self.__sut.create_for_influencer(context=context)
+
+        # assert
+        with self.subTest(msg="base method was called"):
+            self.__sut._create_for_owner.assert_called_once_with(context=context,
+                                                                 repo_method=self.__collaboration_repository.write_new_for_influencer,
+                                                                 request=CollaborationInfluencerCreateRequestDto,
+                                                                 response=CollaborationResponseDto,
+                                                                 model=Collaboration)
 
 
 class TestNotificationController(TestCase):

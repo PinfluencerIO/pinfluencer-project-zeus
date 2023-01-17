@@ -494,3 +494,51 @@ class TestMapping(TestCase):
             # assert
             with self.subTest(msg=f"category {i} listing id matches"):
                 self.assertEqual(getattr(category_from_db, 'listing_id'), listing.id)
+
+    def test_collaboration_fetch(self):
+        # arrange
+        collaboration = AutoFixture().create(dto=Collaboration, list_limit=10)
+        self.__data_manager.create_fake_data([collaboration])
+
+        # act
+        collaboration_from_db = self.__data_manager.session.query(Collaboration).first()
+
+        # assert
+        with self.subTest(msg="collaboration ids match"):
+            self.assertEqual(collaboration_from_db.id, collaboration.id)
+
+        # assert
+        with self.subTest(msg="collaboration created dates match"):
+            self.assertEqual(collaboration_from_db.created, collaboration.created)
+
+        # assert
+        with self.subTest(msg="collaboration states match"):
+            self.assertEqual(collaboration_from_db.collaboration_state, collaboration.collaboration_state)
+
+        # assert
+        with self.subTest(msg="collaboration brand auth ids match"):
+            self.assertEqual(collaboration_from_db.brand_auth_user_id, collaboration.brand_auth_user_id)
+
+        # assert
+        with self.subTest(msg="collaboration listing ids match"):
+            self.assertEqual(collaboration_from_db.listing_id, collaboration.listing_id)
+
+        # assert
+        with self.subTest(msg="collaboration influencer auth ids match"):
+            self.assertEqual(collaboration_from_db.influencer_auth_user_id, collaboration.influencer_auth_user_id)
+
+        # assert
+        with self.subTest(msg="collaboration content proposals match"):
+            self.assertEqual(collaboration_from_db.content_proposal, collaboration.content_proposal)
+
+        # assert
+        with self.subTest(msg="collaboration number of pictures match"):
+            self.assertEqual(collaboration_from_db.number_of_pictures, collaboration.number_of_pictures)
+
+        # assert
+        with self.subTest(msg="collaboration number of videos match"):
+            self.assertEqual(collaboration_from_db.number_of_videos, collaboration.number_of_videos)
+
+        # assert
+        with self.subTest(msg="collaboration number of stories match"):
+            self.assertEqual(collaboration_from_db.number_of_stories, collaboration.number_of_stories)
