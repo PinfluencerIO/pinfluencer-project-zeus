@@ -161,6 +161,10 @@ def update_audience_gender_splits():
 def create_influencer_profile():
     return generic_handler(routeKey="POST /influencer-profile", params={})
 
+@app.route("/influencers/me/collaborations", methods=['POST'])
+def create_collaboration():
+    return generic_handler(routeKey="POST /influencers/me/collaborations", params={})
+
 @app.route("/influencer-profile", methods=['GET'])
 def get_influencer_profile():
     return generic_handler(routeKey="GET /influencer-profile", params={})
