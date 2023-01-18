@@ -4,7 +4,7 @@ from jsonschema.exceptions import ValidationError
 
 from src._types import AuthUserRepository, Deserializer, BrandRepository, ImageRepository, Logger, \
     NotificationRepository, AudienceAgeRepository, InfluencerRepository, ListingRepository, Repository, \
-    AudienceGenderRepository
+    AudienceGenderRepository, CollaborationRepository
 from src.crosscutting import PinfluencerObjectMapper
 from src.domain.models import CategoryEnum, ValueEnum, User
 from src.domain.validation import BrandValidator, InfluencerValidator, ListingValidator
@@ -477,6 +477,11 @@ class AudienceGenderAfterHooks(SaveableHook):
     def __init__(self, repository: AudienceGenderRepository):
         super().__init__(repository)
 
+
+class CollaborationAfterHooks(SaveableHook):
+
+    def __init__(self, repository: CollaborationRepository):
+        super().__init__(repository)
 
 class AudienceAgeBeforeHooks:
 
