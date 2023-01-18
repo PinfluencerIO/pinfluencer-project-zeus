@@ -21,7 +21,7 @@ from src.web.hooks import HooksFacade, CommonBeforeHooks, BrandAfterHooks, Influ
     UserAfterHooks, InfluencerBeforeHooks, BrandBeforeHooks, ListingBeforeHooks, ListingAfterHooks, CommonAfterHooks, \
     NotificationAfterHooks, NotificationBeforeHooks, AudienceAgeBeforeHooks, AudienceCommonHooks, \
     AudienceAgeAfterHooks, AudienceGenderAfterHooks, AudienceGenderBeforeHooks, InfluencerOnBoardingAfterHooks, \
-    CollaborationBeforeHooks
+    CollaborationBeforeHooks, CollaborationAfterHooks
 from src.web.mapping import MappingRules
 from src.web.middleware import MiddlewarePipeline
 from src.web.routing import Dispatcher
@@ -146,6 +146,7 @@ def register_middleware(ioc):
     ioc.add_singleton(AudienceGenderBeforeHooks)
     ioc.add_singleton(InfluencerOnBoardingAfterHooks)
     ioc.add_singleton(CollaborationBeforeHooks)
+    ioc.add_singleton(CollaborationAfterHooks)
 
 
 def register_auth(ioc):
