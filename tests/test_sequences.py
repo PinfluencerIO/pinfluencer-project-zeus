@@ -9,7 +9,7 @@ from src.web.controllers import ListingController, InfluencerController, BrandCo
 from src.web.hooks import CommonBeforeHooks, UserBeforeHooks, ListingBeforeHooks, ListingAfterHooks, UserAfterHooks, \
     BrandBeforeHooks, InfluencerBeforeHooks, InfluencerAfterHooks, BrandAfterHooks, NotificationBeforeHooks, \
     AudienceAgeBeforeHooks, AudienceAgeAfterHooks, AudienceGenderAfterHooks, AudienceGenderBeforeHooks, \
-    InfluencerOnBoardingAfterHooks, CollaborationBeforeHooks
+    InfluencerOnBoardingAfterHooks, CollaborationBeforeHooks, CollaborationAfterHooks
 from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdateCreateListingSubsequenceBuilder, \
     PostSingleUserSubsequenceBuilder, \
     PostMultipleUserSubsequenceBuilder, UpdateImageForListingSequenceBuilder, UpdateListingSequenceBuilder, \
@@ -759,5 +759,6 @@ class TestCreateCollaborationForInfluencerSequenceBuilder(TestCase):
                 ioc.resolve(CommonBeforeHooks).set_body,
                 ioc.resolve(UserBeforeHooks).set_auth_user_id,
                 ioc.resolve(CollaborationBeforeHooks).load_brand_from_listing_to_request_body,
-                ioc.resolve(CollaborationController).create_for_influencer
+                ioc.resolve(CollaborationController).create_for_influencer,
+                ioc.resolve(CollaborationAfterHooks).save_state
             ])
