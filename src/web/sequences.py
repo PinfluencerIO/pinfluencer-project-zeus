@@ -4,7 +4,7 @@ from src.web.controllers import ListingController, InfluencerController, BrandCo
 from src.web.hooks import CommonBeforeHooks, ListingBeforeHooks, ListingAfterHooks, UserAfterHooks, UserBeforeHooks, \
     BrandBeforeHooks, BrandAfterHooks, InfluencerBeforeHooks, InfluencerAfterHooks, NotificationBeforeHooks, \
     AudienceAgeBeforeHooks, CommonAfterHooks, AudienceAgeAfterHooks, AudienceGenderAfterHooks, \
-    AudienceGenderBeforeHooks, InfluencerOnBoardingAfterHooks, CollaborationBeforeHooks
+    AudienceGenderBeforeHooks, InfluencerOnBoardingAfterHooks, CollaborationBeforeHooks, CollaborationAfterHooks
 
 
 class PreGenericUpdateCreateSubsequenceBuilder(FluentSequenceBuilder):
@@ -711,8 +711,10 @@ class CreateCollaborationForInfluencerSequenceBuilder(FluentSequenceBuilder):
                  common_before_hooks: CommonBeforeHooks,
                  user_before_hooks: UserBeforeHooks,
                  collaboration_before_hooks: CollaborationBeforeHooks,
-                 collaboration_controller: CollaborationController):
+                 collaboration_controller: CollaborationController,
+                 collaboration_after_hooks: CollaborationAfterHooks):
         super().__init__()
+        self.__collaboration_after_hooks = collaboration_after_hooks
         self.__collaboration_before_hooks = collaboration_before_hooks
         self.__user_before_hooks = user_before_hooks
         self.__collaboration_controller = collaboration_controller
@@ -722,7 +724,8 @@ class CreateCollaborationForInfluencerSequenceBuilder(FluentSequenceBuilder):
         self._add_command(command=self.__common_before_hooks.set_body)\
             ._add_command(command=self.__user_before_hooks.set_auth_user_id) \
             ._add_command(command=self.__collaboration_before_hooks.load_brand_from_listing_to_request_body)\
-            ._add_command(command=self.__collaboration_controller.create_for_influencer)
+            ._add_command(command=self.__collaboration_controller.create_for_influencer) \
+            ._add_command(command=self.__collaboration_after_hooks.save_state)
 
 
 class NotImplementedSequenceBuilder(FluentSequenceBuilder):
