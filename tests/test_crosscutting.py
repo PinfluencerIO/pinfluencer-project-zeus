@@ -1,6 +1,6 @@
 import datetime
 from dataclasses import dataclass, field
-from typing import Union
+from typing import Union, get_args
 from unittest import TestCase
 
 from ddt import ddt, data
@@ -177,6 +177,14 @@ class TestPinfluencerMapper(TestCase):
         # assert
         with self.subTest(msg="name field matches"):
             assert test_other_dto.name == test_dto.name
+
+        # assert
+        with self.subTest(msg="nested list types match"):
+            self.assertEqual(get_args(list[NestedTestDto])[0], type(test_dto.nested_list[0]))
+
+        # assert
+        with self.subTest(msg="nested list types match"):
+            self.assertEqual(get_args(list[NestedTestOtherDto])[0], type(test_other_dto.nested_list[0]))
 
         # assert
         with self.subTest(msg="nested list field matches"):
