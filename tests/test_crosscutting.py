@@ -187,8 +187,13 @@ class TestPinfluencerMapper(TestCase):
             self.assertEqual(get_args(list[NestedTestOtherDto])[0], type(test_other_dto.nested_list[0]))
 
         # assert
+        with self.subTest(msg="nested list lengths match"):
+            self.assertEqual(len(test_dto.nested_list), len(test_other_dto.nested_list))
+
+        # assert
         with self.subTest(msg="nested list field matches"):
-            assert test_other_dto.nested_list == test_dto.nested_list
+            for i in range(0, len(test_other_dto.nested_list)):
+                self.assertEqual(test_other_dto.nested_list[i].__dict__, test_dto.nested_list[i].__dict__)
 
         # assert
         with self.subTest(msg="nested id field matches"):
