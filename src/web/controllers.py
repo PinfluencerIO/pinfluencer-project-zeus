@@ -207,7 +207,7 @@ class BaseOwnerController(BaseUserController):
         children = self._repository.load_for_auth_brand(context.auth_user_id)
         context.response.status_code = 200
         context.response.body = (list(
-            map(lambda x: self._mapper.map(_from=x, to=response).__dict__, children)))
+            map(lambda x: self._mapper.map_to_dict(_from=x, to=response), children)))
 
     def _create_for_owner(self,
                           context: PinfluencerContext,

@@ -106,7 +106,14 @@ class PinfluencerObjectMapper:
                                   to=to,
                                   propValues=_from.items())
 
-    def __generic_map(self, _from, to, propValues):
+    def map_to_dict(self, _from, to: typing.Type[T]) -> dict:
+        self.__logger.log_trace(f"{vars(_from).items()}")
+        return self.__generic_map(_from=_from,
+                                  to=to,
+                                  propValues=vars(_from).items(),
+                                  map_callback=lambda x: x.__dict__)
+
+    def __generic_map(self, _from, to, propValues, map_callback=lambda x: x):
         new_dto = to()
         dict_to = all_annotations(to)
         self.__logger.log_trace("START MAPPING")
@@ -124,18 +131,18 @@ class PinfluencerObjectMapper:
             except IndexError:
                 if property in dict_to:
                     if bool(typing.get_type_hints(dict_to[property])):
-                        setattr(new_dto, property, self.map(_from=value, to=dict_to[property]))
+                        setattr(new_dto, property, map_callback(self.map(_from=value, to=dict_to[property])))
                     elif (typing.get_origin(dict_to[property]) is list and
                          (bool(typing.get_type_hints(typing.get_args(dict_to[property])[0])))):
                         collection = []
                         sub_item_to = typing.get_args(dict_to[property])[0]
                         for item in value:
-                            collection.append(self.map(_from=item, to=sub_item_to))
+                            collection.append(map_callback(self.map(_from=item, to=sub_item_to)))
                         setattr(new_dto, property, collection)
                     else:
                         new_dto.__dict__[property] = value
         self.__logger.log_trace(f"__generic_map from {type(_from)} {to} and mapped {_from} out -> {new_dto}")
-        return new_dto
+        return map_callback(new_dto)
 
 
 class DummyLogger:
