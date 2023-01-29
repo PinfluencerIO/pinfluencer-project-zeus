@@ -3,7 +3,7 @@ from typing import Callable, Any
 
 from src._types import BrandRepository, UserRepository, InfluencerRepository, Repository, ListingRepository, Logger, \
     Model, NotificationRepository, AudienceAgeRepository, AudienceGenderRepository, BrandListingRepository, \
-    CollaborationRepository
+    CollaborationRepository, InfluencerListingRepository
 from src.crosscutting import PinfluencerObjectMapper, FlexiUpdater
 from src.domain.models import Brand, Influencer, Listing, Notification, AudienceAgeSplit, AudienceGenderSplit, \
     BrandListing, Collaboration
@@ -13,7 +13,7 @@ from src.web.error_capsules import AudienceDataNotFoundErrorCapsule
 from src.web.views import BrandRequestDto, BrandResponseDto, ImageRequestDto, InfluencerRequestDto, \
     InfluencerResponseDto, ListingRequestDto, ListingResponseDto, NotificationCreateRequestDto, \
     NotificationResponseDto, AudienceAgeViewDto, AudienceGenderViewDto, BrandListingResponseDto, \
-    CollaborationResponseDto, CollaborationInfluencerCreateRequestDto
+    CollaborationResponseDto, CollaborationInfluencerCreateRequestDto, InfluencerListingResponseDto
 
 
 class BaseController:
@@ -243,7 +243,6 @@ class BaseAudienceController(BaseOwnerController):
                          response=response,
                          request=request,
                          model=None)
-        ...
 
     def _update_for_influencer(self,
                                context: PinfluencerContext,
@@ -419,6 +418,21 @@ class CollaborationController(BaseOwnerController):
                                       request=CollaborationInfluencerCreateRequestDto,
                                       response=CollaborationResponseDto,
                                       model=Collaboration)
+
+
+class InfluencerListingController(BaseController):
+
+    def __init__(self,
+                 listing_repo: InfluencerListingRepository,
+                 object_mapper: PinfluencerObjectMapper,
+                 flexi_updater: FlexiUpdater,
+                 logger: Logger):
+        super().__init__(repository=listing_repo,
+                         mapper=object_mapper,
+                         flexi_updater=flexi_updater,
+                         logger=logger,
+                         response=InfluencerListingResponseDto,
+                         request=None)
 
 
 class BrandListingController(BaseOwnerController):

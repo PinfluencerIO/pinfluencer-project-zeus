@@ -185,6 +185,11 @@ class BrandListingResponseDto(ListingResponseDto):
 
 
 @dataclass(unsafe_hash=True)
+class InfluencerListingResponseDto(ListingResponseDto):
+    brand: BrandResponseDto = None
+
+
+@dataclass(unsafe_hash=True)
 class NotificationResponseDto(BaseResponseDto):
     receiver_auth_user_id: str = None
     sender_auth_user_id: str = None

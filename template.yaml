@@ -300,6 +300,14 @@ Resources:
             Path: /brands/me/listings
             Method: get
             ApiId: !Ref PinfluencerHttpApi
+        GetAllMyInfluencerListings:
+          Type: HttpApi
+          Properties:
+            Auth:
+              Authorizer: UserAuth
+            Path: /influencers/me/listings
+            Method: get
+            ApiId: !Ref PinfluencerHttpApi
         UpdateMyListingById:
           Type: HttpApi
           Properties:

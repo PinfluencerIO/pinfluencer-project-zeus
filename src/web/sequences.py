@@ -1,6 +1,7 @@
 from src.web import FluentSequenceBuilder, PinfluencerContext
 from src.web.controllers import ListingController, InfluencerController, BrandController, NotificationController, \
-    AudienceAgeController, AudienceGenderController, BrandListingController, CollaborationController
+    AudienceAgeController, AudienceGenderController, BrandListingController, CollaborationController, \
+    InfluencerListingController
 from src.web.hooks import CommonBeforeHooks, ListingBeforeHooks, ListingAfterHooks, UserAfterHooks, UserBeforeHooks, \
     BrandBeforeHooks, BrandAfterHooks, InfluencerBeforeHooks, InfluencerAfterHooks, NotificationBeforeHooks, \
     AudienceAgeBeforeHooks, CommonAfterHooks, AudienceAgeAfterHooks, AudienceGenderAfterHooks, \
@@ -726,6 +727,18 @@ class CreateCollaborationForInfluencerSequenceBuilder(FluentSequenceBuilder):
             ._add_command(command=self.__collaboration_before_hooks.load_brand_from_listing_to_request_body)\
             ._add_command(command=self.__collaboration_controller.create_for_influencer) \
             ._add_command(command=self.__collaboration_after_hooks.save_state)
+
+
+
+class GetListingsForInfluencerSequenceBuilder(FluentSequenceBuilder):
+
+    def __init__(self,
+                 influencer_listing_controller: InfluencerListingController):
+        super().__init__()
+        self.__influencer_listing_controller = influencer_listing_controller
+
+    def build(self):
+        self._add_command(command=self.__influencer_listing_controller.get_all)
 
 
 class NotImplementedSequenceBuilder(FluentSequenceBuilder):

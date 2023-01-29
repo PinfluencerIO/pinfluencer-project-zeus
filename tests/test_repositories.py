@@ -8,9 +8,10 @@ from src.app import logger_factory
 from src.crosscutting import AutoFixture
 from src.data.repositories import SqlAlchemyBrandRepository, SqlAlchemyInfluencerRepository, CognitoAuthUserRepository, \
     CognitoAuthService, SqlAlchemyListingRepository, SqlAlchemyNotificationRepository, SqlAlchemyAudienceAgeRepository, \
-    SqlAlchemyAudienceGenderRepository, SqlAlchemyBrandListingRepository, SqlAlchemyCollaborationRepository
+    SqlAlchemyAudienceGenderRepository, SqlAlchemyBrandListingRepository, SqlAlchemyCollaborationRepository, \
+    SqlAlchemyInfluencerListingRepository
 from src.domain.models import Brand, Influencer, User, Listing, Notification, AudienceAgeSplit, AudienceAge, \
-    AudienceGenderSplit, AudienceGender, BrandListing, Collaboration, CollaborationStateEnum
+    AudienceGenderSplit, AudienceGender, BrandListing, Collaboration, CollaborationStateEnum, InfluencerListing
 from src.exceptions import AlreadyExistsException, NotFoundException
 from tests import InMemorySqliteDataManager
 
@@ -330,6 +331,25 @@ class TestAuthUserRepository(TestCase):
         # assert
         with self.subTest(msg="email matches"):
             assert actual_brand.email == expected_brand.email
+
+
+class TestInfluencerListingRepository(TestCase):
+
+    def setUp(self) -> None:
+        self.__data_manager = InMemorySqliteDataManager()
+        self.__sut = SqlAlchemyInfluencerListingRepository(data_manager=self.__data_manager,
+                                                      logger=Mock())
+
+    def test_load_collection(self):
+        # arrange
+        influencer_listings = AutoFixture().create_many(dto=InfluencerListing, ammount=5, list_limit=5)
+        self.__data_manager.create_fake_data(influencer_listings)
+
+        # act
+        returned_listings = self.__sut.load_collection()
+
+        # assert
+        self.assertEqual(returned_listings, influencer_listings)
 
 
 class TestBrandListingRepository(TestCase):

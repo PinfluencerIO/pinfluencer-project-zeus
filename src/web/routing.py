@@ -12,7 +12,8 @@ from src.web.sequences import UpdateListingSequenceBuilder, UpdateImageForListin
     GetAudienceAgeSequenceBuilder, UpdateAudienceAgeSequenceBuilder, CreateAudienceGenderSequenceBuilder, \
     GetAudienceGenderSequenceBuilder, UpdateAudienceGenderSequenceBuilder, CreateInfluencerProfileSequenceBuilder, \
     GetInfluencerProfileSequenceBuilder, UpdateInfluencerProfileSequenceBuilder, \
-    GetBrandListingsForBrandSequenceBuilder, CreateCollaborationForInfluencerSequenceBuilder
+    GetBrandListingsForBrandSequenceBuilder, CreateCollaborationForInfluencerSequenceBuilder, \
+    GetListingsForInfluencerSequenceBuilder
 
 
 class Dispatcher:
@@ -86,6 +87,9 @@ class Dispatcher:
             {
                 'GET /brands/me/listings':
                     Route(sequence_builder=self.__service_locator.locate(GetBrandListingsForBrandSequenceBuilder)),
+
+                'GET /influencers/me/listings':
+                    Route(sequence_builder=self.__service_locator.locate(GetListingsForInfluencerSequenceBuilder)),
 
                 'DELETE /brands/me/listings/{listing_id}':
                     Route(sequence_builder=self.__service_locator.locate(NotImplementedSequenceBuilder)),

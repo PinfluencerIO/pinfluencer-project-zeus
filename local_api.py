@@ -99,6 +99,11 @@ def get_list_of_listings_for_brand():
     return generic_handler(routeKey="GET /brands/me/listings", params={})
 
 
+@app.route("/influencers/me/listings", methods=['GET'])
+def get_list_of_listings_for_influencer():
+    return generic_handler(routeKey="GET /influencer/me/listings", params={})
+
+
 @app.route("/brands/me/listings", methods=['POST'])
 def create_listing_for_brand():
     return generic_handler(routeKey="POST /brands/me/listings", params={})

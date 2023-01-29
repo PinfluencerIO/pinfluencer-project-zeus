@@ -7,20 +7,22 @@ from callee import Captor
 from ddt import ddt, data
 
 from src._types import BrandRepository, InfluencerRepository, ListingRepository, NotificationRepository, \
-    AudienceAgeRepository, AudienceGenderRepository, BrandListingRepository, CollaborationRepository
+    AudienceAgeRepository, AudienceGenderRepository, BrandListingRepository, CollaborationRepository, \
+    InfluencerListingRepository
 from src.app import logger_factory
 from src.crosscutting import AutoFixture, FlexiUpdater
 from src.domain.models import Influencer, Listing, Brand, Notification, AudienceAgeSplit, AudienceGenderSplit, \
-    AudienceGender, Collaboration
+    AudienceGender, Collaboration, InfluencerListing
 from src.exceptions import AlreadyExistsException, NotFoundException
 from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.controllers import BrandController, InfluencerController, ListingController, NotificationController, \
-    AudienceAgeController, AudienceGenderController, BrandListingController, CollaborationController
+    AudienceAgeController, AudienceGenderController, BrandListingController, CollaborationController, \
+    InfluencerListingController
 from src.web.error_capsules import AudienceDataNotFoundErrorCapsule
 from src.web.views import BrandRequestDto, BrandResponseDto, ImageRequestDto, InfluencerRequestDto, \
     InfluencerResponseDto, ListingRequestDto, ListingResponseDto, NotificationCreateRequestDto, \
     NotificationResponseDto, AudienceAgeViewDto, AudienceGenderViewDto, BrandListingResponseDto, \
-    CollaborationInfluencerCreateRequestDto, CollaborationResponseDto
+    CollaborationInfluencerCreateRequestDto, CollaborationResponseDto, InfluencerListingResponseDto
 from tests import test_mapper
 
 
@@ -1032,3 +1034,25 @@ class TestBrandListingController(TestCase):
         # assert
         with self.subTest(msg="repo was called"):
             self.__sut._get_for_auth_user.assert_called_once_with(context=context, response=BrandListingResponseDto)
+
+
+class TestInfluencerListingController(TestCase):
+
+    def setUp(self):
+        self.__repository: InfluencerListingRepository = Mock()
+        self.__sut = InfluencerListingController(listing_repo=self.__repository,
+                                                 object_mapper=test_mapper(),
+                                                 flexi_updater=FlexiUpdater(mapper=test_mapper()),
+                                                 logger=Mock())
+
+    def test_get_all(self):
+        # arrange
+        context = PinfluencerContext()
+        influencer_listings = AutoFixture().create_many(dto=InfluencerListing, ammount=5)
+        self.__sut._get_all = MagicMock(return_value=influencer_listings)
+
+        # act
+        self.__sut.get_all(context=context)
+
+        self.__sut._get_all.assert_called_once_with(context=context,
+                                                    response=InfluencerListingResponseDto)

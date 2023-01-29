@@ -21,7 +21,8 @@ from src.web.sequences import NotImplementedSequenceBuilder, UpdateImageForListi
     GetAudienceAgeSequenceBuilder, UpdateAudienceAgeSequenceBuilder, CreateAudienceGenderSequenceBuilder, \
     GetAudienceGenderSequenceBuilder, UpdateAudienceGenderSequenceBuilder, CreateInfluencerProfileSequenceBuilder, \
     UpdateInfluencerProfileSequenceBuilder, GetInfluencerProfileSequenceBuilder, \
-    GetBrandListingsForBrandSequenceBuilder, CreateCollaborationForInfluencerSequenceBuilder
+    GetBrandListingsForBrandSequenceBuilder, CreateCollaborationForInfluencerSequenceBuilder, \
+    GetListingsForInfluencerSequenceBuilder
 from tests import get_as_json
 
 
@@ -323,6 +324,24 @@ class TestRoutes(TestCase):
             .execute_middleware \
             .assert_called_once_with(context=Any(),
                                      sequence=self.__ioc.resolve(GetBrandListingsForBrandSequenceBuilder))
+
+    def test_get_auth_influencer_listings(self):
+        # arrange
+        self.__mock_middleware_pipeline.execute_middleware = MagicMock()
+
+        # act
+        bootstrap(event={"routeKey": "GET /influencers/me/listings"},
+                  context={},
+                  middleware=self.__mock_middleware_pipeline,
+                  ioc=self.__ioc,
+                  data_manager=Mock(),
+                  cognito_auth_service=Mock())
+
+        # assert
+        self.__mock_middleware_pipeline \
+            .execute_middleware \
+            .assert_called_once_with(context=Any(),
+                                     sequence=self.__ioc.resolve(GetListingsForInfluencerSequenceBuilder))
 
     def test_update_brand_auth_listing_by_id(self):
         # arrange

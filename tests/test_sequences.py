@@ -5,7 +5,8 @@ from simple_injection import ServiceCollection
 
 from src.app import bootstrap
 from src.web.controllers import ListingController, InfluencerController, BrandController, NotificationController, \
-    AudienceAgeController, AudienceGenderController, BrandListingController, CollaborationController
+    AudienceAgeController, AudienceGenderController, BrandListingController, CollaborationController, \
+    InfluencerListingController
 from src.web.hooks import CommonBeforeHooks, UserBeforeHooks, ListingBeforeHooks, ListingAfterHooks, UserAfterHooks, \
     BrandBeforeHooks, InfluencerBeforeHooks, InfluencerAfterHooks, BrandAfterHooks, NotificationBeforeHooks, \
     AudienceAgeBeforeHooks, AudienceAgeAfterHooks, AudienceGenderAfterHooks, AudienceGenderBeforeHooks, \
@@ -22,7 +23,8 @@ from src.web.sequences import PreGenericUpdateCreateSubsequenceBuilder, PreUpdat
     GetAudienceAgeSequenceBuilder, UpdateAudienceAgeSequenceBuilder, CreateAudienceGenderSequenceBuilder, \
     GetAudienceGenderSequenceBuilder, UpdateAudienceGenderSequenceBuilder, CreateInfluencerProfileSequenceBuilder, \
     UpdateInfluencerProfileSequenceBuilder, GetInfluencerProfileSequenceBuilder, \
-    GetBrandListingsForBrandSequenceBuilder, CreateCollaborationForInfluencerSequenceBuilder
+    GetBrandListingsForBrandSequenceBuilder, CreateCollaborationForInfluencerSequenceBuilder, \
+    GetListingsForInfluencerSequenceBuilder
 
 
 def setup(ioc: ServiceCollection):
@@ -761,4 +763,23 @@ class TestCreateCollaborationForInfluencerSequenceBuilder(TestCase):
                 ioc.resolve(CollaborationBeforeHooks).load_brand_from_listing_to_request_body,
                 ioc.resolve(CollaborationController).create_for_influencer,
                 ioc.resolve(CollaborationAfterHooks).save_state
+            ])
+
+
+class TestGetListingsForInfluencerSequenceBuilder(TestCase):
+
+    def test_sequence(self):
+        # arrange
+        ioc = ServiceCollection()
+        setup(ioc)
+        sut = ioc.resolve(GetListingsForInfluencerSequenceBuilder)
+
+        # act
+        sut.build()
+
+        # assert
+        with self.subTest(msg="components match"):
+            self.maxDiff = None
+            self.assertEqual(sut.components, [
+                ioc.resolve(InfluencerListingController).get_all
             ])

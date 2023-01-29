@@ -1,7 +1,7 @@
 from typing import Protocol, Optional, Union
 
 from src.domain.models import Brand, Influencer, Listing, User, Notification, Collaboration, AudienceAgeSplit, \
-    AudienceGenderSplit, BrandListing
+    AudienceGenderSplit, BrandListing, InfluencerListing
 
 
 class AuthUserRepository(Protocol):
@@ -71,6 +71,12 @@ class BrandListingRepository(Protocol):
         ...
 
 
+class InfluencerListingRepository(Protocol):
+
+    def load_collection(self) -> list[InfluencerListing]:
+        ...
+
+
 class CollaborationRepository(Protocol):
 
     def write_new_for_influencer(self,
@@ -137,6 +143,7 @@ Repository = Union[BrandRepository,
                    AudienceAgeRepository,
                    AudienceGenderRepository,
                    BrandListingRepository,
+                   InfluencerListingRepository,
                    CollaborationRepository]
 
 UserRepository = Union[BrandRepository, InfluencerRepository]
@@ -192,7 +199,12 @@ class ImageRepository(Protocol):
 UserModel = Union[Brand, Influencer]
 
 # TODO: add rest
-Model = Union[UserModel, Listing, Notification, Collaboration]
+Model = Union[UserModel,
+              Listing,
+              Notification,
+              Collaboration,
+              BrandListing,
+              InfluencerListing]
 
 
 class Serializer(Protocol):

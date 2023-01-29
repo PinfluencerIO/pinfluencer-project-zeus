@@ -1,4 +1,3 @@
-from operator import itemgetter
 from unittest import TestCase
 
 from src.app import logger_factory
