@@ -2,9 +2,10 @@ from typing import Union, Optional
 
 from src.crosscutting import PinfluencerObjectMapper, Rule
 from src.domain.models import Brand, Value, Category, Influencer, Listing, AudienceAgeSplit, AudienceAge, \
-    AudienceGenderSplit, GenderEnum, AudienceGender, BrandListing
+    AudienceGenderSplit, GenderEnum, AudienceGender, BrandListing, InfluencerListing
 from src.web.views import BrandRequestDto, BrandResponseDto, InfluencerRequestDto, InfluencerResponseDto, \
-    ListingRequestDto, ListingResponseDto, AudienceAgeViewDto, AudienceGenderViewDto, BrandListingResponseDto
+    ListingRequestDto, ListingResponseDto, AudienceAgeViewDto, AudienceGenderViewDto, BrandListingResponseDto, \
+    InfluencerListingResponseDto
 
 
 class MappingRules:
@@ -118,6 +119,15 @@ class MappingRules:
                                field='values',
                                expression=self.__map_values_view_to_listing)
 
+        self.__mapper.add_rule(_type_from=InfluencerListing,
+                               _type_to=InfluencerListingResponseDto,
+                               field='values',
+                               expression=self.__map_values_to_listing_view)
+        self.__mapper.add_rule(_type_from=InfluencerListingResponseDto,
+                               _type_to=InfluencerListing,
+                               field='values',
+                               expression=self.__map_values_view_to_listing)
+
         # categories
         self.__mapper.add_rule(_type_from=Listing,
                                _type_to=ListingRequestDto,
@@ -141,6 +151,14 @@ class MappingRules:
                                expression=self.__map_categories_to_listing_view)
         self.__mapper.add_rule(_type_from=BrandListingResponseDto,
                                _type_to=BrandListing,
+                               field='categories',
+                               expression=self.__map_categories_view_to_listing)
+        self.__mapper.add_rule(_type_from=InfluencerListing,
+                               _type_to=InfluencerListingResponseDto,
+                               field='categories',
+                               expression=self.__map_categories_to_listing_view)
+        self.__mapper.add_rule(_type_from=InfluencerListingResponseDto,
+                               _type_to=InfluencerListing,
                                field='categories',
                                expression=self.__map_categories_view_to_listing)
 

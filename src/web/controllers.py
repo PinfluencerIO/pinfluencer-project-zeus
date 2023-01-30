@@ -34,7 +34,7 @@ class BaseController:
     def _get_all(self, context: PinfluencerContext, response) -> None:
         users = self._repository.load_collection()
         context.response.status_code = 200
-        context.response.body = (list(map(lambda x: self._mapper.map(_from=x, to=response).__dict__, users)))
+        context.response.body = (list(map(lambda x: self._mapper.map_to_dict(_from=x, to=response), users)))
 
     def get_all(self, context: PinfluencerContext) -> None:
         self._get_all(context=context, response=self._response)
