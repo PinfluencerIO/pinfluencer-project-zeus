@@ -22,6 +22,13 @@ class BrandNotFoundErrorCapsule(ErrorCapsule):
         self.status = 404
 
 
+class BrandNotAuthorized(ErrorCapsule):
+
+    def __init__(self, auth_user_id: str):
+        self.message = f"brand {auth_user_id} not authorized for this request"
+        self.status = 401
+
+
 class InfluencerNotFoundErrorCapsule(ErrorCapsule):
 
     def __init__(self, auth_user_id: str):

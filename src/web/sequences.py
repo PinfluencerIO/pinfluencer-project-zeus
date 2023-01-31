@@ -729,7 +729,6 @@ class CreateCollaborationForInfluencerSequenceBuilder(FluentSequenceBuilder):
             ._add_command(command=self.__collaboration_after_hooks.save_state)
 
 
-
 class GetListingsForInfluencerSequenceBuilder(FluentSequenceBuilder):
 
     def __init__(self,

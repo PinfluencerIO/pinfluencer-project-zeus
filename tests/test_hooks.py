@@ -7,7 +7,7 @@ from callee import Captor
 from ddt import data, ddt
 
 from src._types import AuthUserRepository, BrandRepository, ImageRepository, NotificationRepository, \
-    AudienceAgeRepository, InfluencerRepository, AudienceGenderRepository, ListingRepository
+    AudienceAgeRepository, InfluencerRepository, AudienceGenderRepository, ListingRepository, CollaborationRepository
 from src.crosscutting import JsonCamelToSnakeCaseDeserializer, AutoFixture
 from src.domain.models import User, ValueEnum, CategoryEnum, AudienceAgeSplit, AudienceGenderSplit, \
     AudienceAge, Listing
@@ -15,11 +15,11 @@ from src.domain.validation import InfluencerValidator, BrandValidator, ListingVa
 from src.exceptions import NotFoundException
 from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.error_capsules import AudienceDataAlreadyExistsErrorCapsule, BrandNotFoundErrorCapsule, \
-    InfluencerNotFoundErrorCapsule, ListingNotFoundErrorCapsule
+    InfluencerNotFoundErrorCapsule, ListingNotFoundErrorCapsule, AudienceDataNotFoundErrorCapsule, BrandNotAuthorized
 from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, CommonBeforeHooks, \
     InfluencerBeforeHooks, BrandBeforeHooks, ListingBeforeHooks, ListingAfterHooks, CommonAfterHooks, \
     NotificationAfterHooks, NotificationBeforeHooks, AudienceAgeBeforeHooks, AudienceCommonHooks, \
-    AudienceGenderBeforeHooks, InfluencerOnBoardingAfterHooks, CollaborationBeforeHooks
+    AudienceGenderBeforeHooks, InfluencerOnBoardingAfterHooks, CollaborationBeforeHooks, CollaborationAfterHooks
 from src.web.views import ImageRequestDto, BrandResponseDto, BrandRequestDto, ListingResponseDto, \
     NotificationCreateRequestDto
 from tests import get_auth_user_event, create_for_auth_user_event, get_brand_id_event, \
@@ -1164,6 +1164,44 @@ class TestAudienceAgeBeforeHooks(TestCase):
         # assert
         with self.subTest(msg="error capsule list is empty"):
             self.assertEqual(0, len(context.error_capsule))
+
+
+class TestCollaborationAfterHooks(TestCase):
+
+    def setUp(self) -> None:
+        self.__repo: CollaborationRepository = Mock()
+        self.__sut = CollaborationAfterHooks(repository=self.__repo)
+
+    def test_validate_brand_when_valid(self):
+        # arrange
+        context = PinfluencerContext(auth_user_id="1234",
+                                     response=PinfluencerResponse(body={
+                                         "brand_auth_user_id": "1234"
+                                     }))
+
+        # act
+        self.__sut.validate_brand(context=context)
+
+        # assert
+        self.assertEqual(0, len(context.error_capsule))
+
+    def test_validate_brand_when_invalid(self):
+        # arrange
+        context = PinfluencerContext(auth_user_id="12345",
+                                     response=PinfluencerResponse(body={
+                                         "brand_auth_user_id": "1234"
+                                     }))
+
+        # act
+        self.__sut.validate_brand(context=context)
+
+        # assert
+        with self.subTest(msg="1 error capsule is found"):
+            self.assertEqual(1, len(context.error_capsule))
+
+        # assert
+        with self.subTest(msg="error capsule is brand is not authorized"):
+            self.assertEqual(type(context.error_capsule[0]), BrandNotAuthorized)
 
 
 class TestInfluencerOnBoardingAfterHooks(TestCase):

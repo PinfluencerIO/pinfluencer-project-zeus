@@ -483,6 +483,10 @@ class CollaborationAfterHooks(SaveableHook):
     def __init__(self, repository: CollaborationRepository):
         super().__init__(repository)
 
+    def validate_brand(self, context: PinfluencerContext):
+        ...
+
+
 class AudienceAgeBeforeHooks:
 
     def __init__(self, repository: AudienceAgeRepository,
