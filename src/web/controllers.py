@@ -13,7 +13,8 @@ from src.web.error_capsules import AudienceDataNotFoundErrorCapsule
 from src.web.views import BrandRequestDto, BrandResponseDto, ImageRequestDto, InfluencerRequestDto, \
     InfluencerResponseDto, ListingRequestDto, ListingResponseDto, NotificationCreateRequestDto, \
     NotificationResponseDto, AudienceAgeViewDto, AudienceGenderViewDto, BrandListingResponseDto, \
-    CollaborationResponseDto, CollaborationInfluencerCreateRequestDto, InfluencerListingResponseDto
+    CollaborationResponseDto, CollaborationInfluencerCreateRequestDto, InfluencerListingResponseDto, \
+    CollaborationBrandUpdateRequestDto
 
 
 class BaseController:
@@ -420,7 +421,10 @@ class CollaborationController(BaseOwnerController):
                                       model=Collaboration)
 
     def update(self, context: PinfluencerContext):
-        ...
+        self._generic_update(context=context,
+                             request=CollaborationBrandUpdateRequestDto,
+                             response=CollaborationResponseDto,
+                             repo_func=self._repository.load_by_id)
 
 
 class InfluencerListingController(BaseController):
