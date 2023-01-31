@@ -49,6 +49,11 @@ class CollaborationInfluencerCreateRequestDto:
 
 
 @dataclass(unsafe_hash=True)
+class CollaborationBrandUpdateRequestDto:
+    collaboration_state: CollaborationStateEnum = None
+
+
+@dataclass(unsafe_hash=True)
 class InfluencerRequestDto:
     insta_handle: str = None
     website: str = None
@@ -76,24 +81,6 @@ class AudienceAgeViewDto:
 class AudienceGenderViewDto:
     audience_male_split: float = None
     audience_female_split: float = None
-
-
-@dataclass(unsafe_hash=True)
-class CollaborationCreateRequestDto:
-    content_proposal: str = None
-    number_of_pictures: int = None
-    number_of_videos: int = None
-    number_of_stories: int = None
-    listing_id: str = None
-
-
-@dataclass(unsafe_hash=True)
-class CollaborationUpdateRequestDto:
-    content_proposal: str = None
-    number_of_pictures: int = None
-    number_of_videos: int = None
-    number_of_stories: int = None
-    collaboration_state: CollaborationStateEnum = None
 
 
 @dataclass(unsafe_hash=True)

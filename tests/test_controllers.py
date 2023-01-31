@@ -22,7 +22,8 @@ from src.web.error_capsules import AudienceDataNotFoundErrorCapsule
 from src.web.views import BrandRequestDto, BrandResponseDto, ImageRequestDto, InfluencerRequestDto, \
     InfluencerResponseDto, ListingRequestDto, ListingResponseDto, NotificationCreateRequestDto, \
     NotificationResponseDto, AudienceAgeViewDto, AudienceGenderViewDto, BrandListingResponseDto, \
-    CollaborationInfluencerCreateRequestDto, CollaborationResponseDto, InfluencerListingResponseDto
+    CollaborationInfluencerCreateRequestDto, CollaborationResponseDto, InfluencerListingResponseDto, \
+    CollaborationBrandUpdateRequestDto
 from tests import test_mapper
 
 
@@ -734,6 +735,20 @@ class TestCollaborationController(TestCase):
                                                                  request=CollaborationInfluencerCreateRequestDto,
                                                                  response=CollaborationResponseDto,
                                                                  model=Collaboration)
+
+    def test_update(self):
+        # arrange
+        context = PinfluencerContext()
+        self.__sut._generic_update = MagicMock()
+
+        # act
+        self.__sut.update(context=context)
+
+        # assert
+        self.__sut._generic_update.assert_called_once_with(context=context,
+                                                           request=CollaborationBrandUpdateRequestDto,
+                                                           response=CollaborationResponseDto,
+                                                           repo_func=self.__collaboration_repository.load_by_id)
 
 
 class TestNotificationController(TestCase):

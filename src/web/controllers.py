@@ -419,6 +419,9 @@ class CollaborationController(BaseOwnerController):
                                       response=CollaborationResponseDto,
                                       model=Collaboration)
 
+    def update(self, context: PinfluencerContext):
+        ...
+
 
 class InfluencerListingController(BaseController):
 

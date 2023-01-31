@@ -84,6 +84,9 @@ class CollaborationRepository(Protocol):
                                  auth_user_id: str) -> Collaboration:
         ...
 
+    def load_by_id(self, id_: str) -> Collaboration:
+        ...
+
 
 class BrandRepository(Protocol):
 
