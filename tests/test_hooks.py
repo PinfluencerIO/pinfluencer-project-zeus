@@ -8,7 +8,7 @@ from ddt import data, ddt
 
 from src._types import AuthUserRepository, BrandRepository, ImageRepository, NotificationRepository, \
     AudienceAgeRepository, InfluencerRepository, AudienceGenderRepository, ListingRepository, CollaborationRepository
-from src.crosscutting import JsonCamelToSnakeCaseDeserializer, AutoFixture
+from src.crosscutting import JsonCamelToSnakeCaseDeserializer, AutoFixture, PinfluencerObjectMapper
 from src.domain.models import User, ValueEnum, CategoryEnum, AudienceAgeSplit, AudienceGenderSplit, \
     AudienceAge, Listing
 from src.domain.validation import InfluencerValidator, BrandValidator, ListingValidator
@@ -1170,7 +1170,9 @@ class TestCollaborationAfterHooks(TestCase):
 
     def setUp(self) -> None:
         self.__repo: CollaborationRepository = Mock()
-        self.__sut = CollaborationAfterHooks(repository=self.__repo)
+        self.__mapper = PinfluencerObjectMapper(logger=Mock())
+        self.__sut = CollaborationAfterHooks(repository=self.__repo,
+                                             mapper=self.__mapper)
 
     def test_validate_brand_when_valid(self):
         # arrange

@@ -12,8 +12,9 @@ from src.exceptions import NotFoundException
 from src.web import PinfluencerContext, valid_path_resource_id, ErrorCapsule
 from src.web.constants import AudienceAgeCacheKey, InfluencerDetailsCacheKey, AudienceGenderCacheKey
 from src.web.error_capsules import AudienceDataAlreadyExistsErrorCapsule, BrandNotFoundErrorCapsule, \
-    InfluencerNotFoundErrorCapsule, ListingNotFoundErrorCapsule
-from src.web.views import RawImageRequestDto, ImageRequestDto, ListingResponseDto, NotificationCreateRequestDto
+    InfluencerNotFoundErrorCapsule, ListingNotFoundErrorCapsule, BrandNotAuthorized
+from src.web.views import RawImageRequestDto, ImageRequestDto, ListingResponseDto, NotificationCreateRequestDto, \
+    CollaborationResponseDto
 
 S3_URL = "https://pinfluencer-product-images.s3.eu-west-2.amazonaws.com"
 
@@ -480,11 +481,16 @@ class AudienceGenderAfterHooks(SaveableHook):
 
 class CollaborationAfterHooks(SaveableHook):
 
-    def __init__(self, repository: CollaborationRepository):
+    def __init__(self,
+                 repository: CollaborationRepository,
+                 mapper: PinfluencerObjectMapper):
         super().__init__(repository)
+        self.__mapper = mapper
 
     def validate_brand(self, context: PinfluencerContext):
-        ...
+        if context.auth_user_id != self.__mapper.map_from_dict(_from=context.response.body,
+                                                               to=CollaborationResponseDto).brand_auth_user_id:
+            context.error_capsule = [BrandNotAuthorized(auth_user_id=context.auth_user_id)]
 
 
 class AudienceAgeBeforeHooks:
