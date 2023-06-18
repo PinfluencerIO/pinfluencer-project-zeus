@@ -2,7 +2,6 @@ from typing import Type
 
 import sqlalchemy.orm
 from sqlalchemy import Column, String, DateTime, Float, Table, Integer, Boolean, Enum, orm, and_
-from sqlalchemy.orm import foreign
 
 from src import T
 from src.data import Base

@@ -15,7 +15,7 @@ from src.domain.validation import InfluencerValidator, BrandValidator, ListingVa
 from src.exceptions import NotFoundException
 from src.web import PinfluencerContext, PinfluencerResponse
 from src.web.error_capsules import AudienceDataAlreadyExistsErrorCapsule, BrandNotFoundErrorCapsule, \
-    InfluencerNotFoundErrorCapsule, ListingNotFoundErrorCapsule, AudienceDataNotFoundErrorCapsule, BrandNotAuthorized
+    InfluencerNotFoundErrorCapsule, ListingNotFoundErrorCapsule, BrandNotAuthorized
 from src.web.hooks import UserAfterHooks, UserBeforeHooks, BrandAfterHooks, InfluencerAfterHooks, CommonBeforeHooks, \
     InfluencerBeforeHooks, BrandBeforeHooks, ListingBeforeHooks, ListingAfterHooks, CommonAfterHooks, \
     NotificationAfterHooks, NotificationBeforeHooks, AudienceAgeBeforeHooks, AudienceCommonHooks, \

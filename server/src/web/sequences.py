@@ -740,6 +740,17 @@ class GetListingsForInfluencerSequenceBuilder(FluentSequenceBuilder):
         self._add_command(command=self.__influencer_listing_controller.get_all)
 
 
+class SequenceBuilder(FluentSequenceBuilder):
+
+    def __init__(self,
+                 influencer_listing_controller: InfluencerListingController):
+        super().__init__()
+        self.__influencer_listing_controller = influencer_listing_controller
+
+    def build(self):
+        self._add_command(command=self.__influencer_listing_controller.get_all)
+
+
 class NotImplementedSequenceBuilder(FluentSequenceBuilder):
 
     def __init__(self):

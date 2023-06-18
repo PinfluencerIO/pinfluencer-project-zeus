@@ -1,7 +1,7 @@
 
 # Created by https://www.gitignore.io/api/osx,linux,python,windows,pycharm,visualstudiocode
 
-/.idea
+*.idea
 
 ### Linux ###
 *~
@@ -246,17 +246,17 @@ $RECYCLE.BIN/
 # SAM
 packaged.yaml
 .aws-sam/
-samconfig.toml
+server/samconfig.toml
 samconfig.toml.olddb
 env.json
 
 # End of https://www.gitignore.io/api/osx,linux,python,windows,pycharm,visualstudiocode
 
 # sandbox
-sandbox.py
+server/sandbox.py
 
 # aws
-awssecrets.secrets
+server/awssecrets.secrets
 
 # test runenr artifacts
-/tests/template.yaml
+/server/tests/template.yaml
