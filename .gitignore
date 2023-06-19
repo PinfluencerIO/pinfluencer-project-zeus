@@ -260,3 +260,6 @@ server/awssecrets.secrets
 
 # test runenr artifacts
 /server/tests/template.yaml
+
+# client stuff
+*node_modules
